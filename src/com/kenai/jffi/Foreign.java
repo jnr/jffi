@@ -38,4 +38,7 @@ public final class Foreign {
 
     public native long allocateMemory(long size, boolean clear);
     public native void freeMemory(long address);
+    
+    public native long newCallContext(int returnType, int[] paramTypes, int convention);
+    public native void freeCallContext(long hanndle);
 }
