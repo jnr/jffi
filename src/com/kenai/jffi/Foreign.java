@@ -40,5 +40,16 @@ public final class Foreign {
     public native void freeMemory(long address);
     
     public native long newCallContext(int returnType, int[] paramTypes, int convention);
-    public native void freeCallContext(long hanndle);
+    public native void freeCallContext(long handle);
+
+    public final int callVrI(CallContext ctx, Address function) {
+        return callVrI(ctx.getAddress(), function.nativeAddress());
+    }
+    public final int callIrI(CallContext ctx, Address function, int a1) {
+        return callIrI(ctx.getAddress(), function.nativeAddress(), a1);
+    }
+    public final native int callVrI(long ctx, long function);
+    public final native int callIrI(long ctx, long function, int a1);
+    public final native int callIIrI(long ctx, long function, int a1, int a2);
+    public final native int callIIIrI(long ctx, long function, int a1, int a2, int a3);
 }

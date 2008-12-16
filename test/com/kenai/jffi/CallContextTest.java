@@ -58,4 +58,12 @@ public class CallContextTest {
                 new int[] { NativeType.INT.value() }, 0);
         assertNotSame("Foreign#newCallContext failed", 0L, handle);
     }
+    @Test public void getpid() {
+        long ctx = Foreign.getForeign().newCallContext(NativeType.INT.value(),
+                new int[] { }, 0);
+        long libc = Foreign.getForeign().dlopen("libc.so.6", Library.LAZY | Library.LOCAL);
+        long getpid = Foreign.getForeign().dlsym(libc, "getpid");
+        int pid = Foreign.getForeign().callVrI(ctx, getpid);
+        System.out.println("pid=" + pid);
+    }
 }

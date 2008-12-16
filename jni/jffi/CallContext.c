@@ -3,12 +3,7 @@
 #include <jni.h>
 #include "jffi.h"
 #include "Exception.h"
-
-typedef struct CallContext {
-    ffi_cif cif;
-    ffi_type** ffiParamTypes;
-    int* rawParamOffsets;
-} CallContext;
+#include "CallContext.h"
 
 static inline int FFI_ALIGN(int v, int a) {
     return ((((size_t) v) - 1) | (a - 1)) +1;
