@@ -5,10 +5,7 @@ MODEL = 32 # Default to 32bit compiles
 PLATFORM = $(CPU)-$(OS)
 JDK_HOME=$(shell if [ -d $(JAVA_HOME)/include ];then echo $(JAVA_HOME); else echo $(JAVA_HOME)/..; fi)
 
-BUILD_DIR = ../build/jni
-JFFI_BUILD_DIR = $(BUILD_DIR)/jffi
-LIBFFI_BUILD_DIR = $(BUILD_DIR)/libffi-$(PLATFORM)
-LIBFFI = $(LIBFFI_BUILD_DIR)/.libs/libffi_convenience.a
+
 
 
 # Set defaults to unix (linux/solaris/bsd)
@@ -18,18 +15,25 @@ JNIEXT = so
 
 export MACOSX_DEPLOYMENT_TARGET=10.4
 
-SRCS = $(wildcard jffi/*.c)
-OBJS = $(patsubst %.c, $(JFFI_BUILD_DIR)/%.o, $(SRCS))
 CCACHE=$(shell /usr/bin/which ccache)
-JNI_DIR = $(shell pwd)
-SRC_DIR = $(JNI_DIR)
-JFFI_SRC_DIR = $(JNI_DIR)/jffi
-LIBFFI_SRC_DIR = $(JNI_DIR)/libffi
+SRC_DIR ?= $(shell pwd)/jni
+JNI_DIR ?= $(SRC_DIR)
+BUILD_DIR ?= $(shell pwd)/build
+
+JFFI_SRC_DIR = $(SRC_DIR)/jffi
+JFFI_BUILD_DIR = $(BUILD_DIR)/jffi
+LIBFFI_SRC_DIR = $(SRC_DIR)/libffi
+LIBFFI_BUILD_DIR = $(BUILD_DIR)/libffi-$(PLATFORM)
+
+LIBFFI = $(LIBFFI_BUILD_DIR)/.libs/libffi_convenience.a
+
+SRCS = $(wildcard $(JFFI_SRC_DIR)/*.c)
+OBJS = $(patsubst %.c, $(JFFI_BUILD_DIR)/%.o, $(notdir $(SRCS)))
 
 vpath %.h $(JFFI_SRC_DIR)
 
-TEST_SRCS = $(wildcard libtest/*.c)
-TEST_OBJS := $(patsubst %.c, $(BUILD_DIR)/libtest/%.o, $(TEST_OBJS))
+TEST_SRCS = $(wildcard $(SRC_DIR)/libtest/*.c)
+TEST_OBJS := $(patsubst %.c, $(BUILD_DIR)/libtest/%.o, $(notdir $(TEST_OBJS)))
 	
 LIBNAME = jffi
 #
@@ -76,8 +80,7 @@ ifeq ($(OS), darwin)
 endif
 
 ifeq ($(OS), linux)
-  JFFI_SOFLAGS += -Wl,-soname,lib$(LIBNAME).so
-  TEST_SOFLAGS += -Wl,-soname,libtest.so
+  SOFLAGS += -Wl,-soname,$(@F)
 endif
 
 ifeq ($(CPU), sparcv9)
@@ -149,7 +152,7 @@ $(LIBFFI):
 else
 $(LIBFFI):		
 	@mkdir -p $(LIBFFI_BUILD_DIR)
-	@if [ ! -f $(LIBFFI_BUILD_DIR)/Makefile ]; then \
+	if [ ! -f $(LIBFFI_BUILD_DIR)/Makefile ]; then \
 	    echo "Configuring libffi for $(PLATFORM)"; \
 	    cd $(LIBFFI_BUILD_DIR) && env CC="$(FFI_CC)" LD="$(FFI_LD)" CFLAGS="$(FFI_CFLAGS)" \
 		$(FFI_CONFIGURE) > /dev/null; \

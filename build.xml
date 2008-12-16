@@ -72,8 +72,8 @@
 
     -->
     <target name="-post-init">
-        <property name="native.build.dir" value="${build.dir}/jni"/>
-        <property name="native.src.dir" value="jni"/>
+        <property name="native.build.dir" location="${build.dir}/jni"/>
+        <property name="native.src.dir" location="jni"/>
         <mkdir dir="${native.build.dir}"/>
         <condition property="platform" value="Darwin">
             <os family="Mac"/>
@@ -104,10 +104,13 @@
         <condition property="make.exe" value="make">
           <not><isset property="make.exe"/></not>
         </condition>
-        <exec executable="${make.exe}" dir="${native.src.dir}" failonerror="true">
+        <exec executable="${make.exe}" failonerror="true">
             <arg value="JAVA_HOME=${java.home}"/>
+            <arg value="SRC_DIR=${native.src.dir}"/>
+            <arg value="JNI_DIR=${native.src.dir}"/>
+            <arg value="BUILD_DIR=${native.build.dir}"/>
             <arg value="-f"/>
-            <arg value="GNUmakefile"/>
+            <arg value="${native.src.dir}/GNUmakefile"/>
         </exec>
     </target>
     <target name="native-win32" depends="init,-java-headers">
