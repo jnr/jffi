@@ -35,4 +35,7 @@ public final class Foreign {
     public native long dlopen(String name, int flags);
     public native void dlclose(long handle);
     public native long dlsym(long handle, String name);
+
+    public native long allocateMemory(long size, boolean clear);
+    public native void freeMemory(long address);
 }
