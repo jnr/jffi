@@ -3,3 +3,6 @@
 \.chg\..*$
 \.rej$
 \.conflict\~$
+^nbproject/private
+^build/.*$
+^dist
