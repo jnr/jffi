@@ -6,3 +6,4 @@
 ^nbproject/private
 ^build/.*$
 ^dist
+^lib/nblibraries-private.properties
