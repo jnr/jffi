@@ -69,20 +69,6 @@ Java_com_kenai_jffi_Foreign_call64VrI(JNIEnv* env, jclass self, jlong ctxAddress
     return invokeVrI(&ctx->cif, ctx->function);
 }
 
-typedef union FFIValue {
-    int i;
-    int8_t s8;
-    uint8_t u8;
-    int16_t s16;
-    uint16_t u16;
-    int32_t s32;
-    uint32_t u32;
-    int64_t s64;
-    uint64_t u64;
-    float f;
-    double d;
-    void* p;
-} FFIValue;
 static inline void
 set_int32_param(int type, int32_t arg, FFIValue* v)
 {
