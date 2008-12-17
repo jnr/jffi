@@ -21,12 +21,13 @@
  */
 package com.kenai.jffi;
 
-public final class Foreign {
+public abstract class Foreign {
     private static final class SingletonHolder {
         static {
             Init.init();
         }
-        private static final Foreign INSTANCE = new Foreign();
+        private static final Foreign INSTANCE = Platform.is64()
+                ? LP64.INSTANCE : ILP32.INSTANCE;
     }
     public static final Foreign getForeign() {
         return SingletonHolder.INSTANCE;
@@ -42,14 +43,31 @@ public final class Foreign {
     public native long newCallContext(int returnType, int[] paramTypes, int convention);
     public native void freeCallContext(long handle);
 
-    public final int callVrI(CallContext ctx, Address function) {
-        return callVrI(ctx.getAddress(), function.nativeAddress());
+    public native long newFunction(long address, int returnType, int[] paramTypes, int convention);
+    public native void freeFunction(long handle);
+
+//    public abstract int callVrI(Function function);
+    public final int callVrI(Function function) {
+        return call64VrI(function.getAddress64());
     }
-    public final int callIrI(CallContext ctx, Address function, int a1) {
-        return callIrI(ctx.getAddress(), function.nativeAddress(), a1);
+
+    private static final native int call32VrI(int function);
+    private static final native int call64VrI(long function);
+    private static final native int call32IrI(int function, int arg1);
+    private static final native int call64IrI(long function, int arg1);
+
+    private static final class ILP32 extends Foreign {
+        private static final Foreign INSTANCE = new ILP32();
+
+        public final int _callVrI(Function function) {
+            return call32VrI(function.getAddress32());
+        }
     }
-    public final native int callVrI(long ctx, long function);
-    public final native int callIrI(long ctx, long function, int a1);
-    public final native int callIIrI(long ctx, long function, int a1, int a2);
-    public final native int callIIIrI(long ctx, long function, int a1, int a2, int a3);
+    private static final class LP64 extends Foreign {
+        private static final Foreign INSTANCE = new LP64();
+        
+        public final int _callVrI(Function function) {
+            return call64VrI(function.getAddress64());
+        }
+    }
 }
