@@ -51,7 +51,7 @@ invokeVrI(ffi_cif* cif, void* function)
  * Signature: (JJ)I
  */
 JNIEXPORT jint JNICALL
-Java_com_kenai_jffi_Foreign_call32VrI(JNIEnv* env, jclass self, jint ctxAddress)
+Java_com_kenai_jffi_Foreign_invoke32VrI(JNIEnv* env, jclass self, jint ctxAddress)
 {
     Function* ctx = (Function *) (uintptr_t) ctxAddress;
     return invokeVrI(&ctx->cif, ctx->function);
@@ -63,7 +63,7 @@ Java_com_kenai_jffi_Foreign_call32VrI(JNIEnv* env, jclass self, jint ctxAddress)
  * Signature: (J)I
  */
 JNIEXPORT jint JNICALL
-Java_com_kenai_jffi_Foreign_call64VrI(JNIEnv* env, jclass self, jlong ctxAddress)
+Java_com_kenai_jffi_Foreign_invoke64VrI(JNIEnv* env, jclass self, jlong ctxAddress)
 {
     Function* ctx = (Function *) (uintptr_t) ctxAddress;
     return invokeVrI(&ctx->cif, ctx->function);
@@ -110,7 +110,7 @@ invokeIrI(ffi_cif* cif, void* function, ffi_type** ffiParamTypes, int arg1)
  * Signature: (II)I
  */
 JNIEXPORT jint JNICALL
-Java_com_kenai_jffi_Foreign_call32IrI(JNIEnv*env, jobject self, jint ctxAddress,
+Java_com_kenai_jffi_Foreign_invoke32IrI(JNIEnv*env, jobject self, jint ctxAddress,
         int arg1)
 {
     Function* ctx = (Function *) (uintptr_t)ctxAddress;
@@ -123,7 +123,7 @@ Java_com_kenai_jffi_Foreign_call32IrI(JNIEnv*env, jobject self, jint ctxAddress,
  * Signature: (JI)I
  */
 JNIEXPORT jint JNICALL
-Java_com_kenai_jffi_Foreign_call64IrI(JNIEnv* env, jclass self, jlong ctxAddress,
+Java_com_kenai_jffi_Foreign_invoke64IrI(JNIEnv* env, jclass self, jlong ctxAddress,
         jint arg1)
 {
     Function* ctx = (Function *) (uintptr_t)ctxAddress;
@@ -156,10 +156,17 @@ invokeIIrI(ffi_cif* cif, void* function, ffi_type** ffiParamTypes, int arg1, int
  * Signature: (JJII)I
  */
 JNIEXPORT jint JNICALL
-Java_com_kenai_jffi_Foreign_callIIrI(JNIEnv*env, jobject self, jlong ctxAddress,
+Java_com_kenai_jffi_Foreign_invoke32IIrI(JNIEnv*env, jobject self, jint ctxAddress,
         int arg1, int arg2)
 {
-    Function* ctx = (Function *) j2p(ctxAddress);
+    Function* ctx = (Function *) (uintptr_t) ctxAddress;
+    return invokeIIrI(&ctx->cif, ctx->function, ctx->ffiParamTypes, arg1, arg2);
+}
+JNIEXPORT jint JNICALL
+Java_com_kenai_jffi_Foreign_invoke64IIrI(JNIEnv*env, jobject self, jlong ctxAddress,
+        int arg1, int arg2)
+{
+    Function* ctx = (Function *) (uintptr_t) ctxAddress;
     return invokeIIrI(&ctx->cif, ctx->function, ctx->ffiParamTypes, arg1, arg2);
 }
 
@@ -185,9 +192,17 @@ invokeIIIrI(ffi_cif* cif, void* function, ffi_type** ffiParamTypes, int arg1, in
     return retval;
 }
 JNIEXPORT jint JNICALL
-Java_com_kenai_jffi_Foreign_callIIIrI(JNIEnv*env, jobject self, jlong ctxAddress,
+Java_com_kenai_jffi_Foreign_invoke32IIIrI(JNIEnv*env, jobject self, jint ctxAddress,
         int arg1, int arg2, int arg3)
 {
-    Function* ctx = (Function *) j2p(ctxAddress);
+    Function* ctx = (Function *) (uintptr_t) ctxAddress;
+    return invokeIIIrI(&ctx->cif, ctx->function, ctx->ffiParamTypes, arg1, arg2, arg3);
+}
+
+JNIEXPORT jint JNICALL
+Java_com_kenai_jffi_Foreign_invoke64IIIrI(JNIEnv*env, jobject self, jlong ctxAddress,
+        int arg1, int arg2, int arg3)
+{
+    Function* ctx = (Function *) (uintptr_t) ctxAddress;
     return invokeIIIrI(&ctx->cif, ctx->function, ctx->ffiParamTypes, arg1, arg2, arg3);
 }

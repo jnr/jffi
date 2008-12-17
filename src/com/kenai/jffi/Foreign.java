@@ -46,14 +46,14 @@ public abstract class Foreign {
     public native long newFunction(long address, int returnType, int[] paramTypes, int convention);
     public native void freeFunction(long handle);
 
-    public abstract int callVrI(Function function);
-    public abstract int callIrI(Function function, int arg1);
+    public abstract int invokeVrI(Function function);
+    public abstract int invokeIrI(Function function, int arg1);
     public abstract int invokeIIrI(Function function, int arg1, int arg2);
     public abstract int invokeIIIrI(Function function, int arg1, int arg2, int arg3);
-    private static final native int call32VrI(int function);
-    private static final native int call64VrI(long function);
-    private static final native int call32IrI(int function, int arg1);
-    private static final native int call64IrI(long function, int arg1);
+    private static final native int invoke32VrI(int function);
+    private static final native int invoke64VrI(long function);
+    private static final native int invoke32IrI(int function, int arg1);
+    private static final native int invoke64IrI(long function, int arg1);
     private static final native int invoke32IIrI(int function, int arg1, int arg2);
     private static final native int invoke64IIrI(long function, int arg1, int arg2);
     private static final native int invoke32IIIrI(int function, int arg1, int arg2, int arg3);
@@ -62,11 +62,11 @@ public abstract class Foreign {
     private static final class ILP32 extends Foreign {
         private static final Foreign INSTANCE = new ILP32();
 
-        public final int callVrI(Function function) {
-            return call32VrI(function.getAddress32());
+        public final int invokeVrI(Function function) {
+            return invoke32VrI(function.getAddress32());
         }
-        public int callIrI(Function function, int arg1) {
-            return call32IrI(function.getAddress32(), arg1);
+        public int invokeIrI(Function function, int arg1) {
+            return invoke32IrI(function.getAddress32(), arg1);
         }
         public int invokeIIrI(Function function, int arg1, int arg2) {
             return invoke32IIrI(function.getAddress32(), arg2, arg1);
@@ -78,11 +78,11 @@ public abstract class Foreign {
     private static final class LP64 extends Foreign {
         private static final Foreign INSTANCE = new LP64();
         
-        public final int callVrI(Function function) {
-            return call64VrI(function.getAddress64());
+        public final int invokeVrI(Function function) {
+            return invoke64VrI(function.getAddress64());
         }
-        public int callIrI(Function function, int arg1) {
-            return call64IrI(function.getAddress64(), arg1);
+        public int invokeIrI(Function function, int arg1) {
+            return invoke64IrI(function.getAddress64(), arg1);
         }
         public int invokeIIrI(Function function, int arg1, int arg2) {
             return invoke64IIrI(function.getAddress64(), arg2, arg1);

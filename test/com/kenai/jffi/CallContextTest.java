@@ -64,7 +64,7 @@ public class CallContextTest {
         long getpid = Foreign.getForeign().dlsym(libc, "getpid");
         Function f = new Function(new Address(getpid), NativeType.SINT32,
                 new NativeType[] { });
-        int pid = Foreign.getForeign().callVrI(f);
+        int pid = Foreign.getForeign().invokeVrI(f);
         System.out.println("pid=" + pid);
     }
 }
