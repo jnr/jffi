@@ -12,11 +12,28 @@
 #  define USE_RAW 1
 #endif
 
+typedef union FFIValue {
+    int i;
+    int8_t s8;
+    uint8_t u8;
+    int16_t s16;
+    uint16_t u16;
+    int32_t s32;
+    uint32_t u32;
+    int64_t s64;
+    uint64_t u64;
+    float f;
+    double d;
+    void* p;
+} FFIValue;
+
 static inline int
 invokeVrI(ffi_cif* cif, void* function)
 {
     long retval;
-#if defined(USE_RAW) && 0 /* for zero args, non-raw is marginally faster */
+#if defined(__i386__) && 1
+    retval = ((int (*)()) function)();
+#elif defined(USE_RAW) && 0 /* for zero args, non-raw is marginally faster */
     int arg0;
     ffi_raw_call(cif, FFI_FN(function), &retval, (ffi_raw *) &arg0);
 #else
@@ -52,7 +69,7 @@ Java_com_kenai_jffi_Foreign_call64VrI(JNIEnv* env, jclass self, jlong ctxAddress
     return invokeVrI(&ctx->cif, ctx->function);
 }
 
-typedef union Param {
+typedef union FFIValue {
     int i;
     int8_t s8;
     uint8_t u8;
@@ -65,9 +82,9 @@ typedef union Param {
     float f;
     double d;
     void* p;
-} Param;
+} FFIValue;
 static inline void
-set_int32_param(int type, int32_t arg, Param* v)
+set_int32_param(int type, int32_t arg, FFIValue* v)
 {
     switch (type) {
         case FFI_TYPE_INT: v->i = arg; break;
@@ -85,13 +102,15 @@ static inline int
 invokeIrI(ffi_cif* cif, void* function, ffi_type** ffiParamTypes, int arg1)
 {
     long retval;
-#if defined(USE_RAW) && defined(__i386__)
+#if defined(__i386__)
+    retval = ((int (*)(int)) function)(arg1);
+#elif defined(USE_RAW) && defined(__i386__)
     ffi_raw_call(cif, FFI_FN(function), &retval, (ffi_raw *) &arg1);
 #elif BYTE_ORDER == LITTLE_ENDIAN
     void* ffiValues[] = { &arg1 };
     ffi_call(cif, FFI_FN(function), &retval, ffiValues);
 #else
-    Param v1;
+    FFIValue v1;
     void* ffiValues[] = { &v1 };
     set_int32_param(ffiParamTypes[0]->type, arg1, &v1);
     ffi_call(cif, FFI_FN(function), &retval, ffiValues);
@@ -129,13 +148,15 @@ static inline int
 invokeIIrI(ffi_cif* cif, void* function, ffi_type** ffiParamTypes, int arg1, int arg2)
 {
     long retval;
-#if defined(USE_RAW) && defined(__i386__)
+#if defined(__i386__)
+    retval = ((int (*)(int, int)) function)(arg1, arg2);
+#elif defined(USE_RAW) && defined(__i386__)
     ffi_raw_call(cif, FFI_FN(function), &retval, (ffi_raw *) &arg1);
 #elif BYTE_ORDER == LITTLE_ENDIAN
     void* ffiValues[] = { &arg1, &arg2 };
     ffi_call(cif, FFI_FN(function), &retval, ffiValues);
 #else
-    Param v1, v2;
+    FFIValue v1, v2;
     void* ffiValues[] = { &v1, &v2 };
     set_int32_param(ffiParamTypes[0]->type, arg1, &v1);
     set_int32_param(ffiParamTypes[1]->type, arg2, &v2);
@@ -160,13 +181,15 @@ static inline int
 invokeIIIrI(ffi_cif* cif, void* function, ffi_type** ffiParamTypes, int arg1, int arg2, int arg3)
 {
     long retval;
-#if defined(USE_RAW) && defined(__i386__)
+#if defined(__i386__)
+    retval = ((int (*)(int, int, int)) function)(arg1, arg2, arg3);
+#elif defined(USE_RAW) && defined(__i386__)
     ffi_raw_call(cif, FFI_FN(function), &retval, (ffi_raw *) &arg1);
 #elif BYTE_ORDER == LITTLE_ENDIAN
     void* ffiValues[] = { &arg1, &arg2, &arg3 };
     ffi_call(cif, FFI_FN(function), &retval, ffiValues);
 #else
-    Param v1, v2, v3;
+    FFIValue v1, v2, v3;
     void* ffiValues[] = { &v1, &v2, &v3 };
     set_int32_param(ffiParamTypes[0]->type, arg1, &v1);
     set_int32_param(ffiParamTypes[1]->type, arg2, &v2);
