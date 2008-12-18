@@ -25,7 +25,9 @@ invokeArray(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer, FFIValue* ret
     for (i = 0; i < ctx->cif.nargs; ++i) {
         ffiArgs[i] = &tmpBuffer[i * 8];
     }
-    (*env)->GetByteArrayRegion(env, paramBuffer, 0, ctx->cif.nargs * 8, tmpBuffer);
+    if (ctx->cif.nargs > 0) {
+        (*env)->GetByteArrayRegion(env, paramBuffer, 0, ctx->cif.nargs * PARAM_SIZE, tmpBuffer);
+    }
     ffi_call(&ctx->cif, FFI_FN(ctx->function), retval, ffiArgs);
 }
 
