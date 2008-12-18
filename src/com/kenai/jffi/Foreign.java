@@ -79,7 +79,8 @@ public abstract class Foreign {
         return invokeArrayDouble(function.getAddress64(), buffer.array());
     }
     private static native double invokeArrayDouble(long function, byte[] buffer);
-    
+
+    public abstract long invokeAddress(Function function, HeapInvocationBuffer buffer);
     private static final class ILP32 extends Foreign {
         private static final Foreign INSTANCE = new ILP32();
 
@@ -94,6 +95,9 @@ public abstract class Foreign {
         }
         public int invokeIIIrI(Function function, int arg1, int arg2, int arg3) {
             return invoke32IIIrI(function.getAddress32(), arg1, arg2, arg3);
+        }
+        public long invokeAddress(Function function, HeapInvocationBuffer buffer) {
+            return invokeArrayInt32(function.getAddress64(), buffer.array());
         }
     }
     private static final class LP64 extends Foreign {
@@ -110,6 +114,9 @@ public abstract class Foreign {
         }
         public int invokeIIIrI(Function function, int arg1, int arg2, int arg3) {
             return invoke64IIIrI(function.getAddress64(), arg1, arg2, arg3);
+        }
+        public long invokeAddress(Function function, HeapInvocationBuffer buffer) {
+            return invokeArrayInt64(function.getAddress64(), buffer.array());
         }
     }
 }
