@@ -25,10 +25,10 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
     byte[] array() {
         return buffer;
     }
-    public final void putInt8(final byte value) {
+    public final void putInt8(final int value) {
         io.putInt8(buffer, paramIndex++ * 8, value);
     }
-    public final void putInt16(final short value) {
+    public final void putInt16(final int value) {
         io.putInt16(buffer, paramIndex++ * 8, value);
     }
     public final void putInt32(final int value) {
@@ -37,35 +37,29 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
     public final void putInt64(final long value) {
         io.putInt64(buffer, paramIndex++ * 8, value);
     }
-    public int getInt8Result() {
-        return 0;
+    public final void putFloat(final float value) {
+        io.putFloat32(buffer, paramIndex++, value);
     }
-    public int getInt16Result() {
-        return 0;
-    }
-    public int getInt32Result() {
-        return 0;
-    }
-    public int getInt64Result() {
-        return 0;
+    public final void putDouble(final double value) {
+        io.putFloat64(buffer, paramIndex++, value);
     }
     private static abstract class ArrayIO {
-        public abstract void putInt8(byte[] buffer, int offset, byte value);
-        public abstract void putInt16(byte[] buffer, int offset, short value);
+        public abstract void putInt8(byte[] buffer, int offset, int value);
+        public abstract void putInt16(byte[] buffer, int offset, int value);
         public abstract void putInt32(byte[] buffer, int offset, int value);
         public abstract void putInt64(byte[] buffer, int offset, long value);
         public final void putFloat32(byte[] buffer, int offset, float value) {
-            putInt32(buffer, offset, Float.floatToIntBits(value));
+            putInt32(buffer, offset, Float.floatToRawIntBits(value));
         }
-        public final void putFloat64(byte[] buffer, int offset, float value) {
-            putInt64(buffer, offset, Double.doubleToLongBits(value));
+        public final void putFloat64(byte[] buffer, int offset, double value) {
+            putInt64(buffer, offset, Double.doubleToRawLongBits(value));
         }
     }
     private static class L32ArrayIO extends ArrayIO {
-        public void putInt8(byte[] buffer, int offset, byte value) {
-            buffer[offset] = value;
+        public void putInt8(byte[] buffer, int offset, int value) {
+            buffer[offset] = (byte) value;
         }
-        public void putInt16(byte[] buffer, int offset, short value) {
+        public void putInt16(byte[] buffer, int offset, int value) {
             buffer[offset] = (byte) value;
             buffer[offset + 1] = (byte) (value >> 8);
         }

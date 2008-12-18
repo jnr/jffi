@@ -1,17 +1,12 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 
 package com.kenai.jffi;
 
-/**
- *
- * @author wayne
- */
 public interface InvocationBuffer {
-    public abstract int getInt8Result();
-    public abstract int getInt16Result();
-    public abstract int getInt32Result();
-    public abstract int getInt64Result();
+    public abstract void putInt8(final int value);
+    public abstract void putInt16(final int value);
+    public abstract void putInt32(final int value);
+    public abstract void putInt64(final long value);
+    public abstract void putFloat(final float value);
+    public abstract void putDouble(final double value);
+    
 }
