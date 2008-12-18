@@ -110,7 +110,7 @@ Java_com_kenai_jffi_MemoryIO_00024Native_copyMemory(JNIEnv* env, jobject self, j
  * Signature: (JIJ)I
  */
 JNIEXPORT jlong JNICALL
-Java_com_kenai_jffi_Unsafe_memchr(JNIEnv* env, jobject self, jlong address, jint c, jlong maxlen)
+Java_com_kenai_jffi_MemoryIO_memchr(JNIEnv* env, jobject self, jlong address, jint c, jlong maxlen)
 {
     void* ptr = memchr(j2p(address), c, maxlen);
     if (ptr == NULL) {
