@@ -66,5 +66,7 @@ public class CallContextTest {
                 new NativeType[] { });
         int pid = Foreign.getForeign().invokeVrI(f);
         System.out.println("pid=" + pid);
+        HeapInvocationBuffer paramBuffer = new HeapInvocationBuffer(1);
+        pid = Foreign.getForeign().invokeInt(f, paramBuffer);
     }
 }

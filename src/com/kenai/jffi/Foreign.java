@@ -50,6 +50,7 @@ public abstract class Foreign {
     public abstract int invokeIrI(Function function, int arg1);
     public abstract int invokeIIrI(Function function, int arg1, int arg2);
     public abstract int invokeIIIrI(Function function, int arg1, int arg2, int arg3);
+
     private static final native int invoke32VrI(int function);
     private static final native int invoke64VrI(long function);
     private static final native int invoke32IrI(int function, int arg1);
@@ -59,6 +60,11 @@ public abstract class Foreign {
     private static final native int invoke32IIIrI(int function, int arg1, int arg2, int arg3);
     private static final native int invoke64IIIrI(long function, int arg1, int arg2, int arg3);
 
+    public int invokeInt(Function function, HeapInvocationBuffer buffer) {
+        return invokeArrayInt(function.getAddress64(), buffer.array());
+    }
+    private static native int invokeArrayInt(long function, byte[] buffer);
+    
     private static final class ILP32 extends Foreign {
         private static final Foreign INSTANCE = new ILP32();
 
