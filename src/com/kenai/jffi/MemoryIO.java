@@ -43,7 +43,14 @@ public abstract class MemoryIO {
     public native void putFloatArray(long address, float[] data, int offset, int length);
     public native void getDoubleArray(long address, double[] data, int offset, int length);
     public native void putDoubleArray(long address, double[] data, int offset, int length);
-    
+
+    public long indexOf(long address, byte value) {
+        return memchr(address, value, Integer.MAX_VALUE);
+    }
+    public long indexOf(long address, byte value, int maxlen) {
+        return memchr(address, value, maxlen);
+    }
+    private native long memchr(long address, int value, long len);
     private static final class Native extends MemoryIO {
         public native byte getByte(long address);
         public native short getShort(long address);
