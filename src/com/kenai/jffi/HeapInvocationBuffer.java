@@ -38,13 +38,13 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
         io.putInt64(buffer, paramIndex++ * 8, value);
     }
     public final void putFloat(final float value) {
-        io.putFloat32(buffer, paramIndex++, value);
+        io.putFloat32(buffer, paramIndex++ * 8, value);
     }
     public final void putDouble(final double value) {
-        io.putFloat64(buffer, paramIndex++, value);
+        io.putFloat64(buffer, paramIndex++ * 8, value);
     }
     public final void putAddress(final long value) {
-        io.putAddress(buffer, paramIndex++, value);
+        io.putAddress(buffer, paramIndex++ * 8, value);
     }
     private static abstract class ArrayIO {
         public abstract void putInt8(byte[] buffer, int offset, int value);
