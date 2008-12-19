@@ -8,5 +8,6 @@ public interface InvocationBuffer {
     public abstract void putInt64(final long value);
     public abstract void putFloat(final float value);
     public abstract void putDouble(final double value);
+    public abstract void putAddress(final long value);
     
 }

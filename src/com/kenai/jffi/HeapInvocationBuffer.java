@@ -43,6 +43,9 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
     public final void putDouble(final double value) {
         io.putFloat64(buffer, paramIndex++, value);
     }
+    public final void putAddress(final long value) {
+        io.putAddress(buffer, paramIndex++, value);
+    }
     private static abstract class ArrayIO {
         public abstract void putInt8(byte[] buffer, int offset, int value);
         public abstract void putInt16(byte[] buffer, int offset, int value);
@@ -54,6 +57,7 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
         public final void putFloat64(byte[] buffer, int offset, double value) {
             putInt64(buffer, offset, Double.doubleToRawLongBits(value));
         }
+        public abstract void putAddress(byte[] buffer, int offset, long value);
     }
     private static class L32ArrayIO extends ArrayIO {
         public void putInt8(byte[] buffer, int offset, int value) {
@@ -78,6 +82,12 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
             buffer[offset + 5] = (byte) (value >> 40);
             buffer[offset + 6] = (byte) (value >> 48);
             buffer[offset + 7] = (byte) (value >> 56);
+        }
+        public void putAddress(byte[] buffer, int offset, long value) {
+            buffer[offset] = (byte) value;
+            buffer[offset + 1] = (byte) (value >> 8);
+            buffer[offset + 2] = (byte) (value >> 16);
+            buffer[offset + 3] = (byte) (value >> 24);
         }
     }
 
