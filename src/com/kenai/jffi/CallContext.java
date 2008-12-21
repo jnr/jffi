@@ -24,7 +24,7 @@ package com.kenai.jffi;
 public final class CallContext {
 
     private final Address handle;
-    public CallContext(NativeType returnType, NativeType[] paramTypes) {
+    public CallContext(Type returnType, Type[] paramTypes) {
         int[] nativeParamTypes = new int[paramTypes.length];
         for (int i = 0; i < paramTypes.length; ++i) {
             nativeParamTypes[i] = paramTypes[i].value();

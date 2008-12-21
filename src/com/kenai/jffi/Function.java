@@ -5,7 +5,7 @@ public final class Function {
     private final int address32;
     private final long address64;
 
-    public Function(Address address, NativeType returnType, NativeType[] paramTypes) {
+    public Function(Address address, Type returnType, Type[] paramTypes) {
         int[] nativeParamTypes = new int[paramTypes.length];
         for (int i = 0; i < paramTypes.length; ++i) {
             nativeParamTypes[i] = paramTypes[i].value();

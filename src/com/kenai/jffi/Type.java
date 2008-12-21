@@ -21,7 +21,7 @@ package com.kenai.jffi;
 /**
  * Native parameter and return types.
  */
-public enum NativeType {
+public enum Type {
     /* Note: These must match the native FFI types */
     VOID(0),
     INT(1),
@@ -40,7 +40,7 @@ public enum NativeType {
     POINTER(14);
     private final int value;
 
-    private NativeType(int value) {
+    private Type(int value) {
         this.value = value;
     }
     public int value() {
