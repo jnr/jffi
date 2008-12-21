@@ -32,18 +32,26 @@ public final class Library {
     Library(Address handle) {
         this.handle = handle;
     }
+
     public Library(String name, int flags) {
-        this(new Address(Foreign.getForeign().dlopen(name, flags)));
+        long address = Foreign.getForeign().dlopen(name, flags);
+        if (address == 0) {
+            throw new UnsatisfiedLinkError("Could not open [" + name +"]");
+        }
+        this.handle = new Address(address);
     }
 
-//    public Address findSymbol(String name) {
-//        long address = Foreign.getForeign().dlsym(handle, name);
-//        return new Address(address);
-//    }
+    public final Address findSymbol(String name) {
+        long address = Foreign.getForeign().dlsym(handle.nativeAddress(), name);
+        return address != 0 ? new Address(address) : null;
+    }
+
     @Override
     protected void finalize() throws Throwable {
         try {
-            Foreign.getForeign().dlclose(handle.longValue());
+            if (!handle.isNull()) {
+                Foreign.getForeign().dlclose(handle.longValue());
+            }
         } finally {
             super.finalize();
         }
