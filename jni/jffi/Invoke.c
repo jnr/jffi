@@ -14,18 +14,19 @@ static inline void
 invokeArray(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer, FFIValue* retval)
 {
     Function* ctx = (Function *) (uintptr_t) ctxAddress;
-    jbyte tmpStackBuffer[MAX_STACK_ARGS * PARAM_SIZE], *tmpBuffer = &tmpStackBuffer[0];
+    union { double d; long long ll; jbyte tmp[PARAM_SIZE]; } tmpStackBuffer[MAX_STACK_ARGS];
+    jbyte *tmpBuffer = (jbyte *) &tmpStackBuffer[0];
     void* ffiStackArgs[MAX_STACK_ARGS];
     void** ffiArgs = ffiStackArgs;
     unsigned int i;
-    if (ctx->cif.nargs > MAX_STACK_ARGS) {
-        tmpBuffer = alloca(ctx->cif.nargs * PARAM_SIZE);
-        ffiArgs = alloca(ctx->cif.nargs * sizeof(void *));
-    }
-    for (i = 0; i < ctx->cif.nargs; ++i) {
-        ffiArgs[i] = &tmpBuffer[i * 8];
-    }
     if (ctx->cif.nargs > 0) {
+        if (ctx->cif.nargs > MAX_STACK_ARGS) {
+            tmpBuffer = alloca(ctx->cif.nargs * PARAM_SIZE);
+            ffiArgs = alloca(ctx->cif.nargs * sizeof(void *));
+        }
+        for (i = 0; i < ctx->cif.nargs; ++i) {
+            ffiArgs[i] = &tmpBuffer[i * PARAM_SIZE];
+        }
         (*env)->GetByteArrayRegion(env, paramBuffer, 0, ctx->cif.nargs * PARAM_SIZE, tmpBuffer);
     }
     ffi_call(&ctx->cif, FFI_FN(ctx->function), retval, ffiArgs);
