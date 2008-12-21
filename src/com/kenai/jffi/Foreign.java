@@ -46,39 +46,42 @@ public abstract class Foreign {
     public native long newFunction(long address, int returnType, int[] paramTypes, int convention);
     public native void freeFunction(long handle);
 
+//    public long newClosure(Closure closure, int returnType, int[] paramTypes, int convention);
+//    public native void freeClosure(long handle);
+
     public abstract int invokeVrI(Function function);
     public abstract int invokeIrI(Function function, int arg1);
     public abstract int invokeIIrI(Function function, int arg1, int arg2);
     public abstract int invokeIIIrI(Function function, int arg1, int arg2, int arg3);
 
-    private static final native int invoke32VrI(int function);
-    private static final native int invoke64VrI(long function);
-    private static final native int invoke32IrI(int function, int arg1);
-    private static final native int invoke64IrI(long function, int arg1);
-    private static final native int invoke32IIrI(int function, int arg1, int arg2);
-    private static final native int invoke64IIrI(long function, int arg1, int arg2);
-    private static final native int invoke32IIIrI(int function, int arg1, int arg2, int arg3);
-    private static final native int invoke64IIIrI(long function, int arg1, int arg2, int arg3);
+    final native int invoke32VrI(int function);
+    final native int invoke64VrI(long function);
+    final native int invoke32IrI(int function, int arg1);
+    final native int invoke64IrI(long function, int arg1);
+    final native int invoke32IIrI(int function, int arg1, int arg2);
+    final native int invoke64IIrI(long function, int arg1, int arg2);
+    final native int invoke32IIIrI(int function, int arg1, int arg2, int arg3);
+    final native int invoke64IIIrI(long function, int arg1, int arg2, int arg3);
 
     public int invokeInt(Function function, HeapInvocationBuffer buffer) {
         return invokeArrayInt32(function.getAddress64(), buffer.array());
     }
-    private static native int invokeArrayInt32(long function, byte[] buffer);
+    native int invokeArrayInt32(long function, byte[] buffer);
 
     public long invokeLong(Function function, HeapInvocationBuffer buffer) {
         return invokeArrayInt64(function.getAddress64(), buffer.array());
     }
-    private static native long invokeArrayInt64(long function, byte[] buffer);
+    native long invokeArrayInt64(long function, byte[] buffer);
 
     public float invokeFloat(Function function, HeapInvocationBuffer buffer) {
         return invokeArrayFloat(function.getAddress64(), buffer.array());
     }
-    private static native float invokeArrayFloat(long function, byte[] buffer);
+    native float invokeArrayFloat(long function, byte[] buffer);
 
     public double invokeDouble(Function function, HeapInvocationBuffer buffer) {
         return invokeArrayDouble(function.getAddress64(), buffer.array());
     }
-    private static native double invokeArrayDouble(long function, byte[] buffer);
+    native double invokeArrayDouble(long function, byte[] buffer);
 
     public abstract long invokeAddress(Function function, HeapInvocationBuffer buffer);
     private static final class ILP32 extends Foreign {
