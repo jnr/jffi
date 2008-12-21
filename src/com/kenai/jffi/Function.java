@@ -3,7 +3,7 @@ package com.kenai.jffi;
 
 public final class Function {
     private final int address32;
-    private final Address handle;
+    private final long address64;
 
     public Function(Address address, NativeType returnType, NativeType[] paramTypes) {
         int[] nativeParamTypes = new int[paramTypes.length];
@@ -15,12 +15,12 @@ public final class Function {
         if (h == 0) {
             throw new RuntimeException("Failed to create native function");
         }
-        handle = new Address(h);
+        address64 = h;
         address32 = (int) h;
     }
     
     final long getAddress64() {
-        return handle.nativeAddress();
+        return address64;
     }
     final int getAddress32() {
         return address32;
@@ -28,8 +28,8 @@ public final class Function {
     @Override
     protected void finalize() throws Throwable {
         try {
-            if (handle != null && !handle.isNull()) {
-                Foreign.getForeign().freeFunction(handle.nativeAddress());
+            if (address64 != 0) {
+                Foreign.getForeign().freeFunction(address64);
             }
         } finally {
             super.finalize();
