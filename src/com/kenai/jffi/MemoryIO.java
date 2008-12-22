@@ -12,7 +12,9 @@ public abstract class MemoryIO {
         return SingletonHolder.INSTANCE;
     }
     private MemoryIO() {}
-    
+
+    public abstract long allocateMemory(long size, boolean clear);
+    public abstract  void freeMemory(long address);
     public abstract byte getByte(long address);
     public abstract short getShort(long address);
     public abstract int getInt(long address);
@@ -52,6 +54,7 @@ public abstract class MemoryIO {
     }
     private native long memchr(long address, int value, long len);
     private static final class Native extends MemoryIO {
+        private static final Foreign foreign = Foreign.getForeign();
         public native byte getByte(long address);
         public native short getShort(long address);
         public native int getInt(long address);
@@ -68,6 +71,12 @@ public abstract class MemoryIO {
         public native void putAddress(long address, long value);
         public native void setMemory(long address, long size, byte value);
         public native void copyMemory(long src, long dst, long size);
+        public final long allocateMemory(long size, boolean clear) {
+            return foreign.allocateMemory(size, clear);
+        }
+        public void freeMemory(long address) {
+            foreign.freeMemory(address);
+        }
     }
     private static final MemoryIO getImpl() {
         return new Native();
