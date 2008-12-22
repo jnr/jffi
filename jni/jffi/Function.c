@@ -75,6 +75,7 @@ Java_com_kenai_jffi_Foreign_newFunction(JNIEnv* env, jobject self,
         default:
             throwException(env, Runtime, "Unknown FFI error");
     }
+    ctx->rawSize = rawOffset;
     ctx->function = j2p(function);
     return p2j(ctx);
 cleanup:
