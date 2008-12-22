@@ -1,21 +1,14 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 
 package com.kenai.jffi;
 
-/**
- *
- * @author wayne
- */
 public final class HeapInvocationBuffer implements InvocationBuffer {
+    private static final int PARAM_SIZE = 8;
     private static final ArrayIO io = new L32ArrayIO();
     private final byte[] buffer;
     private int paramIndex = 0;
 
     public HeapInvocationBuffer(int paramCount) {
-        buffer = new byte[paramCount * 8];
+        buffer = new byte[paramCount * PARAM_SIZE];
     }
     /**
      * Gets the backing array of this <tt>InvocationBuffer</tt>
@@ -26,25 +19,25 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
         return buffer;
     }
     public final void putInt8(final int value) {
-        io.putInt8(buffer, paramIndex++ * 8, value);
+        io.putInt8(buffer, paramIndex++ * PARAM_SIZE, value);
     }
     public final void putInt16(final int value) {
-        io.putInt16(buffer, paramIndex++ * 8, value);
+        io.putInt16(buffer, paramIndex++ * PARAM_SIZE, value);
     }
     public final void putInt32(final int value) {
-        io.putInt32(buffer, paramIndex++ * 8, value);
+        io.putInt32(buffer, paramIndex++ * PARAM_SIZE, value);
     }
     public final void putInt64(final long value) {
-        io.putInt64(buffer, paramIndex++ * 8, value);
+        io.putInt64(buffer, paramIndex++ * PARAM_SIZE, value);
     }
     public final void putFloat(final float value) {
-        io.putFloat32(buffer, paramIndex++ * 8, value);
+        io.putFloat32(buffer, paramIndex++ * PARAM_SIZE, value);
     }
     public final void putDouble(final double value) {
-        io.putFloat64(buffer, paramIndex++ * 8, value);
+        io.putFloat64(buffer, paramIndex++ * PARAM_SIZE, value);
     }
     public final void putAddress(final long value) {
-        io.putAddress(buffer, paramIndex++ * 8, value);
+        io.putAddress(buffer, paramIndex++ * PARAM_SIZE, value);
     }
     private static abstract class ArrayIO {
         public abstract void putInt8(byte[] buffer, int offset, int value);
