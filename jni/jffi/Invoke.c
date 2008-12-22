@@ -8,8 +8,30 @@
 #include "Function.h"
 #include "com_kenai_jffi_Foreign.h"
 
+#if defined(__i386__)
+#  define USE_RAW 1
+#endif
+
 #define PARAM_SIZE (8)
 #define MAX_STACK_ARGS (8)
+
+#ifdef USE_RAW
+static inline void
+invokeArray(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer, FFIValue* retval)
+{
+    Function* ctx = (Function *) (uintptr_t) ctxAddress;
+    union { double d; long long ll; jbyte tmp[PARAM_SIZE]; } tmpStackBuffer[MAX_STACK_ARGS];
+    jbyte *tmpBuffer = (jbyte *) &tmpStackBuffer[0];
+    
+    if (ctx->cif.nargs > 0) {
+        if (ctx->rawSize > (MAX_STACK_ARGS * PARAM_SIZE)) {
+            tmpBuffer = alloca(ctx->rawSize);
+        }
+        (*env)->GetByteArrayRegion(env, paramBuffer, 0, ctx->rawSize, tmpBuffer);
+    }
+    ffi_raw_call(&ctx->cif, FFI_FN(ctx->function), retval, (ffi_raw *) tmpBuffer);
+}
+#else
 static inline void
 invokeArray(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer, FFIValue* retval)
 {
@@ -18,8 +40,9 @@ invokeArray(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer, FFIValue* ret
     jbyte *tmpBuffer = (jbyte *) &tmpStackBuffer[0];
     void* ffiStackArgs[MAX_STACK_ARGS];
     void** ffiArgs = ffiStackArgs;
-    unsigned int i;
+    
     if (ctx->cif.nargs > 0) {
+        unsigned int i;
         if (ctx->cif.nargs > MAX_STACK_ARGS) {
             tmpBuffer = alloca(ctx->cif.nargs * PARAM_SIZE);
             ffiArgs = alloca(ctx->cif.nargs * sizeof(void *));
@@ -31,7 +54,7 @@ invokeArray(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer, FFIValue* ret
     }
     ffi_call(&ctx->cif, FFI_FN(ctx->function), retval, ffiArgs);
 }
-
+#endif
 /*
  * Class:     com_kenai_jffi_Foreign
  * Method:    invokeArrayInt32

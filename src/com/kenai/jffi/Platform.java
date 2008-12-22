@@ -41,6 +41,7 @@ public class Platform {
     }
     public enum ARCH {
         I386,
+        X86_64,
         PPC,
         SPARC,
         SPARCV9,
