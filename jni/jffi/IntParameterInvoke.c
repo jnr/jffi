@@ -15,7 +15,7 @@
 #if BYTE_ORDER == LITTLE_ENDIAN
 # define return_int(retval) return ((retval).s32)
 #else
-# define return_int(retval) return ((retval).s64 & 0xFFFFFFFFL)
+# define return_int(retval) return ((retval).l & 0xFFFFFFFFL)
 #endif
 
 typedef unsigned int u32;
