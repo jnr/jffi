@@ -44,19 +44,28 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
     }
     private static final Encoder getEncoder() {
         switch (Platform.getArch()) {
-            case I386: return getLE32RawEncoder();
-            case X86_64: return getLE64Encoder();
+            case I386: return newLE32RawEncoder();
+            case X86_64: return newLE64Encoder();
+            case PPC: return newBE32Encoder();
+            case SPARC: return newBE32Encoder();
+            case SPARCV9: return newBE64Encoder();
             default: throw new RuntimeException("Unsupported arch " + Platform.getArch());
         }
     }
-    private static final Encoder getLE32RawEncoder() {
-        return LE32RawEncoder.INSTANCE;
+    private static final Encoder newLE32RawEncoder() {
+        return new LE32RawEncoder();
     }
-    private static final Encoder getLE32Encoder() {
-        return LE32Encoder.INSTANCE;
+    private static final Encoder newLE32Encoder() {
+        return new DefaultEncoder(LE32ArrayIO.INSTANCE);
     }
-    private static final Encoder getLE64Encoder() {
-        return LE64Encoder.INSTANCE;
+    private static final Encoder newLE64Encoder() {
+        return new DefaultEncoder(LE64ArrayIO.INSTANCE);
+    }
+    private static final Encoder newBE32Encoder() {
+        return new DefaultEncoder(BE32ArrayIO.INSTANCE);
+    }
+    private static final Encoder newBE64Encoder() {
+        return new DefaultEncoder(BE64ArrayIO.INSTANCE);
     }
     private static abstract class Encoder {
         public abstract int getBufferSize(Function function);
@@ -69,8 +78,7 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
         public abstract int putAddress(byte[] buffer, int offset, long value);
     }
     private static final class LE32RawEncoder extends Encoder {
-        private static final Encoder INSTANCE = new LE32RawEncoder();
-        private static final ArrayIO IO = new LE32ArrayIO();
+        private static final ArrayIO IO = LE32ArrayIO.INSTANCE;
 
         public final int getBufferSize(Function function) {
             return function.getRawParameterSize();
@@ -97,10 +105,10 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
             IO.putAddress(buffer, offset, value); return 4;
         }
     }
-    private static abstract class LittleEndianEncoder extends Encoder {
+    private static final class DefaultEncoder extends Encoder {
         private final ArrayIO io;
 
-        public LittleEndianEncoder(ArrayIO io) {
+        public DefaultEncoder(ArrayIO io) {
             this.io = io;
         }
         public final int getBufferSize(Function function) {
@@ -128,22 +136,7 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
             io.putAddress(buffer, offset, value); return PARAM_SIZE;
         }
     }
-    private static final class LE32Encoder extends LittleEndianEncoder {
-        private static final Encoder INSTANCE = new LE32Encoder();
 
-        public LE32Encoder() {
-            super(new LE32ArrayIO());
-        }
-        
-    }
-    private static final class LE64Encoder extends LittleEndianEncoder {
-        private static final Encoder INSTANCE = new LE64Encoder();
-
-        public LE64Encoder() {
-            super(new LE64ArrayIO());
-        }
-
-    }
     private static abstract class ArrayIO {
         public abstract void putInt8(byte[] buffer, int offset, int value);
         public abstract void putInt16(byte[] buffer, int offset, int value);
@@ -158,20 +151,20 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
         public abstract void putAddress(byte[] buffer, int offset, long value);
     }
     private static abstract class LittleEndianArrayIO extends ArrayIO {
-        public void putInt8(byte[] buffer, int offset, int value) {
+        public final void putInt8(byte[] buffer, int offset, int value) {
             buffer[offset] = (byte) value;
         }
-        public void putInt16(byte[] buffer, int offset, int value) {
+        public final void putInt16(byte[] buffer, int offset, int value) {
             buffer[offset] = (byte) value;
             buffer[offset + 1] = (byte) (value >> 8);
         }
-        public void putInt32(byte[] buffer, int offset, int value) {
+        public final void putInt32(byte[] buffer, int offset, int value) {
             buffer[offset] = (byte) value;
             buffer[offset + 1] = (byte) (value >> 8);
             buffer[offset + 2] = (byte) (value >> 16);
             buffer[offset + 3] = (byte) (value >> 24);
         }
-        public void putInt64(byte[] buffer, int offset, long value) {
+        public final void putInt64(byte[] buffer, int offset, long value) {
             buffer[offset] = (byte) value;
             buffer[offset + 1] = (byte) (value >> 8);
             buffer[offset + 2] = (byte) (value >> 16);
@@ -183,7 +176,8 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
         }
     }
     private static final class LE32ArrayIO extends LittleEndianArrayIO {
-        public void putAddress(byte[] buffer, int offset, long value) {
+        static final ArrayIO INSTANCE = new LE32ArrayIO();
+        public final void putAddress(byte[] buffer, int offset, long value) {
             buffer[offset] = (byte) value;
             buffer[offset + 1] = (byte) (value >> 8);
             buffer[offset + 2] = (byte) (value >> 16);
@@ -191,9 +185,51 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
         }
     }
     private static final class LE64ArrayIO extends LittleEndianArrayIO {
+        static final ArrayIO INSTANCE = new LE64ArrayIO();
+        public final void putAddress(byte[] buffer, int offset, long value) {
+            putInt64(buffer, offset, value);
+        }
+    }
+    private static abstract class BigEndianArrayIO extends ArrayIO {
+        public final void putInt8(byte[] buffer, int offset, int value) {
+            buffer[offset] = (byte) value;
+        }
+        public final void putInt16(byte[] buffer, int offset, int value) {
+            buffer[offset + 0] = (byte) (value >> 8);
+            buffer[offset + 1] = (byte) value;
+            
+        }
+        public final void putInt32(byte[] buffer, int offset, int value) {
+            buffer[offset + 0] = (byte) (value >> 24);
+            buffer[offset + 1] = (byte) (value >> 16);
+            buffer[offset + 2] = (byte) (value >> 8);
+            buffer[offset + 3] = (byte) value;
+        }
+        public final void putInt64(byte[] buffer, int offset, long value) {
+            buffer[offset + 0] = (byte) (value >> 56);
+            buffer[offset + 1] = (byte) (value >> 48);
+            buffer[offset + 2] = (byte) (value >> 40);
+            buffer[offset + 3] = (byte) (value >> 32);
+            buffer[offset + 4] = (byte) (value >> 24);
+            buffer[offset + 5] = (byte) (value >> 16);
+            buffer[offset + 6] = (byte) (value >> 8);
+            buffer[offset + 7] = (byte) value;
+        }
+    }
+    private static final class BE32ArrayIO extends BigEndianArrayIO {
+        static final ArrayIO INSTANCE = new BE32ArrayIO();
+        public void putAddress(byte[] buffer, int offset, long value) {
+            buffer[offset + 0] = (byte) (value >> 24);
+            buffer[offset + 1] = (byte) (value >> 16);
+            buffer[offset + 2] = (byte) (value >> 8);
+            buffer[offset + 3] = (byte) value;
+        }
+
+    }
+    private static final class BE64ArrayIO extends BigEndianArrayIO {
+        static final ArrayIO INSTANCE = new BE64ArrayIO();
         public void putAddress(byte[] buffer, int offset, long value) {
             putInt64(buffer, offset, value);
         }
     }
-
 }
