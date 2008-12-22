@@ -36,8 +36,8 @@ public final class Foreign {
     public native void dlclose(long handle);
     public native long dlsym(long handle, String name);
 
-    public native long allocateMemory(long size, boolean clear);
-    public native void freeMemory(long address);
+    native long allocateMemory(long size, boolean clear);
+    native void freeMemory(long address);
     
     public native long newCallContext(int returnType, int[] paramTypes, int convention);
     public native void freeCallContext(long handle);
