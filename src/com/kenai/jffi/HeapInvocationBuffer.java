@@ -10,6 +10,9 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
     public HeapInvocationBuffer(int paramCount) {
         buffer = new byte[paramCount * PARAM_SIZE];
     }
+    public HeapInvocationBuffer(Function function) {
+        buffer = new byte[encoder.getBufferSize(function)];
+    }
     /**
      * Gets the backing array of this <tt>InvocationBuffer</tt>
      *
@@ -56,6 +59,7 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
         return LE64Encoder.INSTANCE;
     }
     private static abstract class Encoder {
+        public abstract int getBufferSize(Function function);
         public abstract int putInt8(byte[] buffer, int offset, int value);
         public abstract int putInt16(byte[] buffer, int offset, int value);
         public abstract int putInt32(byte[] buffer, int offset, int value);
@@ -68,6 +72,9 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
         private static final Encoder INSTANCE = new LE32RawEncoder();
         private static final ArrayIO IO = new LE32ArrayIO();
 
+        public final int getBufferSize(Function function) {
+            return function.getRawParameterSize();
+        }
         public final int putInt8(byte[] buffer, int offset, int value) {
             IO.putInt8(buffer, offset, value); return 4;
         }
@@ -96,7 +103,9 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
         public LittleEndianEncoder(ArrayIO io) {
             this.io = io;
         }
-
+        public final int getBufferSize(Function function) {
+            return function.getParameterCount() * PARAM_SIZE;
+        }
         public final int putInt8(byte[] buffer, int offset, int value) {
             io.putInt8(buffer, offset, value); return PARAM_SIZE;
         }

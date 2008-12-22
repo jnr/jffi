@@ -4,7 +4,7 @@
 typedef struct Function {
     void* function;
     ffi_cif cif;
-    int rawSize;
+    int rawParameterSize;
     ffi_type** ffiParamTypes;
     int* rawParamOffsets;
 } Function;

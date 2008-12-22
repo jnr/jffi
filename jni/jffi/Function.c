@@ -75,7 +75,7 @@ Java_com_kenai_jffi_Foreign_newFunction(JNIEnv* env, jobject self,
         default:
             throwException(env, Runtime, "Unknown FFI error");
     }
-    ctx->rawSize = rawOffset;
+    ctx->rawParameterSize = rawOffset;
     ctx->function = j2p(function);
     return p2j(ctx);
 cleanup:
@@ -109,6 +109,18 @@ Java_com_kenai_jffi_Foreign_freeFunction(JNIEnv* env, jobject self, jlong handle
         }
         free(ctx);
     }
+}
+
+/*
+ * Class:     com_kenai_jffi_Foreign
+ * Method:    getFunctionRawParameterSize
+ * Signature: (J)I
+ */
+JNIEXPORT jint JNICALL
+Java_com_kenai_jffi_Foreign_getFunctionRawParameterSize(JNIEnv* env, jobject self, jlong handle)
+{
+    Function* ctx = (Function *) j2p(handle);
+    return ctx->rawParameterSize;
 }
 
 static ffi_type*

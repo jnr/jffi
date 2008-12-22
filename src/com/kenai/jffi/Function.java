@@ -4,7 +4,9 @@ package com.kenai.jffi;
 public final class Function {
     private final int address32;
     private final long address64;
-
+    private final int parameterCount;
+    private final int rawParameterSize;
+    
     public Function(Address address, Type returnType, Type[] paramTypes) {
         int[] nativeParamTypes = new int[paramTypes.length];
         for (int i = 0; i < paramTypes.length; ++i) {
@@ -15,10 +17,17 @@ public final class Function {
         if (h == 0) {
             throw new RuntimeException("Failed to create native function");
         }
+        parameterCount = nativeParamTypes.length;
+        rawParameterSize = Foreign.getForeign().getFunctionRawParameterSize(h);
         address64 = h;
         address32 = (int) h;
     }
-    
+    final int getParameterCount() {
+        return parameterCount;
+    }
+    final int getRawParameterSize() {
+        return rawParameterSize;
+    }
     final long getAddress64() {
         return address64;
     }
