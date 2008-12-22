@@ -12,21 +12,31 @@
 #  define USE_RAW 1
 #endif
 
-static inline int
+#if BYTE_ORDER == LITTLE_ENDIAN
+# define return_int(retval) return ((retval).s32)
+#else
+# define return_int(retval) return ((retval).s64 & 0xFFFFFFFFL)
+#endif
+
+typedef unsigned int u32;
+
+static inline jint
 invokeVrI(ffi_cif* cif, void* function)
 {
-    long retval;
-#if defined(__i386__) && 1
-    retval = ((int (*)()) function)();
-#elif defined(USE_RAW) && 0 /* for zero args, non-raw is marginally faster */
+#if defined(__i386__)
+    return ((int (*)()) function)();
+#else
+    FFIValue retval;
+# if defined(USE_RAW) && 0 /* for zero args, non-raw is marginally faster */
     int arg0;
     ffi_raw_call(cif, FFI_FN(function), &retval, (ffi_raw *) &arg0);
-#else
+# else
     int arg0;
     void* ffiValues[] = { &arg0 };
     ffi_call(cif, FFI_FN(function), &retval, ffiValues);
+# endif
+    return_int(retval);
 #endif
-    return retval;
 }
 
 
@@ -69,24 +79,26 @@ set_int32_param(int type, int32_t arg, FFIValue* v)
     }
 }
 
-static inline int
+static inline jint
 invokeIrI(ffi_cif* cif, void* function, ffi_type** ffiParamTypes, int arg1)
 {
-    long retval;
 #if defined(__i386__)
-    retval = ((int (*)(int)) function)(arg1);
-#elif defined(USE_RAW) && defined(__i386__)
+    return ((int (*)(int)) function)(arg1);
+#else
+    FFIValue retval;
+# if defined(USE_RAW) && defined(__i386__)
     ffi_raw_call(cif, FFI_FN(function), &retval, (ffi_raw *) &arg1);
-#elif BYTE_ORDER == LITTLE_ENDIAN
+# elif BYTE_ORDER == LITTLE_ENDIAN
     void* ffiValues[] = { &arg1 };
     ffi_call(cif, FFI_FN(function), &retval, ffiValues);
-#else
+# else
     FFIValue v1;
     void* ffiValues[] = { &v1 };
     set_int32_param(ffiParamTypes[0]->type, arg1, &v1);
     ffi_call(cif, FFI_FN(function), &retval, ffiValues);
+# endif
+    return_int(retval);
 #endif
-    return retval;
 }
 
 /*
@@ -115,25 +127,28 @@ Java_com_kenai_jffi_Foreign_invoke64IrI(JNIEnv* env, jclass self, jlong ctxAddre
     return invokeIrI(&ctx->cif, ctx->function, ctx->ffiParamTypes, arg1);
 }
 
-static inline int
-invokeIIrI(ffi_cif* cif, void* function, ffi_type** ffiParamTypes, int arg1, int arg2)
+static inline jint
+invokeIIrI(ffi_cif* cif, void* function, ffi_type** ffiParamTypes, jint arg1, jint arg2)
 {
-    long retval;
 #if defined(__i386__)
-    retval = ((int (*)(int, int)) function)(arg1, arg2);
-#elif defined(USE_RAW) && defined(__i386__)
-    ffi_raw_call(cif, FFI_FN(function), &retval, (ffi_raw *) &arg1);
-#elif BYTE_ORDER == LITTLE_ENDIAN
+    return ((jint (*)(jint, jint)) function)(arg1, arg2);
+#else
+    FFIValue retval;
+# if defined(USE_RAW) && defined(__i386__)
+    jint raw[] = { arg1, arg2 };
+    ffi_raw_call(cif, FFI_FN(function), &retval, (ffi_raw *) raw);
+# elif BYTE_ORDER == LITTLE_ENDIAN
     void* ffiValues[] = { &arg1, &arg2 };
     ffi_call(cif, FFI_FN(function), &retval, ffiValues);
-#else
+# else
     FFIValue v1, v2;
     void* ffiValues[] = { &v1, &v2 };
     set_int32_param(ffiParamTypes[0]->type, arg1, &v1);
     set_int32_param(ffiParamTypes[1]->type, arg2, &v2);
     ffi_call(cif, FFI_FN(function), &retval, ffiValues);
+# endif
+    return_int(retval);
 #endif
-    return retval;
 }
 /*
  * Class:     com_kenai_jffi_Foreign
@@ -142,14 +157,14 @@ invokeIIrI(ffi_cif* cif, void* function, ffi_type** ffiParamTypes, int arg1, int
  */
 JNIEXPORT jint JNICALL
 Java_com_kenai_jffi_Foreign_invoke32IIrI(JNIEnv*env, jobject self, jint ctxAddress,
-        int arg1, int arg2)
+        jint arg1, jint arg2)
 {
     Function* ctx = (Function *) (uintptr_t) ctxAddress;
     return invokeIIrI(&ctx->cif, ctx->function, ctx->ffiParamTypes, arg1, arg2);
 }
 JNIEXPORT jint JNICALL
 Java_com_kenai_jffi_Foreign_invoke64IIrI(JNIEnv*env, jobject self, jlong ctxAddress,
-        int arg1, int arg2)
+        jint arg1, jint arg2)
 {
     Function* ctx = (Function *) (uintptr_t) ctxAddress;
     return invokeIIrI(&ctx->cif, ctx->function, ctx->ffiParamTypes, arg1, arg2);
@@ -158,27 +173,30 @@ Java_com_kenai_jffi_Foreign_invoke64IIrI(JNIEnv*env, jobject self, jlong ctxAddr
 static inline int
 invokeIIIrI(ffi_cif* cif, void* function, ffi_type** ffiParamTypes, int arg1, int arg2, int arg3)
 {
-    long retval;
 #if defined(__i386__)
-    retval = ((int (*)(int, int, int)) function)(arg1, arg2, arg3);
-#elif defined(USE_RAW) && defined(__i386__)
-    ffi_raw_call(cif, FFI_FN(function), &retval, (ffi_raw *) &arg1);
-#elif BYTE_ORDER == LITTLE_ENDIAN
+    return ((int (*)(jint, jint, jint)) function)(arg1, arg2, arg3);
+#else
+    FFIValue retval;
+# if defined(USE_RAW) && defined(__i386__)
+    jint raw[] = { arg1, arg2, arg3 };
+    ffi_raw_call(cif, FFI_FN(function), &retval, (ffi_raw *) raw);
+# elif BYTE_ORDER == LITTLE_ENDIAN
     void* ffiValues[] = { &arg1, &arg2, &arg3 };
     ffi_call(cif, FFI_FN(function), &retval, ffiValues);
-#else
+# else
     FFIValue v1, v2, v3;
     void* ffiValues[] = { &v1, &v2, &v3 };
     set_int32_param(ffiParamTypes[0]->type, arg1, &v1);
     set_int32_param(ffiParamTypes[1]->type, arg2, &v2);
     set_int32_param(ffiParamTypes[2]->type, arg3, &v3);
     ffi_call(cif, FFI_FN(function), &retval, ffiValues);
+# endif
+    return_int(reval);
 #endif
-    return retval;
 }
 JNIEXPORT jint JNICALL
 Java_com_kenai_jffi_Foreign_invoke32IIIrI(JNIEnv*env, jobject self, jint ctxAddress,
-        int arg1, int arg2, int arg3)
+        jint arg1, jint arg2, jint arg3)
 {
     Function* ctx = (Function *) (uintptr_t) ctxAddress;
     return invokeIIIrI(&ctx->cif, ctx->function, ctx->ffiParamTypes, arg1, arg2, arg3);
@@ -186,7 +204,7 @@ Java_com_kenai_jffi_Foreign_invoke32IIIrI(JNIEnv*env, jobject self, jint ctxAddr
 
 JNIEXPORT jint JNICALL
 Java_com_kenai_jffi_Foreign_invoke64IIIrI(JNIEnv*env, jobject self, jlong ctxAddress,
-        int arg1, int arg2, int arg3)
+        jint arg1, jint arg2, jint arg3)
 {
     Function* ctx = (Function *) (uintptr_t) ctxAddress;
     return invokeIIIrI(&ctx->cif, ctx->function, ctx->ffiParamTypes, arg1, arg2, arg3);
