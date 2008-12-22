@@ -24,10 +24,10 @@ invokeArray(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer, FFIValue* ret
     jbyte *tmpBuffer = (jbyte *) &tmpStackBuffer[0];
     
     if (ctx->cif.nargs > 0) {
-        if (ctx->rawSize > (MAX_STACK_ARGS * PARAM_SIZE)) {
-            tmpBuffer = alloca(ctx->rawSize);
+        if (ctx->rawParameterSize > (MAX_STACK_ARGS * PARAM_SIZE)) {
+            tmpBuffer = alloca(ctx->rawParameterSize);
         }
-        (*env)->GetByteArrayRegion(env, paramBuffer, 0, ctx->rawSize, tmpBuffer);
+        (*env)->GetByteArrayRegion(env, paramBuffer, 0, ctx->rawParameterSize, tmpBuffer);
     }
     ffi_raw_call(&ctx->cif, FFI_FN(ctx->function), retval, (ffi_raw *) tmpBuffer);
 }
