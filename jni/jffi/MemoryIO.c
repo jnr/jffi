@@ -23,26 +23,25 @@
 #include <stdlib.h>
 #include <jni.h>
 #include "jffi.h"
-#include "com_kenai_jffi_MemoryIO.h"
-#include "com_kenai_jffi_MemoryIO_Native.h"
+#include "com_kenai_jffi_Foreign.h"
 
 #define GET(JTYPE, NTYPE) JNIEXPORT NTYPE JNICALL \
-Java_com_kenai_jffi_MemoryIO_00024Native_get##JTYPE(JNIEnv* env, jobject self, jlong address) \
+Java_com_kenai_jffi_Foreign_get##JTYPE(JNIEnv* env, jobject self, jlong address) \
 { NTYPE tmp; memcpy(&tmp, j2p(address), sizeof(tmp)); return tmp; }
 
 #define PUT(JTYPE, NTYPE) \
 JNIEXPORT void JNICALL \
-Java_com_kenai_jffi_MemoryIO_00024Native_put##JTYPE(JNIEnv *env, jobject self, jlong address, NTYPE value) \
+Java_com_kenai_jffi_Foreign_put##JTYPE(JNIEnv *env, jobject self, jlong address, NTYPE value) \
 { memcpy(j2p(address), &value, sizeof(value)); }
 
 #define COPY(JTYPE, NTYPE) \
 JNIEXPORT void JNICALL \
-Java_com_kenai_jffi_MemoryIO_put##JTYPE##Array(JNIEnv* env, jobject unsafe, jlong address, jobject obj, jint offset, jint length) \
+Java_com_kenai_jffi_Foreign_put##JTYPE##Array(JNIEnv* env, jobject unsafe, jlong address, jobject obj, jint offset, jint length) \
 { \
     (*env)->Get##JTYPE##ArrayRegion(env, obj, offset, length, (NTYPE *) j2p(address)); \
 } \
 JNIEXPORT void JNICALL \
-Java_com_kenai_jffi_MemoryIO_get##JTYPE##Array(JNIEnv* env, jobject unsafe, jlong address, jobject obj, jint offset, jint length) \
+Java_com_kenai_jffi_Foreign_get##JTYPE##Array(JNIEnv* env, jobject unsafe, jlong address, jobject obj, jint offset, jint length) \
 { \
     (*env)->Set##JTYPE##ArrayRegion(env, obj, offset, length, (NTYPE *) j2p(address)); \
 }
@@ -63,7 +62,7 @@ UNSAFE(Double, jdouble);
  * Signature: (J)J
  */
 JNIEXPORT jlong JNICALL
-Java_com_kenai_jffi_MemoryIO_00024Native_getAddress(JNIEnv* ev, jobject self, jlong address)
+Java_com_kenai_jffi_Foreign_getAddress(JNIEnv* ev, jobject self, jlong address)
 {
     void* tmp;
     memcpy(&tmp, j2p(address), sizeof(tmp));
@@ -76,7 +75,7 @@ Java_com_kenai_jffi_MemoryIO_00024Native_getAddress(JNIEnv* ev, jobject self, jl
  * Signature: (JJ)V
  */
 JNIEXPORT void JNICALL
-Java_com_kenai_jffi_MemoryIO_00024Native_putAddress(JNIEnv* env, jobject self, jlong address, jlong value)
+Java_com_kenai_jffi_Foreign_putAddress(JNIEnv* env, jobject self, jlong address, jlong value)
 {
     void* tmp = j2p(value);
     memcpy(j2p(address), &tmp, sizeof(tmp));
@@ -88,7 +87,7 @@ Java_com_kenai_jffi_MemoryIO_00024Native_putAddress(JNIEnv* env, jobject self, j
  * Signature: (JJB)V
  */
 JNIEXPORT void JNICALL
-Java_com_kenai_jffi_MemoryIO_00024Native_setMemory(JNIEnv* env, jobject self, jlong address, jlong size, jbyte value)
+Java_com_kenai_jffi_Foreign_setMemory(JNIEnv* env, jobject self, jlong address, jlong size, jbyte value)
 {
     memset(j2p(address), value, size);
 }
@@ -99,7 +98,7 @@ Java_com_kenai_jffi_MemoryIO_00024Native_setMemory(JNIEnv* env, jobject self, jl
  * Signature: (JJJ)V
  */
 JNIEXPORT void JNICALL
-Java_com_kenai_jffi_MemoryIO_00024Native_copyMemory(JNIEnv* env, jobject self, jlong src, jlong dst, jlong size)
+Java_com_kenai_jffi_Foreign_copyMemory(JNIEnv* env, jobject self, jlong src, jlong dst, jlong size)
 {
     memcpy(j2p(dst), j2p(src), size);
 }
@@ -110,7 +109,7 @@ Java_com_kenai_jffi_MemoryIO_00024Native_copyMemory(JNIEnv* env, jobject self, j
  * Signature: (JIJ)I
  */
 JNIEXPORT jlong JNICALL
-Java_com_kenai_jffi_MemoryIO_memchr(JNIEnv* env, jobject self, jlong address, jint c, jlong maxlen)
+Java_com_kenai_jffi_Foreign_memchr(JNIEnv* env, jobject self, jlong address, jint c, jlong maxlen)
 {
     void* ptr = memchr(j2p(address), c, maxlen);
     if (ptr == NULL) {

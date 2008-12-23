@@ -61,4 +61,37 @@ public final class Foreign {
     final native long invokeArrayInt64(long function, byte[] buffer);
     final native float invokeArrayFloat(long function, byte[] buffer);
     final native double invokeArrayDouble(long function, byte[] buffer);
+
+
+    final native byte getByte(long address);
+    final native short getShort(long address);
+    final native int getInt(long address);
+    final native long getLong(long address);
+    final native float getFloat(long address);
+    final native double getDouble(long address);
+    final native long getAddress(long address);
+    final native void putByte(long address, byte value);
+    final native void putShort(long address, short value);
+    final native void putInt(long address, int value);
+    final native void putLong(long address, long value);
+    final native void putFloat(long address, float value);
+    final native void putDouble(long address, double value);
+    final native void putAddress(long address, long value);
+    final native void setMemory(long address, long size, byte value);
+    final native void copyMemory(long src, long dst, long size);
+    final native void putByteArray(long address, byte[] data, int offset, int length);
+    final native void getByteArray(long address, byte[] data, int offset, int length);
+    final native void putCharArray(long address, char[] data, int offset, int length);
+    final native void getCharArray(long address, char[] data, int offset, int length);
+    final native void putShortArray(long address, short[] data, int offset, int length);
+    final native void getShortArray(long address, short[] data, int offset, int length);
+    final native void putIntArray(long address, int[] data, int offset, int length);
+    final native void getIntArray(long address, int[] data, int offset, int length);
+    final native void getLongArray(long address, long[] data, int offset, int length);
+    final native void putLongArray(long address, long[] data, int offset, int length);
+    final native void getFloatArray(long address, float[] data, int offset, int length);
+    final native void putFloatArray(long address, float[] data, int offset, int length);
+    final native void getDoubleArray(long address, double[] data, int offset, int length);
+    final native void putDoubleArray(long address, double[] data, int offset, int length);
+    final native long memchr(long address, int value, long len);
 }
