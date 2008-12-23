@@ -34,7 +34,7 @@ public final class Library {
     }
 
     public Library(String name, int flags) {
-        long address = Foreign.getForeign().dlopen(name, flags);
+        long address = Foreign.getInstance().dlopen(name, flags);
         if (address == 0) {
             throw new UnsatisfiedLinkError("Could not open [" + name +"]");
         }
@@ -42,7 +42,7 @@ public final class Library {
     }
 
     public final Address findSymbol(String name) {
-        long address = Foreign.getForeign().dlsym(handle.nativeAddress(), name);
+        long address = Foreign.getInstance().dlsym(handle.nativeAddress(), name);
         return address != 0 ? new Address(address) : null;
     }
 
@@ -50,7 +50,7 @@ public final class Library {
     protected void finalize() throws Throwable {
         try {
             if (!handle.isNull()) {
-                Foreign.getForeign().dlclose(handle.longValue());
+                Foreign.getInstance().dlclose(handle.longValue());
             }
         } finally {
             super.finalize();

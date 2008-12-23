@@ -39,7 +39,7 @@ public class LibraryTest {
     // @Test
     // public void hello() {}
     @Test public void dlopen() {
-        long handle = Foreign.getForeign().dlopen("libc.so.6", Library.LAZY | Library.GLOBAL);
+        long handle = Foreign.getInstance().dlopen("libc.so.6", Library.LAZY | Library.GLOBAL);
         assertNotSame("Could not open libc.so", 0L, handle);
     }
 }

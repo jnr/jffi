@@ -248,7 +248,7 @@ public class Platform {
      */
     public boolean isSupported() {
         try {
-            return Foreign.getForeign() != null;
+            return Foreign.getInstance() != null;
         } catch (Throwable t) {
             return false;
         }

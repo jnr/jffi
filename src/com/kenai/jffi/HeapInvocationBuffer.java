@@ -44,7 +44,7 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
     }
     private static final Encoder getEncoder() {
         switch (Platform.getArch()) {
-            case I386: return Foreign.getForeign().isRawParameterPackingEnabled()
+            case I386: return Foreign.getInstance().isRawParameterPackingEnabled()
                     ? newI386RawEncoder()
                     : newLE32Encoder();
             case X86_64: return newLE64Encoder();

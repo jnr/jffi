@@ -29,7 +29,7 @@ public final class CallContext {
         for (int i = 0; i < paramTypes.length; ++i) {
             nativeParamTypes[i] = paramTypes[i].value();
         }
-        long h = Foreign.getForeign().newCallContext(returnType.value(), nativeParamTypes, 0);
+        long h = Foreign.getInstance().newCallContext(returnType.value(), nativeParamTypes, 0);
         handle = new Address(h);
     }
 

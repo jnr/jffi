@@ -43,25 +43,25 @@ public class CallContextTest {
     // @Test
     // public void hello() {}
     @Test public void VrV() {
-        long handle = Foreign.getForeign().newCallContext(Type.VOID.value(),
+        long handle = Foreign.getInstance().newCallContext(Type.VOID.value(),
                 new int[] { Type.VOID.value() }, 0);
         assertNotSame("Foreign#newCallContext failed", 0L, handle);
         CallContext ctx = new CallContext(Type.VOID, new Type[] { Type.VOID });
     }
     @Test public void VrI() {
-        long handle = Foreign.getForeign().newCallContext(Type.INT.value(),
+        long handle = Foreign.getInstance().newCallContext(Type.INT.value(),
                 new int[] { Type.VOID.value() }, 0);
         assertNotSame("Foreign#newCallContext failed", 0L, handle);
     }
     @Test public void IrI() {
-        long handle = Foreign.getForeign().newCallContext(Type.INT.value(),
+        long handle = Foreign.getInstance().newCallContext(Type.INT.value(),
                 new int[] { Type.INT.value() }, 0);
         assertNotSame("Foreign#newCallContext failed", 0L, handle);
     }
     @Test public void getpid() {
 
-        long libc = Foreign.getForeign().dlopen("libc.so.6", Library.LAZY | Library.LOCAL);
-        long getpid = Foreign.getForeign().dlsym(libc, "getpid");
+        long libc = Foreign.getInstance().dlopen("libc.so.6", Library.LAZY | Library.LOCAL);
+        long getpid = Foreign.getInstance().dlsym(libc, "getpid");
         Function f = new Function(new Address(getpid), Type.SINT32,
                 new Type[] { });
         int pid = Invoker.getInstance().invokeVrI(f);

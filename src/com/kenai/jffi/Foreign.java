@@ -28,7 +28,7 @@ public final class Foreign {
         }
         private static final Foreign INSTANCE = new Foreign();
     }
-    public static final Foreign getForeign() {
+    public static final Foreign getInstance() {
         return SingletonHolder.INSTANCE;
     }
     private Foreign() {}

@@ -2,7 +2,7 @@
 package com.kenai.jffi;
 
 public abstract class MemoryIO {
-    protected final Foreign foreign = Foreign.getForeign();
+    protected final Foreign foreign = Foreign.getInstance();
     private static final class SingletonHolder {
         private static final MemoryIO INSTANCE = getImpl();
     }

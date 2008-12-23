@@ -2,7 +2,7 @@
 package com.kenai.jffi;
 
 public abstract class Invoker {
-    protected final Foreign foreign = Foreign.getForeign();
+    protected final Foreign foreign = Foreign.getInstance();
     private static final class SingletonHolder {
         private static final Invoker INSTANCE = Platform.is64()
                 ? getLP64() : getILP32();

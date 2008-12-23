@@ -12,13 +12,13 @@ public final class Function {
         for (int i = 0; i < paramTypes.length; ++i) {
             nativeParamTypes[i] = paramTypes[i].value();
         }
-        final long h = Foreign.getForeign().newFunction(address.nativeAddress(),
+        final long h = Foreign.getInstance().newFunction(address.nativeAddress(),
                 returnType.value(), nativeParamTypes, 0);
         if (h == 0) {
             throw new RuntimeException("Failed to create native function");
         }
         parameterCount = nativeParamTypes.length;
-        rawParameterSize = Foreign.getForeign().getFunctionRawParameterSize(h);
+        rawParameterSize = Foreign.getInstance().getFunctionRawParameterSize(h);
         address64 = h;
         address32 = (int) h;
     }
@@ -38,7 +38,7 @@ public final class Function {
     protected void finalize() throws Throwable {
         try {
             if (address64 != 0) {
-                Foreign.getForeign().freeFunction(address64);
+                Foreign.getInstance().freeFunction(address64);
             }
         } finally {
             super.finalize();
