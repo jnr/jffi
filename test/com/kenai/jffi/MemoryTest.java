@@ -35,9 +35,9 @@ public class MemoryTest {
     // @Test
     // public void hello() {}
     @Test public void allocateUnaligned() {
-        long memory = MemoryIO.getMemoryIO().allocateMemory(1024, false);
+        long memory = MemoryIO.getInstance().allocateMemory(1024, false);
         assertNotSame("Could not allocate memory", 0L, memory);
-        MemoryIO.getMemoryIO().freeMemory(memory);
+        MemoryIO.getInstance().freeMemory(memory);
     }
     
 }

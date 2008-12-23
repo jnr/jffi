@@ -6,7 +6,7 @@ public abstract class MemoryIO {
     private static final class SingletonHolder {
         private static final MemoryIO INSTANCE = getImpl();
     }
-    public static MemoryIO getMemoryIO() {
+    public static MemoryIO getInstance() {
         return SingletonHolder.INSTANCE;
     }
     private MemoryIO() {}
