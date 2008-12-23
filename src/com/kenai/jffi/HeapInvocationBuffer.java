@@ -44,7 +44,7 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
     }
     private static final Encoder getEncoder() {
         switch (Platform.getArch()) {
-            case I386: return newLE32RawEncoder();
+            case I386: return newI386RawEncoder();
             case X86_64: return newLE64Encoder();
             case PPC: return newBE32Encoder();
             case SPARC: return newBE32Encoder();
@@ -52,8 +52,8 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
             default: throw new RuntimeException("Unsupported arch " + Platform.getArch());
         }
     }
-    private static final Encoder newLE32RawEncoder() {
-        return new LE32RawEncoder();
+    private static final Encoder newI386RawEncoder() {
+        return new I386RawEncoder();
     }
     private static final Encoder newLE32Encoder() {
         return new DefaultEncoder(LE32ArrayIO.INSTANCE);
@@ -77,7 +77,7 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
         public abstract int putFloat64(byte[] buffer, int offset, double value);
         public abstract int putAddress(byte[] buffer, int offset, long value);
     }
-    private static final class LE32RawEncoder extends Encoder {
+    private static final class I386RawEncoder extends Encoder {
         private static final ArrayIO IO = LE32ArrayIO.INSTANCE;
 
         public final int getBufferSize(Function function) {
