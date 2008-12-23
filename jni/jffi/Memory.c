@@ -30,4 +30,15 @@ Java_com_kenai_jffi_Foreign_freeMemory(JNIEnv* env, jobject self, jlong address)
     free(j2p(address));
 }
 
+/*
+ * Class:     com_kenai_jffi_Foreign
+ * Method:    strlen
+ * Signature: (J)J
+ */
+JNIEXPORT jlong JNICALL
+Java_com_kenai_jffi_Foreign_strlen(JNIEnv* env, jobject self, jlong address)
+{
+    return (jlong) strlen(j2p(address));
+}
+
 

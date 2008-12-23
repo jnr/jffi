@@ -72,6 +72,9 @@ public abstract class MemoryIO {
         foreign.putDoubleArray(address, data, offset, length);
     }
 
+    public final long getStringLength(long address) {
+        return foreign.strlen(address);
+    }
     public final long indexOf(long address, byte value) {
         return foreign.memchr(address, value, Integer.MAX_VALUE);
     }
