@@ -21,7 +21,7 @@
  */
 package com.kenai.jffi;
 
-public final class Foreign {
+final class Foreign {
     private static final class SingletonHolder {
         static {
             Init.init();
@@ -32,20 +32,20 @@ public final class Foreign {
         return SingletonHolder.INSTANCE;
     }
     private Foreign() {}
-    public native long dlopen(String name, int flags);
-    public native void dlclose(long handle);
-    public native long dlsym(long handle, String name);
+    final native long dlopen(String name, int flags);
+    final native void dlclose(long handle);
+    final native long dlsym(long handle, String name);
 
-    native long allocateMemory(long size, boolean clear);
-    native void freeMemory(long address);
+    final native long allocateMemory(long size, boolean clear);
+    final native void freeMemory(long address);
     
-    public native long newCallContext(int returnType, int[] paramTypes, int convention);
-    public native void freeCallContext(long handle);
+    final native long newCallContext(int returnType, int[] paramTypes, int convention);
+    final native void freeCallContext(long handle);
 
-    public native long newFunction(long address, int returnType, int[] paramTypes, int convention);
-    public native void freeFunction(long handle);
-    native boolean isRawParameterPackingEnabled();
-    native int getFunctionRawParameterSize(long handle);
+    final native long newFunction(long address, int returnType, int[] paramTypes, int convention);
+    final native void freeFunction(long handle);
+    final native boolean isRawParameterPackingEnabled();
+    final native int getFunctionRawParameterSize(long handle);
 //    public long newClosure(Closure closure, int returnType, int[] paramTypes, int convention);
 //    public native void freeClosure(long handle);
 
