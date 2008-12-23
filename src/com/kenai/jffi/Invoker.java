@@ -2,7 +2,7 @@
 package com.kenai.jffi;
 
 public abstract class Invoker {
-    protected final Foreign foreign = Foreign.getInstance();
+    final Foreign foreign = Foreign.getInstance();
     private static final class SingletonHolder {
         private static final Invoker INSTANCE = Platform.is64()
                 ? getLP64() : getILP32();
@@ -19,19 +19,31 @@ public abstract class Invoker {
     public abstract long invokeAddress(Function function, HeapInvocationBuffer buffer);
 
     public int invokeInt(Function function, HeapInvocationBuffer buffer) {
-        return foreign.invokeArrayInt32(function.getAddress64(), buffer.array());
+        ObjectBuffer objectBuffer = buffer.objectBuffer();
+        return objectBuffer != null
+                ? foreign.invokeArrayWithObjectsInt32(function.getAddress64(), buffer.array(), objectBuffer.objectCount(), objectBuffer.info(), objectBuffer.objects())
+                : foreign.invokeArrayInt32(function.getAddress64(), buffer.array());
     }
 
     public long invokeLong(Function function, HeapInvocationBuffer buffer) {
-        return foreign.invokeArrayInt64(function.getAddress64(), buffer.array());
+        ObjectBuffer objectBuffer = buffer.objectBuffer();
+        return objectBuffer != null
+                ? foreign.invokeArrayWithObjectsInt64(function.getAddress64(), buffer.array(), objectBuffer.objectCount(), objectBuffer.info(), objectBuffer.objects())
+                : foreign.invokeArrayInt64(function.getAddress64(), buffer.array());
     }
 
     public float invokeFloat(Function function, HeapInvocationBuffer buffer) {
-        return foreign.invokeArrayFloat(function.getAddress64(), buffer.array());
+        ObjectBuffer objectBuffer = buffer.objectBuffer();
+        return objectBuffer != null
+                ? foreign.invokeArrayWithObjectsFloat(function.getAddress64(), buffer.array(), objectBuffer.objectCount(), objectBuffer.info(), objectBuffer.objects())
+                : foreign.invokeArrayFloat(function.getAddress64(), buffer.array());
     }
     
     public double invokeDouble(Function function, HeapInvocationBuffer buffer) {
-        return foreign.invokeArrayDouble(function.getAddress64(), buffer.array());
+        ObjectBuffer objectBuffer = buffer.objectBuffer();
+        return objectBuffer != null
+                ? foreign.invokeArrayWithObjectsDouble(function.getAddress64(), buffer.array(), objectBuffer.objectCount(), objectBuffer.info(), objectBuffer.objects())
+                : foreign.invokeArrayDouble(function.getAddress64(), buffer.array());
     }
 
     private static final Invoker getILP32() {

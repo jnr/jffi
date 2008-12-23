@@ -5,6 +5,8 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
     private static final int PARAM_SIZE = 8;
     private static final Encoder encoder = getEncoder();
     private final byte[] buffer;
+    private ObjectBuffer objectBuffer = null;
+    private int paramOffset = 0;
     private int paramIndex = 0;
 
     public HeapInvocationBuffer(int paramCount) {
@@ -21,26 +23,43 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
     byte[] array() {
         return buffer;
     }
+    ObjectBuffer objectBuffer() {
+        return objectBuffer;
+    }
     public final void putInt8(final int value) {
-        paramIndex += encoder.putInt8(buffer, paramIndex, value);
+        paramOffset += encoder.putInt8(buffer, paramOffset, value);
+        ++paramIndex;
     }
     public final void putInt16(final int value) {
-        paramIndex += encoder.putInt16(buffer, paramIndex, value);
+        paramOffset += encoder.putInt16(buffer, paramOffset, value);
+        ++paramIndex;
     }
     public final void putInt32(final int value) {
-        paramIndex += encoder.putInt32(buffer, paramIndex, value);
+        paramOffset += encoder.putInt32(buffer, paramOffset, value);
+        ++paramIndex;
     }
     public final void putInt64(final long value) {
-        paramIndex += encoder.putInt64(buffer, paramIndex, value);
+        paramOffset += encoder.putInt64(buffer, paramOffset, value);
+        ++paramIndex;
     }
     public final void putFloat(final float value) {
-        paramIndex += encoder.putFloat32(buffer, paramIndex, value);
+        paramOffset += encoder.putFloat32(buffer, paramOffset, value);
+        ++paramIndex;
     }
     public final void putDouble(final double value) {
-        paramIndex += encoder.putFloat64(buffer, paramIndex, value);
+        paramOffset += encoder.putFloat64(buffer, paramOffset, value);
+        ++paramIndex;
     }
     public final void putAddress(final long value) {
-        paramIndex += encoder.putAddress(buffer, paramIndex, value);
+        paramOffset += encoder.putAddress(buffer, paramOffset, value);
+        ++paramIndex;
+    }
+    public final void putArray(final byte[] array, int offset, int length, int flags) {
+        paramOffset += encoder.putAddress(buffer, paramOffset, 0);
+        if (objectBuffer == null) {
+            objectBuffer = new ObjectBuffer();
+        }
+        objectBuffer.putArray(paramIndex++, array, offset, length, flags);
     }
     private static final Encoder getEncoder() {
         switch (Platform.getArch()) {

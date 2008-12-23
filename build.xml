@@ -87,6 +87,7 @@
         <javah classpath="${build.classes.dir}" destdir="${native.build.dir}" force="yes">
             <class name="com.kenai.jffi.Foreign"/>
             <class name="com.kenai.jffi.Library"/>
+            <class name="com.kenai.jffi.ObjectBuffer"/>
         </javah>
     </target>
     <target name="native" depends="-native"/>

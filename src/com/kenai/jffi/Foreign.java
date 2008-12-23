@@ -58,11 +58,17 @@ final class Foreign {
     final native int invoke64IIrI(long function, int arg1, int arg2);
     final native int invoke32IIIrI(int function, int arg1, int arg2, int arg3);
     final native int invoke64IIIrI(long function, int arg1, int arg2, int arg3);
+    /* ---------------------------------------------------------------------- */
     final native int invokeArrayInt32(long function, byte[] buffer);
     final native long invokeArrayInt64(long function, byte[] buffer);
     final native float invokeArrayFloat(long function, byte[] buffer);
     final native double invokeArrayDouble(long function, byte[] buffer);
-
+    /* ---------------------------------------------------------------------- */
+    final native int invokeArrayWithObjectsInt32(long function, byte[] buffer, int objectCount, int[] objectInfo, Object[] objects);
+    final native long invokeArrayWithObjectsInt64(long function, byte[] buffer, int objectCount, int[] objectInfo, Object[] objects);
+    final native float invokeArrayWithObjectsFloat(long function, byte[] buffer, int objectCount, int[] objectInfo, Object[] objects);
+    final native double invokeArrayWithObjectsDouble(long function, byte[] buffer, int objectCount, int[] objectInfo, Object[] objects);
+    /* ---------------------------------------------------------------------- */
 
     final native byte getByte(long address);
     final native short getShort(long address);
