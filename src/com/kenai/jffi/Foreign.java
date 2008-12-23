@@ -44,6 +44,7 @@ public final class Foreign {
 
     public native long newFunction(long address, int returnType, int[] paramTypes, int convention);
     public native void freeFunction(long handle);
+    native boolean isRawParameterPackingEnabled();
     native int getFunctionRawParameterSize(long handle);
 //    public long newClosure(Closure closure, int returnType, int[] paramTypes, int convention);
 //    public native void freeClosure(long handle);

@@ -57,6 +57,20 @@ invokeArray(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer, FFIValue* ret
 #endif
 /*
  * Class:     com_kenai_jffi_Foreign
+ * Method:    isRawParameterPackingEnabled
+ * Signature: ()Z
+ */
+JNIEXPORT jboolean JNICALL
+Java_com_kenai_jffi_Foreign_isRawParameterPackingEnabled(JNIEnv* env, jobject self)
+{
+#ifdef USE_RAW
+    return JNI_TRUE;
+#else
+    return JNI_FALSE;
+#endif
+}
+/*
+ * Class:     com_kenai_jffi_Foreign
  * Method:    invokeArrayInt32
  * Signature: (J[B)I
  */
