@@ -1,12 +1,14 @@
 #include <sys/types.h>
 #include <stdlib.h>
 #include <endian.h>
+#include <errno.h>
 #include <ffi.h>
 #include <jni.h>
 #include "jffi.h"
 #include "Exception.h"
 #include "Function.h"
 #include "Array.h"
+#include "LastError.h"
 #include "com_kenai_jffi_Foreign.h"
 
 #if defined(__i386__)
@@ -31,6 +33,7 @@ invokeArray(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer, FFIValue* ret
         (*env)->GetByteArrayRegion(env, paramBuffer, 0, ctx->rawParameterSize, tmpBuffer);
     }
     ffi_raw_call(&ctx->cif, FFI_FN(ctx->function), retval, (ffi_raw *) tmpBuffer);
+    set_last_error(errno);
 }
 #else
 static inline void
@@ -54,6 +57,7 @@ invokeArray(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer, FFIValue* ret
         (*env)->GetByteArrayRegion(env, paramBuffer, 0, ctx->cif.nargs * PARAM_SIZE, tmpBuffer);
     }
     ffi_call(&ctx->cif, FFI_FN(ctx->function), retval, ffiArgs);
+    set_last_error(errno);
 }
 #endif
 /*
@@ -193,6 +197,7 @@ invokeArrayWithObjects(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer,
 #else
     ffi_call(&ctx->cif, FFI_FN(ctx->function), retval, ffiArgs);
 #endif
+    set_last_error(errno);
 cleanup:
     /* Release any array backing memory */
     for (i = 0; i < arrayCount; ++i) {

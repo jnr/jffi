@@ -1,11 +1,13 @@
 #include <sys/types.h>
 #include <stdlib.h>
 #include <endian.h>
+#include <errno.h>
 #include <ffi.h>
 #include <jni.h>
 #include "jffi.h"
 #include "Exception.h"
 #include "Function.h"
+#include "LastError.h"
 #include "com_kenai_jffi_Foreign.h"
 
 #if defined(__i386__) && 0
@@ -24,7 +26,9 @@ static inline jint
 invokeVrI(ffi_cif* cif, void* function)
 {
 #if defined(__i386__)
-    return ((int (*)()) function)();
+    int retval = ((int (*)()) function)();
+    set_last_error(errno);
+    return retval;
 #else
     FFIValue retval;
 # if defined(USE_RAW) && 0 /* for zero args, non-raw is marginally faster */
@@ -35,6 +39,7 @@ invokeVrI(ffi_cif* cif, void* function)
     void* ffiValues[] = { &arg0 };
     ffi_call(cif, FFI_FN(function), &retval, ffiValues);
 # endif
+    set_last_error(errno);
     return_int(retval);
 #endif
 }
@@ -83,7 +88,9 @@ static inline jint
 invokeIrI(ffi_cif* cif, void* function, ffi_type** ffiParamTypes, int arg1)
 {
 #if defined(__i386__)
-    return ((int (*)(int)) function)(arg1);
+    int retval = ((int (*)(int)) function)(arg1);
+    set_last_error(errno);
+    return retval;
 #else
     FFIValue retval;
 # if defined(USE_RAW) && defined(__i386__)
@@ -97,6 +104,7 @@ invokeIrI(ffi_cif* cif, void* function, ffi_type** ffiParamTypes, int arg1)
     set_int32_param(ffiParamTypes[0]->type, arg1, &v1);
     ffi_call(cif, FFI_FN(function), &retval, ffiValues);
 # endif
+    set_last_error(errno);
     return_int(retval);
 #endif
 }
@@ -131,7 +139,9 @@ static inline jint
 invokeIIrI(ffi_cif* cif, void* function, ffi_type** ffiParamTypes, jint arg1, jint arg2)
 {
 #if defined(__i386__)
-    return ((jint (*)(jint, jint)) function)(arg1, arg2);
+    int retval = ((jint (*)(jint, jint)) function)(arg1, arg2);
+    set_last_error(errno);
+    return retval;
 #else
     FFIValue retval;
 # if defined(USE_RAW) && defined(__i386__)
@@ -147,6 +157,7 @@ invokeIIrI(ffi_cif* cif, void* function, ffi_type** ffiParamTypes, jint arg1, ji
     set_int32_param(ffiParamTypes[1]->type, arg2, &v2);
     ffi_call(cif, FFI_FN(function), &retval, ffiValues);
 # endif
+    set_last_error(errno);
     return_int(retval);
 #endif
 }
@@ -174,7 +185,9 @@ static inline int
 invokeIIIrI(ffi_cif* cif, void* function, ffi_type** ffiParamTypes, int arg1, int arg2, int arg3)
 {
 #if defined(__i386__)
-    return ((int (*)(jint, jint, jint)) function)(arg1, arg2, arg3);
+    int retval = ((int (*)(jint, jint, jint)) function)(arg1, arg2, arg3);
+    set_last_error(errno);
+    return retval;
 #else
     FFIValue retval;
 # if defined(USE_RAW) && defined(__i386__)
@@ -191,6 +204,7 @@ invokeIIIrI(ffi_cif* cif, void* function, ffi_type** ffiParamTypes, int arg1, in
     set_int32_param(ffiParamTypes[2]->type, arg3, &v3);
     ffi_call(cif, FFI_FN(function), &retval, ffiValues);
 # endif
+    set_last_error(errno);
     return_int(reval);
 #endif
 }

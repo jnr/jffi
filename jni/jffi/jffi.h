@@ -22,6 +22,7 @@
 #include <sys/param.h>
 #include <stdint.h>
 #include <string.h>
+#include <pthread.h>
 #include <jni.h>
 
 #ifndef roundup
@@ -108,6 +109,19 @@ typedef union FFIValue {
     void* p;
 } FFIValue;
 
+typedef struct ThreadData {
+    int error;
+} ThreadData;
+
+extern pthread_key_t jffi_threadDataKey;
+extern ThreadData* jffi_thread_data_init();
+
+static inline ThreadData*
+thread_data_get()
+{
+    ThreadData* td = pthread_getspecific(jffi_threadDataKey);
+    return td != NULL ? td : jffi_thread_data_init();
+}
 
 #endif /* jffi_jffi_h */
 
