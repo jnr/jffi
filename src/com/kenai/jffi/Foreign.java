@@ -40,9 +40,6 @@ final class Foreign {
 
     final native long allocateMemory(long size, boolean clear);
     final native void freeMemory(long address);
-    
-    final native long newCallContext(int returnType, int[] paramTypes, int convention);
-    final native void freeCallContext(long handle);
 
     final native long newFunction(long address, int returnType, int[] paramTypes, int convention);
     final native void freeFunction(long handle);
