@@ -18,28 +18,28 @@ public abstract class Invoker {
     public abstract int invokeIIIrI(Function function, int arg1, int arg2, int arg3);
     public abstract long invokeAddress(Function function, HeapInvocationBuffer buffer);
 
-    public int invokeInt(Function function, HeapInvocationBuffer buffer) {
+    public final int invokeInt(Function function, HeapInvocationBuffer buffer) {
         ObjectBuffer objectBuffer = buffer.objectBuffer();
         return objectBuffer != null
                 ? foreign.invokeArrayWithObjectsInt32(function.getAddress64(), buffer.array(), objectBuffer.objectCount(), objectBuffer.info(), objectBuffer.objects())
                 : foreign.invokeArrayInt32(function.getAddress64(), buffer.array());
     }
 
-    public long invokeLong(Function function, HeapInvocationBuffer buffer) {
+    public final long invokeLong(Function function, HeapInvocationBuffer buffer) {
         ObjectBuffer objectBuffer = buffer.objectBuffer();
         return objectBuffer != null
                 ? foreign.invokeArrayWithObjectsInt64(function.getAddress64(), buffer.array(), objectBuffer.objectCount(), objectBuffer.info(), objectBuffer.objects())
                 : foreign.invokeArrayInt64(function.getAddress64(), buffer.array());
     }
 
-    public float invokeFloat(Function function, HeapInvocationBuffer buffer) {
+    public final float invokeFloat(Function function, HeapInvocationBuffer buffer) {
         ObjectBuffer objectBuffer = buffer.objectBuffer();
         return objectBuffer != null
                 ? foreign.invokeArrayWithObjectsFloat(function.getAddress64(), buffer.array(), objectBuffer.objectCount(), objectBuffer.info(), objectBuffer.objects())
                 : foreign.invokeArrayFloat(function.getAddress64(), buffer.array());
     }
     
-    public double invokeDouble(Function function, HeapInvocationBuffer buffer) {
+    public final double invokeDouble(Function function, HeapInvocationBuffer buffer) {
         ObjectBuffer objectBuffer = buffer.objectBuffer();
         return objectBuffer != null
                 ? foreign.invokeArrayWithObjectsDouble(function.getAddress64(), buffer.array(), objectBuffer.objectCount(), objectBuffer.info(), objectBuffer.objects())
@@ -55,17 +55,17 @@ public abstract class Invoker {
         public final int invokeVrI(Function function) {
             return foreign.invoke32VrI(function.getAddress32());
         }
-        public int invokeIrI(Function function, int arg1) {
+        public final int invokeIrI(Function function, int arg1) {
             return foreign.invoke32IrI(function.getAddress32(), arg1);
         }
-        public int invokeIIrI(Function function, int arg1, int arg2) {
+        public final int invokeIIrI(Function function, int arg1, int arg2) {
             return foreign.invoke32IIrI(function.getAddress32(), arg2, arg1);
         }
-        public int invokeIIIrI(Function function, int arg1, int arg2, int arg3) {
+        public final int invokeIIIrI(Function function, int arg1, int arg2, int arg3) {
             return foreign.invoke32IIIrI(function.getAddress32(), arg1, arg2, arg3);
         }
-        public long invokeAddress(Function function, HeapInvocationBuffer buffer) {
-            return foreign.invokeArrayInt32(function.getAddress64(), buffer.array());
+        public final long invokeAddress(Function function, HeapInvocationBuffer buffer) {
+            return invokeInt(function, buffer);
         }
     }
     private static final Invoker getLP64() {
@@ -87,7 +87,7 @@ public abstract class Invoker {
             return foreign.invoke64IIIrI(function.getAddress64(), arg1, arg2, arg3);
         }
         public long invokeAddress(Function function, HeapInvocationBuffer buffer) {
-            return foreign.invokeArrayInt64(function.getAddress64(), buffer.array());
+            return invokeLong(function, buffer);
         }
     }
 }

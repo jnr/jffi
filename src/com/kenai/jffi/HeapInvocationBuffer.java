@@ -55,7 +55,7 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
         ++paramIndex;
     }
     public final void putArray(final byte[] array, int offset, int length, int flags) {
-        paramOffset += encoder.putAddress(buffer, paramOffset, 0);
+        paramOffset += encoder.putAddress(buffer, paramOffset, 0L);
         if (objectBuffer == null) {
             objectBuffer = new ObjectBuffer();
         }
