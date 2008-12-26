@@ -98,7 +98,7 @@ public class ClosureManager {
         }
 
         public long getAddress(int index) {
-            return IO.getAddress(IO.getAddress(parameters + (index * PARAM_SIZE)));
+            return IO.getAddress(IO.getAddress(parameters + (index * PARAM_SIZE))) & Address.MASK;
         }
 
         public void setInt8Return(int value) {

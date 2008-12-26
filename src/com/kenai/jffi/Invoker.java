@@ -65,7 +65,7 @@ public abstract class Invoker {
             return foreign.invoke32IIIrI(function.getAddress32(), arg1, arg2, arg3);
         }
         public final long invokeAddress(Function function, HeapInvocationBuffer buffer) {
-            return invokeInt(function, buffer);
+            return (long)invokeInt(function, buffer) & Address.MASK;
         }
     }
     private static final Invoker getLP64() {

@@ -124,7 +124,7 @@ public abstract class MemoryIO {
             return foreign.getDouble(address);
         }
         public final long getAddress(long address) {
-            return foreign.getAddress(address);
+            return foreign.getAddress(address) & Address.MASK;
         }
         public final void putByte(long address, byte value) {
             foreign.putByte(address, value);
