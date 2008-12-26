@@ -21,6 +21,8 @@
  */
 package com.kenai.jffi;
 
+import java.lang.reflect.Method;
+
 final class Foreign {
     private static final class SingletonHolder {
         static {
@@ -46,8 +48,8 @@ final class Foreign {
     final native void freeFunction(long handle);
     final native boolean isRawParameterPackingEnabled();
     final native int getFunctionRawParameterSize(long handle);
-//    public long newClosure(Closure closure, int returnType, int[] paramTypes, int convention);
-//    public native void freeClosure(long handle);
+    final native long newClosure(Object proxy, Method closureMethod, int returnType, int[] paramTypes, int convention);
+    final native void freeClosure(long handle);
 
     
     final native int invoke32VrI(int function);
