@@ -196,7 +196,7 @@ invokeArrayWithObjects(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer,
 cleanup:
     /* Release any array backing memory */
     for (i = 0; i < arrayCount; ++i) {
-        if (!arrays[i].stack) {
+        if (!arrays[i].stack || arrays[i].mode != JNI_ABORT) {
             //printf("releasing array=%p\n", arrays[i].result);
             (*arrays[i].release)(env, &arrays[i]);
         }
