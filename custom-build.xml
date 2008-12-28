@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="jffi" default="default" basedir=".">
+    <description>Builds, tests, and runs the project jffi.</description>
+    <target name="-compile-java"/>
+    <target name="build-native" depends="-build-platform-jar, -assemble-final-jar"/>
+    
+    <target name="-init-vars">
+        <property name="build.native.dir" location="${build.dir}/jni"/>
+        <property name="src.native.dir" location="jni"/>
+        <mkdir dir="${build.native.dir}"/>
+        <condition property="platform" value="Darwin">
+            <os family="Mac"/>
+        </condition>
+        <condition property="platform" value="${os.arch}-${os.name}">
+          <not><isset property="platform"/></not>
+        </condition>
+    </target>
+    
+    <target name="-generate-native-headers" depends="-init-vars,-compile-java">
+        <mkdir dir="${build.native.dir}"/>
+        <javah classpath="${build.classes.dir}" destdir="${build.native.dir}" force="yes">
+            <class name="com.kenai.jffi.Foreign"/>
+            <class name="com.kenai.jffi.Library"/>
+            <class name="com.kenai.jffi.ObjectBuffer"/>
+        </javah>
+    </target>
+    
+    <target name="-build-native-library" depends="-init-vars, -generate-native-headers">
+        <mkdir dir="${build.native.dir}"/>
+
+        <condition property="make.exe" value="gmake">
+          <or>
+            <os name="FreeBSD"/>
+            <os name="OpenBSD"/>
+          </or>
+        </condition>
+        <condition property="make.exe" value="/usr/sfw/bin/gmake">
+          <os name="SunOS"/>
+        </condition>
+        <condition property="make.exe" value="make">
+          <not><isset property="make.exe"/></not>
+        </condition>
+        <exec executable="${make.exe}" failonerror="true">
+            <arg value="JAVA_HOME=${java.home}"/>
+            <arg value="SRC_DIR=${src.native.dir}"/>
+            <arg value="JNI_DIR=${src.native.dir}"/>
+            <arg value="BUILD_DIR=${build.native.dir}"/>
+            <arg value="-f"/>
+            <arg value="${src.native.dir}/GNUmakefile"/>
+        </exec>
+    </target>
+    
+    
+    <target name="-build-platform-jar" depends="-init-vars, -build-native-library">
+        <echo message="platform=${platform}"/>
+        <jar jarfile="${dist.dir}/${platform}.jar">
+            <zipfileset prefix="jni/${platform}" dir="${build.native.dir}">
+                <include name="jffi.dll"/>
+                <include name="libjffi.so"/>
+                <include name="libjffi.jnilib"/>
+                <include name="libjffi.dylib"/>
+            </zipfileset>
+        </jar>
+    </target>
+    
+    <target name="-assemble-final-jar" depends="-init-vars, -build-platform-jar">
+        <echo message="os.arch=${os.arch}"/>
+        <echo message="platform=${platform}"/>
+        <jar jarfile="${dist.jar}" index="true" update="true" duplicate="preserve"
+            filesetmanifest="skip">
+            <zipfileset src="${dist.dir}/${platform}.jar"/>
+            <zipfileset src="archive/i386-Linux.jar"/>
+        </jar>
+    </target>
+    <target name="-archive-platform-jar" depends="-build-platform-jar">
+        <copy file="${dist.dir}/${platform}.jar" todir="archive" flatten="true"/>
+    </target>
+</project>
