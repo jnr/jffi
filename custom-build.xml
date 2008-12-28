@@ -15,15 +15,27 @@
         <condition property="platform" value="${os.arch}-${os.name}">
           <not><isset property="platform"/></not>
         </condition>
+        <condition property="native.jar" value="${build.dir}/native.jar">
+          <not><isset property="native.jar"/></not>
+        </condition>
     </target>
     
     <target name="-generate-native-headers" depends="-init-vars,-compile-java">
         <mkdir dir="${build.native.dir}"/>
+        <!--
         <javah classpath="${build.classes.dir}" destdir="${build.native.dir}" force="yes">
             <class name="com.kenai.jffi.Foreign"/>
             <class name="com.kenai.jffi.Library"/>
             <class name="com.kenai.jffi.ObjectBuffer"/>
         </javah>
+        -->
+        <exec executable="javah" failonerror="true">
+          <arg line="-d ${build.native.dir}"/>
+          <arg line="-classpath ${build.classes.dir}"/>
+          <arg line="com.kenai.jffi.Foreign"/>
+          <arg line="com.kenai.jffi.Library"/>
+          <arg line="com.kenai.jffi.ObjectBuffer"/>
+        </exec>
     </target>
     
     <target name="-build-native-library" depends="-init-vars, -generate-native-headers">
@@ -64,10 +76,14 @@
         </jar>
     </target>
     
-    <target name="-assemble-final-jar" depends="-init-vars, -build-platform-jar">
-        <echo message="os.arch=${os.arch}"/>
-        <echo message="platform=${platform}"/>
+    <target name="-assemble-final-jar" depends="-init-vars, -assemble-native-jar">
         <jar jarfile="${dist.jar}" index="true" update="true" duplicate="preserve"
+            filesetmanifest="skip">
+            <zipfileset src="${native.jar"/>
+        </jar>
+    </target>
+    <target name="-assemble-native-jar" depends="-init-vars, -build-platform-jar">
+        <jar jarfile="${native.jar}" index="true" update="true" duplicate="preserve"
             filesetmanifest="skip">
             <zipfileset src="${dist.dir}/${platform}.jar"/>
             <zipfileset src="archive/i386-Linux.jar"/>

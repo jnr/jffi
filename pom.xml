@@ -1,0 +1,156 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.jruby.extras</groupId>
+  <artifactId>jffi</artifactId>
+  <packaging>jar</packaging>
+  <version>0.1-SNAPSHOT</version>
+  <name>jffi</name>
+  <description>Java wrapper around libffi</description>
+  <url>http://jffi.kenai.com</url>
+  <licenses>
+    <license>
+      <name>The MIT License</name>
+      <url>http://www.opensource.org/licenses/mit-license.php</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <scm>
+    <connection>scm:hg:https://kenai.com/hg/jffi~mercurial</connection>
+    <url>https://kenai.com/hg/jffi~mercurial</url>
+  </scm>
+  <distributionManagement>
+     <repository>
+      <id>codehaus-jruby-repository</id>
+      <name>JRuby Central Repository</name>
+      <url>dav:https://dav.codehaus.org/repository/jruby</url>
+    </repository>
+    <snapshotRepository>
+      <id>codehaus-jruby-snapshot-repository</id>
+      <name>JRuby Central Development Repository</name>
+      <url>dav:https://dav.codehaus.org/snapshots.repository/jruby</url>
+    </snapshotRepository>
+  </distributionManagement>
+  <repositories>
+    <repository>
+      <id>maven2-repository.dev.java.net</id>
+      <name>Java.net Repository for Maven</name>
+      <url>http://download.java.net/maven/2/</url>
+    </repository>
+    <repository>
+      <id>codehaus</id>
+      <name>Codehaus Repository</name>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <url>http://repository.codehaus.org</url>
+    </repository>
+  </repositories>
+  <pluginRepositories>
+    <pluginRepository>
+      <id>maven2-repository.dev.java.net</id>
+      <name>Java.net Repository for Maven</name>
+      <url>http://download.java.net/maven/2/</url>
+    </pluginRepository>
+  </pluginRepositories>
+  <developers>
+    <developer>
+      <id>wmeissner</id>
+      <name>Wayne Meissner</name>
+      <email>wmeissner@gmail.com</email>
+    </developer>
+  </developers>
+
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.5</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+  <properties>
+      <make.exe>make</make.exe>
+  </properties>
+  <profiles>
+      <profile>
+          <id>linux-profile</id>
+          <activation>
+              <os><name>linux</name></os>
+          </activation>
+      </profile>
+      <profile>
+          <id>freebsd-profile</id>
+          <activation>
+              <os><name>freebsd</name></os>
+          </activation>
+          <properties>
+              <make.exe>gmake</make.exe>
+          </properties>
+      </profile>
+  </profiles>
+  <build>
+    <directory>build</directory>
+    <outputDirectory>build/classes</outputDirectory>
+    <testOutputDirectory>build/test/classes</testOutputDirectory>
+    <sourceDirectory>src</sourceDirectory>
+    <!-- <testSourceDirectory>test</testSourceDirectory> -->
+    <resources>
+    </resources>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.0.2</version>
+        <configuration>
+          <source>1.5</source>
+          <target>1.5</target>
+        </configuration>
+      </plugin>
+      
+      
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>1.1</version>
+        <executions>
+          <execution>
+            <id>build-native-library</id>
+            <phase>process-classes</phase>
+            <configuration>
+              <tasks>
+                <property name="os.name" value="${os.name}"/>
+                <property name="os.arch" value="${os.arch}"/>
+                <property name="java.home" value="${java.home}"/>
+                <property name="dist.dir" value="${project.build.directory}"/>
+                <property name="build.dir" value="${project.build.directory}"/>
+                <property name="build.classes.dir" value="${project.build.outputDirectory}"/>
+                <ant antfile="custom-build.xml" dir="." target="-assemble-native-jar"/>
+                <unjar src="${project.build.directory}/native.jar" dest="${project.build.outputDirectory}"/>
+              </tasks>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+    <extensions>
+      <extension>
+        <groupId>org.jvnet.wagon-svn</groupId>
+        <artifactId>wagon-svn</artifactId>
+        <version>1.8</version>
+      </extension>
+      <extension>
+        <groupId>org.apache.maven.wagon</groupId>
+        <artifactId>wagon-webdav</artifactId>
+      </extension>
+    </extensions>
+  </build>
+  <reporting>
+    <outputDirectory>build/report</outputDirectory>
+  </reporting>
+</project>
