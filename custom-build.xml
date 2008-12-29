@@ -79,7 +79,7 @@
     <target name="-assemble-final-jar" depends="-init-vars, -assemble-native-jar">
         <jar jarfile="${dist.jar}" index="true" update="true" duplicate="preserve"
             filesetmanifest="skip">
-            <zipfileset src="${native.jar"/>
+            <zipfileset src="${native.jar}"/>
         </jar>
     </target>
     <target name="-assemble-native-jar" depends="-init-vars, -build-platform-jar">
