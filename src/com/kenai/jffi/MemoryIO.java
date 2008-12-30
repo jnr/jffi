@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 
 public abstract class MemoryIO {
     private final Foreign foreign = Foreign.getInstance();
+    private static final long ADDRESS_MASK = Platform.getPlatform().addressMask();
     private static final class SingletonHolder {
         private static final MemoryIO INSTANCE = getImpl();
     }
@@ -124,7 +125,7 @@ public abstract class MemoryIO {
             return foreign.getDouble(address);
         }
         public final long getAddress(long address) {
-            return foreign.getAddress(address) & Address.MASK;
+            return foreign.getAddress(address) & ADDRESS_MASK;
         }
         public final void putByte(long address, byte value) {
             foreign.putByte(address, value);

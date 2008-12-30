@@ -96,6 +96,7 @@ public class Platform {
         javaVersionMajor = version;
     }
     private final int addressSize;
+    private final long addressMask;
     private final boolean isSupported;
     private Platform() {
         final int dataModel = Integer.getInteger("sun.arch.data.model");
@@ -104,6 +105,7 @@ public class Platform {
         }
         addressSize = dataModel;
         isSupported = getStubLibraryStream() != null;
+        addressMask = addressSize == 32 ? 0xffffffffL : 0xffffffffffffffffL;
     }
     public static final Platform getPlatform() {
         return platform;
@@ -154,7 +156,7 @@ public class Platform {
      *
      * @return the size of a long in bits
      */
-    public int longSize() {
+    public final int longSize() {
         return addressSize;
     }
 
@@ -163,8 +165,17 @@ public class Platform {
      *
      * @return the size of a pointer in bits
      */
-    public int addressSize() {
+    public final int addressSize() {
         return addressSize;
+    }
+
+    /**
+     * Gets the 32/64bit mask of a C address/pointer on the native platform.
+     *
+     * @return the size of a pointer in bits
+     */
+    public final long addressMask() {
+        return addressMask;
     }
 
     /**
@@ -332,10 +343,6 @@ public class Platform {
      * A {@link Platform} subclass representing the Windows system.
      */
     private static class Windows extends Platform {
-        @Override
-        public int longSize() {
-            return 32;
-        }
         @Override
         public String getLibraryNamePattern() {
             return ".*\\.dll$";

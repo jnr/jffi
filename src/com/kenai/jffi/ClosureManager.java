@@ -4,6 +4,7 @@ package com.kenai.jffi;
 import java.lang.reflect.Method;
 
 public class ClosureManager {
+    private static final long ADDRESS_MASK = Platform.getPlatform().addressMask();
     private static final class SingletonHolder {
         static final ClosureManager INSTANCE = new ClosureManager();
     }
@@ -98,7 +99,7 @@ public class ClosureManager {
         }
 
         public long getAddress(int index) {
-            return IO.getAddress(IO.getAddress(parameters + (index * PARAM_SIZE))) & Address.MASK;
+            return IO.getAddress(IO.getAddress(parameters + (index * PARAM_SIZE))) & ADDRESS_MASK;
         }
 
         public void setInt8Return(int value) {
