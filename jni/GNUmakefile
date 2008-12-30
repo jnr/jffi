@@ -69,7 +69,10 @@ ifeq ($(OS), win32)
 	LDFLAGS += -mno-cygwin -Wl,--add-stdcall-alias
 endif
 ifeq ($(OS), darwin)
+  PLATFORM = darwin
+  ARCHES = i386 x86_64
   CFLAGS += -isysroot /Developer/SDKs/MacOSX10.4u.sdk -DTARGET_RT_MAC_CFM=0
+  CFLAGS += $(foreach arch, $(ARCHES),-arch $(arch))
   LDFLAGS = -arch i386 -arch x86_64 -dynamiclib -framework JavaVM \
 	-Wl,-syslibroot,$(SDKROOT) -mmacosx-version-min=10.4
   LIBEXT = dylib
@@ -117,17 +120,9 @@ $(LIBJFFI):  $(LIBFFI) $(OBJS)
 $(LIBTEST):  $(TEST_OBJS)
 	$(CC) -o $@ $(LDFLAGS) $(TEST_SOFLAGS) $(TEST_OBJS) -lm
 	
-ifeq ($(OS), darwin)
-$(BUILD_DIR)/%.o:	$(SRC_DIR)/%.c $(JFFI_SRC_DIR)/jffi.h
-	@mkdir -p $(@D)
-	$(CCACHE) $(CC) -arch i386 -I$(BUILD_DIR)/libffi-i386/include $(CFLAGS) -c $< -o $@.i386
-	$(CCACHE) $(CC) -arch x86_64 -I$(BUILD_DIR)/libffi-x86_64/include $(CFLAGS) -c $< -o $@.x86_64
-	lipo -create -output $@ -arch x86_64 $@.x86_64 -arch i386 $@.i386
-else
 $(BUILD_DIR)/%.o : $(SRC_DIR)/%.c jffi.h
 	@mkdir -p $(@D)
 	$(CCACHE) $(CC) $(CFLAGS) -c $< -o $@
-endif
 
 ifeq ($(OS), darwin)
 build_ffi = \
@@ -135,21 +130,39 @@ build_ffi = \
 	(if [ ! -f $(BUILD_DIR)/libffi-$(1)/Makefile ]; then \
 	    echo "Configuring libffi for $(1)"; \
 	    cd $(BUILD_DIR)/libffi-$(1) && \
-	      env CFLAGS="-arch $(1) $(FFI_CFLAGS)" LDFLAGS="-arch $(1)" \
+	      env CC="$(CCACHE) $(CC)" CFLAGS="-arch $(1) $(FFI_CFLAGS)" LDFLAGS="-arch $(1)" \
 		$(FFI_CONFIGURE) --host=$(1)-apple-darwin > /dev/null; \
 	fi); \
 	env MACOSX_DEPLOYMENT_TARGET=10.4 $(MAKE) -C $(BUILD_DIR)/libffi-$(1)
 	
 $(LIBFFI):
 	@echo "JNI_DIR=$(JNI_DIR) MAKE=$(MAKE) FFI_CONFIGURE=$(FFI_CONFIGURE)"
-	@$(call build_ffi,i386)
-	@$(call build_ffi,x86_64)
+	@for arch in $(ARCHES); do $(call build_ffi,$$arch);done
 	
 	# Assemble into a FAT (i386, x86_64, ppc) library
-	@mkdir -p $(LIBFFI_BUILD_DIR)/.libs
+	@mkdir -p $(BUILD_DIR)/libffi/.libs
 	env MACOSX_DEPLOYMENT_TARGET=10.4 /usr/bin/libtool -static -o $@ \
-            $(BUILD_DIR)/libffi-i386/.libs/libffi_convenience.a \
-	    $(BUILD_DIR)/libffi-x86_64/.libs/libffi_convenience.a
+	    $(foreach arch, $(ARCHES),$(BUILD_DIR)/libffi-$(arch)/.libs/libffi_convenience.a)
+	@mkdir -p $(LIBFFI_BUILD_DIR)/include
+	$(RM) $(LIBFFI_BUILD_DIR)/include/ffi.h
+	@( \
+		printf "#if defined(__i386__)\n"; \
+		printf "#include \"libffi-i386/include/ffi.h\"\n"; \
+		printf "#elif defined(__x86_64__)\n"; \
+		printf "#include \"libffi-x86_64/include/ffi.h\"\n";\
+		printf "#elif defined(__ppc__)\n"; \
+		printf "#include \"libffi-ppc/include/ffi.h\"\n";\
+		printf "#endif\n";\
+	) > $(LIBFFI_BUILD_DIR)/include/ffi.h
+	@( \
+		printf "#if defined(__i386__)\n"; \
+		printf "#include \"libffi-i386/include/ffitarget.h\"\n"; \
+		printf "#elif defined(__x86_64__)\n"; \
+		printf "#include \"libffi-x86_64/include/ffitarget.h\"\n";\
+		printf "#elif defined(__ppc__)\n"; \
+		printf "#include \"libffi-ppc/include/ffitarget.h\"\n";\
+		printf "#endif\n";\
+	) > $(LIBFFI_BUILD_DIR)/include/ffitarget.h
 else
 $(LIBFFI):		
 	@mkdir -p $(LIBFFI_BUILD_DIR)
