@@ -104,7 +104,6 @@ public abstract class MemoryIO {
     }
 
     private static final class NativeImpl extends MemoryIO {
-        static { System.out.println("Loading NativeImpl"); }
         private static final Foreign foreign = Foreign.getInstance();
         public final byte getByte(long address) {
             return foreign.getByte(address);
@@ -156,7 +155,6 @@ public abstract class MemoryIO {
         }
     }
     private static final class UnsafeImpl extends MemoryIO {
-        static { System.out.println("Loading UnsafeImpl"); }
         private static sun.misc.Unsafe unsafe = sun.misc.Unsafe.class.cast(getUnsafe());
         private static Object getUnsafe() {
             try {
