@@ -21,6 +21,8 @@
 package com.kenai.jffi;
 
 public final class Library {
+    private static final Object lock = new Object();
+    private static final ThreadLocal<String> lastError = new ThreadLocal<String>();
     public static final int LAZY   = 0x00001;
     public static final int NOW    = 0x00002;
     public static final int LOCAL  = 0x00004;
@@ -34,18 +36,35 @@ public final class Library {
     }
 
     public Library(String name, int flags) {
-        long address = Foreign.getInstance().dlopen(name, flags);
-        if (address == 0) {
-            throw new UnsatisfiedLinkError("Could not open [" + name +"]");
+        long address;
+        final Foreign foreign = Foreign.getInstance();
+        synchronized (lock) {
+            address = foreign.dlopen(name, flags);
+            if (address == 0) {
+                String error = String.format("Could not open [%s]: %s", name, foreign.dlerror());
+                throw new UnsatisfiedLinkError(error);
+            }
         }
         this.handle = new Address(address);
     }
 
     public final Address findSymbol(String name) {
-        long address = Foreign.getInstance().dlsym(handle.nativeAddress(), name);
-        return address != 0 ? new Address(address) : null;
+        long address;
+        final Foreign foreign = Foreign.getInstance();
+        synchronized (lock) {
+            address = foreign.dlsym(handle.nativeAddress(), name);
+            if (address == 0) {
+                lastError.set(Foreign.getInstance().dlerror());
+                return null;
+            }
+        }
+        return new Address(address);
     }
 
+    public static final String lastError() {
+        String error = lastError.get();
+        return error != null ? error : "unknown";
+    }
     @Override
     protected void finalize() throws Throwable {
         try {

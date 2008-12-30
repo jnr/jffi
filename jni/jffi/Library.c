@@ -24,7 +24,9 @@ static void dl_error(char* buf, int size);
 enum { RTLD_LAZY=1, RTLD_NOW, RTLD_GLOBAL, RTLD_LOCAL };
 #else
 # define dl_open(name, flags) dlopen(name, flags != 0 ? flags : RTLD_LAZY)
-# define dl_error(buf, size) do { snprintf(buf, size, "%s", dlerror()); } while(0)
+# define dl_error(buf, size) do { \
+    const char *e = dlerror(); snprintf(buf, size, "%s", e ? e : "unknown"); \
+} while(0)
 # define dl_sym(handle, name) dlsym(handle, name)
 # define dl_close(handle) dlclose(handle)
 #ifndef RTLD_LOCAL
@@ -81,8 +83,44 @@ Java_com_kenai_jffi_Foreign_dlsym(JNIEnv* env, jclass cls, jlong handle, jstring
 {
     char sym[1024];
     getMultibyteString(env, sym, jstr, sizeof(sym));
+#ifndef _WIN32
+    dlerror(); // clear any errors
+#endif
     return p2j(dl_sym(j2p(handle), sym));
 }
+
+/*
+ * Class:     com_kenai_jffi_Foreign
+ * Method:    dlerror
+ * Signature: ()Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL
+Java_com_kenai_jffi_Foreign_dlerror(JNIEnv* env, jobject self)
+{
+    char errbuf[1024] = { 0 };
+    dl_error(errbuf, sizeof(errbuf) - 1);
+    return (*env)->NewStringUTF(env, errbuf);
+}
+
+
+#if defined(_WIN32) || defined(__WIN32__)
+static void*
+dl_open(const char* name, int flags)
+{
+    if (name == NULL) {
+        return GetModuleHandle(NULL);
+    } else {
+        return LoadLibraryEx(name, NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
+    }
+}
+
+static void
+dl_error(char* buf, int size)
+{
+    FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM, NULL, GetLastError(),
+            0, buf, size, NULL);
+}
+#endif
 
 static int
 getWideString(JNIEnv* env, wchar_t* dst, jstring src, int n)

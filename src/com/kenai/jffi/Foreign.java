@@ -37,6 +37,7 @@ final class Foreign {
     final native long dlopen(String name, int flags);
     final native void dlclose(long handle);
     final native long dlsym(long handle, String name);
+    final native String dlerror();
 
     final native long allocateMemory(long size, boolean clear);
     final native void freeMemory(long address);
