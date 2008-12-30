@@ -136,9 +136,10 @@ Java_com_kenai_jffi_Foreign_invokeArrayDouble(JNIEnv* env, jclass self, jlong ct
 }
 
 #define MAX_STACK_OBJECTS (4)
+
 static void
-invokeArrayWithObjects(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer,
-        jint objectCount, jintArray objectInfo, jobjectArray objectArray, FFIValue* retval)
+invokeArrayWithObjects_(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer,
+        jint objectCount, jint* infoBuffer, jobject* objectBuffer, FFIValue* retval)
 {
     Function* ctx = (Function *) (uintptr_t) ctxAddress;
     union { double d; long long ll; jbyte tmp[PARAM_SIZE]; } tmpStackBuffer[MAX_STACK_ARGS];
@@ -147,7 +148,6 @@ invokeArrayWithObjects(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer,
     void* ffiStackArgs[MAX_STACK_ARGS], **ffiArgs = &ffiStackArgs[0];
 #endif
     Array stackArrays[MAX_STACK_OBJECTS], *arrays = &stackArrays[0];
-    jint stackInfoBuffer[MAX_STACK_OBJECTS * 3], *infoBuffer = &stackInfoBuffer[0];
     StackAllocator alloc;
     unsigned int i, arrayCount = 0;
 
@@ -167,16 +167,14 @@ invokeArrayWithObjects(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer,
 #endif
     
     if (objectCount > MAX_STACK_OBJECTS) {
-        infoBuffer = alloca(objectCount * sizeof(jint) * 3);
         arrays = alloca(objectCount * sizeof(Array));
     }
     initStackAllocator(&alloc);
-    (*env)->GetIntArrayRegion(env, objectInfo, 0, objectCount * 3, infoBuffer);
     for (i = 0; i < (unsigned int) objectCount; ++i) {
         int type = infoBuffer[i * 3];
         jsize offset = infoBuffer[(i * 3) + 1];
         jsize length = infoBuffer[(i * 3) + 2];
-        jobject object = (*env)->GetObjectArrayElement(env, objectArray, i);
+        jobject object = objectBuffer[i];
         int idx = (type & com_kenai_jffi_ObjectBuffer_INDEX_MASK) >> com_kenai_jffi_ObjectBuffer_INDEX_SHIFT;
         void* ptr;
 
@@ -210,6 +208,29 @@ cleanup:
     }
 }
 
+static inline void
+invokeArrayWithObjects(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer,
+        jint objectCount, jintArray objectInfo, jobjectArray objectArray, FFIValue* retval)
+{
+    jint stackInfoBuffer[MAX_STACK_OBJECTS * 3], *infoBuffer = &stackInfoBuffer[0];
+    jobject stackObjectBuffer[MAX_STACK_OBJECTS], *objectBuffer = &stackObjectBuffer[0];
+    int i;
+    if (objectCount > MAX_STACK_OBJECTS) {
+        infoBuffer = alloca(objectCount * sizeof(jint) * 3);
+        objectBuffer = alloca(objectCount * sizeof(jobject));
+    }
+    (*env)->GetIntArrayRegion(env, objectInfo, 0, objectCount * 3, infoBuffer);
+    for (i = 0; i < objectCount; ++i) {
+        objectBuffer[i] = (*env)->GetObjectArrayElement(env, objectArray, i);
+    }
+    invokeArrayWithObjects_(env, ctxAddress, paramBuffer, objectCount, infoBuffer, objectBuffer, retval);
+}
+#if BYTE_ORDER == LITTLE_ENDIAN
+#  define ret_int32(retval) ((retval).s32)
+#else
+#  define ret_int32(retval) ((retval).l & 0xFFFFFFFFL)
+#endif
+
 /*
  * Class:     com_kenai_jffi_Foreign
  * Method:    invokeArrayWithObjectsInt32
@@ -221,11 +242,40 @@ Java_com_kenai_jffi_Foreign_invokeArrayWithObjectsInt32(JNIEnv* env, jobject sel
 {
     FFIValue retval;
     invokeArrayWithObjects(env, ctxAddress, paramBuffer, objectCount, objectInfo, objectArray, &retval);
-#if BYTE_ORDER == LITTLE_ENDIAN
-    return retval.s32;
-#else
-    return retval.l & 0xFFFFFFFFL;
-#endif
+    return ret_int32(retval);
+}
+
+/*
+ * Class:     com_kenai_jffi_Foreign
+ * Method:    invokeArrayO1Int32
+ * Signature: (J[BILjava/lang/Object;I)I
+ */
+JNIEXPORT jint JNICALL
+Java_com_kenai_jffi_Foreign_invokeArrayO1Int32(JNIEnv* env, jobject self, jlong ctxAddress,
+        jbyteArray paramBuffer, jobject o1, jint o1info, jint o1off, jint o1len)
+{
+    FFIValue retval;
+    jint info[] = { o1info, o1off, o1len };
+    jobject objects[] = { o1 };
+    invokeArrayWithObjects_(env, ctxAddress, paramBuffer, 1, info, objects, &retval);
+    return ret_int32(retval);
+}
+
+/*
+ * Class:     com_kenai_jffi_Foreign
+ * Method:    invokeArrayO2Int32
+ * Signature: (J[BLjava/lang/Object;IIILjava/lang/Object;III)I
+ */
+JNIEXPORT jint JNICALL
+Java_com_kenai_jffi_Foreign_invokeArrayO2Int32(JNIEnv* env, jobject self, jlong ctxAddress,
+        jbyteArray paramBuffer, jobject o1, jint o1info, jint o1off, jint o1len,
+        jobject o2, jint o2info, jint o2off, jint o2len)
+{
+    FFIValue retval;
+    jint info[] = { o1info, o1off, o1len, o2info, o2off, o2len };
+    jobject objects[] = { o1, o2 };
+    invokeArrayWithObjects_(env, ctxAddress, paramBuffer, 2, info, objects, &retval);
+    return ret_int32(retval);
 }
 
 /*

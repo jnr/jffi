@@ -70,6 +70,9 @@ final class Foreign {
     final native float invokeArrayWithObjectsFloat(long function, byte[] buffer, int objectCount, int[] objectInfo, Object[] objects);
     final native double invokeArrayWithObjectsDouble(long function, byte[] buffer, int objectCount, int[] objectInfo, Object[] objects);
     /* ---------------------------------------------------------------------- */
+    final native int invokeArrayO1Int32(long function, byte[] buffer, Object o1, int o1Info, int o1off, int o1len);
+    final native int invokeArrayO2Int32(long function, byte[] buffer, Object o1, int o1Info, int o1off, int o1len,
+            Object o2, int o2info, int o2off, int o2len);
 
     final native byte getByte(long address);
     final native short getShort(long address);

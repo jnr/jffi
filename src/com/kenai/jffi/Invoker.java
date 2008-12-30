@@ -22,7 +22,7 @@ public abstract class Invoker {
     public final int invokeInt(Function function, HeapInvocationBuffer buffer) {
         ObjectBuffer objectBuffer = buffer.objectBuffer();
         return objectBuffer != null
-                ? foreign.invokeArrayWithObjectsInt32(function.getAddress64(), buffer.array(), objectBuffer.objectCount(), objectBuffer.info(), objectBuffer.objects())
+                ? invokeArrayWithObjectsInt32(function, buffer, objectBuffer)
                 : foreign.invokeArrayInt32(function.getAddress64(), buffer.array());
     }
 
@@ -46,7 +46,26 @@ public abstract class Invoker {
                 ? foreign.invokeArrayWithObjectsDouble(function.getAddress64(), buffer.array(), objectBuffer.objectCount(), objectBuffer.info(), objectBuffer.objects())
                 : foreign.invokeArrayDouble(function.getAddress64(), buffer.array());
     }
+    
+    private final int invokeArrayWithObjectsInt32(Function function, HeapInvocationBuffer buffer,
+            ObjectBuffer objectBuffer) {
+        Object[] objects = objectBuffer.objects();
+        int[] info = objectBuffer.info();
+        int objectCount = objectBuffer.objectCount();
 
+        switch (objectCount) {
+            case 1:
+                return foreign.invokeArrayO1Int32(function.getAddress64(), buffer.array(),
+                        objects[0], info[0], info[1], info[2]);
+            case 2:
+                return foreign.invokeArrayO2Int32(function.getAddress64(), buffer.array(),
+                        objects[0], info[0], info[1], info[2],
+                        objects[1], info[3], info[4], info[5]);
+        }
+
+        return foreign.invokeArrayWithObjectsInt32(function.getAddress64(), buffer.array(),
+            objectCount, info, objects);
+    }
     private static final Invoker getILP32() {
         return ILP32.INSTANCE;
     }
