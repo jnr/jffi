@@ -1,8 +1,6 @@
 
 package com.kenai.jffi;
 
-import java.nio.ByteOrder;
-
 /**
  * Holds objects the native code must handle - such as primitive arrays
  */
@@ -29,10 +27,6 @@ public final class ObjectBuffer {
     static final int FLOAT = 0x5 << TYPE_SHIFT;
     static final int DOUBLE = 0x6 << TYPE_SHIFT;
     
-    
-    private static final Encoder encoder = newEncoder();
-    
-    
     private Object[] objects = new Object[3];
     private int[] info = new int[objects.length * 3];
     private int infoIndex = 0;
@@ -42,9 +36,6 @@ public final class ObjectBuffer {
         return objectIndex;
     }
     final int[] info() {
-//        for (int i = 0; i < infoIndex; ++i) {
-//            System.out.printf("info[%d]=%#x\n", i, info[i]);
-//        }
         return info;
     }
 
@@ -61,9 +52,6 @@ public final class ObjectBuffer {
             info = newInfo;
         }
     }
-    private static final int intToNative(int value) {
-        return value;
-    }
     private static final int makeArrayFlags(int flags, int type, int index) {
         return (flags & FLAGS_MASK) | ((index << INDEX_SHIFT) & INDEX_MASK) | type;
     }
@@ -73,30 +61,8 @@ public final class ObjectBuffer {
     private void putObject(Object array, int offset, int length, int flags) {
         ensureSpace();
         objects[objectIndex++] = array;
-        info[infoIndex++] = intToNative(flags);
-        info[infoIndex++] = intToNative(offset);
-        info[infoIndex++] = intToNative(length);
-    }
-    private static Encoder newEncoder() {
-        if (ByteOrder.nativeOrder().equals(ByteOrder.BIG_ENDIAN)) {
-            return newBigEndianEncoder();
-        } else {
-            return newLittleEndianEncoder();
-        }
-    }
-    private static Encoder newBigEndianEncoder() {
-        return new BigEndianEncoder();
-    }
-    private static Encoder newLittleEndianEncoder() {
-        return new LittleEndianEncoder();
-    }
-    private static abstract class Encoder {
-        abstract int encodeInt(int value);
-    }
-    private static final class BigEndianEncoder extends Encoder {
-        int encodeInt(int value) { return value; }
-    }
-    private static final class LittleEndianEncoder extends Encoder {
-        int encodeInt(int value) { return Integer.reverseBytes(value); }
+        info[infoIndex++] = flags;
+        info[infoIndex++] = offset;
+        info[infoIndex++] = length;
     }
 }
