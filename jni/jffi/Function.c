@@ -20,7 +20,7 @@ Java_com_kenai_jffi_Foreign_newFunction(JNIEnv* env, jobject self,
         jlong function, jint returnType, jintArray paramArray, jint convention)
 {
     Function* ctx = NULL;
-    int* paramTypes;
+    jint* paramTypes;
     int paramCount, i, rawOffset = 0;
     ffi_type* ffiParamTypes;
     int ffiStatus;

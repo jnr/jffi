@@ -1,6 +1,8 @@
 #include <sys/types.h>
 #include <stdlib.h>
-#include <endian.h>
+#ifdef __linux__
+#  include <endian.h>
+#endif
 #include <errno.h>
 #include <ffi.h>
 #include <jni.h>
@@ -116,7 +118,7 @@ invokeIrI(ffi_cif* cif, void* function, ffi_type** ffiParamTypes, int arg1)
  */
 JNIEXPORT jint JNICALL
 Java_com_kenai_jffi_Foreign_invoke32IrI(JNIEnv*env, jobject self, jint ctxAddress,
-        int arg1)
+        jint arg1)
 {
     Function* ctx = (Function *) (uintptr_t)ctxAddress;
     return invokeIrI(&ctx->cif, ctx->function, ctx->ffiParamTypes, arg1);
@@ -205,7 +207,7 @@ invokeIIIrI(ffi_cif* cif, void* function, ffi_type** ffiParamTypes, int arg1, in
     ffi_call(cif, FFI_FN(function), &retval, ffiValues);
 # endif
     set_last_error(errno);
-    return_int(reval);
+    return_int(retval);
 #endif
 }
 JNIEXPORT jint JNICALL

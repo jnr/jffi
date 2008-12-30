@@ -87,6 +87,7 @@
             filesetmanifest="skip">
             <zipfileset src="${dist.dir}/${platform}.jar"/>
             <zipfileset src="archive/i386-Linux.jar"/>
+            <zipfileset src="archive/Darwin.jar"/>
         </jar>
     </target>
     <target name="-archive-platform-jar" depends="-build-platform-jar">

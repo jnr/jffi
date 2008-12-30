@@ -1,6 +1,8 @@
 #include <sys/types.h>
 #include <stdlib.h>
-#include <endian.h>
+#ifdef __linux__
+#  include <endian.h>
+#endif
 #include <errno.h>
 #include <ffi.h>
 #include <jni.h>

@@ -45,7 +45,7 @@ WFLAGS = -W -Werror -Wall -Wno-unused -Wno-parentheses
 PICFLAGS = -fPIC -pthread
 SOFLAGS = -shared -static-libgcc -mimpure-text -Wl,-O1
 LDFLAGS += $(SOFLAGS)
-FFI_MMAP_EXEC = -DFFI_MMAP_EXEC_WRIT
+# FFI_MMAP_EXEC = -DFFI_MMAP_EXEC_WRIT
 
 FFI_CC=$(CCACHE) $(CC)
 FFI_LD=$(LD)
@@ -81,6 +81,7 @@ endif
 
 ifeq ($(OS), linux)
   SOFLAGS += -Wl,-soname,$(@F)
+  FFI_MMAP_EXEC = -DFFI_MMAP_EXEC_WRIT
 endif
 
 ifeq ($(CPU), sparcv9)
@@ -121,7 +122,7 @@ $(BUILD_DIR)/%.o:	$(SRC_DIR)/%.c $(JFFI_SRC_DIR)/jffi.h
 	@mkdir -p $(@D)
 	$(CCACHE) $(CC) -arch i386 -I$(BUILD_DIR)/libffi-i386/include $(CFLAGS) -c $< -o $@.i386
 	$(CCACHE) $(CC) -arch x86_64 -I$(BUILD_DIR)/libffi-x86_64/include $(CFLAGS) -c $< -o $@.x86_64
-	lipo -create -output $@ -arch x86_64 $@.x86_64 -arch i386 $@.i386 -arch ppc $@.ppc
+	lipo -create -output $@ -arch x86_64 $@.x86_64 -arch i386 $@.i386
 else
 $(BUILD_DIR)/%.o : $(SRC_DIR)/%.c jffi.h
 	@mkdir -p $(@D)

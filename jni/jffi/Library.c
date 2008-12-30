@@ -61,7 +61,7 @@ Java_com_kenai_jffi_Foreign_dlopen(JNIEnv* env, jobject self, jstring jPath, jin
         path = path_;
         getMultibyteString(env, path_, jPath, sizeof(path_));
     }
-    return p2j(dlopen(path, flags));
+    return p2j(dl_open(path, flags));
 #endif
 }
 
@@ -73,11 +73,7 @@ Java_com_kenai_jffi_Foreign_dlopen(JNIEnv* env, jobject self, jstring jPath, jin
 JNIEXPORT void JNICALL
 Java_com_kenai_jffi_Foreign_dlclose(JNIEnv* env, jclass cls, jlong handle)
 {
-#ifdef _WIN32
-    FreeLibrary(j2p(handle));
-#else
-    dlclose(j2p(handle));
-#endif
+    dl_close(j2p(handle));
 }
 
 JNIEXPORT jlong JNICALL
@@ -85,11 +81,7 @@ Java_com_kenai_jffi_Foreign_dlsym(JNIEnv* env, jclass cls, jlong handle, jstring
 {
     char sym[1024];
     getMultibyteString(env, sym, jstr, sizeof(sym));
-#ifdef _WIN32
-    return p2j(GetProcAddress(j2p(handle), sym));
-#else
-    return p2j(dlsym(j2p(handle), sym));
-#endif
+    return p2j(dl_sym(j2p(handle), sym));
 }
 
 static int
