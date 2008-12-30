@@ -25,3 +25,4 @@ JNI_OnLoad(JavaVM *vm, void *reserved)
     pthread_key_create(&jffi_threadDataKey, thread_data_free);
     return JNI_VERSION_1_4;
 }
+

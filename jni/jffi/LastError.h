@@ -16,3 +16,4 @@ set_last_error(int error)
 }
 
 #endif /* JFFI_LASTERRROR_H */
+

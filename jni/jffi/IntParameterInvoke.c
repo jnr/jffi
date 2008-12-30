@@ -225,3 +225,4 @@ Java_com_kenai_jffi_Foreign_invoke64IIIrI(JNIEnv*env, jobject self, jlong ctxAdd
     Function* ctx = (Function *) (uintptr_t) ctxAddress;
     return invokeIIIrI(&ctx->cif, ctx->function, ctx->ffiParamTypes, arg1, arg2, arg3);
 }
+

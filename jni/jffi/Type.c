@@ -23,3 +23,4 @@ jffi_TypeToFFI(int type)
     }
     return NULL;
 }
+

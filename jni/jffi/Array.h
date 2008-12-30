@@ -39,3 +39,4 @@ extern void* jffi_getArrayCritical(JNIEnv* env, jobject buf, jint offset, jint l
 #define OBJ_INDEX_SHIFT com_kenai_jffi_ObjectBuffer_INDEX_SHIFT
 
 #endif /* jffi_Array_h */
+

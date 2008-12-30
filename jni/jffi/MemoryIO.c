@@ -155,3 +155,4 @@ Java_com_kenai_jffi_Foreign_freeMemory(JNIEnv* env, jobject self, jlong address)
 {
     free(j2p(address));
 }
+

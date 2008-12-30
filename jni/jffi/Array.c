@@ -136,3 +136,4 @@ jffi_getArrayCritical(JNIEnv* env, jobject buf, jsize offset, jsize length, int 
     }
     return array->elems != NULL ? (char *) array->elems + offset : NULL;
 }
+

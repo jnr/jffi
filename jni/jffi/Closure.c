@@ -195,3 +195,4 @@ closure_invoke(ffi_cif* cif, void* retval, void** parameters, void* user_data)
 
     closure_end(closure, env, detach);
 }
+

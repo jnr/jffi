@@ -11,3 +11,4 @@ Java_com_kenai_jffi_Foreign_getLastError(JNIEnv* env, jobject self)
 {
     return get_last_error();
 }
+

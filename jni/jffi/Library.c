@@ -164,3 +164,4 @@ getMultibyteString(JNIEnv* env, char* dst, jstring src, int n)
     }
     return wcstombs(dst, wstr, n);
 }
+

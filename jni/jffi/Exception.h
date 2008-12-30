@@ -32,3 +32,4 @@ extern const char* jffi_RuntimeException;
 extern void jffi_throwExceptionByName(JNIEnv* env, const char* exceptionName, const char* fmt, ...);
 
 #endif /* jffi_Exception_h */
+
