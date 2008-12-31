@@ -20,9 +20,13 @@
 #define jffi_jffi_h
 
 #include <sys/param.h>
+#include <sys/types.h>
 #include <stdint.h>
 #include <string.h>
 #include <pthread.h>
+#ifdef __linux__
+#  include <endian.h>
+#endif
 #include <jni.h>
 
 #ifndef roundup
@@ -122,6 +126,17 @@ thread_data_get()
     ThreadData* td = pthread_getspecific(jffi_threadDataKey);
     return td != NULL ? td : jffi_thread_data_init();
 }
+
+#if defined(__i386__)
+#  define USE_RAW 1
+#  define BYPASS_FFI 1
+#endif
+
+#if BYTE_ORDER == LITTLE_ENDIAN
+# define return_int(retval) return ((retval).s32)
+#else
+# define return_int(retval) return ((retval).l & 0xFFFFFFFFL)
+#endif
 
 #endif /* jffi_jffi_h */
 

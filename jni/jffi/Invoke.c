@@ -13,10 +13,6 @@
 #include "LastError.h"
 #include "com_kenai_jffi_Foreign.h"
 
-#if defined(__i386__)
-#  define USE_RAW 1
-#endif
-
 #define PARAM_SIZE (8)
 #define MAX_STACK_ARGS (8)
 
@@ -87,11 +83,7 @@ Java_com_kenai_jffi_Foreign_invokeArrayInt32(JNIEnv* env, jclass self, jlong ctx
 {
     FFIValue retval;
     invokeArray(env, ctxAddress, paramBuffer, &retval);
-#if BYTE_ORDER == LITTLE_ENDIAN
-    return retval.s32;
-#else
-    return retval.l & 0xFFFFFFFFL;
-#endif
+    return_int(retval);
 }
 
 /*
@@ -225,11 +217,6 @@ invokeArrayWithObjects(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer,
     }
     invokeArrayWithObjects_(env, ctxAddress, paramBuffer, objectCount, infoBuffer, objectBuffer, retval);
 }
-#if BYTE_ORDER == LITTLE_ENDIAN
-#  define ret_int32(retval) ((retval).s32)
-#else
-#  define ret_int32(retval) ((retval).l & 0xFFFFFFFFL)
-#endif
 
 /*
  * Class:     com_kenai_jffi_Foreign
@@ -242,7 +229,7 @@ Java_com_kenai_jffi_Foreign_invokeArrayWithObjectsInt32(JNIEnv* env, jobject sel
 {
     FFIValue retval;
     invokeArrayWithObjects(env, ctxAddress, paramBuffer, objectCount, objectInfo, objectArray, &retval);
-    return ret_int32(retval);
+    return_int(retval);
 }
 
 /*
@@ -258,7 +245,7 @@ Java_com_kenai_jffi_Foreign_invokeArrayO1Int32(JNIEnv* env, jobject self, jlong 
     jint info[] = { o1info, o1off, o1len };
     jobject objects[] = { o1 };
     invokeArrayWithObjects_(env, ctxAddress, paramBuffer, 1, info, objects, &retval);
-    return ret_int32(retval);
+    return_int(retval);
 }
 
 /*
@@ -275,7 +262,7 @@ Java_com_kenai_jffi_Foreign_invokeArrayO2Int32(JNIEnv* env, jobject self, jlong 
     jint info[] = { o1info, o1off, o1len, o2info, o2off, o2len };
     jobject objects[] = { o1, o2 };
     invokeArrayWithObjects_(env, ctxAddress, paramBuffer, 2, info, objects, &retval);
-    return ret_int32(retval);
+    return_int(retval);
 }
 
 /*

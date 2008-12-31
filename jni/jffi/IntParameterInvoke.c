@@ -12,35 +12,20 @@
 #include "LastError.h"
 #include "com_kenai_jffi_Foreign.h"
 
-#if defined(__i386__) && 0
-#  define USE_RAW 1
-#endif
-
-#if BYTE_ORDER == LITTLE_ENDIAN
-# define return_int(retval) return ((retval).s32)
-#else
-# define return_int(retval) return ((retval).l & 0xFFFFFFFFL)
-#endif
-
 typedef unsigned int u32;
 
 static inline jint
 invokeVrI(ffi_cif* cif, void* function)
 {
-#if defined(__i386__)
+#if defined(BYPASS_FFI)
     int retval = ((int (*)()) function)();
     set_last_error(errno);
     return retval;
 #else
     FFIValue retval;
-# if defined(USE_RAW) && 0 /* for zero args, non-raw is marginally faster */
-    int arg0;
-    ffi_raw_call(cif, FFI_FN(function), &retval, (ffi_raw *) &arg0);
-# else
     int arg0;
     void* ffiValues[] = { &arg0 };
     ffi_call(cif, FFI_FN(function), &retval, ffiValues);
-# endif
     set_last_error(errno);
     return_int(retval);
 #endif
@@ -89,7 +74,7 @@ set_int32_param(int type, int32_t arg, FFIValue* v)
 static inline jint
 invokeIrI(ffi_cif* cif, void* function, ffi_type** ffiParamTypes, int arg1)
 {
-#if defined(__i386__)
+#if defined(BYPASS_FFI)
     int retval = ((int (*)(int)) function)(arg1);
     set_last_error(errno);
     return retval;
@@ -140,7 +125,7 @@ Java_com_kenai_jffi_Foreign_invoke64IrI(JNIEnv* env, jclass self, jlong ctxAddre
 static inline jint
 invokeIIrI(ffi_cif* cif, void* function, ffi_type** ffiParamTypes, jint arg1, jint arg2)
 {
-#if defined(__i386__)
+#if defined(BYPASS_FFI)
     int retval = ((jint (*)(jint, jint)) function)(arg1, arg2);
     set_last_error(errno);
     return retval;
@@ -186,7 +171,7 @@ Java_com_kenai_jffi_Foreign_invoke64IIrI(JNIEnv*env, jobject self, jlong ctxAddr
 static inline int
 invokeIIIrI(ffi_cif* cif, void* function, ffi_type** ffiParamTypes, int arg1, int arg2, int arg3)
 {
-#if defined(__i386__)
+#if defined(BYPASS_FFI)
     int retval = ((int (*)(jint, jint, jint)) function)(arg1, arg2, arg3);
     set_last_error(errno);
     return retval;
