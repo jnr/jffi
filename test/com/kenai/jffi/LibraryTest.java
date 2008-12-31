@@ -39,7 +39,8 @@ public class LibraryTest {
     // @Test
     // public void hello() {}
     @Test public void dlopen() {
-        long handle = Foreign.getInstance().dlopen("libc.so.6", Library.LAZY | Library.GLOBAL);
+        String libName = Platform.isLinux() ? "libc.so.6" : "libc.dylib";
+        long handle = Foreign.getInstance().dlopen(libName, Library.LAZY | Library.GLOBAL);
         assertNotSame("Could not open libc.so", 0L, handle);
     }
 }
