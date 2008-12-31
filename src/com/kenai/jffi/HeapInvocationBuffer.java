@@ -1,6 +1,8 @@
 
 package com.kenai.jffi;
 
+import java.nio.ByteOrder;
+
 public final class HeapInvocationBuffer implements InvocationBuffer {
     private static final int PARAM_SIZE = 8;
     private static final Encoder encoder = getEncoder();
@@ -62,15 +64,16 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
         objectBuffer.putArray(paramIndex++, array, offset, length, flags);
     }
     private static final Encoder getEncoder() {
-        switch (Platform.getArch()) {
-            case I386: return Foreign.getInstance().isRawParameterPackingEnabled()
+        if (Platform.getArch() == Platform.ARCH.I386) {
+            return Foreign.getInstance().isRawParameterPackingEnabled()
                     ? newI386RawEncoder()
                     : newLE32Encoder();
-            case X86_64: return newLE64Encoder();
-            case PPC: return newBE32Encoder();
-            case SPARC: return newBE32Encoder();
-            case SPARCV9: return newBE64Encoder();
-            default: throw new RuntimeException("Unsupported arch " + Platform.getArch());
+        } else if (Platform.is64()) {
+            return ByteOrder.nativeOrder().equals(ByteOrder.BIG_ENDIAN)
+                    ? newBE64Encoder() : newLE64Encoder();
+        } else {
+            return ByteOrder.nativeOrder().equals(ByteOrder.BIG_ENDIAN)
+                    ? newBE32Encoder() : newLE32Encoder();
         }
     }
     private static final Encoder newI386RawEncoder() {
