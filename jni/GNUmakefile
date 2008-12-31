@@ -70,10 +70,10 @@ ifeq ($(OS), win32)
 endif
 ifeq ($(OS), darwin)
   PLATFORM = darwin
-  ARCHES = i386 x86_64
+  ARCHES = i386
   CFLAGS += -isysroot /Developer/SDKs/MacOSX10.4u.sdk -DTARGET_RT_MAC_CFM=0
   CFLAGS += $(foreach arch, $(ARCHES),-arch $(arch))
-  LDFLAGS = -arch i386 -arch x86_64 -dynamiclib -framework JavaVM \
+  LDFLAGS = $(foreach arch, $(ARCHES),-arch $(arch)) -dynamiclib -framework JavaVM \
 	-Wl,-syslibroot,$(SDKROOT) -mmacosx-version-min=10.4
   LIBEXT = dylib
   JNIEXT = jnilib
