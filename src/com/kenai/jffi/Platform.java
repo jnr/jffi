@@ -259,7 +259,12 @@ public class Platform {
      */
     public boolean isSupported() {
         try {
-            return Foreign.getInstance() != null;
+            //
+            // Call a function in the stub library - this will throw an
+            // exception if there is no stub lib for this platform.
+            //
+            Foreign.getInstance().isRawParameterPackingEnabled();
+            return true;
         } catch (Throwable t) {
             return false;
         }
