@@ -16,18 +16,31 @@ public abstract class MemoryIO {
     private MemoryIO() {}
     private static final MemoryIO getImpl() {
         try {
-            return !Boolean.getBoolean("jffi.unsafe.disable") && isUnsafeAvailable()
+            return !Boolean.getBoolean("jffi.unsafe.disabled") && isUnsafeAvailable()
                     ? newUnsafeImpl() : newNativeImpl();
         } catch (Throwable t) {
             return newNativeImpl();
         }
     }
+    
+    /*
+     * The new calls are wrapped in methods, so the classes are not referenced
+     * until the method is called.  This means only one implementation class
+     * is ever loaded, and hotspot can inline non-final functions implemented
+     * in the subclass.
+     */
     private static final MemoryIO newNativeImpl() {
-        return new NativeImpl();
+        return Platform.getPlatform().addressSize() == 32
+                ? newNativeImpl32() : newNativeImpl64();
     }
+    private static final MemoryIO newNativeImpl32() { return new NativeImpl32();}
+    private static final MemoryIO newNativeImpl64() { return new NativeImpl64();}
     private static final MemoryIO newUnsafeImpl() {
-        return new UnsafeImpl();
+        return Platform.getPlatform().addressSize() == 32
+                ? newUnsafeImpl32() : newUnsafeImpl64();
     }
+    private static final MemoryIO newUnsafeImpl32() { return new UnsafeImpl32(); }
+    private static final MemoryIO newUnsafeImpl64() { return new UnsafeImpl64(); }
     
     public abstract byte getByte(long address);
     public abstract short getShort(long address);
@@ -103,8 +116,8 @@ public abstract class MemoryIO {
         return foreign.memchr(address, value, maxlen);
     }
 
-    private static final class NativeImpl extends MemoryIO {
-        private static final Foreign foreign = Foreign.getInstance();
+    private static abstract class NativeImpl extends MemoryIO {
+        protected static final Foreign foreign = Foreign.getInstance();
         public final byte getByte(long address) {
             return foreign.getByte(address);
         }
@@ -122,9 +135,6 @@ public abstract class MemoryIO {
         }
         public final double getDouble(long address) {
             return foreign.getDouble(address);
-        }
-        public final long getAddress(long address) {
-            return foreign.getAddress(address) & ADDRESS_MASK;
         }
         public final void putByte(long address, byte value) {
             foreign.putByte(address, value);
@@ -144,9 +154,6 @@ public abstract class MemoryIO {
         public final void putDouble(long address, double value) {
             foreign.putDouble(address, value);
         }
-        public final void putAddress(long address, long value) {
-            foreign.putAddress(address, value);
-        }
         public final void setMemory(long address, long size, byte value) {
             foreign.setMemory(address, size, value);
         }
@@ -154,9 +161,26 @@ public abstract class MemoryIO {
             foreign.copyMemory(src, dst, size);
         }
     }
-    private static final class UnsafeImpl extends MemoryIO {
-        private static sun.misc.Unsafe unsafe = sun.misc.Unsafe.class.cast(getUnsafe());
-        private static Object getUnsafe() {
+    private static final class NativeImpl32 extends NativeImpl {
+        public final long getAddress(long address) {
+            // Mask with ADDRESS_MASK to cancel out any sign extension
+            return foreign.getAddress(address) & ADDRESS_MASK;
+        }
+        public final void putAddress(long address, long value) {
+            foreign.putAddress(address, value & ADDRESS_MASK);
+        }
+    }
+    private static final class NativeImpl64 extends NativeImpl {
+        public final long getAddress(long address) {
+            return foreign.getAddress(address);
+        }
+        public final void putAddress(long address, long value) {
+            foreign.putAddress(address, value);
+        }
+    }
+    private static abstract class UnsafeImpl extends MemoryIO {
+        protected static sun.misc.Unsafe unsafe = sun.misc.Unsafe.class.cast(getUnsafe());
+        private static final Object getUnsafe() {
             try {
                 Class sunUnsafe = Class.forName("sun.misc.Unsafe");
                 Field f = sunUnsafe.getDeclaredField("theUnsafe");
@@ -184,9 +208,6 @@ public abstract class MemoryIO {
         public final double getDouble(long address) {
             return unsafe.getDouble(address);
         }
-        public final long getAddress(long address) {
-            return unsafe.getAddress(address);
-        }
         public final void putByte(long address, byte value) {
             unsafe.putByte(address, value);
         }
@@ -205,16 +226,28 @@ public abstract class MemoryIO {
         public final void putDouble(long address, double value) {
             unsafe.putDouble(address, value);
         }
-        public final void putAddress(long address, long value) {
-            unsafe.putAddress(address, value);
-        }
         public final void copyMemory(long src, long dst, long size) {
             unsafe.copyMemory(src, dst, size);
         }
         public final void setMemory(long src, long size, byte value) {
             unsafe.setMemory(src, size, value);
         }
-        
+    }
+    private static final class UnsafeImpl32 extends UnsafeImpl {
+        public final long getAddress(long address) {
+            return unsafe.getAddress(address) & ADDRESS_MASK;
+        }
+        public final void putAddress(long address, long value) {
+            unsafe.putAddress(address, value & ADDRESS_MASK);
+        }
+    }
+    private static final class UnsafeImpl64 extends UnsafeImpl {
+        public final long getAddress(long address) {
+            return unsafe.getAddress(address);
+        }
+        public final void putAddress(long address, long value) {
+            unsafe.putAddress(address, value);
+        }
     }
     @SuppressWarnings("unchecked")
     private static final void verifyAccessor(Class unsafeClass, Class primitive) throws NoSuchMethodException {

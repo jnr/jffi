@@ -2,10 +2,13 @@
 package com.kenai.jffi;
 
 public abstract class Invoker {
+    private static final long ADDRESS_SIZE = Platform.getPlatform().addressSize();
+    private static final long ADDRESS_MASK = Platform.getPlatform().addressMask();
+    
     final Foreign foreign = Foreign.getInstance();
-    final long ADDRESS_MASK = Platform.getPlatform().addressMask();
+    
     private static final class SingletonHolder {
-        private static final Invoker INSTANCE = Platform.is64()
+        private static final Invoker INSTANCE = ADDRESS_SIZE == 64
                 ? getLP64() : getILP32();
     }
     public static final Invoker getInstance() {
@@ -85,7 +88,7 @@ public abstract class Invoker {
             return foreign.invoke32IIIrI(function.getAddress32(), arg1, arg2, arg3);
         }
         public final long invokeAddress(Function function, HeapInvocationBuffer buffer) {
-            return (long)invokeInt(function, buffer) & ADDRESS_MASK;
+            return ((long)invokeInt(function, buffer)) & ADDRESS_MASK;
         }
     }
     private static final Invoker getLP64() {
