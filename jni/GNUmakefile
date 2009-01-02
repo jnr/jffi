@@ -46,7 +46,7 @@ JFLAGS = -fno-omit-frame-pointer -fno-strict-aliasing -DNDEBUG
 OFLAGS = -O2 $(JFLAGS)
 WFLAGS = -W -Werror -Wall -Wno-unused -Wno-parentheses
 PICFLAGS = -fPIC
-SOFLAGS = -shared -static-libgcc -mimpure-text -Wl,-O1
+SOFLAGS = # Filled in for each OS specifically
 LDFLAGS += $(SOFLAGS)
 # FFI_MMAP_EXEC = -DFFI_MMAP_EXEC_WRIT
 
@@ -86,7 +86,7 @@ ifeq ($(OS), darwin)
 endif
 
 ifeq ($(OS), linux)
-  SOFLAGS += -Wl,-soname,$(@F)
+  SOFLAGS = -shared -mimpure-text -static-libgcc -Wl,-soname,$(@F) -Wl,-O1
   FFI_MMAP_EXEC = -DFFI_MMAP_EXEC_WRIT
   PICFLAGS += -pthread
 endif
@@ -95,7 +95,7 @@ ifeq ($(OS), solaris)
   CFLAGS += -D__EXTENSIONS__
   LD = /usr/ccs/bin/ld
   CCACHE=
-  SOFLAGS = -shared -static-libgcc 
+  SOFLAGS = -shared -static-libgcc -mimpure-text
   LIBS += -ldl
 endif
 ifeq ($(CPU), sparcv9)
