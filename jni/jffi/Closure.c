@@ -20,6 +20,9 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
+#ifdef __sun
+#  include <alloca.h>
+#endif
 #include <jni.h>
 #include "jffi.h"
 #include "Exception.h"

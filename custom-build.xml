@@ -58,6 +58,7 @@
             <arg value="SRC_DIR=${src.native.dir}"/>
             <arg value="JNI_DIR=${src.native.dir}"/>
             <arg value="BUILD_DIR=${build.native.dir}"/>
+            <arg value="CPU=${os.arch}"/>
             <arg value="-f"/>
             <arg value="${src.native.dir}/GNUmakefile"/>
         </exec>
@@ -88,6 +89,8 @@
             <zipfileset src="${dist.dir}/${platform}.jar"/>
             <zipfileset src="archive/i386-Linux.jar"/>
             <zipfileset src="archive/Darwin.jar"/>
+            <zipfileset src="archive/x86-SunOS.jar"/>
+            <zipfileset src="archive/amd64-SunOS.jar"/>
         </jar>
     </target>
     <target name="-archive-platform-jar" depends="-build-platform-jar">

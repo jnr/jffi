@@ -1,5 +1,8 @@
 #include <sys/types.h>
 #include <stdlib.h>
+#ifdef __sun
+#  include <alloca.h>
+#endif
 #ifdef __linux__
 #  include <endian.h>
 #endif

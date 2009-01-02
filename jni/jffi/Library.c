@@ -2,12 +2,16 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <limits.h>
 
 #if defined(_WIN32) || defined(__WIN32__)
 # include <windows.h>
 # include <malloc.h>
 #else
 # include <dlfcn.h>
+#endif
+#ifdef __sun
+#  include <alloca.h>
 #endif
 #include <ffi.h>
 #include <jni.h>

@@ -1,4 +1,9 @@
+#include <sys/types.h>
+#include <stdint.h>
 #include <stdlib.h>
+#ifdef __sun
+#  include <alloca.h>
+#endif
 #include <ffi.h>
 #include <jni.h>
 #include "jffi.h"

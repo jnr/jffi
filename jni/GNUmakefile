@@ -1,5 +1,8 @@
 # -*- makefile -*-
-OS ?= $(shell uname -s | tr '[A-Z]' '[a-z]')
+OS ?= $(shell uname -s | tr '[:upper:]' '[:lower:]')
+ifeq ($(OS),sunos)
+  OS = solaris
+endif
 CPU ?= $(shell uname -m | sed -e 's/i[345678]86/i386/')
 MODEL = 32 # Default to 32bit compiles
 PLATFORM = $(CPU)-$(OS)
@@ -42,7 +45,7 @@ LIBNAME = jffi
 JFLAGS = -fno-omit-frame-pointer -fno-strict-aliasing -DNDEBUG
 OFLAGS = -O2 $(JFLAGS)
 WFLAGS = -W -Werror -Wall -Wno-unused -Wno-parentheses
-PICFLAGS = -fPIC -pthread
+PICFLAGS = -fPIC
 SOFLAGS = -shared -static-libgcc -mimpure-text -Wl,-O1
 LDFLAGS += $(SOFLAGS)
 # FFI_MMAP_EXEC = -DFFI_MMAP_EXEC_WRIT
@@ -85,8 +88,16 @@ endif
 ifeq ($(OS), linux)
   SOFLAGS += -Wl,-soname,$(@F)
   FFI_MMAP_EXEC = -DFFI_MMAP_EXEC_WRIT
+  PICFLAGS += -pthread
 endif
-
+ifeq ($(OS), solaris)
+  CC = /usr/sfw/bin/gcc -std=c99
+  CFLAGS += -D__EXTENSIONS__
+  LD = /usr/ccs/bin/ld
+  CCACHE=
+  SOFLAGS = -shared -static-libgcc 
+  LIBS += -ldl
+endif
 ifeq ($(CPU), sparcv9)
   MODEL = 64
 endif
