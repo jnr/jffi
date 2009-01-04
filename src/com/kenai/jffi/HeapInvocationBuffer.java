@@ -86,6 +86,10 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
         paramOffset += encoder.putAddress(buffer, paramOffset, 0L);
         getObjectBuffer().putArray(paramIndex++, array, offset, length, flags);
     }
+    public final void putDirectBuffer(final java.nio.Buffer value, int offset, int length) {
+        paramOffset += encoder.putAddress(buffer, paramOffset, 0L);
+        getObjectBuffer().putDirectBuffer(paramIndex++, value, offset, length);
+    }
     private static final Encoder getEncoder() {
         if (Platform.getArch() == Platform.ARCH.I386) {
             return Foreign.getInstance().isRawParameterPackingEnabled()

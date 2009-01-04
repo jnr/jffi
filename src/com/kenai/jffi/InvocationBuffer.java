@@ -1,6 +1,8 @@
 
 package com.kenai.jffi;
 
+import java.nio.Buffer;
+
 public interface InvocationBuffer {
     public abstract void putInt8(final int value);
     public abstract void putInt16(final int value);
@@ -15,4 +17,5 @@ public interface InvocationBuffer {
     public abstract void putArray(final long[] value, int offset, int length, int flags);
     public abstract void putArray(final float[] value, int offset, int length, int flags);
     public abstract void putArray(final double[] value, int offset, int length, int flags);
+    public abstract void putDirectBuffer(final Buffer buffer, int offset, int length);
 }

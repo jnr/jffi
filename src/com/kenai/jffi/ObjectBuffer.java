@@ -55,6 +55,9 @@ public final class ObjectBuffer {
     private static final int makeArrayFlags(int flags, int type, int index) {
         return (flags & FLAGS_MASK) | ((index << INDEX_SHIFT) & INDEX_MASK) | type;
     }
+    private static final int makeBufferFlags(int index) {
+        return ((index << INDEX_SHIFT) & INDEX_MASK) | BUFFER;
+    }
     public void putArray(int index, byte[] array, int offset, int length, int flags) {
         putObject(array, offset, length, makeArrayFlags(flags, BYTE | ARRAY, index));
     }
@@ -72,6 +75,9 @@ public final class ObjectBuffer {
     }
     public void putArray(int index, double[] array, int offset, int length, int flags) {
         putObject(array, offset, length, makeArrayFlags(flags, DOUBLE | ARRAY, index));
+    }
+    public void putDirectBuffer(int index, java.nio.Buffer obj, int offset, int length) {
+        putObject(obj, offset, length, makeBufferFlags(index));
     }
     private void putObject(Object array, int offset, int length, int flags) {
         ensureSpace();

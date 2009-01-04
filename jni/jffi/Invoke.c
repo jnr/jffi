@@ -173,14 +173,29 @@ invokeArrayWithObjects_(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer,
         int idx = (type & com_kenai_jffi_ObjectBuffer_INDEX_MASK) >> com_kenai_jffi_ObjectBuffer_INDEX_SHIFT;
         void* ptr;
 
-        ptr = jffi_getArray(env, object, offset, length, type, &alloc, &arrays[arrayCount]);
-        if (ptr == NULL) {
-            throwException(env, NullPointer, "Could not allocate array");
-            goto cleanup;
+        switch (type & com_kenai_jffi_ObjectBuffer_TYPE_MASK & ~com_kenai_jffi_ObjectBuffer_PRIM_MASK) {
+            case com_kenai_jffi_ObjectBuffer_ARRAY:
+                ptr = jffi_getArray(env, object, offset, length, type, &alloc, &arrays[arrayCount]);
+                if (ptr == NULL) {
+                    throwException(env, NullPointer, "Could not allocate array");
+                    goto cleanup;
+                }
+                ++arrayCount;
+                break;
+            case com_kenai_jffi_ObjectBuffer_BUFFER:
+                ptr = (*env)->GetDirectBufferAddress(env, object);
+                if (ptr == NULL) {
+                    throwException(env, NullPointer, "Could not get direct Buffer address");
+                    goto cleanup;
+                }
+                ptr = ((char *) ptr + offset);
+                break;
+            default:
+                throwException(env, IllegalArgument, "Unsupported object type: %#x", 
+                        type & com_kenai_jffi_ObjectBuffer_TYPE_MASK);
+                goto cleanup;
         }
 
-        ++arrayCount;
-        //printf("array=%p\n", ptr);
 #if defined(USE_RAW)
         *((void **)(tmpBuffer + ctx->rawParamOffsets[idx])) = ptr;
 #else
