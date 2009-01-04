@@ -56,12 +56,35 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
         paramOffset += encoder.putAddress(buffer, paramOffset, value);
         ++paramIndex;
     }
-    public final void putArray(final byte[] array, int offset, int length, int flags) {
-        paramOffset += encoder.putAddress(buffer, paramOffset, 0L);
+    private final ObjectBuffer getObjectBuffer() {
         if (objectBuffer == null) {
             objectBuffer = new ObjectBuffer();
         }
-        objectBuffer.putArray(paramIndex++, array, offset, length, flags);
+        return objectBuffer;
+    }
+    public final void putArray(final byte[] array, int offset, int length, int flags) {
+        paramOffset += encoder.putAddress(buffer, paramOffset, 0L);
+        getObjectBuffer().putArray(paramIndex++, array, offset, length, flags);
+    }
+    public final void putArray(final short[] array, int offset, int length, int flags) {
+        paramOffset += encoder.putAddress(buffer, paramOffset, 0L);
+        getObjectBuffer().putArray(paramIndex++, array, offset, length, flags);
+    }
+    public final void putArray(final int[] array, int offset, int length, int flags) {
+        paramOffset += encoder.putAddress(buffer, paramOffset, 0L);
+        getObjectBuffer().putArray(paramIndex++, array, offset, length, flags);
+    }
+    public final void putArray(final long[] array, int offset, int length, int flags) {
+        paramOffset += encoder.putAddress(buffer, paramOffset, 0L);
+        getObjectBuffer().putArray(paramIndex++, array, offset, length, flags);
+    }
+    public final void putArray(final float[] array, int offset, int length, int flags) {
+        paramOffset += encoder.putAddress(buffer, paramOffset, 0L);
+        getObjectBuffer().putArray(paramIndex++, array, offset, length, flags);
+    }
+    public final void putArray(final double[] array, int offset, int length, int flags) {
+        paramOffset += encoder.putAddress(buffer, paramOffset, 0L);
+        getObjectBuffer().putArray(paramIndex++, array, offset, length, flags);
     }
     private static final Encoder getEncoder() {
         if (Platform.getArch() == Platform.ARCH.I386) {

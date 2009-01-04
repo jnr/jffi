@@ -10,4 +10,9 @@ public interface InvocationBuffer {
     public abstract void putDouble(final double value);
     public abstract void putAddress(final long value);
     public abstract void putArray(final byte[] value, int offset, int length, int flags);
+    public abstract void putArray(final short[] value, int offset, int length, int flags);
+    public abstract void putArray(final int[] value, int offset, int length, int flags);
+    public abstract void putArray(final long[] value, int offset, int length, int flags);
+    public abstract void putArray(final float[] value, int offset, int length, int flags);
+    public abstract void putArray(final double[] value, int offset, int length, int flags);
 }

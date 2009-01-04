@@ -58,6 +58,21 @@ public final class ObjectBuffer {
     public void putArray(int index, byte[] array, int offset, int length, int flags) {
         putObject(array, offset, length, makeArrayFlags(flags, BYTE | ARRAY, index));
     }
+    public void putArray(int index, short[] array, int offset, int length, int flags) {
+        putObject(array, offset, length, makeArrayFlags(flags, SHORT | ARRAY, index));
+    }
+    public void putArray(int index, int[] array, int offset, int length, int flags) {
+        putObject(array, offset, length, makeArrayFlags(flags, INT | ARRAY, index));
+    }
+    public void putArray(int index, long[] array, int offset, int length, int flags) {
+        putObject(array, offset, length, makeArrayFlags(flags, LONG | ARRAY, index));
+    }
+    public void putArray(int index, float[] array, int offset, int length, int flags) {
+        putObject(array, offset, length, makeArrayFlags(flags, FLOAT | ARRAY, index));
+    }
+    public void putArray(int index, double[] array, int offset, int length, int flags) {
+        putObject(array, offset, length, makeArrayFlags(flags, DOUBLE | ARRAY, index));
+    }
     private void putObject(Object array, int offset, int length, int flags) {
         ensureSpace();
         objects[objectIndex++] = array;
