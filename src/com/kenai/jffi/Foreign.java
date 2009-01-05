@@ -59,7 +59,16 @@ final class Foreign {
     final native int invoke64IIrI(long function, int arg1, int arg2);
     final native int invoke32IIIrI(int function, int arg1, int arg2, int arg3);
     final native int invoke64IIIrI(long function, int arg1, int arg2, int arg3);
+
     /* ---------------------------------------------------------------------- */
+
+    final native long invokeVrL(long function);
+    final native long invokeLrL(long function, long arg1);
+    final native long invokeLLrL(long function, long arg1, long arg2);
+    final native long invokeLLLrL(long function, long arg1, long arg2, long arg3);
+
+    /* ---------------------------------------------------------------------- */
+
     final native int invokeArrayInt32(long function, byte[] buffer);
     final native long invokeArrayInt64(long function, byte[] buffer);
     final native float invokeArrayFloat(long function, byte[] buffer);

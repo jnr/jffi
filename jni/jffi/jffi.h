@@ -98,7 +98,7 @@ getLong(void* address)
 }
 
 typedef union FFIValue {
-    int i;
+    
     int8_t s8;
     uint8_t u8;
     int16_t s16;
@@ -107,6 +107,8 @@ typedef union FFIValue {
     uint32_t u32;
     int64_t s64;
     uint64_t u64;
+    jint i;
+    jlong j;
     long l;
     float f;
     double d;
@@ -133,7 +135,7 @@ thread_data_get()
 #endif
 
 #if BYTE_ORDER == LITTLE_ENDIAN
-# define return_int(retval) return ((retval).s32)
+# define return_int(retval) return ((retval).i)
 #else
 # define return_int(retval) return ((retval).l & 0xFFFFFFFFL)
 #endif
