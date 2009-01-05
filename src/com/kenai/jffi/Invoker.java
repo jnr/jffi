@@ -22,6 +22,18 @@ public abstract class Invoker {
     public abstract int invokeIIIrI(Function function, int arg1, int arg2, int arg3);
     public abstract long invokeAddress(Function function, HeapInvocationBuffer buffer);
 
+    public final long invokeVrL(Function function) {
+        return foreign.invokeVrL(function.getAddress64());
+    }
+    public final long invokeLrL(Function function, long arg1) {
+        return foreign.invokeLrL(function.getAddress64(), arg1);
+    }
+    public final long invokeLLrL(Function function, long arg1, long arg2) {
+        return foreign.invokeLLrL(function.getAddress64(), arg1, arg2);
+    }
+    public final long invokeLLLrL(Function function, long arg1, long arg2, long arg3) {
+        return foreign.invokeLLLrL(function.getAddress64(), arg1, arg2, arg3);
+    }
     public final int invokeInt(Function function, HeapInvocationBuffer buffer) {
         ObjectBuffer objectBuffer = buffer.objectBuffer();
         return objectBuffer != null
