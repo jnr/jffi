@@ -14,7 +14,7 @@
 
 
 #if BYTE_ORDER == BIG_ENDIAN
-#  define ARGPTR(argp, type) (((caddr_t) (arg)) + sizeof(*argp) - (type)->size)
+#  define ARGPTR(argp, type) (((caddr_t) (argp)) + sizeof(*argp) - (type)->size)
 #else
 #  define ARGPTR(argp, type) (argp)
 #endif
