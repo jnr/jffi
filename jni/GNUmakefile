@@ -48,7 +48,7 @@ WFLAGS = -W -Werror -Wall -Wno-unused -Wno-parentheses
 PICFLAGS = -fPIC
 SOFLAGS = # Filled in for each OS specifically
 LDFLAGS += $(SOFLAGS)
-# FFI_MMAP_EXEC = -DFFI_MMAP_EXEC_WRIT
+FFI_MMAP_EXEC = -DFFI_MMAP_EXEC_WRIT
 
 FFI_CC=$(CCACHE) $(CC)
 FFI_LD=$(LD)
@@ -87,7 +87,6 @@ endif
 
 ifeq ($(OS), linux)
   SOFLAGS = -shared -mimpure-text -static-libgcc -Wl,-soname,$(@F) -Wl,-O1
-  FFI_MMAP_EXEC = -DFFI_MMAP_EXEC_WRIT
   PICFLAGS += -pthread
 endif
 ifeq ($(OS), solaris)
