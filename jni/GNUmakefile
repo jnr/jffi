@@ -146,13 +146,12 @@ build_ffi = \
 	env MACOSX_DEPLOYMENT_TARGET=10.4 $(MAKE) -C $(BUILD_DIR)/libffi-darwin-$(1)
 	
 $(LIBFFI):
-	@echo "JNI_DIR=$(JNI_DIR) MAKE=$(MAKE) FFI_CONFIGURE=$(FFI_CONFIGURE)"
 	@mkdir -p $(@D)
 	@for arch in $(ARCHES); do $(call build_ffi,$$arch);done
 	
 	# Assemble into a FAT (i386, x86_64, ppc) library
 	@mkdir -p $(BUILD_DIR)/libffi/.libs
-	env MACOSX_DEPLOYMENT_TARGET=10.4 /usr/bin/libtool -static -o $@ \
+	@env MACOSX_DEPLOYMENT_TARGET=10.4 /usr/bin/libtool -static -o $@ \
 	    $(foreach arch, $(ARCHES),$(BUILD_DIR)/libffi-darwin-$(arch)/.libs/libffi_convenience.a)
 	@mkdir -p $(LIBFFI_BUILD_DIR)/include
 	$(RM) $(LIBFFI_BUILD_DIR)/include/ffi.h
@@ -177,7 +176,7 @@ $(LIBFFI):
 else
 $(LIBFFI):		
 	@mkdir -p $(LIBFFI_BUILD_DIR)
-	if [ ! -f $(LIBFFI_BUILD_DIR)/Makefile ]; then \
+	@if [ ! -f $(LIBFFI_BUILD_DIR)/Makefile ]; then \
 	    echo "Configuring libffi for $(PLATFORM)"; \
 	    cd $(LIBFFI_BUILD_DIR) && env CC="$(FFI_CC)" LD="$(FFI_LD)" CFLAGS="$(FFI_CFLAGS)" \
 		$(FFI_CONFIGURE) > /dev/null; \
