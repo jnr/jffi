@@ -28,18 +28,12 @@ JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_invokeVrL(JNIEnv* env, jobject self, jlong ctxAddress)
 {
     Function* ctx = (Function *) (uintptr_t) ctxAddress;
-#if defined(BYPASS_FFI)
-    jlong retval = ((jlong (*)()) ctx->function)();
-    set_last_error(errno);
-    return retval;
-#else
     ffi_cif *cif = &ctx->cif;
     FFIValue retval, arg0;
     void* ffiValues[] = { &arg0 };
-    ffi_call(cif, FFI_FN(function), &retval, ffiValues);
+    ffi_call(cif, FFI_FN(ctx->function), &retval, ffiValues);
     set_last_error(errno);
     return retval.j;
-#endif
 }
 
 /*
