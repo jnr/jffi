@@ -56,9 +56,9 @@ Java_com_kenai_jffi_Foreign_invoke64VrI(JNIEnv* env, jclass self, jlong ctxAddre
 }
 
 #if BYTE_ORDER == BIG_ENDIAN
-#  define ARGPTR(arg, type) (((caddr_t) &(arg)) + sizeof(arg) - (type)->size)
+#  define ARGPTR(argp, type) (((caddr_t) (arg)) + sizeof(*argp) - (type)->size)
 #else
-#  define ARGPTR(arg, type) (&(arg))
+#  define ARGPTR(argp, type) (argp)
 #endif
 static inline jint
 invokeIrI(ffi_cif* cif, void* function, jint arg1)
@@ -72,7 +72,7 @@ invokeIrI(ffi_cif* cif, void* function, jint arg1)
 # if defined(USE_RAW) && defined(__i386__)
     ffi_raw_call(cif, FFI_FN(function), &retval, (ffi_raw *) &arg1);
 # else
-    void* ffiValues[] = { ARGPTR(arg1, cif->arg_types[0]) };
+    void* ffiValues[] = { ARGPTR(&arg1, cif->arg_types[0]) };
     ffi_call(cif, FFI_FN(function), &retval, ffiValues);
 # endif
     set_last_error(errno);
@@ -120,8 +120,8 @@ invokeIIrI(ffi_cif* cif, void* function, jint arg1, jint arg2)
     ffi_raw_call(cif, FFI_FN(function), &retval, (ffi_raw *) raw);
 # else
     void* ffiValues[] = {
-        ARGPTR(arg1, cif->arg_types[0]),
-        ARGPTR(arg2, cif->arg_types[1])
+        ARGPTR(&arg1, cif->arg_types[0]),
+        ARGPTR(&arg2, cif->arg_types[1])
     };
     ffi_call(cif, FFI_FN(function), &retval, ffiValues);
 # endif
@@ -163,9 +163,9 @@ invokeIIIrI(ffi_cif* cif, void* function, jint arg1, jint arg2, jint arg3)
     ffi_raw_call(cif, FFI_FN(function), &retval, (ffi_raw *) raw);
 # else
     void* ffiValues[] = { 
-        ARGPTR(arg1, cif->arg_types[0]),
-        ARGPTR(arg2, cif->arg_types[1]),
-        ARGPTR(arg3, cif->arg_types[2])
+        ARGPTR(&arg1, cif->arg_types[0]),
+        ARGPTR(&arg2, cif->arg_types[1]),
+        ARGPTR(&arg3, cif->arg_types[2])
     };
     ffi_call(cif, FFI_FN(function), &retval, ffiValues);
 # endif

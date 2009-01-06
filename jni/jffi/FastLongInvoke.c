@@ -14,9 +14,9 @@
 
 
 #if BYTE_ORDER == BIG_ENDIAN
-#  define ARGPTR(arg, type) (((caddr_t) &(arg)) + sizeof(arg) - (type)->size)
+#  define ARGPTR(argp, type) (((caddr_t) (arg)) + sizeof(*argp) - (type)->size)
 #else
-#  define ARGPTR(arg, type) (&(arg))
+#  define ARGPTR(argp, type) (argp)
 #endif
 
 /*
@@ -48,7 +48,7 @@ Java_com_kenai_jffi_Foreign_invokeLrL(JNIEnv* env, jobject self, jlong ctxAddres
     ffi_cif *cif = &ctx->cif;
     FFIValue retval;
     void* ffiValues[] = { 
-        ARGPTR(arg1, cif->arg_types[0])
+        ARGPTR(&arg1, cif->arg_types[0])
     };
     ffi_call(cif, FFI_FN(ctx->function), &retval, ffiValues);
     set_last_error(errno);
@@ -67,8 +67,8 @@ Java_com_kenai_jffi_Foreign_invokeLLrL(JNIEnv* env, jobject self, jlong ctxAddre
     ffi_cif *cif = &ctx->cif;
     FFIValue retval;
     void* ffiValues[] = {
-        ARGPTR(arg1, cif->arg_types[0]),
-        ARGPTR(arg2, cif->arg_types[1])
+        ARGPTR(&arg1, cif->arg_types[0]),
+        ARGPTR(&arg2, cif->arg_types[1])
     };
     ffi_call(cif, FFI_FN(ctx->function), &retval, ffiValues);
     set_last_error(errno);
@@ -88,9 +88,9 @@ Java_com_kenai_jffi_Foreign_invokeLLLrL(JNIEnv* env, jobject self, jlong ctxAddr
     ffi_cif *cif = &ctx->cif;
     FFIValue retval;
     void* ffiValues[] = {
-        ARGPTR(arg1, cif->arg_types[0]),
-        ARGPTR(arg2, cif->arg_types[1]),
-        ARGPTR(arg3, cif->arg_types[2])
+        ARGPTR(&arg1, cif->arg_types[0]),
+        ARGPTR(&arg2, cif->arg_types[1]),
+        ARGPTR(&arg3, cif->arg_types[2])
     };
     ffi_call(cif, FFI_FN(ctx->function), &retval, ffiValues);
     set_last_error(errno);
