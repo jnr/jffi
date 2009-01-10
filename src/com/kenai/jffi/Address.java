@@ -21,6 +21,7 @@ package com.kenai.jffi;
 /**
  * Represents a native memory address.
  */
+@Deprecated
 public final class Address extends Number implements Comparable<Address> {
     public static final int SIZE = Platform.getPlatform().addressSize();
     public static final int SHIFT = SIZE == 32 ? 2 : 3;
