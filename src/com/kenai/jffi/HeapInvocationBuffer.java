@@ -10,10 +10,7 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
     private ObjectBuffer objectBuffer = null;
     private int paramOffset = 0;
     private int paramIndex = 0;
-
-    public HeapInvocationBuffer(int paramCount) {
-        buffer = new byte[paramCount * PARAM_SIZE];
-    }
+    
     public HeapInvocationBuffer(Function function) {
         buffer = new byte[encoder.getBufferSize(function)];
     }
@@ -28,28 +25,44 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
     ObjectBuffer objectBuffer() {
         return objectBuffer;
     }
+    @Deprecated
     public final void putInt8(final int value) {
-        paramOffset += encoder.putInt8(buffer, paramOffset, value);
-        ++paramIndex;
+        putByte(value);
     }
+    @Deprecated
     public final void putInt16(final int value) {
-        paramOffset += encoder.putInt16(buffer, paramOffset, value);
-        ++paramIndex;
+        putShort(value);
     }
+    @Deprecated
     public final void putInt32(final int value) {
-        paramOffset += encoder.putInt32(buffer, paramOffset, value);
+        putInt(value);
+    }
+    @Deprecated
+    public final void putInt64(final long value) {
+        putLong(value);
+    }
+    public final void putByte(final int value) {
+        paramOffset += encoder.putByte(buffer, paramOffset, value);
         ++paramIndex;
     }
-    public final void putInt64(final long value) {
-        paramOffset += encoder.putInt64(buffer, paramOffset, value);
+    public final void putShort(final int value) {
+        paramOffset += encoder.putShort(buffer, paramOffset, value);
+        ++paramIndex;
+    }
+    public final void putInt(final int value) {
+        paramOffset += encoder.putInt(buffer, paramOffset, value);
+        ++paramIndex;
+    }
+    public final void putLong(final long value) {
+        paramOffset += encoder.putLong(buffer, paramOffset, value);
         ++paramIndex;
     }
     public final void putFloat(final float value) {
-        paramOffset += encoder.putFloat32(buffer, paramOffset, value);
+        paramOffset += encoder.putFloat(buffer, paramOffset, value);
         ++paramIndex;
     }
     public final void putDouble(final double value) {
-        paramOffset += encoder.putFloat64(buffer, paramOffset, value);
+        paramOffset += encoder.putDouble(buffer, paramOffset, value);
         ++paramIndex;
     }
     public final void putAddress(final long value) {
@@ -120,12 +133,12 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
     }
     private static abstract class Encoder {
         public abstract int getBufferSize(Function function);
-        public abstract int putInt8(byte[] buffer, int offset, int value);
-        public abstract int putInt16(byte[] buffer, int offset, int value);
-        public abstract int putInt32(byte[] buffer, int offset, int value);
-        public abstract int putInt64(byte[] buffer, int offset, long value);
-        public abstract int putFloat32(byte[] buffer, int offset, float value);
-        public abstract int putFloat64(byte[] buffer, int offset, double value);
+        public abstract int putByte(byte[] buffer, int offset, int value);
+        public abstract int putShort(byte[] buffer, int offset, int value);
+        public abstract int putInt(byte[] buffer, int offset, int value);
+        public abstract int putLong(byte[] buffer, int offset, long value);
+        public abstract int putFloat(byte[] buffer, int offset, float value);
+        public abstract int putDouble(byte[] buffer, int offset, double value);
         public abstract int putAddress(byte[] buffer, int offset, long value);
     }
     private static final class I386RawEncoder extends Encoder {
@@ -134,23 +147,23 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
         public final int getBufferSize(Function function) {
             return function.getRawParameterSize();
         }
-        public final int putInt8(byte[] buffer, int offset, int value) {
-            IO.putInt8(buffer, offset, value); return 4;
+        public final int putByte(byte[] buffer, int offset, int value) {
+            IO.putByte(buffer, offset, value); return 4;
         }
-        public final int putInt16(byte[] buffer, int offset, int value) {
-            IO.putInt16(buffer, offset, value); return 4;
+        public final int putShort(byte[] buffer, int offset, int value) {
+            IO.putShort(buffer, offset, value); return 4;
         }
-        public final int putInt32(byte[] buffer, int offset, int value) {
-            IO.putInt32(buffer, offset, value); return 4;
+        public final int putInt(byte[] buffer, int offset, int value) {
+            IO.putInt(buffer, offset, value); return 4;
         }
-        public final int putInt64(byte[] buffer, int offset, long value) {
-            IO.putInt64(buffer, offset, value); return 8;
+        public final int putLong(byte[] buffer, int offset, long value) {
+            IO.putLong(buffer, offset, value); return 8;
         }
-        public final int putFloat32(byte[] buffer, int offset, float value) {
-            IO.putFloat32(buffer, offset, value); return 4;
+        public final int putFloat(byte[] buffer, int offset, float value) {
+            IO.putFloat(buffer, offset, value); return 4;
         }
-        public final int putFloat64(byte[] buffer, int offset, double value) {
-            IO.putFloat64(buffer, offset, value); return 8;
+        public final int putDouble(byte[] buffer, int offset, double value) {
+            IO.putDouble(buffer, offset, value); return 8;
         }
         public final int putAddress(byte[] buffer, int offset, long value) {
             IO.putAddress(buffer, offset, value); return 4;
@@ -165,23 +178,23 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
         public final int getBufferSize(Function function) {
             return function.getParameterCount() * PARAM_SIZE;
         }
-        public final int putInt8(byte[] buffer, int offset, int value) {
-            io.putInt8(buffer, offset, value); return PARAM_SIZE;
+        public final int putByte(byte[] buffer, int offset, int value) {
+            io.putByte(buffer, offset, value); return PARAM_SIZE;
         }
-        public final int putInt16(byte[] buffer, int offset, int value) {
-            io.putInt16(buffer, offset, value); return PARAM_SIZE;
+        public final int putShort(byte[] buffer, int offset, int value) {
+            io.putShort(buffer, offset, value); return PARAM_SIZE;
         }
-        public final int putInt32(byte[] buffer, int offset, int value) {
-            io.putInt32(buffer, offset, value); return PARAM_SIZE;
+        public final int putInt(byte[] buffer, int offset, int value) {
+            io.putInt(buffer, offset, value); return PARAM_SIZE;
         }
-        public final int putInt64(byte[] buffer, int offset, long value) {
-            io.putInt64(buffer, offset, value); return PARAM_SIZE;
+        public final int putLong(byte[] buffer, int offset, long value) {
+            io.putLong(buffer, offset, value); return PARAM_SIZE;
         }
-        public final int putFloat32(byte[] buffer, int offset, float value) {
-            io.putFloat32(buffer, offset, value); return PARAM_SIZE;
+        public final int putFloat(byte[] buffer, int offset, float value) {
+            io.putFloat(buffer, offset, value); return PARAM_SIZE;
         }
-        public final int putFloat64(byte[] buffer, int offset, double value) {
-            io.putFloat64(buffer, offset, value); return PARAM_SIZE;
+        public final int putDouble(byte[] buffer, int offset, double value) {
+            io.putDouble(buffer, offset, value); return PARAM_SIZE;
         }
         public final int putAddress(byte[] buffer, int offset, long value) {
             io.putAddress(buffer, offset, value); return PARAM_SIZE;
@@ -189,33 +202,33 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
     }
 
     private static abstract class ArrayIO {
-        public abstract void putInt8(byte[] buffer, int offset, int value);
-        public abstract void putInt16(byte[] buffer, int offset, int value);
-        public abstract void putInt32(byte[] buffer, int offset, int value);
-        public abstract void putInt64(byte[] buffer, int offset, long value);
-        public final void putFloat32(byte[] buffer, int offset, float value) {
-            putInt32(buffer, offset, Float.floatToRawIntBits(value));
+        public abstract void putByte(byte[] buffer, int offset, int value);
+        public abstract void putShort(byte[] buffer, int offset, int value);
+        public abstract void putInt(byte[] buffer, int offset, int value);
+        public abstract void putLong(byte[] buffer, int offset, long value);
+        public final void putFloat(byte[] buffer, int offset, float value) {
+            putInt(buffer, offset, Float.floatToRawIntBits(value));
         }
-        public final void putFloat64(byte[] buffer, int offset, double value) {
-            putInt64(buffer, offset, Double.doubleToRawLongBits(value));
+        public final void putDouble(byte[] buffer, int offset, double value) {
+            putLong(buffer, offset, Double.doubleToRawLongBits(value));
         }
         public abstract void putAddress(byte[] buffer, int offset, long value);
     }
     private static abstract class LittleEndianArrayIO extends ArrayIO {
-        public final void putInt8(byte[] buffer, int offset, int value) {
+        public final void putByte(byte[] buffer, int offset, int value) {
             buffer[offset] = (byte) value;
         }
-        public final void putInt16(byte[] buffer, int offset, int value) {
+        public final void putShort(byte[] buffer, int offset, int value) {
             buffer[offset] = (byte) value;
             buffer[offset + 1] = (byte) (value >> 8);
         }
-        public final void putInt32(byte[] buffer, int offset, int value) {
+        public final void putInt(byte[] buffer, int offset, int value) {
             buffer[offset] = (byte) value;
             buffer[offset + 1] = (byte) (value >> 8);
             buffer[offset + 2] = (byte) (value >> 16);
             buffer[offset + 3] = (byte) (value >> 24);
         }
-        public final void putInt64(byte[] buffer, int offset, long value) {
+        public final void putLong(byte[] buffer, int offset, long value) {
             buffer[offset] = (byte) value;
             buffer[offset + 1] = (byte) (value >> 8);
             buffer[offset + 2] = (byte) (value >> 16);
@@ -238,25 +251,25 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
     private static final class LE64ArrayIO extends LittleEndianArrayIO {
         static final ArrayIO INSTANCE = new LE64ArrayIO();
         public final void putAddress(byte[] buffer, int offset, long value) {
-            putInt64(buffer, offset, value);
+            putLong(buffer, offset, value);
         }
     }
     private static abstract class BigEndianArrayIO extends ArrayIO {
-        public final void putInt8(byte[] buffer, int offset, int value) {
+        public final void putByte(byte[] buffer, int offset, int value) {
             buffer[offset] = (byte) value;
         }
-        public final void putInt16(byte[] buffer, int offset, int value) {
+        public final void putShort(byte[] buffer, int offset, int value) {
             buffer[offset + 0] = (byte) (value >> 8);
             buffer[offset + 1] = (byte) value;
             
         }
-        public final void putInt32(byte[] buffer, int offset, int value) {
+        public final void putInt(byte[] buffer, int offset, int value) {
             buffer[offset + 0] = (byte) (value >> 24);
             buffer[offset + 1] = (byte) (value >> 16);
             buffer[offset + 2] = (byte) (value >> 8);
             buffer[offset + 3] = (byte) value;
         }
-        public final void putInt64(byte[] buffer, int offset, long value) {
+        public final void putLong(byte[] buffer, int offset, long value) {
             buffer[offset + 0] = (byte) (value >> 56);
             buffer[offset + 1] = (byte) (value >> 48);
             buffer[offset + 2] = (byte) (value >> 40);
@@ -280,7 +293,7 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
     private static final class BE64ArrayIO extends BigEndianArrayIO {
         static final ArrayIO INSTANCE = new BE64ArrayIO();
         public void putAddress(byte[] buffer, int offset, long value) {
-            putInt64(buffer, offset, value);
+            putLong(buffer, offset, value);
         }
     }
 }

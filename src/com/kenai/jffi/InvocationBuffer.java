@@ -4,10 +4,19 @@ package com.kenai.jffi;
 import java.nio.Buffer;
 
 public interface InvocationBuffer {
+    @Deprecated
     public abstract void putInt8(final int value);
+    @Deprecated
     public abstract void putInt16(final int value);
+    @Deprecated
     public abstract void putInt32(final int value);
+    @Deprecated
     public abstract void putInt64(final long value);
+    
+    public abstract void putByte(final int value);
+    public abstract void putShort(final int value);
+    public abstract void putInt(final int value);
+    public abstract void putLong(final long value);
     public abstract void putFloat(final float value);
     public abstract void putDouble(final double value);
     public abstract void putAddress(final long value);
