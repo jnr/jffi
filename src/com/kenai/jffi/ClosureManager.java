@@ -73,62 +73,92 @@ public class ClosureManager {
             this.parameters = parameters;
         }
 
-
+        @Deprecated
         public int getInt8(int index) {
+            return getByte(index);
+        }
+        @Deprecated
+        public int getInt16(int index) {
+            return getShort(index);
+        }
+        @Deprecated
+        public int getInt32(int index) {
+            return getInt(index);
+        }
+        @Deprecated
+        public long getInt64(int index) {
+            return getLong(index);
+        }
+        @Deprecated
+        public void setInt8Return(int value) {
+            setByteReturn((byte) value);
+        }
+        @Deprecated
+        public void setInt16Return(int value) {
+            setShortReturn((short) value);
+        }
+        @Deprecated
+        public void setInt32Return(int value) {
+            setIntReturn(value);
+        }
+        @Deprecated
+        public final void setInt64Return(long value) {
+            setLongReturn(value);
+        }
+        public final byte getByte(int index) {
             return IO.getByte(IO.getAddress(parameters + (index * PARAM_SIZE)));
         }
 
-        public int getInt16(int index) {
+        public final short getShort(int index) {
             return IO.getShort(IO.getAddress(parameters + (index * PARAM_SIZE)));
         }
 
-        public int getInt32(int index) {
+        public final int getInt(int index) {
             return IO.getInt(IO.getAddress(parameters + (index * PARAM_SIZE)));
         }
 
-        public long getInt64(int index) {
+        public final long getLong(int index) {
             return IO.getLong(IO.getAddress(parameters + (index * PARAM_SIZE)));
         }
 
-        public float getFloat(int index) {
+        public final float getFloat(int index) {
             return IO.getFloat(IO.getAddress(parameters + (index * PARAM_SIZE)));
         }
 
-        public double getDouble(int index) {
+        public final double getDouble(int index) {
             return IO.getDouble(IO.getAddress(parameters + (index * PARAM_SIZE)));
         }
 
-        public long getAddress(int index) {
+        public final long getAddress(int index) {
             return IO.getAddress(IO.getAddress(parameters + (index * PARAM_SIZE))) & ADDRESS_MASK;
         }
 
-        public void setInt8Return(int value) {
-            IO.putByte(retval, (byte) value);
+        public final void setByteReturn(byte value) {
+            IO.putByte(retval, value);
         }
 
-        public void setInt16Return(int value) {
-            IO.putShort(retval, (short) value);
+        public final void setShortReturn(short value) {
+            IO.putShort(retval, value);
         }
 
-        public void setInt32Return(int value) {
+        public final void setIntReturn(int value) {
             IO.putInt(retval, value);
         }
 
-        public void setInt64Return(long value) {
+        public final void setLongReturn(long value) {
             IO.putLong(retval, value);
         }
 
-        public void setFloatReturn(float value) {
+        public final void setFloatReturn(float value) {
             IO.putFloat(retval, value);
         }
 
-        public void setDoubleReturn(double value) {
+        public final void setDoubleReturn(double value) {
             IO.putDouble(retval, value);
         }
 
-        public void setAddressReturn(long address) {
+        public final void setAddressReturn(long address) {
             IO.putAddress(retval, address);
         }
-        
     }
 }
