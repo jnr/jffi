@@ -43,7 +43,7 @@ final class Init {
                     System.load(path);
                     return;
                 } catch (UnsatisfiedLinkError ex) {}
-                if (Platform.isMac()) {
+                if (Platform.getPlatform().getOS() == Platform.OS.DARWIN) {
                     String orig, ext;
                     if (path.endsWith("dylib")) {
                         orig = "dylib";

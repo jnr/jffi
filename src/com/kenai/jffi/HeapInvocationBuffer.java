@@ -104,11 +104,11 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
         getObjectBuffer().putDirectBuffer(paramIndex++, value, offset, length);
     }
     private static final Encoder getEncoder() {
-        if (Platform.getArch() == Platform.ARCH.I386) {
+        if (Platform.getPlatform().getCPU() == Platform.CPU.I386) {
             return Foreign.getInstance().isRawParameterPackingEnabled()
                     ? newI386RawEncoder()
                     : newLE32Encoder();
-        } else if (Platform.is64()) {
+        } else if (Platform.getPlatform().addressSize() == 64) {
             return ByteOrder.nativeOrder().equals(ByteOrder.BIG_ENDIAN)
                     ? newBE64Encoder() : newLE64Encoder();
         } else {
