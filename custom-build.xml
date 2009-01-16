@@ -18,6 +18,18 @@
         <condition property="native.jar" value="${build.dir}/native.jar">
           <not><isset property="native.jar"/></not>
         </condition>
+        <condition property="make.exe" value="gmake">
+          <or>
+            <os name="FreeBSD"/>
+            <os name="OpenBSD"/>
+          </or>
+        </condition>
+        <condition property="make.exe" value="/usr/sfw/bin/gmake">
+          <os name="SunOS"/>
+        </condition>
+        <condition property="make.exe" value="make">
+          <not><isset property="make.exe"/></not>
+        </condition>
     </target>
     
     <target name="-generate-native-headers" depends="-init-vars,-compile-java">
@@ -41,18 +53,6 @@
     <target name="-build-native-library" depends="-init-vars, -generate-native-headers">
         <mkdir dir="${build.native.dir}"/>
 
-        <condition property="make.exe" value="gmake">
-          <or>
-            <os name="FreeBSD"/>
-            <os name="OpenBSD"/>
-          </or>
-        </condition>
-        <condition property="make.exe" value="/usr/sfw/bin/gmake">
-          <os name="SunOS"/>
-        </condition>
-        <condition property="make.exe" value="make">
-          <not><isset property="make.exe"/></not>
-        </condition>
         <exec executable="${make.exe}" failonerror="true">
             <arg value="JAVA_HOME=${java.home}"/>
             <arg value="SRC_DIR=${src.native.dir}"/>
@@ -64,6 +64,17 @@
         </exec>
     </target>
     
+    <target name="-build-native-testlib" depends="-init-vars">
+        <mkdir dir="${build.native.dir}"/>
+
+        <exec executable="${make.exe}" failonerror="true">
+            <arg value="JAVA_HOME=${java.home}"/>
+            <arg value="BUILD_DIR=${build.dir}"/>
+            <arg value="CPU=${os.arch}"/>
+            <arg value="-f"/>
+            <arg value="libtest/GNUmakefile"/>
+        </exec>
+    </target>
     
     <target name="-build-platform-jar" depends="-init-vars, -build-native-library">
         <echo message="platform=${platform}"/>

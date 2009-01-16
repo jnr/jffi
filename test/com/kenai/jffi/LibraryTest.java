@@ -39,7 +39,7 @@ public class LibraryTest {
     // @Test
     // public void hello() {}
     @Test public void dlopen() {
-        String libName = Platform.isLinux() ? "libc.so.6" : Platform.isMac() ? "libc.dylib" : "libc.so";
+        String libName = UnitHelper.getCLibraryName();
         long handle = Foreign.getInstance().dlopen(libName, Library.LAZY | Library.GLOBAL);
         assertNotSame("Could not open libc.so", 0L, handle);
     }

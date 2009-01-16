@@ -74,6 +74,8 @@
     <import file="custom-build.xml"/>
     <target name="-post-init" depends="-init-vars"/>
     <target name="-post-compile" depends="-build-native-library"/>
+    <target name="-post-compile-test" depends="-build-native-testlib"/>
     <target name="-post-jar" depends="-assemble-final-jar"/>
+
     <target name="-compile-java" depends="-do-compile"/>
 </project>
