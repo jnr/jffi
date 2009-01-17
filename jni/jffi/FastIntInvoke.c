@@ -20,14 +20,14 @@ typedef unsigned int u32;
 
 #if defined(BYPASS_FFI)
 #  define invokeVrI(ctx, retval) do { \
-        (retval)->i = ((jint (*)()) ctx->function)(); \
+        (retval)->i = ((jint (*)()) (ctx)->function)(); \
     } while (0)
 
 #else
 #  define invokeVrI(ctx, retval) do { \
         FFIValue arg0; \
         void* ffiValues[] = { &arg0 }; \
-        ffi_call(&ctx->cif, FFI_FN(ctx->function), retval, ffiValues); \
+        ffi_call(&(ctx)->cif, FFI_FN((ctx)->function), (retval), ffiValues); \
     } while (0)
 #endif
 
@@ -35,73 +35,73 @@ typedef unsigned int u32;
 
 #if defined(BYPASS_FFI)
 # define invokeIrI(ctx, retval, arg1) do { \
-        (retval)->i = ((jint (*)(jint)) ctx->function)(arg1); \
+        (retval)->i = ((jint (*)(jint)) (ctx)->function)(arg1); \
     } while (0)
 
 #elif defined(USE_RAW) && defined(__i386__)
 # define invokeIrI(ctx, retval, arg1) do { \
-        ffi_raw_call(&ctx->cif, FFI_FN(ctx->function), retval, (ffi_raw *) &arg1); \
+        ffi_raw_call(&(ctx)->cif, FFI_FN((ctx)->function), (retval), (ffi_raw *) &arg1); \
     } while (0)
 
 #elif BYTE_ORDER == LITTLE_ENDIAN
 # define invokeIrI(ctx, retval, arg1) do { \
         void* ffiValues[] = { &arg1 }; \
-        ffi_call(&ctx->cif, FFI_FN(ctx->function), retval, ffiValues); \
+        ffi_call(&(ctx)->cif, FFI_FN((ctx)->function), (retval), ffiValues); \
     } while (0)
 
 #else
 # define invokeIrI(ctx, retval, arg1) do { \
-        void* ffiValues[] = {  ARGPTR(&arg1, ctx->cif->arg_types[0]) }; \
-        ffi_call(&ctx->cif, FFI_FN(ctx->function), retval, ffiValues); \
+        void* ffiValues[] = {  ARGPTR(&(arg1), (ctx)->cif.arg_types[0]) }; \
+        ffi_call(&(ctx)->cif, FFI_FN((ctx)->function), (retval), ffiValues); \
     } while (0)
 #endif
 
 #if defined(BYPASS_FFI)
 # define invokeIIrI(ctx, retval, arg1, arg2) do { \
-        (retval)->i = ((jint (*)(jint, jint)) ctx->function)(arg1, arg2); \
+        (retval)->i = ((jint (*)(jint, jint)) (ctx)->function)((arg1), (arg2)); \
     } while (0)
 
 #elif defined(USE_RAW) && defined(__i386__)
 # define invokeIIrI(ctx, retval, arg1, arg2) do { \
-        ffi_raw_call(&ctx->cif, FFI_FN(ctx->function), retval, (ffi_raw *) &arg1); \
+        ffi_raw_call(&(ctx)->cif, FFI_FN((ctx)->function), (retval), (ffi_raw *) &arg1); \
     } while (0)
 #elif BYTE_ORDER == LITTLE_ENDIAN
 # define invokeIIrI(ctx, retval, arg1, arg2) do { \
         void* ffiValues[] = { &arg1, &arg2 }; \
-        ffi_call(&ctx->cif, FFI_FN(ctx->function), retval, ffiValues); \
+        ffi_call(&(ctx)->cif, FFI_FN((ctx)->function), (retval), ffiValues); \
     } while (0)
 #else
 # define invokeIIrI(ctx, retval, arg1, arg2) do {\
         void* ffiValues[] = { \
-            ARGPTR(&arg1, ctx->cif->arg_types[0]), \
-            ARGPTR(&arg2, ctx->cif->arg_types[1]) \
+            ARGPTR(&arg1, (ctx)->cif.arg_types[0]), \
+            ARGPTR(&arg2, (ctx)->cif.arg_types[1]) \
         }; \
-        ffi_call(&ctx->cif, FFI_FN(ctx->function), retval, ffiValues); \
+        ffi_call(&(ctx)->cif, FFI_FN((ctx)->function), (retval), ffiValues); \
     } while (0)
 #endif
 
 #if defined(BYPASS_FFI)
 # define invokeIIIrI(ctx, retval, arg1, arg2, arg3) do { \
-        (retval)->i = ((jint (*)(jint, jint, jint)) ctx->function)(arg1, arg2, arg3); \
+        (retval)->i = ((jint (*)(jint, jint, jint)) (ctx)->function)(arg1, arg2, arg3); \
     } while (0)
 
 #elif defined(USE_RAW) && defined(__i386__)
 # define invokeIIIrI(ctx, retval, arg1, arg2, arg3) do { \
-        ffi_raw_call(&ctx->cif, FFI_FN(ctx->function), retval, (ffi_raw *) &arg1); \
+        ffi_raw_call(&(ctx)->cif, FFI_FN((ctx)->function), (retval), (ffi_raw *) &arg1); \
     } while (0)
 #elif BYTE_ORDER == LITTLE_ENDIAN
 # define invokeIIIrI(ctx, retval, arg1, arg2, arg3) do { \
         void* ffiValues[] = { &arg1, &arg2, &arg3 }; \
-        ffi_call(&ctx->cif, FFI_FN(ctx->function), retval, ffiValues); \
+        ffi_call(&ctx->cif, FFI_FN(ctx->function), (retval), ffiValues); \
     } while (0)
 #else
 # define invokeIIIrI(ctx, retval, arg1, arg2, arg3) do { \
         void* ffiValues[] = { \
-            ARGPTR(&arg1, ctx->cif->arg_types[0]), \
-            ARGPTR(&arg2, ctx->cif->arg_types[1]), \
-            ARGPTR(&arg3, ctx->cif->arg_types[2]) \
+            ARGPTR(&arg1, (ctx)->cif.arg_types[0]), \
+            ARGPTR(&arg2, (ctx)->cif.arg_types[1]), \
+            ARGPTR(&arg3, (ctx)->cif.arg_types[2]) \
         }; \
-        ffi_call(&ctx->cif, FFI_FN(ctx->function), retval, ffiValues); \
+        ffi_call(&(ctx)->cif, FFI_FN((ctx)->function), (retval), ffiValues); \
     } while (0)
 #endif
 
