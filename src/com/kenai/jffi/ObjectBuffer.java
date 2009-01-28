@@ -16,6 +16,7 @@ public final class ObjectBuffer {
     public static final int IN = 0x1;
     public static final int OUT = 0x2;
     public static final int ZERO_TERMINATE = 0x4;
+    public static final int PINNED = 0x8;
 
     static final int ARRAY = 0x10 << TYPE_SHIFT;
     static final int BUFFER = 0x20 << TYPE_SHIFT;

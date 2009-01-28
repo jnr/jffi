@@ -21,14 +21,17 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <jni.h>
+
 #include "jffi.h"
+#include "Exception.h"
 #include "com_kenai_jffi_ObjectBuffer.h"
 
 #include "Array.h"
 
-#define PARAM_NULTERMINATE com_kenai_jffi_ObjectBuffer_ZERO_TERMINATE
-#define PARAM_IN com_kenai_jffi_ObjectBuffer_IN
-#define PARAM_OUT com_kenai_jffi_ObjectBuffer_OUT
+#define ARRAY_NULTERMINATE com_kenai_jffi_ObjectBuffer_ZERO_TERMINATE
+#define ARRAY_IN com_kenai_jffi_ObjectBuffer_IN
+#define ARRAY_OUT com_kenai_jffi_ObjectBuffer_OUT
+#define ARRAY_PINNED com_kenai_jffi_ObjectBuffer_OUT
 #define ARGPRIM_MASK com_kenai_jffi_ObjectBuffer_PRIM_MASK
 #define ARGTYPE_MASK com_kenai_jffi_ObjectBuffer_TYPE_MASK
 #define ARGTYPE_SHIFT com_kenai_jffi_ObjectBuffer_TYPE_SHIFT
@@ -56,14 +59,14 @@ RELEASE(Double, jdouble);
 
 #define ARRAY(JTYPE, NTYPE, flags, obj, offset, length, array) do { \
   if (((array)->array = buf) != NULL) { \
-    int allocSize = sizeof(NTYPE) * (length + ((flags & PARAM_NULTERMINATE) != 0 ? 1 : 0)); \
+    int allocSize = sizeof(NTYPE) * (length + ((flags & ARRAY_NULTERMINATE) != 0 ? 1 : 0)); \
     if (((array)->elems = allocStack(stackAllocator, allocSize)) != NULL) { \
         (array)->stack = 1; \
     } else { \
         (array)->elems = malloc(allocSize); \
         (array)->stack = 0; \
     } \
-    if ((flags & (PARAM_IN | PARAM_OUT)) != PARAM_OUT) { \
+    if ((flags & (ARRAY_IN | ARRAY_OUT)) != ARRAY_OUT) { \
         (*env)->Get##JTYPE##ArrayRegion(env, obj, offset, length, (NTYPE *) array->elems); \
     } \
     (array)->release = release##JTYPE##Array; \
@@ -77,12 +80,14 @@ jffi_getArray(JNIEnv* env, jobject buf, jsize offset, jsize length, int paramTyp
     if (buf == NULL) {
         return NULL;
     }
-    
+    if ((paramType & ARRAY_PINNED) != 0) {
+        return jffi_getArrayCritical(env, buf, offset, length, paramType, array);
+    }
     switch (paramType & ARGPRIM_MASK) {
     case com_kenai_jffi_ObjectBuffer_BYTE:
         ARRAY(Byte, jbyte, paramType, buf, offset, length, array);
         // If the array was really a string, nul terminate it
-        if ((paramType & (PARAM_NULTERMINATE | PARAM_IN | PARAM_OUT)) != PARAM_OUT) {
+        if ((paramType & (ARRAY_NULTERMINATE | ARRAY_IN | ARRAY_OUT)) != ARRAY_OUT) {
             if (array->elems != NULL) {
                 *(((char *) array->elems) + length) = '\0';
             }
@@ -104,17 +109,16 @@ jffi_getArray(JNIEnv* env, jobject buf, jsize offset, jsize length, int paramTyp
         ARRAY(Double, jdouble, paramType, buf, offset, length, array);
         break;
     default:
-        printf("Invalid array type: %#x\n", paramType);  fflush(stdout);
+        throwException(env, IllegalArgument, "Invalid array type: %#x\n", paramType);
         return NULL;
     }
     array->array = buf;
-    array->result = array->elems;
     array->offset = offset;
     array->length = length;
     
     /* If its an IN-only array, don't bother copying the native data back. */
-    array->mode = ((paramType & (PARAM_IN | PARAM_OUT)) == PARAM_IN) ? JNI_ABORT : 0;
-    return array->result;
+    array->mode = ((paramType & (ARRAY_IN | ARRAY_OUT)) == ARRAY_IN) ? JNI_ABORT : 0;
+    return array->elems;
 }
 
 static void 
@@ -124,16 +128,16 @@ jffi_releaseCriticalArray(JNIEnv* env, Array *array)
 }
 
 void*
-jffi_getArrayCritical(JNIEnv* env, jobject buf, jsize offset, jsize length, int type, struct Array* array) 
+jffi_getArrayCritical(JNIEnv* env, jobject buf, jsize offset, jsize length, int paramType, struct Array* array)
 {
     if (buf == NULL) {
         return NULL;
     }
     array->array = buf;
-    if (array->array != NULL) {
-        array->elems = (*env)->GetPrimitiveArrayCritical(env, array->array, NULL);
-        array->release = jffi_releaseCriticalArray;
-    }
+    array->elems = (*env)->GetPrimitiveArrayCritical(env, array->array, NULL);
+    array->release = jffi_releaseCriticalArray;
+    /* If its an IN-only array, don't bother copying the native data back. */
+    array->mode = ((paramType & (ARRAY_IN | ARRAY_OUT)) == ARRAY_IN) ? JNI_ABORT : 0;
     return array->elems != NULL ? (char *) array->elems + offset : NULL;
 }
 

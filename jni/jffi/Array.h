@@ -22,7 +22,6 @@
 typedef struct Array {
     jobject array;
     void* elems;
-    void* result;
     jsize offset;
     jsize length;
     int mode;
