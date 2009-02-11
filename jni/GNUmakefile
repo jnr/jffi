@@ -1,14 +1,13 @@
 # -*- makefile -*-
-OS ?= $(shell uname -s | tr '[:upper:]' '[:lower:]')
+BUILD_OS = $(shell uname -s | tr '[:upper:]' '[:lower:]')
+OS = $(BUILD_OS)
 ifeq ($(OS),sunos)
   OS = solaris
 endif
+
 CPU ?= $(shell uname -m | sed -e 's/i[345678]86/i386/')
 MODEL = 32 # Default to 32bit compiles
 PLATFORM = $(CPU)-$(OS)
-JDK_HOME=$(shell if [ -d $(JAVA_HOME)/include ];then echo $(JAVA_HOME); else echo $(JAVA_HOME)/..; fi)
-
-
 
 
 # Set defaults to unix (linux/solaris/bsd)
@@ -18,7 +17,7 @@ JNIEXT = so
 
 export MACOSX_DEPLOYMENT_TARGET=10.4
 
-CCACHE=$(shell /usr/bin/which ccache)
+#CCACHE=$(shell /usr/bin/which ccache)
 SRC_DIR ?= $(shell pwd)/jni
 JNI_DIR ?= $(SRC_DIR)
 BUILD_DIR ?= $(shell pwd)/build
@@ -59,17 +58,26 @@ IFLAGS = -I"$(BUILD_DIR)" -I"$(JFFI_SRC_DIR)" -I"$(LIBFFI_BUILD_DIR)/include"
 CFLAGS = $(OFLAGS) $(WFLAGS) $(IFLAGS) $(PICFLAGS) $(JDK_INCLUDES)
 CFLAGS += -D_REENTRANT -D_LARGEFILE64_SOURCE -D_GNU_SOURCE
 
-ifneq ($(MINGW32),)
-	OS=win32
-	CPU=i386
-	CC=i386-mingw32-gcc
-	LD=i386-mingw32-ld
-	PICFLAGS=
-	JDK_INCLUDES=-I$(JNI_DIR)/include -I$(JNI_DIR)/include/win32
+ifeq ($(OS),mingw32)
+  OS = win32
+  CPU = i386
+  JDK_INCLUDES=-I$(JNI_DIR)/include -I$(JNI_DIR)/include/win32
+  ifneq ($(OS),$(BUILD_OS))
+    CC ?= i386-mingw32-gcc
+    LD ?= i386-mingw32-ld
+  else
+    CC = gcc
+    LD = ld
+  endif
+endif
+ifneq ($(findstring cygwin,$(BUILD_OS)),)
+  OS = win32
+  JAVA_HOME := $(shell cygpath -u \""$(JAVA_HOME)"\")
 endif
 ifeq ($(OS), win32)
-	CC += -mno-cygwin
-	LDFLAGS += -mno-cygwin -Wl,--add-stdcall-alias
+  CC += -mno-cygwin
+  LDFLAGS += -mno-cygwin -Wl,--add-stdcall-alias
+  PICFLAGS=
 endif
 ifeq ($(OS), darwin)
   PLATFORM = darwin
@@ -112,6 +120,7 @@ ifeq ($(MODEL), 64)
   LD += -m64
 endif
 
+JDK_HOME=$(shell if [ -d $(JAVA_HOME)/include ];then echo $(JAVA_HOME); else echo $(JAVA_HOME)/..; fi)
 LIBJFFI = $(BUILD_DIR)/$(PREFIX)$(LIBNAME).$(JNIEXT)
 LIBTEST = $(BUILD_DIR)/$(PREFIX)$(LIBNAME)test.$(LIBEXT)
 FFI_CONFIGURE = $(LIBFFI_SRC_DIR)/configure --disable-static \
@@ -122,6 +131,10 @@ endif
 all:	$(LIBJFFI) $(LIBTEST)
 
 debug:
+	@echo OS="$(OS)"
+	@echo BUILD_OS="$(BUILD_OS)"
+	@echo JAVA_HOME="$(JAVA_HOME)"
+	@echo JDK_HOME="$(JDK_HOME)"
 	@echo "OBJS=$(OBJS) JFFI_BUILD_DIR=$(JFFI_BUILD_DIR) PLATFORM=$(PLATFORM)"
 
 $(LIBJFFI):  $(LIBFFI) $(OBJS)
@@ -185,4 +198,4 @@ $(LIBFFI):
 endif
 clean::
 	# nothing to do - ant will delete the build dir
-	
+
