@@ -23,7 +23,9 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <string.h>
-#include <pthread.h>
+#ifndef _WIN32
+#  include <pthread.h>
+#endif
 #ifdef __linux__
 #  include <endian.h>
 #endif
