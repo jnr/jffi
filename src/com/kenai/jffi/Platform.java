@@ -69,6 +69,8 @@ public abstract class Platform {
             return OS.OPENBSD;
         } else if (osName.startsWith("freebsd")) {
             return OS.FREEBSD;
+        } else if (osName.startsWith("windows")) {
+            return OS.WINDOWS;
         } else {
             throw new ExceptionInInitializerError("Unsupported operating system");
         }

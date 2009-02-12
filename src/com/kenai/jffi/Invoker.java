@@ -94,7 +94,7 @@ public abstract class Invoker {
             return foreign.invoke32IrI(function.getAddress32(), arg1);
         }
         public final int invokeIIrI(Function function, int arg1, int arg2) {
-            return foreign.invoke32IIrI(function.getAddress32(), arg2, arg1);
+            return foreign.invoke32IIrI(function.getAddress32(), arg1, arg2);
         }
         public final int invokeIIIrI(Function function, int arg1, int arg2, int arg3) {
             return foreign.invoke32IIIrI(function.getAddress32(), arg1, arg2, arg3);
@@ -116,7 +116,7 @@ public abstract class Invoker {
             return foreign.invoke64IrI(function.getAddress64(), arg1);
         }
         public int invokeIIrI(Function function, int arg1, int arg2) {
-            return foreign.invoke64IIrI(function.getAddress64(), arg2, arg1);
+            return foreign.invoke64IIrI(function.getAddress64(), arg1, arg2);
         }
         public int invokeIIIrI(Function function, int arg1, int arg2, int arg3) {
             return foreign.invoke64IIIrI(function.getAddress64(), arg1, arg2, arg3);
