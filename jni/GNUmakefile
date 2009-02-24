@@ -113,6 +113,10 @@ ifeq ($(CPU), amd64)
   MODEL = 64
 endif
 
+ifeq ($(CPU), x86_64)
+  MODEL = 64
+endif
+
 ifeq ($(MODEL), 64)
   # Change the CC/LD instead of CFLAGS/LDFLAGS, incase other things in the flags
   # makes the libffi build choke

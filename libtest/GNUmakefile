@@ -78,6 +78,10 @@ ifeq ($(CPU), amd64)
   MODEL = 64
 endif
 
+ifeq ($(CPU), x86_64)
+  MODEL = 64
+endif
+
 ifeq ($(MODEL), 64)
   CC += -m64
   LD += -m64
