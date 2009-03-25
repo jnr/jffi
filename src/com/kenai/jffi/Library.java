@@ -32,7 +32,7 @@ public final class Library {
     private static final ThreadLocal<String> lastError = new ThreadLocal<String>();
 
     private static final class DefaultLibrary {
-        private static final Library INSTANCE = new Library(null, Library.LAZY);
+        private static final Library INSTANCE = new Library(null, dlopen(null, LAZY));
     }
     public static final int LAZY   = 0x00001;
     public static final int NOW    = 0x00002;
@@ -77,15 +77,17 @@ public final class Library {
             return getDefault();
         }
         WeakReference<Library> ref = cache.get(name);
-        Library lib;
-        if (ref != null && (lib = ref.get()) != null) {
+        Library lib = ref != null ? ref.get() : null;
+        if (lib != null) {
             return lib;
         }
-        final long address = dlopen(name, flags);
-        if (address == 0L) {
+        
+        lib = openLibrary(name, flags);
+        if (lib == null) {
             return null;
         }
-        cache.put(name, new WeakReference<Library>(lib = new Library(name, address)));
+        cache.put(name, new WeakReference<Library>(lib));
+        
         return lib;
     }
 
@@ -100,7 +102,13 @@ public final class Library {
      * @return A <tt>Library</tt> instance representing the named library.
      */
     public static final Library openLibrary(String name, int flags) {
+        // dlopen on some OS does not like flags=0, so set to sensible defaults
+        if (flags == 0) {
+            flags = LAZY;
+        }
+
         final long address = dlopen(name, flags);
+
         return address != 0L ? new Library(name, address) : null;
     }
     
@@ -109,20 +117,6 @@ public final class Library {
         this.handle = address;
     }
 
-    @Deprecated
-    public Library(String name, int flags) {
-        this.name = name;
-        this.handle = dlopen(name, flags);
-        if (this.handle == 0L) {
-            String error = String.format("Could not open [%s]: %s", name, getLastError());
-            throw new UnsatisfiedLinkError(error);
-        }
-    }
-
-    @Deprecated
-    public final Address findSymbol(String name) {
-        return new Address(getSymbolAddress(name));
-    }
     /**
      * Gets the address of a symbol within the <tt>Library</tt>.
      * 
@@ -139,12 +133,7 @@ public final class Library {
             return address;
         }
     }
-
-    @Deprecated
-    public static final String lastError() {
-        return getLastError();
-    }
-
+    
     /**
      * Gets the current error string from dlopen/LoadLibrary.
      *
