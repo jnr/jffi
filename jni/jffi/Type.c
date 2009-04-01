@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <ffi.h>
 #include <jni.h>
+#include "com_kenai_jffi_Foreign.h"
 #include "jffi.h"
 
 ffi_type*
@@ -24,3 +25,45 @@ jffi_TypeToFFI(int type)
     return NULL;
 }
 
+/*
+ * Class:     com_kenai_jffi_Foreign
+ * Method:    lookupType
+ * Signature: (I)J
+ */
+JNIEXPORT jlong JNICALL
+Java_com_kenai_jffi_Foreign_lookupBuiltinType(JNIEnv* env, jobject self, jint type)
+{
+    return p2j(jffi_TypeToFFI(type));
+}
+
+/*
+ * Class:     com_kenai_jffi_Foreign
+ * Method:    getTypeSize
+ * Signature: (J)I
+ */
+JNIEXPORT jint JNICALL
+Java_com_kenai_jffi_Foreign_getTypeSize(JNIEnv* env, jobject self, jlong handle)
+{
+    return ((ffi_type *) j2p(handle))->size;
+}
+
+/*
+ * Class:     com_kenai_jffi_Foreign
+ * Method:    getTypeAlign
+ * Signature: (J)I
+ */
+JNIEXPORT jint JNICALL Java_com_kenai_jffi_Foreign_getTypeAlign(JNIEnv* env, jobject self, jlong handle)
+{
+    return ((ffi_type *) j2p(handle))->alignment;
+}
+
+/*
+ * Class:     com_kenai_jffi_Foreign
+ * Method:    getTypeType
+ * Signature: (J)I
+ */
+JNIEXPORT jint JNICALL
+Java_com_kenai_jffi_Foreign_getTypeType(JNIEnv* env, jobject self, jlong handle)
+{
+    return ((ffi_type *) j2p(handle))->type;
+}

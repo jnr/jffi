@@ -50,6 +50,52 @@ final class Foreign {
     final native long newClosure(Object proxy, Method closureMethod, int returnType, int[] paramTypes, int convention);
     final native void freeClosure(long handle);
 
+    /**
+     * Gets the address of the ffi_type structure for the builtin type
+     *
+     * @param type The FFI type enum value
+     * @return The address of the ffi_type struct for this type, or <tt>null</tt>
+     */
+    final native long lookupBuiltinType(int type);
+
+    /**
+     * Gets the native size of the type
+     *
+     * @param handle Address of the type structure
+     * @return The native size of the type
+     */
+    final native int getTypeSize(long handle);
+
+    /**
+     * Gets the minimum required alignment of the FFI type
+     *
+     * @param handle Address of the type structure
+     * @return The minimum required alignment
+     */
+    final native int getTypeAlign(long handle);
+
+    /**
+     * Gets the primitive type enum for the FFI type
+     *
+     * @param handle Address of the type structure
+     * @return The builtin primitive type of the type structure
+     */
+    final native int getTypeType(long handle);
+
+    /**
+     * Allocates a new FFI struct layout
+     *
+     * @param fields An array of ffi_type pointers desccribing the fields of the struct
+     * @return The native address of the ffi_type structure for the new struct layout
+     */
+    final native long newStruct(long[] fields);
+
+    /**
+     * Frees a FFI struct handle allocated via {@linkl #newStruct}.
+     *
+     * @param handle The FFI struct handle
+     */
+    final native void freeStruct(long handle);
     
     final native int invoke32VrI(int function);
     final native int invoke64VrI(long function);
