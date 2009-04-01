@@ -149,3 +149,18 @@ get_point_b(struct rectangle* r)
 {
     return &r->b;
 }
+
+struct s8s32 {
+    char s8;
+    int s32;
+};
+
+struct s8s32
+struct_return_s8s32()
+{
+    struct s8s32 s;
+    s.s8 = 0x7f;
+    s.s32 = 0x12345678;
+
+    return s;
+};

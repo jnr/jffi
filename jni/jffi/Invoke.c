@@ -21,7 +21,7 @@
 
 #ifdef USE_RAW
 static inline void
-invokeArray(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer, FFIValue* retval)
+invokeArray(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer, void* returnBuffer)
 {
     Function* ctx = (Function *) (uintptr_t) ctxAddress;
     union { double d; long long ll; jbyte tmp[PARAM_SIZE]; } tmpStackBuffer[MAX_STACK_ARGS];
@@ -33,12 +33,37 @@ invokeArray(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer, FFIValue* ret
         }
         (*env)->GetByteArrayRegion(env, paramBuffer, 0, ctx->rawParameterSize, tmpBuffer);
     }
-    ffi_raw_call(&ctx->cif, FFI_FN(ctx->function), retval, (ffi_raw *) tmpBuffer);
+    ffi_raw_call(&ctx->cif, FFI_FN(ctx->function), returnBuffer, (ffi_raw *) tmpBuffer);
     set_last_error(errno);
 }
+
+static void
+invokeArrayNonRaw(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer, void* returnBuffer)
+{
+    Function* ctx = (Function *) (uintptr_t) ctxAddress;
+    union { double d; long long ll; jbyte tmp[PARAM_SIZE]; } tmpStackBuffer[MAX_STACK_ARGS];
+    jbyte *tmpBuffer = (jbyte *) &tmpStackBuffer[0];
+    void* ffiStackArgs[MAX_STACK_ARGS];
+    void** ffiArgs = ffiStackArgs;
+
+    if (ctx->cif.nargs > 0) {
+        unsigned int i;
+        if (ctx->cif.nargs > MAX_STACK_ARGS) {
+            tmpBuffer = alloca(ctx->cif.nargs * PARAM_SIZE);
+            ffiArgs = alloca(ctx->cif.nargs * sizeof(void *));
+        }
+        for (i = 0; i < ctx->cif.nargs; ++i) {
+            ffiArgs[i] = &tmpBuffer[ctx->rawParamOffsets[i]];
+        }
+        (*env)->GetByteArrayRegion(env, paramBuffer, 0, ctx->cif.nargs * PARAM_SIZE, tmpBuffer);
+    }
+    ffi_call(&ctx->cif, FFI_FN(ctx->function), returnBuffer, ffiArgs);
+    set_last_error(errno);
+}
+
 #else
 static inline void
-invokeArray(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer, FFIValue* retval)
+invokeArray(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer, void* returnBuffer)
 {
     Function* ctx = (Function *) (uintptr_t) ctxAddress;
     union { double d; long long ll; jbyte tmp[PARAM_SIZE]; } tmpStackBuffer[MAX_STACK_ARGS];
@@ -57,9 +82,11 @@ invokeArray(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer, FFIValue* ret
         }
         (*env)->GetByteArrayRegion(env, paramBuffer, 0, ctx->cif.nargs * PARAM_SIZE, tmpBuffer);
     }
-    ffi_call(&ctx->cif, FFI_FN(ctx->function), retval, ffiArgs);
+    ffi_call(&ctx->cif, FFI_FN(ctx->function), returnBuffer, ffiArgs);
     set_last_error(errno);
 }
+#define invokeArrayNonRaw invokeArray
+
 #endif
 /*
  * Class:     com_kenai_jffi_Foreign
@@ -128,6 +155,22 @@ Java_com_kenai_jffi_Foreign_invokeArrayDouble(JNIEnv* env, jclass self, jlong ct
     FFIValue retval;
     invokeArray(env, ctxAddress, paramBuffer, &retval);
     return retval.d;
+}
+
+/*
+ * Class:     com_kenai_jffi_Foreign
+ * Method:    invokeArrayWithReturnBuffer
+ * Signature: (J[B[B)V
+ */
+JNIEXPORT void JNICALL
+Java_com_kenai_jffi_Foreign_invokeArrayWithReturnBuffer(JNIEnv* env, jclass self, jlong ctxAddress,
+        jbyteArray paramBuffer, jbyteArray returnBuffer)
+{
+    Function* ctx = (Function *) (uintptr_t) ctxAddress;
+    jbyte* retval = alloca(ctx->cif.rtype->size);
+
+    invokeArrayNonRaw(env, ctxAddress, paramBuffer, retval);
+    (*env)->SetByteArrayRegion(env, returnBuffer, 0, ctx->cif.rtype->size, retval);
 }
 
 #define MAX_STACK_OBJECTS (4)
