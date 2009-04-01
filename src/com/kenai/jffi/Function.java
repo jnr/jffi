@@ -8,12 +8,12 @@ public final class Function {
     private final int rawParameterSize;
     
     public Function(long address, Type returnType, Type[] paramTypes, CallingConvention convention) {
-        int[] nativeParamTypes = new int[paramTypes.length];
+        long[] nativeParamTypes = new long[paramTypes.length];
         for (int i = 0; i < paramTypes.length; ++i) {
-            nativeParamTypes[i] = paramTypes[i].value();
+            nativeParamTypes[i] = paramTypes[i].handle();
         }
         final long h = Foreign.getInstance().newFunction(address,
-                returnType.value(), nativeParamTypes,
+                returnType.handle(), nativeParamTypes,
                 convention == CallingConvention.STDCALL ? 1 : 0);
         if (h == 0) {
             throw new RuntimeException("Failed to create native function");

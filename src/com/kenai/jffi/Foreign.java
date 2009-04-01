@@ -42,7 +42,7 @@ final class Foreign {
     final native long allocateMemory(long size, boolean clear);
     final native void freeMemory(long address);
 
-    final native long newFunction(long address, int returnType, int[] paramTypes, int convention);
+    final native long newFunction(long address, long returnType, long[] paramTypes, int convention);
     final native void freeFunction(long handle);
     final native boolean isRawParameterPackingEnabled();
     final native int getFunctionRawParameterSize(long handle);

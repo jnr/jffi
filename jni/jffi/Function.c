@@ -14,7 +14,6 @@ static inline int FFI_ALIGN(int v, int a) {
     return ((((size_t) v) - 1) | (a - 1)) +1;
 }
 
-static ffi_type* getFFIType(int type);
 /*
  * Class:     com_kenai_jffi_Foreign
  * Method:    newCallContext
@@ -22,10 +21,10 @@ static ffi_type* getFFIType(int type);
  */
 JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_newFunction(JNIEnv* env, jobject self,
-        jlong function, jint returnType, jintArray paramArray, jint convention)
+        jlong function, jlong returnType, jlongArray paramArray, jint convention)
 {
     Function* ctx = NULL;
-    jint* paramTypes;
+    jlong* paramTypes;
     int paramCount, i, rawOffset = 0;
     ffi_type* ffiParamTypes;
     int ffiStatus;
@@ -48,11 +47,11 @@ Java_com_kenai_jffi_Foreign_newFunction(JNIEnv* env, jobject self,
         goto cleanup;
     }
 
-    paramTypes = alloca(sizeof(int) * paramCount);
-    (*env)->GetIntArrayRegion(env, paramArray, 0, paramCount, paramTypes);
+    paramTypes = alloca(paramCount * sizeof(jlong));
+    (*env)->GetLongArrayRegion(env, paramArray, 0, paramCount, paramTypes);
 
     for (i = 0; i < paramCount; ++i) {
-        ffi_type* type = getFFIType(paramTypes[i]);
+        ffi_type* type = (ffi_type *) j2p(paramTypes[i]);
         if (type == NULL) {
             throwException(env, IllegalArgument, "Invalid parameter type: %#x", paramTypes[i]);
             goto cleanup;
@@ -66,7 +65,7 @@ Java_com_kenai_jffi_Foreign_newFunction(JNIEnv* env, jobject self,
 #else
     abi = FFI_DEFAULT_ABI;
 #endif
-    ffiStatus = ffi_prep_cif(&ctx->cif, abi, paramCount, getFFIType(returnType),
+    ffiStatus = ffi_prep_cif(&ctx->cif, abi, paramCount, (ffi_type *) j2p(returnType),
             ctx->ffiParamTypes);
     switch (ffiStatus) {
         case FFI_OK:
@@ -127,25 +126,3 @@ Java_com_kenai_jffi_Foreign_getFunctionRawParameterSize(JNIEnv* env, jobject sel
     Function* ctx = (Function *) j2p(handle);
     return ctx->rawParameterSize;
 }
-
-static ffi_type*
-getFFIType(int type)
-{
-    switch (type) {
-        case FFI_TYPE_VOID: return &ffi_type_void;
-        case FFI_TYPE_INT: return &ffi_type_sint;
-        case FFI_TYPE_FLOAT:return &ffi_type_float;
-        case FFI_TYPE_DOUBLE: return &ffi_type_double;
-        case FFI_TYPE_UINT8: return &ffi_type_uint8;
-        case FFI_TYPE_SINT8: return &ffi_type_sint8;
-        case FFI_TYPE_UINT16: return &ffi_type_uint16;
-        case FFI_TYPE_SINT16: return &ffi_type_sint16;
-        case FFI_TYPE_UINT32: return &ffi_type_uint32;
-        case FFI_TYPE_SINT32: return &ffi_type_sint32;
-        case FFI_TYPE_UINT64: return &ffi_type_uint64;
-        case FFI_TYPE_SINT64: return &ffi_type_sint64;
-        case FFI_TYPE_POINTER: return &ffi_type_pointer;
-    }
-    return NULL;
-}
-
