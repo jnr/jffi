@@ -19,9 +19,9 @@ public final class Function {
             nativeParamTypes[i] = paramTypes[i].handle();
         }
 
-        if (!(returnType instanceof Type.Builtin)) {
-            throw new IllegalArgumentException("return type " + returnType + " is not supported");
-        }
+//        if (!(returnType instanceof Type.Builtin)) {
+//            throw new IllegalArgumentException("return type " + returnType + " is not supported");
+//        }
 
         final long h = Foreign.getInstance().newFunction(address,
                 returnType.handle(), nativeParamTypes,
