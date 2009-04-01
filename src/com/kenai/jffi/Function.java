@@ -13,15 +13,8 @@ public final class Function {
         
         long[] nativeParamTypes = new long[paramTypes.length];
         for (int i = 0; i < paramTypes.length; ++i) {
-            if (!(paramTypes[i] instanceof Type.Builtin)) {
-                throw new IllegalArgumentException("parameter type " + paramTypes[i] + " is not supported");
-            }
             nativeParamTypes[i] = paramTypes[i].handle();
         }
-
-//        if (!(returnType instanceof Type.Builtin)) {
-//            throw new IllegalArgumentException("return type " + returnType + " is not supported");
-//        }
 
         final long h = Foreign.getInstance().newFunction(address,
                 returnType.handle(), nativeParamTypes,
@@ -35,8 +28,7 @@ public final class Function {
         // garbage collected
         //
         this.returnType = returnType;
-        this.paramTypes = new Type[paramTypes.length];
-        System.arraycopy(paramTypes, 0, this.paramTypes, 0, paramTypes.length);
+        this.paramTypes = (Type[]) paramTypes.clone();
 
         this.parameterCount = nativeParamTypes.length;
         this.rawParameterSize = Foreign.getInstance().getFunctionRawParameterSize(h);

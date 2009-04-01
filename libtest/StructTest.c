@@ -163,4 +163,16 @@ struct_return_s8s32()
     s.s32 = 0x12345678;
 
     return s;
-};
+}
+
+int
+struct_s8s32_get_s8(struct s8s32 s)
+{
+    return s.s8;
+}
+
+int
+struct_s8s32_get_s32(struct s8s32 s)
+{
+    return s.s32;
+}

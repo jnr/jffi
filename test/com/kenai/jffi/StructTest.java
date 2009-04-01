@@ -83,7 +83,7 @@ public class StructTest {
         long function = foreign.newFunction(sym, struct, new long[0], 0);
         assertNotSame("Could not create function for struct_return_s8s32", 0L, function);
      
-        byte[] paramBuffer = new byte[foreign.getFunctionRawParameterSize(function)];
+        byte[] paramBuffer = new byte[0];
         byte[] returnBuffer = new byte[8];
         foreign.invokeArrayWithReturnBuffer(function, paramBuffer, returnBuffer);
         ByteBuffer buf = ByteBuffer.wrap(returnBuffer).order(ByteOrder.nativeOrder());
@@ -109,5 +109,32 @@ public class StructTest {
         ByteBuffer buf = ByteBuffer.wrap(returnBuffer).order(ByteOrder.nativeOrder());
         assertEquals("Wrong s8 value", (byte) 0x7f, buf.get(0));
         assertEquals("Wrong s32 value", 0x12345678, buf.getInt(4));
+    }
+
+    @Test public void paramS8S32() throws Throwable {
+        Foreign foreign = Foreign.getInstance();
+
+        Library lib = Library.getCachedInstance("build/libtest.so", Library.LAZY | Library.GLOBAL);
+        assertNotNull("Could not open libtest", lib);
+
+        long sym_s8 = lib.getSymbolAddress("struct_s8s32_get_s8");
+        assertNotSame("Could not lookup struct_s8s32_get_s8", 0L, sym_s8);
+
+        long sym_s32 = lib.getSymbolAddress("struct_s8s32_get_s32");
+        assertNotSame("Could not lookup struct_s8s32_get_s32", 0L, sym_s32);
+
+        Struct s8s32 = new Struct(new Type[] { Type.SINT8, Type.SINT32 });
+        Function get_s8 = new Function(sym_s8, Type.SINT32, new Type[] { s8s32 });
+        Function get_s32 = new Function(sym_s32, Type.SINT32, new Type[] { s8s32 });
+        HeapInvocationBuffer paramBuffer = new HeapInvocationBuffer(get_s8);
+        ByteBuffer buf = ByteBuffer.wrap(paramBuffer.array()).order(ByteOrder.nativeOrder());
+        buf.put(0, (byte) 0x12);
+        buf.putInt(4, 0x87654321);
+
+        int retval = 0;
+        retval = foreign.invokeArrayInt32(get_s8.getAddress64(), paramBuffer.array());
+        assertEquals("Wrong s8 value", 0x12, retval);
+        retval = foreign.invokeArrayInt32(get_s32.getAddress64(), paramBuffer.array());
+        assertEquals("Wrong s32 value", 0x87654321, retval);
     }
 }
