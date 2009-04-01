@@ -21,29 +21,47 @@ package com.kenai.jffi;
 /**
  * Native parameter and return types.
  */
-public enum Type {
+public abstract class Type {
     /* Note: These must match the native FFI types */
-    VOID(0),
-    INT(1),
-    FLOAT(2),
-    DOUBLE(3),
-    LONGDOUBLE(4),
-    UINT8(5),
-    SINT8(6),
-    UINT16(7),
-    SINT16(8),
-    UINT32(9),
-    SINT32(10),
-    UINT64(11),
-    SINT64(12),
-    STRUCT(13),
-    POINTER(14);
-    private final int value;
+    public static final Type VOID = new Builtin(0);
+    public static final Type INT = new Builtin(1);
+    public static final Type FLOAT = new Builtin(2);
+    public static final Type DOUBLE = new Builtin(3);
+    public static final Type LONGDOUBLE = new Builtin(4);
+    public static final Type UINT8 = new Builtin(5);
+    public static final Type SINT8 = new Builtin(6);
+    public static final Type UINT16 = new Builtin(7);
+    public static final Type SINT16 = new Builtin(8);
+    public static final Type UINT32 = new Builtin(9);
+    public static final Type SINT32 = new Builtin(10);
+    public static final Type UINT64 = new Builtin(11);
+    public static final Type SINT64 = new Builtin(12);
+    public static final Type STRUCT = new Builtin(13);
+    public static final Type POINTER = new Builtin(14);
 
-    private Type(int value) {
-        this.value = value;
+    protected final int type;
+    protected final long handle;
+
+    Type(int type, long handle) {
+        this.type = type;
+        this.handle = handle;
     }
+    
     public int value() {
-        return value;
+        return type;
+    }
+
+    public int type() {
+        return type;
+    }
+
+    final long handle() {
+        return handle;
+    }
+
+    public static final class Builtin extends Type {
+        private Builtin(int type) {
+            super(type, Foreign.getInstance().lookupBuiltinType(type));
+        }
     }
 }
