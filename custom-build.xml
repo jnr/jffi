@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project name="jffi" default="default" basedir=".">
-    <description>Builds, tests, and runs the project jffi.</description>
+<project name="custom-build" default="default" basedir=".">
     <target name="-compile-java"/>
     <target name="build-native" depends="-build-platform-jar, -assemble-final-jar"/>
     
