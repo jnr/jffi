@@ -58,6 +58,9 @@ public final class Function {
     final int getAddress32() {
         return address32;
     }
+    final Type getReturnType() {
+        return returnType;
+    }
     @Override
     protected void finalize() throws Throwable {
         try {

@@ -255,9 +255,9 @@ public class ClosureTest {
         Function f = new Function(UnitHelper.findSymbol("testClosureVrT").address, s8f32s32, new Type[] { Type.POINTER });
         HeapInvocationBuffer paramBuffer = new HeapInvocationBuffer(f);
         paramBuffer.putAddress(handle.getAddress());
-        ByteBuffer retval = ByteBuffer.allocate(12).order(ByteOrder.nativeOrder());
-        Foreign.getInstance().invokeArrayWithReturnBuffer(f.getAddress64(),
-                paramBuffer.array(), retval.array());
+
+        ByteBuffer retval = ByteBuffer.wrap(Invoker.getInstance().invokeBuffer(f, paramBuffer));
+        retval.order(ByteOrder.nativeOrder());
         assertTrue("Closure not called", called[0]);
         assertEquals("Wrong s8 field value", S8_MAGIC, retval.get(0));
         assertEquals("Wrong s32 field value", S32_MAGIC, retval.getInt(8));
@@ -290,9 +290,9 @@ public class ClosureTest {
         Function f = new Function(UnitHelper.findSymbol("testClosureVrT").address, s8f32s32, new Type[] { Type.POINTER });
         HeapInvocationBuffer paramBuffer = new HeapInvocationBuffer(f);
         paramBuffer.putAddress(handle.getAddress());
-        ByteBuffer retval = ByteBuffer.allocate(12).order(ByteOrder.nativeOrder());
-        Foreign.getInstance().invokeArrayWithReturnBuffer(f.getAddress64(),
-                paramBuffer.array(), retval.array());
+        
+        ByteBuffer retval = ByteBuffer.wrap(Invoker.getInstance().invokeBuffer(f, paramBuffer));
+        retval.order(ByteOrder.nativeOrder());
         assertTrue("Closure not called", called[0]);
         assertEquals("Wrong s8 field value", S8_MAGIC, retval.get(0));
         assertEquals("Wrong s32 field value", S32_MAGIC, retval.getInt(8));
