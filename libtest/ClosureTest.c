@@ -77,6 +77,18 @@ void testClosureDrV(void (*closure)(double), double a1)
 {
     (*closure)(a1);
 }
+
+struct s8f32s32 {
+    char s8;
+    float f32;
+    int s32;
+};
+// Takes a struct argument
+void testClosureTrV(void (*closure)(struct s8f32s32 s), struct s8f32s32* s)
+{
+    (*closure)(*s);
+}
+
 //
 // These macros produce functions of the form:
 // testClosureBIrV(void (*closure)(char, int), char a1, int a2) {}

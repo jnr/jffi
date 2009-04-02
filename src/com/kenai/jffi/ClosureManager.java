@@ -133,9 +133,6 @@ public class ClosureManager {
         Proxy proxy = new Proxy(closure);
         long[] nativeParamTypes = new long[parameterTypes.length];
         for (int i = 0; i < parameterTypes.length; ++i) {
-            if (!(parameterTypes[i] instanceof Type.Builtin)) {
-                throw new IllegalArgumentException("Unsupported parameter type " + parameterTypes[i]);
-            }
             nativeParamTypes[i] = parameterTypes[i].handle();
         }
         

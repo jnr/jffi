@@ -2,6 +2,7 @@
 package com.kenai.jffi;
 
 import com.kenai.jffi.UnitHelper.InvokerType;
+import com.kenai.jffi.UnitHelper.Address;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -11,13 +12,14 @@ import static org.junit.Assert.*;
 
 public class ClosureTest {
     private static interface LibClosureTest {
-        void testClosureVrV(long addr);
-        byte testClosureVrB(long addr);
-        short testClosureVrS(long addr);
-        int testClosureVrI(long addr);
-        long testClosureVrL(long addr);
-        float testClosureVrF(long addr);
-        double testClosureVrD(long addr);
+        void testClosureVrV(Address closure);
+        byte testClosureVrB(Address closure);
+        short testClosureVrS(Address closure);
+        int testClosureVrI(Address closure);
+        long testClosureVrL(Address closure);
+        float testClosureVrF(Address closure);
+        double testClosureVrD(Address closure);
+        void testClosureTrV(Address closure, Address struct);
     }
     private LibClosureTest lib, fastint, fastlong;
     public ClosureTest() {
@@ -58,7 +60,7 @@ public class ClosureTest {
         };
         Closure.Handle handle = ClosureManager.getInstance().newClosure(closure,
                 Type.VOID, new Type[0], CallingConvention.DEFAULT);
-        lib.testClosureVrV(handle.getAddress());
+        lib.testClosureVrV(new Address(handle));
         assertTrue("Closure not called", called[0]);
     }
     @Test public void defaultClosureVrV() throws Throwable {
@@ -83,7 +85,7 @@ public class ClosureTest {
         };
         Closure.Handle handle = ClosureManager.getInstance().newClosure(closure,
                 Type.SINT8, new Type[0], CallingConvention.DEFAULT);
-        byte retval = lib.testClosureVrB(handle.getAddress());
+        byte retval = lib.testClosureVrB(new Address(handle));
         assertTrue("Closure not called", called[0]);
         assertEquals("Wrong value returned by closure", MAGIC, retval);
     }
@@ -108,7 +110,7 @@ public class ClosureTest {
         };
         Closure.Handle handle = ClosureManager.getInstance().newClosure(closure,
                 Type.SINT32, new Type[0], CallingConvention.DEFAULT);
-        short retval = lib.testClosureVrS(handle.getAddress());
+        short retval = lib.testClosureVrS(new Address(handle));
         assertTrue("Closure not called", called[0]);
         assertEquals("Wrong value returned by closure", MAGIC, retval);
     }
@@ -133,7 +135,7 @@ public class ClosureTest {
         };
         Closure.Handle handle = ClosureManager.getInstance().newClosure(closure,
                 Type.SINT64, new Type[0], CallingConvention.DEFAULT);
-        int retval = lib.testClosureVrI(handle.getAddress());
+        int retval = lib.testClosureVrI(new Address(handle));
         assertTrue("Closure not called", called[0]);
         assertEquals("Wrong value returned by closure", MAGIC, retval);
     }
@@ -158,7 +160,7 @@ public class ClosureTest {
         };
         Closure.Handle handle = ClosureManager.getInstance().newClosure(closure,
                 Type.FLOAT, new Type[0], CallingConvention.DEFAULT);
-        float retval = lib.testClosureVrF(handle.getAddress());
+        float retval = lib.testClosureVrF(new Address(handle));
         assertTrue("Closure not called", called[0]);
         assertTrue("Wrong value returned by closure", (MAGIC -retval) < 0.0001);
     }
@@ -180,7 +182,7 @@ public class ClosureTest {
         };
         Closure.Handle handle = ClosureManager.getInstance().newClosure(closure,
                 Type.DOUBLE, new Type[0], CallingConvention.DEFAULT);
-        float retval = lib.testClosureVrF(handle.getAddress());
+        double retval = lib.testClosureVrD(new Address(handle));
         assertTrue("Closure not called", called[0]);
         assertTrue("Wrong value returned by closure", (MAGIC -retval) < 0.0001);
     }
@@ -189,5 +191,39 @@ public class ClosureTest {
     }
     @Test public void fastLongClosureVrD() throws Throwable {
         testClosureVrD(fastlong);
+    }
+
+    @Test public void testClosureTrV() throws Throwable {
+        final boolean called[] = { false };
+        final byte[] s8 = { 0 };
+        final float[] f32 = { 0 };
+        final int[] s32 = { 0 };
+
+        final byte S8_MAGIC = (byte) 0xfe;
+        final int S32_MAGIC = (int) 0xdeadbeef;
+        final float F32_MAGIC = (float) 0x12345678;
+
+        Closure closure = new Closure() {
+            public void invoke(Buffer buffer) {
+                called[0] = true;
+                long struct = buffer.getStruct(0);
+                s8[0] = MemoryIO.getInstance().getByte(struct);
+                f32[0] = MemoryIO.getInstance().getFloat(struct + 4);
+                s32[0] = MemoryIO.getInstance().getInt(struct + 8);
+            }
+        };
+        Struct s8f32s32 = new Struct(new Type[] { Type.SINT8, Type.FLOAT, Type.SINT32 });
+        Closure.Handle handle = ClosureManager.getInstance().newClosure(closure,
+                Type.VOID, new Type[] { s8f32s32, Type.POINTER }, CallingConvention.DEFAULT);
+        long struct = MemoryIO.getInstance().allocateMemory(12, true);
+        MemoryIO.getInstance().putByte(struct, S8_MAGIC);
+        MemoryIO.getInstance().putFloat(struct + 4, F32_MAGIC);
+        MemoryIO.getInstance().putInt(struct + 8, S32_MAGIC);
+        lib.testClosureTrV(new Address(handle), new Address(struct));
+        assertTrue("Closure not called", called[0]);
+        assertEquals("Wrong s8 field value", S8_MAGIC, s8[0]);
+        assertEquals("Wrong s32 field value", S32_MAGIC, s32[0]);
+        assertTrue("Wrong f32 field value", (F32_MAGIC - f32[0]) < 0.0001);
+        
     }
 }

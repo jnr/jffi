@@ -14,6 +14,42 @@ public class UnitHelper {
         FastInt,
         FastLong
     }
+    public static final class Address extends java.lang.Number {
+
+        public final int SIZE = Platform.getPlatform().addressSize();
+
+        public final long address;
+
+        public Address(long address) {
+            this.address = address;
+        }
+
+        public Address(Closure.Handle closure) {
+            this(closure.getAddress());
+        }
+
+        @Override
+        public int intValue() {
+            return (int) address;
+        }
+
+        @Override
+        public long longValue() {
+            return address;
+        }
+
+        @Override
+        public float floatValue() {
+            return (float) address;
+        }
+
+        @Override
+        public double doubleValue() {
+            return (double) address;
+        }
+    }
+
+
     public static final String getCLibraryName() {
         switch (Platform.getPlatform().getOS()) {
             case LINUX:
@@ -123,6 +159,8 @@ public class UnitHelper {
             return Type.FLOAT;
         } else if (type == double.class || type == Double.class) {
             return Type.DOUBLE;
+        } else if (Address.class.isAssignableFrom(type)) {
+            return Type.POINTER;
         } else {
             throw new IllegalArgumentException("Unknown type: " + type);
         }
@@ -157,6 +195,8 @@ public class UnitHelper {
                     buffer.putFloat(((Number) args[i]).floatValue());
                 } else if (parameterTypes[i] == double.class || parameterTypes[i] == Double.class) {
                     buffer.putDouble(((Number) args[i]).doubleValue());
+                } else if (Address.class.isAssignableFrom(parameterTypes[i])) {
+                    buffer.putAddress(((Address) args[i]).address);
                 } else {
                     throw new RuntimeException("Unknown parameter type: " + parameterTypes[i]);
                 }
@@ -167,16 +207,18 @@ public class UnitHelper {
                 return null;
             } else if (returnType == byte.class || returnType == Byte.class) {
                 return Byte.valueOf((byte) invoker.invokeInt(function, buffer));
-            } if (returnType == short.class || returnType == Short.class) {
+            } else if (returnType == short.class || returnType == Short.class) {
                 return Short.valueOf((short) invoker.invokeInt(function, buffer));
-            } if (returnType == int.class || returnType == Integer.class) {
+            } else if (returnType == int.class || returnType == Integer.class) {
                 return Integer.valueOf(invoker.invokeInt(function, buffer));
-            } if (returnType == long.class || returnType == Long.class) {
+            } else if (returnType == long.class || returnType == Long.class) {
                 return Long.valueOf(invoker.invokeLong(function, buffer));
-            } if (returnType == float.class || returnType == Float.class) {
+            } else if (returnType == float.class || returnType == Float.class) {
                 return Float.valueOf(invoker.invokeFloat(function, buffer));
-            } if (returnType == double.class || returnType == double.class) {
+            } else if (returnType == double.class || returnType == double.class) {
                 return Double.valueOf(invoker.invokeDouble(function, buffer));
+            } else if (Address.class.isAssignableFrom(returnType)) {
+                return new Address(invoker.invokeAddress(function, buffer));
             }
             throw new RuntimeException("Unknown return type: " + returnType);
         }
@@ -186,16 +228,18 @@ public class UnitHelper {
             return null;
         } else if (returnType == byte.class || returnType == Byte.class) {
             return result.byteValue();
-        } if (returnType == short.class || returnType == Short.class) {
+        } else if (returnType == short.class || returnType == Short.class) {
             return result.shortValue();
-        } if (returnType == int.class || returnType == Integer.class) {
+        } else if (returnType == int.class || returnType == Integer.class) {
             return result.intValue();
-        } if (returnType == long.class || returnType == Long.class) {
+        } else if (returnType == long.class || returnType == Long.class) {
             return result.longValue();
-        } if (returnType == float.class || returnType == Float.class) {
+        } else if (returnType == float.class || returnType == Float.class) {
             return Float.intBitsToFloat(result.intValue());
-        } if (returnType == double.class || returnType == double.class) {
+        } else if (returnType == double.class || returnType == double.class) {
             return Double.longBitsToDouble(result.longValue());
+        } else if (Address.class.isAssignableFrom(returnType)) {
+            return new Address(result.longValue());
         }
         throw new RuntimeException("Unknown return type: " + returnType);
     }
