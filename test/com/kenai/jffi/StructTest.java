@@ -1,6 +1,7 @@
 
 package com.kenai.jffi;
 
+import com.kenai.jffi.UnitHelper.Address;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import org.junit.After;
@@ -69,13 +70,11 @@ public class StructTest {
         long sint32 = foreign.lookupBuiltinType(Type.SINT32.value());
         long struct = foreign.newStruct(new long[] { sint8, sint32 });
         
-        Library lib = Library.getCachedInstance("build/libtest.so", Library.LAZY | Library.GLOBAL);
-        assertNotNull("Could not open libtest", lib);
         
-        long sym = lib.getSymbolAddress("struct_return_s8s32");
+        Address sym = UnitHelper.findSymbol("struct_return_s8s32");
         assertNotSame("Could not lookup struct_return_s8s32", 0L, sym);
 
-        long function = foreign.newFunction(sym, struct, new long[0], 0);
+        long function = foreign.newFunction(sym.address, struct, new long[0], 0);
         assertNotSame("Could not create function for struct_return_s8s32", 0L, function);
      
         byte[] paramBuffer = new byte[0];
@@ -90,13 +89,10 @@ public class StructTest {
         Foreign foreign = Foreign.getInstance();
         Struct struct = new Struct(new Type[] { Type.SINT8, Type.SINT32 });
 
-        Library lib = Library.getCachedInstance("build/libtest.so", Library.LAZY | Library.GLOBAL);
-        assertNotNull("Could not open libtest", lib);
+        Address sym = UnitHelper.findSymbol("struct_return_s8s32");
+        assertNotNull("Could not lookup struct_return_s8s32", sym);
 
-        long sym = lib.getSymbolAddress("struct_return_s8s32");
-        assertNotSame("Could not lookup struct_return_s8s32", 0L, sym);
-
-        Function function = new Function(sym, struct, new Type[0]);
+        Function function = new Function(sym.address, struct, new Type[0]);
 
         HeapInvocationBuffer paramBuffer = new HeapInvocationBuffer(function);
         byte[] returnBuffer = new byte[8];
@@ -107,19 +103,16 @@ public class StructTest {
     }
 
     @Test public void structS8S32FromArray() throws Throwable {
+        
+        Address sym_s8 = UnitHelper.findSymbol("struct_s8s32_get_s8");
+        assertNotNull("Could not lookup struct_s8s32_get_s8", sym_s8);
 
-        Library lib = Library.getCachedInstance("build/libtest.so", Library.LAZY | Library.GLOBAL);
-        assertNotNull("Could not open libtest", lib);
-
-        long sym_s8 = lib.getSymbolAddress("struct_s8s32_get_s8");
-        assertNotSame("Could not lookup struct_s8s32_get_s8", 0L, sym_s8);
-
-        long sym_s32 = lib.getSymbolAddress("struct_s8s32_get_s32");
-        assertNotSame("Could not lookup struct_s8s32_get_s32", 0L, sym_s32);
+        Address sym_s32 = UnitHelper.findSymbol("struct_s8s32_get_s32");
+        assertNotNull("Could not lookup struct_s8s32_get_s32", sym_s32);
 
         Struct s8s32 = new Struct(new Type[] { Type.SINT8, Type.SINT32 });
-        Function get_s8 = new Function(sym_s8, Type.SINT32, new Type[] { s8s32 });
-        Function get_s32 = new Function(sym_s32, Type.SINT32, new Type[] { s8s32 });
+        Function get_s8 = new Function(sym_s8.address, Type.SINT32, new Type[] { s8s32 });
+        Function get_s32 = new Function(sym_s32.address, Type.SINT32, new Type[] { s8s32 });
         HeapInvocationBuffer paramBuffer = new HeapInvocationBuffer(get_s8);
         ByteBuffer buf = ByteBuffer.allocate(8).order(ByteOrder.nativeOrder());
         buf.putInt((byte) 0x12);
@@ -135,18 +128,15 @@ public class StructTest {
 
     @Test public void structS8S32FromPointer() throws Throwable {
 
-        Library lib = Library.getCachedInstance("build/libtest.so", Library.LAZY | Library.GLOBAL);
-        assertNotNull("Could not open libtest", lib);
+        Address sym_s8 = UnitHelper.findSymbol("struct_s8s32_get_s8");
+        assertNotNull("Could not lookup struct_s8s32_get_s8", sym_s8);
 
-        long sym_s8 = lib.getSymbolAddress("struct_s8s32_get_s8");
-        assertNotSame("Could not lookup struct_s8s32_get_s8", 0L, sym_s8);
-
-        long sym_s32 = lib.getSymbolAddress("struct_s8s32_get_s32");
-        assertNotSame("Could not lookup struct_s8s32_get_s32", 0L, sym_s32);
+        Address sym_s32 = UnitHelper.findSymbol("struct_s8s32_get_s32");
+        assertNotNull("Could not lookup struct_s8s32_get_s32", sym_s32);
 
         Struct s8s32 = new Struct(new Type[] { Type.SINT8, Type.SINT32 });
-        Function get_s8 = new Function(sym_s8, Type.SINT32, new Type[] { s8s32 });
-        Function get_s32 = new Function(sym_s32, Type.SINT32, new Type[] { s8s32 });
+        Function get_s8 = new Function(sym_s8.address, Type.SINT32, new Type[] { s8s32 });
+        Function get_s32 = new Function(sym_s32.address, Type.SINT32, new Type[] { s8s32 });
         HeapInvocationBuffer paramBuffer = new HeapInvocationBuffer(get_s8);
         long struct = MemoryIO.getInstance().allocateMemory(8, true);
         MemoryIO.getInstance().putInt(struct, 0x12);
@@ -161,14 +151,11 @@ public class StructTest {
 
     @Test public void structS8S32FromArrayAndS32() throws Throwable {
         
-        Library lib = Library.getCachedInstance("build/libtest.so", Library.LAZY | Library.GLOBAL);
-        assertNotNull("Could not open libtest", lib);
-
-        long sym = lib.getSymbolAddress("struct_s8s32_s32_ret_s32");
-        assertNotSame("Could not lookup struct_s8s32_s32_ret_s32", 0L, sym);
+        Address sym = UnitHelper.findSymbol("struct_s8s32_s32_ret_s32");
+        assertNotNull("Could not lookup struct_s8s32_s32_ret_s32", sym);
 
         Struct s8s32 = new Struct(new Type[] { Type.SINT8, Type.SINT32 });
-        Function function = new Function(sym, Type.SINT32, new Type[] { s8s32, Type.SINT32 });
+        Function function = new Function(sym.address, Type.SINT32, new Type[] { s8s32, Type.SINT32 });
         HeapInvocationBuffer paramBuffer = new HeapInvocationBuffer(function);
         ByteBuffer buf = ByteBuffer.allocate(8).order(ByteOrder.nativeOrder());
         buf.putInt((byte) 0x12);
@@ -183,14 +170,11 @@ public class StructTest {
 
     @Test public void structS8S32FromPointerAndS32() throws Throwable {
 
-        Library lib = Library.getCachedInstance("build/libtest.so", Library.LAZY | Library.GLOBAL);
-        assertNotNull("Could not open libtest", lib);
-
-        long sym = lib.getSymbolAddress("struct_s8s32_s32_ret_s32");
-        assertNotSame("Could not lookup struct_s8s32_s32_ret_s32", 0L, sym);
+        Address sym = UnitHelper.findSymbol("struct_s8s32_s32_ret_s32");
+        assertNotNull("Could not lookup struct_s8s32_s32_ret_s32", sym);
 
         Struct s8s32 = new Struct(new Type[] { Type.SINT8, Type.SINT32 });
-        Function function = new Function(sym, Type.SINT32, new Type[] { s8s32, Type.SINT32 });
+        Function function = new Function(sym.address, Type.SINT32, new Type[] { s8s32, Type.SINT32 });
         HeapInvocationBuffer paramBuffer = new HeapInvocationBuffer(function);
         long struct = MemoryIO.getInstance().allocateMemory(8, true);
         MemoryIO.getInstance().putInt(struct, 0x12);
@@ -206,14 +190,11 @@ public class StructTest {
 
     @Test public void structS8S32FromArrayAndS64() throws Throwable {
 
-        Library lib = Library.getCachedInstance("build/libtest.so", Library.LAZY | Library.GLOBAL);
-        assertNotNull("Could not open libtest", lib);
-
-        long sym = lib.getSymbolAddress("struct_s8s32_s64_ret_s64");
-        assertNotSame("Could not lookup struct_s8s32_s64_ret_s64", 0L, sym);
+        Address sym = UnitHelper.findSymbol("struct_s8s32_s64_ret_s64");
+        assertNotNull("Could not lookup struct_s8s32_s64_ret_s64", sym);
 
         Struct s8s32 = new Struct(new Type[] { Type.SINT8, Type.SINT32 });
-        Function function = new Function(sym, Type.SINT64, new Type[] { s8s32, Type.SINT64 });
+        Function function = new Function(sym.address, Type.SINT64, new Type[] { s8s32, Type.SINT64 });
         HeapInvocationBuffer paramBuffer = new HeapInvocationBuffer(function);
         ByteBuffer buf = ByteBuffer.allocate(8).order(ByteOrder.nativeOrder());
         buf.putInt((byte) 0x12);
@@ -228,14 +209,11 @@ public class StructTest {
 
     @Test public void structS8S32FromPointerAndS64() throws Throwable {
 
-        Library lib = Library.getCachedInstance("build/libtest.so", Library.LAZY | Library.GLOBAL);
-        assertNotNull("Could not open libtest", lib);
-
-        long sym = lib.getSymbolAddress("struct_s8s32_s64_ret_s64");
-        assertNotSame("Could not lookup struct_s8s32_s64_ret_s64", 0L, sym);
+        Address sym = UnitHelper.findSymbol("struct_s8s32_s64_ret_s64");
+        assertNotNull("Could not lookup struct_s8s32_s64_ret_s64", sym);
 
         Struct s8s32 = new Struct(new Type[] { Type.SINT8, Type.SINT32 });
-        Function function = new Function(sym, Type.SINT64, new Type[] { s8s32, Type.SINT64 });
+        Function function = new Function(sym.address, Type.SINT64, new Type[] { s8s32, Type.SINT64 });
         HeapInvocationBuffer paramBuffer = new HeapInvocationBuffer(function);
         long struct = MemoryIO.getInstance().allocateMemory(8, true);
         MemoryIO.getInstance().putInt(struct, 0x12);
@@ -252,14 +230,11 @@ public class StructTest {
     @Test public void s8s32_set() throws Throwable {
         Foreign foreign = Foreign.getInstance();
 
-        Library lib = Library.getCachedInstance("build/libtest.so", Library.LAZY | Library.GLOBAL);
-        assertNotNull("Could not open libtest", lib);
-
-        long sym = lib.getSymbolAddress("struct_s8s32_set");
-        assertNotSame("Could not lookup struct_s8s32_set", 0L, sym);
+        Address sym = UnitHelper.findSymbol("struct_s8s32_set");
+        assertNotNull("Could not lookup struct_s8s32_set", sym);
 
         Struct s8s32 = new Struct(new Type[] { Type.SINT8, Type.SINT32 });
-        Function function = new Function(sym, s8s32, new Type[] { Type.SINT8, Type.SINT32 });
+        Function function = new Function(sym.address, s8s32, new Type[] { Type.SINT8, Type.SINT32 });
         
         HeapInvocationBuffer paramBuffer = new HeapInvocationBuffer(function);
         paramBuffer.putByte((byte) 0x12);

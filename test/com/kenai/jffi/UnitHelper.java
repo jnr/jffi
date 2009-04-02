@@ -95,8 +95,11 @@ public class UnitHelper {
                 new File("build", Platform.getPlatform().mapLibraryName("test")).getAbsolutePath(), Library.LAZY);
     }
     public static Address findSymbol(String name) {
-        long address = LibraryHolder.libtest.getSymbolAddress(name);
-        return address != 0 ? new Address(address) : null;
+        final long address = LibraryHolder.libtest.getSymbolAddress(name);
+        if (address == 0L) {
+            throw new UnsatisfiedLinkError("Could not locate symbol '" + name + "'");
+        }
+        return new Address(address);
     }
     private static final class NativeInvocationHandler implements InvocationHandler {
         private final ConcurrentMap<Method, MethodInvoker> invokers
