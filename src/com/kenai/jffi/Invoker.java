@@ -71,9 +71,21 @@ public abstract class Invoker {
      */
     public final byte[] invokeBuffer(Function function, HeapInvocationBuffer buffer) {
         byte[] returnBuffer = new byte[function.getReturnType().size()];
-        foreign.invokeArrayWithReturnBuffer(function.getAddress64(), buffer.array(), returnBuffer);
+        foreign.invokeArrayWithReturnBuffer(function.getAddress64(), buffer.array(), returnBuffer, 0);
 
         return returnBuffer;
+    }
+
+    /**
+     * Invokes a function, encoding the return value in a byte array
+     *
+     * @param function The function to invoke.
+     * @param buffer The parameter buffer.
+     * @param returnBuffer The output buffer to place the return value in.
+     * @param offset The offset within returnBuffer to place the return value.
+     */
+    public final void invokeBuffer(Function function, HeapInvocationBuffer buffer, byte[] returnBuffer, int offset) {
+        foreign.invokeArrayWithReturnBuffer(function.getAddress64(), buffer.array(), returnBuffer, offset);
     }
     
     private final int invokeArrayWithObjectsInt32(Function function, HeapInvocationBuffer buffer,

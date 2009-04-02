@@ -80,7 +80,7 @@ public class StructTest {
      
         byte[] paramBuffer = new byte[0];
         byte[] returnBuffer = new byte[8];
-        foreign.invokeArrayWithReturnBuffer(function, paramBuffer, returnBuffer);
+        foreign.invokeArrayWithReturnBuffer(function, paramBuffer, returnBuffer, 0);
         ByteBuffer buf = ByteBuffer.wrap(returnBuffer).order(ByteOrder.nativeOrder());
         assertEquals("Wrong s8 value", (byte) 0x7f, buf.get(0));
         assertEquals("Wrong s32 value", 0x12345678, buf.getInt(4));
@@ -100,7 +100,7 @@ public class StructTest {
 
         HeapInvocationBuffer paramBuffer = new HeapInvocationBuffer(function);
         byte[] returnBuffer = new byte[8];
-        foreign.invokeArrayWithReturnBuffer(function.getAddress64(), paramBuffer.array(), returnBuffer);
+        foreign.invokeArrayWithReturnBuffer(function.getAddress64(), paramBuffer.array(), returnBuffer, 0);
         ByteBuffer buf = ByteBuffer.wrap(returnBuffer).order(ByteOrder.nativeOrder());
         assertEquals("Wrong s8 value", (byte) 0x7f, buf.get(0));
         assertEquals("Wrong s32 value", 0x12345678, buf.getInt(4));
@@ -266,7 +266,7 @@ public class StructTest {
         paramBuffer.putInt(0x87654321);
 
         byte[] returnBuffer = new byte[16];
-        foreign.invokeArrayWithReturnBuffer(function.getAddress64(), paramBuffer.array(), returnBuffer);
+        foreign.invokeArrayWithReturnBuffer(function.getAddress64(), paramBuffer.array(), returnBuffer, 0);
         ByteBuffer buf = ByteBuffer.wrap(returnBuffer).order(ByteOrder.nativeOrder());
         assertEquals("Wrong s8 value", (byte) 0x12, buf.get(0));
         assertEquals("Wrong s32 value", 0x87654321, buf.getInt(4));

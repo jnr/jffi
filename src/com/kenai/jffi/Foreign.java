@@ -119,7 +119,7 @@ final class Foreign {
     final native long invokeArrayInt64(long function, byte[] buffer);
     final native float invokeArrayFloat(long function, byte[] buffer);
     final native double invokeArrayDouble(long function, byte[] buffer);
-    final native void invokeArrayWithReturnBuffer(long function, byte[] paramBuffer, byte[] returnBuffer);
+    final native void invokeArrayWithReturnBuffer(long function, byte[] paramBuffer, byte[] returnBuffer, int offset);
 
     /* ---------------------------------------------------------------------- */
     final native int invokeArrayWithObjectsInt32(long function, byte[] buffer, int objectCount, int[] objectInfo, Object[] objects);

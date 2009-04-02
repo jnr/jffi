@@ -155,13 +155,13 @@ Java_com_kenai_jffi_Foreign_invokeArrayDouble(JNIEnv* env, jclass self, jlong ct
  */
 JNIEXPORT void JNICALL
 Java_com_kenai_jffi_Foreign_invokeArrayWithReturnBuffer(JNIEnv* env, jclass self, jlong ctxAddress,
-        jbyteArray paramBuffer, jbyteArray returnBuffer)
+        jbyteArray paramBuffer, jbyteArray returnBuffer, jint offset)
 {
     Function* ctx = (Function *) (uintptr_t) ctxAddress;
     jbyte* retval = alloca(ctx->cif.rtype->size);
 
     invokeArray(env, ctxAddress, paramBuffer, retval);
-    (*env)->SetByteArrayRegion(env, returnBuffer, 0, ctx->cif.rtype->size, retval);
+    (*env)->SetByteArrayRegion(env, returnBuffer, offset, ctx->cif.rtype->size, retval);
 }
 
 #define MAX_STACK_OBJECTS (4)
