@@ -1,10 +1,19 @@
+#include <sys/param.h>
+#include <sys/types.h>
+
 #include <stdlib.h>
+#ifdef __sun
+#  include <alloca.h>
+#endif
 #include <ffi.h>
 #include <jni.h>
 #include "com_kenai_jffi_Foreign.h"
 #include "jffi.h"
 #include "Exception.h"
 
+#ifndef MAX
+#  define MAX(x,y)  ((x) > (y) ? (x) : (y))
+#endif
 #define ALIGN(v, a)  (((((size_t) (v))-1) | ((a)-1))+1)
 
 /*
