@@ -111,8 +111,7 @@ public class StructTest {
         assertEquals("Wrong s32 value", 0x12345678, buf.getInt(4));
     }
 
-    @Test public void paramS8S32() throws Throwable {
-        Foreign foreign = Foreign.getInstance();
+    @Test public void structS8S32FromArray() throws Throwable {
 
         Library lib = Library.getCachedInstance("build/libtest.so", Library.LAZY | Library.GLOBAL);
         assertNotNull("Could not open libtest", lib);
@@ -127,15 +126,133 @@ public class StructTest {
         Function get_s8 = new Function(sym_s8, Type.SINT32, new Type[] { s8s32 });
         Function get_s32 = new Function(sym_s32, Type.SINT32, new Type[] { s8s32 });
         HeapInvocationBuffer paramBuffer = new HeapInvocationBuffer(get_s8);
-        ByteBuffer buf = ByteBuffer.wrap(paramBuffer.array()).order(ByteOrder.nativeOrder());
-        buf.put(0, (byte) 0x12);
-        buf.putInt(4, 0x87654321);
+        ByteBuffer buf = ByteBuffer.allocate(8).order(ByteOrder.nativeOrder());
+        buf.putInt((byte) 0x12);
+        buf.putInt(0x87654321);
+        buf.flip();
+        paramBuffer.putStruct(buf.array(), buf.arrayOffset(), buf.limit());
 
-        int retval = 0;
-        retval = foreign.invokeArrayInt32(get_s8.getAddress64(), paramBuffer.array());
+        int retval = Invoker.getInstance().invokeInt(get_s8, paramBuffer);
         assertEquals("Wrong s8 value", 0x12, retval);
-        retval = foreign.invokeArrayInt32(get_s32.getAddress64(), paramBuffer.array());
+        retval = Invoker.getInstance().invokeInt(get_s32, paramBuffer);
         assertEquals("Wrong s32 value", 0x87654321, retval);
+    }
+
+    @Test public void structS8S32FromPointer() throws Throwable {
+
+        Library lib = Library.getCachedInstance("build/libtest.so", Library.LAZY | Library.GLOBAL);
+        assertNotNull("Could not open libtest", lib);
+
+        long sym_s8 = lib.getSymbolAddress("struct_s8s32_get_s8");
+        assertNotSame("Could not lookup struct_s8s32_get_s8", 0L, sym_s8);
+
+        long sym_s32 = lib.getSymbolAddress("struct_s8s32_get_s32");
+        assertNotSame("Could not lookup struct_s8s32_get_s32", 0L, sym_s32);
+
+        Struct s8s32 = new Struct(new Type[] { Type.SINT8, Type.SINT32 });
+        Function get_s8 = new Function(sym_s8, Type.SINT32, new Type[] { s8s32 });
+        Function get_s32 = new Function(sym_s32, Type.SINT32, new Type[] { s8s32 });
+        HeapInvocationBuffer paramBuffer = new HeapInvocationBuffer(get_s8);
+        long struct = MemoryIO.getInstance().allocateMemory(8, true);
+        MemoryIO.getInstance().putInt(struct, 0x12);
+        MemoryIO.getInstance().putInt(struct + 4, 0x87654321);
+        System.out.printf("struct address=%x\n", struct);
+        paramBuffer.putStruct(struct, 8);
+
+        int retval = Invoker.getInstance().invokeInt(get_s8, paramBuffer);
+        assertEquals("Wrong s8 value", 0x12, retval);
+        retval = Invoker.getInstance().invokeInt(get_s32, paramBuffer);
+        assertEquals("Wrong s32 value", 0x87654321, retval);
+    }
+
+    @Test public void structS8S32FromArrayAndS32() throws Throwable {
+        
+        Library lib = Library.getCachedInstance("build/libtest.so", Library.LAZY | Library.GLOBAL);
+        assertNotNull("Could not open libtest", lib);
+
+        long sym = lib.getSymbolAddress("struct_s8s32_s32_ret_s32");
+        assertNotSame("Could not lookup struct_s8s32_s32_ret_s32", 0L, sym);
+
+        Struct s8s32 = new Struct(new Type[] { Type.SINT8, Type.SINT32 });
+        Function function = new Function(sym, Type.SINT32, new Type[] { s8s32, Type.SINT32 });
+        HeapInvocationBuffer paramBuffer = new HeapInvocationBuffer(function);
+        ByteBuffer buf = ByteBuffer.allocate(8).order(ByteOrder.nativeOrder());
+        buf.putInt((byte) 0x12);
+        buf.putInt(0x87654321);
+        buf.flip();
+        paramBuffer.putStruct(buf.array(), buf.arrayOffset(), buf.limit());
+        paramBuffer.putInt(0xdeadbeef);
+
+        int retval = Invoker.getInstance().invokeInt(function, paramBuffer);
+        assertEquals("Wrong s32 param value", (int) 0xdeadbeef, retval);
+    }
+
+    @Test public void structS8S32FromPointerAndS32() throws Throwable {
+
+        Library lib = Library.getCachedInstance("build/libtest.so", Library.LAZY | Library.GLOBAL);
+        assertNotNull("Could not open libtest", lib);
+
+        long sym = lib.getSymbolAddress("struct_s8s32_s32_ret_s32");
+        assertNotSame("Could not lookup struct_s8s32_s32_ret_s32", 0L, sym);
+
+        Struct s8s32 = new Struct(new Type[] { Type.SINT8, Type.SINT32 });
+        Function function = new Function(sym, Type.SINT32, new Type[] { s8s32, Type.SINT32 });
+        HeapInvocationBuffer paramBuffer = new HeapInvocationBuffer(function);
+        long struct = MemoryIO.getInstance().allocateMemory(8, true);
+        MemoryIO.getInstance().putInt(struct, 0x12);
+        MemoryIO.getInstance().putInt(struct + 4, 0x87654321);
+        paramBuffer.putStruct(struct, 8);
+
+        // Add a following int32 param and ensure it is passed
+        paramBuffer.putInt(0xdeadbeef);
+
+        int retval = Invoker.getInstance().invokeInt(function, paramBuffer);
+        assertEquals("Wrong s32 param value", (int) 0xdeadbeef, retval);
+    }
+
+    @Test public void structS8S32FromArrayAndS64() throws Throwable {
+
+        Library lib = Library.getCachedInstance("build/libtest.so", Library.LAZY | Library.GLOBAL);
+        assertNotNull("Could not open libtest", lib);
+
+        long sym = lib.getSymbolAddress("struct_s8s32_s64_ret_s64");
+        assertNotSame("Could not lookup struct_s8s32_s64_ret_s64", 0L, sym);
+
+        Struct s8s32 = new Struct(new Type[] { Type.SINT8, Type.SINT32 });
+        Function function = new Function(sym, Type.SINT64, new Type[] { s8s32, Type.SINT64 });
+        HeapInvocationBuffer paramBuffer = new HeapInvocationBuffer(function);
+        ByteBuffer buf = ByteBuffer.allocate(8).order(ByteOrder.nativeOrder());
+        buf.putInt((byte) 0x12);
+        buf.putInt(0x87654321);
+        buf.flip();
+        paramBuffer.putStruct(buf.array(), buf.arrayOffset(), buf.limit());
+        paramBuffer.putLong(0xdeadbeef);
+
+        long retval = Invoker.getInstance().invokeLong(function, paramBuffer);
+        assertEquals("Wrong s64 param value", 0xdeadbeef, retval);
+    }
+
+    @Test public void structS8S32FromPointerAndS64() throws Throwable {
+
+        Library lib = Library.getCachedInstance("build/libtest.so", Library.LAZY | Library.GLOBAL);
+        assertNotNull("Could not open libtest", lib);
+
+        long sym = lib.getSymbolAddress("struct_s8s32_s64_ret_s64");
+        assertNotSame("Could not lookup struct_s8s32_s64_ret_s64", 0L, sym);
+
+        Struct s8s32 = new Struct(new Type[] { Type.SINT8, Type.SINT32 });
+        Function function = new Function(sym, Type.SINT64, new Type[] { s8s32, Type.SINT64 });
+        HeapInvocationBuffer paramBuffer = new HeapInvocationBuffer(function);
+        long struct = MemoryIO.getInstance().allocateMemory(8, true);
+        MemoryIO.getInstance().putInt(struct, 0x12);
+        MemoryIO.getInstance().putInt(struct + 4, 0x87654321);
+        paramBuffer.putStruct(struct, 8);
+
+        // Add a following int64 param and ensure it is passed
+        paramBuffer.putLong(0xdeadbeef);
+
+        long retval = Invoker.getInstance().invokeLong(function, paramBuffer);
+        assertEquals("Wrong s64 param value", 0xdeadbeef, retval);
     }
 
     @Test public void s8s32_set() throws Throwable {
@@ -160,4 +277,6 @@ public class StructTest {
         assertEquals("Wrong s8 value", (byte) 0x12, buf.get(0));
         assertEquals("Wrong s32 value", 0x87654321, buf.getInt(4));
     }
+
+
 }

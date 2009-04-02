@@ -63,11 +63,18 @@ invokeArray(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer, void* returnB
             tmpBuffer = alloca(ctx->cif.nargs * PARAM_SIZE);
             ffiArgs = alloca(ctx->cif.nargs * sizeof(void *));
         }
-        for (i = 0; i < ctx->cif.nargs; ++i) {
-            ffiArgs[i] = &tmpBuffer[i * PARAM_SIZE];
-        }
+        
         (*env)->GetByteArrayRegion(env, paramBuffer, 0, ctx->cif.nargs * PARAM_SIZE, tmpBuffer);
+
+        for (i = 0; i < ctx->cif.nargs; ++i) {
+            if (ctx->cif.arg_types[i]->type == FFI_TYPE_STRUCT) {
+                ffiArgs[i] = *(void **) &tmpBuffer[i * PARAM_SIZE];
+            } else {
+                ffiArgs[i] = &tmpBuffer[i * PARAM_SIZE];
+            }
+        }
     }
+
     ffi_call(&ctx->cif, FFI_FN(ctx->function), returnBuffer, ffiArgs);
     set_last_error(errno);
 }
@@ -228,7 +235,11 @@ invokeArrayWithObjects_(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer,
 #if defined(USE_RAW)
         *((void **)(tmpBuffer + rawAdj + ctx->rawParamOffsets[idx])) = ptr;
 #else
-        *((void **) ffiArgs[idx]) = ptr;
+        if (ctx->cif.arg_types[idx]->type == FFI_TYPE_STRUCT) {
+            ffiArgs[idx] = ptr;
+        } else {
+            *((void **) ffiArgs[idx]) = ptr;
+        }
 #endif
     }
 #if defined(USE_RAW)

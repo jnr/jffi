@@ -103,6 +103,28 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
         paramOffset += encoder.putAddress(buffer, paramOffset, 0L);
         getObjectBuffer().putDirectBuffer(paramIndex++, value, offset, length);
     }
+
+    public final void putStruct(final byte[] struct, int offset, int length) {
+        if (encoder.isRaw()) {
+            System.arraycopy(struct, offset, buffer, paramOffset, length);
+            paramOffset = FFI_ALIGN(paramOffset + length, 4);
+        } else {
+            paramOffset += encoder.putAddress(buffer, paramOffset, 0L);
+            getObjectBuffer().putArray(paramIndex, struct, offset, length, ObjectBuffer.IN);
+        }
+        ++paramIndex;
+    }
+
+    public final void putStruct(final long struct, int size) {
+        if (encoder.isRaw()) {
+            MemoryIO.getInstance().getByteArray(struct, buffer, paramOffset, size);
+            paramOffset = FFI_ALIGN(paramOffset + size, 4);
+        } else {
+            paramOffset += encoder.putAddress(buffer, paramOffset, struct);
+        }
+        ++paramIndex;
+    }
+
     private static final Encoder getEncoder() {
         if (Platform.getPlatform().getCPU() == Platform.CPU.I386) {
             return Foreign.getInstance().isRawParameterPackingEnabled()
@@ -131,7 +153,12 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
     private static final Encoder newBE64Encoder() {
         return new DefaultEncoder(BE64ArrayIO.INSTANCE);
     }
+
+    /**
+     * Encodes java data types into native parameter frames
+     */
     private static abstract class Encoder {
+        public abstract boolean isRaw();
         public abstract int getBufferSize(Function function);
         public abstract int putByte(byte[] buffer, int offset, int value);
         public abstract int putShort(byte[] buffer, int offset, int value);
@@ -143,6 +170,10 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
     }
     private static final class I386RawEncoder extends Encoder {
         private static final ArrayIO IO = LE32ArrayIO.INSTANCE;
+
+        public final boolean isRaw() {
+            return true;
+        }
 
         public final int getBufferSize(Function function) {
             return function.getRawParameterSize();
@@ -175,6 +206,11 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
         public DefaultEncoder(ArrayIO io) {
             this.io = io;
         }
+
+        public final boolean isRaw() {
+            return false;
+        }
+        
         public final int getBufferSize(Function function) {
             return function.getParameterCount() * PARAM_SIZE;
         }
@@ -296,4 +332,9 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
             putLong(buffer, offset, value);
         }
     }
+
+    private static final int FFI_ALIGN(int v, int a) {
+        return ((v - 1) | (a - 1)) + 1;
+    }
+
 }

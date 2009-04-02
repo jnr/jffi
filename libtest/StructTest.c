@@ -179,6 +179,7 @@ struct_s8s32_set(char s8, int s32)
 int
 struct_s8s32_get_s8(struct s8s32 s)
 {
+    printf("returning s8=%#x\n", (int) s.s8);
     return s.s8;
 }
 
@@ -186,4 +187,18 @@ int
 struct_s8s32_get_s32(struct s8s32 s)
 {
     return s.s32;
+}
+
+// Pass a struct and an int arg, ensure the int arg is passed correctly
+int
+struct_s8s32_s32_ret_s32(struct s8s32 s, int s32)
+{
+    return s32;
+}
+
+// Pass a struct and a long long arg, ensure the long long arg is passed correctly
+long long
+struct_s8s32_s64_ret_s64(struct s8s32 s, long long s64)
+{
+    return s64;
 }
