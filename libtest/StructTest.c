@@ -179,7 +179,6 @@ struct_s8s32_set(char s8, int s32)
 int
 struct_s8s32_get_s8(struct s8s32 s)
 {
-    printf("returning s8=%#x\n", (int) s.s8);
     return s.s8;
 }
 
