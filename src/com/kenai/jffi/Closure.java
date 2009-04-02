@@ -121,11 +121,26 @@ public interface Closure {
         void setDoubleReturn(double value);
 
         /**
-         * Sets the closure return value to an 8 bit integer value.
+         * Sets the closure return value to a native pointer value.
          *
-         * @param value The 8 bit integer value to return from the closure.
+         * @param address The native pointer value to return from the closure.
          */
         void setAddressReturn(long address);
+
+        /**
+         * Sets the closure return value to the contents of a struct
+         *
+         * @param address The address of a native struct to return as a struct value from the closure.
+         */
+        void setStructReturn(long value);
+
+        /**
+         * Sets the closure return value to the contents of a struct
+         *
+         * @param data Struct data packed into a byte array to return as a struct value from the closure.
+         * @param offset the offset within the byte array to start copying data
+         */
+        void setStructReturn(byte[] data, int offset);
     }
 
     /**

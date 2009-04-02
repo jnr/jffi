@@ -86,6 +86,14 @@ public class ClosureManager {
     private static final class Proxy {
         static final Method METHOD = getMethod();
         final Closure closure;
+        
+        /** 
+         * Keep references to the return and parameter types so they do not get
+         * garbage collected until the closure does.
+         */
+        final Type returnType;
+        final Type[] parameterTypes;
+
         /**
          * Gets the
          * @return
@@ -101,10 +109,14 @@ public class ClosureManager {
         /**
          * Creates a new <tt>Proxy</tt> instance.
          *
-         * @param closure
+         * @param closure The closure to call when this proxy is invoked
+         * @param returnType The native return type of the closure
+         * @param parameterTypes The parameterTypes of the closure
          */
-        Proxy(Closure closure) {
+        Proxy(Closure closure, Type returnType, Type[] parameterTypes) {
             this.closure = closure;
+            this.returnType = returnType;
+            this.parameterTypes = (Type[]) parameterTypes.clone();
         }
 
         /**
@@ -115,7 +127,7 @@ public class ClosureManager {
          * @param paramAddress The address of the native parameter buffer.
          */
         void invoke(long retvalAddress, long paramAddress) {
-            closure.invoke(new DirectBuffer(retvalAddress, paramAddress));
+            closure.invoke(new DirectBuffer(returnType, parameterTypes, retvalAddress, paramAddress));
         }
     }
 
@@ -130,16 +142,12 @@ public class ClosureManager {
      * @return A new {@link Closure.Handle} instance.
      */
     public final Closure.Handle newClosure(Closure closure, Type returnType, Type[] parameterTypes, CallingConvention convention) {
-        Proxy proxy = new Proxy(closure);
+        Proxy proxy = new Proxy(closure, returnType, parameterTypes);
         long[] nativeParamTypes = new long[parameterTypes.length];
         for (int i = 0; i < parameterTypes.length; ++i) {
             nativeParamTypes[i] = parameterTypes[i].handle();
         }
         
-        if (!(returnType instanceof Type.Builtin)) {
-            throw new IllegalArgumentException("Unsupported return type " + returnType);
-        }
-
         long handle = Foreign.getInstance().newClosure(proxy, Proxy.METHOD,
                 returnType.handle(), nativeParamTypes, 0);
         if (handle == 0) {
@@ -157,8 +165,12 @@ public class ClosureManager {
         private static final com.kenai.jffi.MemoryIO IO = com.kenai.jffi.MemoryIO.getInstance();
         private static final int PARAM_SIZE = Platform.getPlatform().addressSize() / 8;
         private final long retval, parameters;
+        private final Type returnType;
+        private final Type[] parameterTypes;
 
-        public DirectBuffer(long retval, long parameters) {
+        public DirectBuffer(Type returnType, Type[] parameterTypes, long retval, long parameters) {
+            this.returnType = returnType;
+            this.parameterTypes = parameterTypes;
             this.retval = retval;
             this.parameters = parameters;
         }
@@ -221,6 +233,14 @@ public class ClosureManager {
 
         public final void setAddressReturn(long address) {
             IO.putAddress(retval, address);
+        }
+
+        public void setStructReturn(long value) {
+            IO.copyMemory(value, retval, returnType.size());
+        }
+
+        public void setStructReturn(byte[] data, int offset) {
+            IO.putByteArray(retval, data, offset, returnType.size());
         }
     }
 }

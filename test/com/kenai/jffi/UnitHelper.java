@@ -90,7 +90,14 @@ public class UnitHelper {
                 new Class[]{ interfaceClass },
                 new NativeInvocationHandler(lib, invokerType)));
     }
-    
+    private static final class LibraryHolder {
+        static final Library libtest = Library.getCachedInstance(
+                new File("build", Platform.getPlatform().mapLibraryName("test")).getAbsolutePath(), Library.LAZY);
+    }
+    public static Address findSymbol(String name) {
+        long address = LibraryHolder.libtest.getSymbolAddress(name);
+        return address != 0 ? new Address(address) : null;
+    }
     private static final class NativeInvocationHandler implements InvocationHandler {
         private final ConcurrentMap<Method, MethodInvoker> invokers
             = new ConcurrentHashMap<Method, MethodInvoker>();

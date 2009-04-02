@@ -3,6 +3,8 @@ package com.kenai.jffi;
 
 import com.kenai.jffi.UnitHelper.InvokerType;
 import com.kenai.jffi.UnitHelper.Address;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -226,4 +228,76 @@ public class ClosureTest {
         assertTrue("Wrong f32 field value", (F32_MAGIC - f32[0]) < 0.0001);
         
     }
+
+
+    @Test public void testClosureVrTFromArray() throws Throwable {
+        final boolean called[] = { false };
+        
+        final byte S8_MAGIC = (byte) 0xfe;
+        final int S32_MAGIC = (int) 0xdeadbeef;
+        final float F32_MAGIC = (float) 0x12345678;
+
+        Closure closure = new Closure() {
+            public void invoke(Buffer buffer) {
+                called[0] = true;
+                ByteBuffer retVal = ByteBuffer.allocate(12).order(ByteOrder.nativeOrder());
+                retVal.put(0, S8_MAGIC);
+                retVal.putFloat(4, F32_MAGIC);
+                retVal.putInt(8, S32_MAGIC);
+                buffer.setStructReturn(retVal.array(), retVal.arrayOffset());
+            }
+        };
+        Struct s8f32s32 = new Struct(new Type[] { Type.SINT8, Type.FLOAT, Type.SINT32 });
+
+        Closure.Handle handle = ClosureManager.getInstance().newClosure(closure,
+                s8f32s32, new Type[] { }, CallingConvention.DEFAULT);
+
+        Function f = new Function(UnitHelper.findSymbol("testClosureVrT").address, s8f32s32, new Type[] { Type.POINTER });
+        HeapInvocationBuffer paramBuffer = new HeapInvocationBuffer(f);
+        paramBuffer.putAddress(handle.getAddress());
+        ByteBuffer retval = ByteBuffer.allocate(12).order(ByteOrder.nativeOrder());
+        Foreign.getInstance().invokeArrayWithReturnBuffer(f.getAddress64(),
+                paramBuffer.array(), retval.array());
+        assertTrue("Closure not called", called[0]);
+        assertEquals("Wrong s8 field value", S8_MAGIC, retval.get(0));
+        assertEquals("Wrong s32 field value", S32_MAGIC, retval.getInt(8));
+        assertTrue("Wrong f32 field value", (F32_MAGIC - retval.getFloat(4)) < 0.0001);
+
+    }
+
+    @Test public void testClosureVrTFromPointer() throws Throwable {
+        final boolean called[] = { false };
+
+        final byte S8_MAGIC = (byte) 0xfe;
+        final int S32_MAGIC = (int) 0xdeadbeef;
+        final float F32_MAGIC = (float) 0x12345678;
+
+        Closure closure = new Closure() {
+            public void invoke(Buffer buffer) {
+                called[0] = true;
+                long struct = MemoryIO.getInstance().allocateMemory(12, true);
+                MemoryIO.getInstance().putByte(struct, S8_MAGIC);
+                MemoryIO.getInstance().putFloat(struct + 4, F32_MAGIC);
+                MemoryIO.getInstance().putInt(struct + 8, S32_MAGIC);
+                buffer.setStructReturn(struct);
+            }
+        };
+        Struct s8f32s32 = new Struct(new Type[] { Type.SINT8, Type.FLOAT, Type.SINT32 });
+
+        Closure.Handle handle = ClosureManager.getInstance().newClosure(closure,
+                s8f32s32, new Type[] { }, CallingConvention.DEFAULT);
+
+        Function f = new Function(UnitHelper.findSymbol("testClosureVrT").address, s8f32s32, new Type[] { Type.POINTER });
+        HeapInvocationBuffer paramBuffer = new HeapInvocationBuffer(f);
+        paramBuffer.putAddress(handle.getAddress());
+        ByteBuffer retval = ByteBuffer.allocate(12).order(ByteOrder.nativeOrder());
+        Foreign.getInstance().invokeArrayWithReturnBuffer(f.getAddress64(),
+                paramBuffer.array(), retval.array());
+        assertTrue("Closure not called", called[0]);
+        assertEquals("Wrong s8 field value", S8_MAGIC, retval.get(0));
+        assertEquals("Wrong s32 field value", S32_MAGIC, retval.getInt(8));
+        assertTrue("Wrong f32 field value", (F32_MAGIC - retval.getFloat(4)) < 0.0001);
+
+    }
+    
 }

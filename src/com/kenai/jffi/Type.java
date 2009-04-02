@@ -59,6 +59,14 @@ public abstract class Type {
         return handle;
     }
 
+    /**
+     * Gets the size of this type.
+     * 
+     * @return The size of this type, in bytes.
+     */
+    final int size() {
+        return Foreign.getInstance().getTypeSize(handle);
+    }
     public static final class Builtin extends Type {
         private Builtin(int type) {
             super(type, Foreign.getInstance().lookupBuiltinType(type));
