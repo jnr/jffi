@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 
 package com.kenai.jffi;
 
@@ -15,8 +11,7 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
- *
- * @author wayne
+ * Tests C struct parameters and return values using pass/return by value.
  */
 public class StructTest {
 
@@ -156,7 +151,6 @@ public class StructTest {
         long struct = MemoryIO.getInstance().allocateMemory(8, true);
         MemoryIO.getInstance().putInt(struct, 0x12);
         MemoryIO.getInstance().putInt(struct + 4, 0x87654321);
-        System.out.printf("struct address=%x\n", struct);
         paramBuffer.putStruct(struct, 8);
 
         int retval = Invoker.getInstance().invokeInt(get_s8, paramBuffer);
