@@ -43,7 +43,7 @@ LIBNAME = jffi
 #   http://weblogs.java.net/blog/kellyohair/archive/2006/01/compilation_of_1.html
 JFLAGS = -fno-omit-frame-pointer -fno-strict-aliasing -DNDEBUG
 OFLAGS = -O2 $(JFLAGS)
-WFLAGS = -W -Werror -Wall -Wno-unused -Wno-parentheses
+WFLAGS = -W -Werror -Wall -Wno-unused -Wno-parentheses -Wundef
 PICFLAGS = -fPIC
 SOFLAGS = # Filled in for each OS specifically
 LDFLAGS += $(SOFLAGS)
