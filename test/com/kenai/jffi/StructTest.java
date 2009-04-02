@@ -137,4 +137,27 @@ public class StructTest {
         retval = foreign.invokeArrayInt32(get_s32.getAddress64(), paramBuffer.array());
         assertEquals("Wrong s32 value", 0x87654321, retval);
     }
+
+    @Test public void s8s32_set() throws Throwable {
+        Foreign foreign = Foreign.getInstance();
+
+        Library lib = Library.getCachedInstance("build/libtest.so", Library.LAZY | Library.GLOBAL);
+        assertNotNull("Could not open libtest", lib);
+
+        long sym = lib.getSymbolAddress("struct_s8s32_set");
+        assertNotSame("Could not lookup struct_s8s32_set", 0L, sym);
+
+        Struct s8s32 = new Struct(new Type[] { Type.SINT8, Type.SINT32 });
+        Function function = new Function(sym, s8s32, new Type[] { Type.SINT8, Type.SINT32 });
+        
+        HeapInvocationBuffer paramBuffer = new HeapInvocationBuffer(function);
+        paramBuffer.putByte((byte) 0x12);
+        paramBuffer.putInt(0x87654321);
+
+        byte[] returnBuffer = new byte[16];
+        foreign.invokeArrayWithReturnBuffer(function.getAddress64(), paramBuffer.array(), returnBuffer);
+        ByteBuffer buf = ByteBuffer.wrap(returnBuffer).order(ByteOrder.nativeOrder());
+        assertEquals("Wrong s8 value", (byte) 0x12, buf.get(0));
+        assertEquals("Wrong s32 value", 0x87654321, buf.getInt(4));
+    }
 }

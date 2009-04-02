@@ -28,36 +28,22 @@ invokeArray(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer, void* returnB
     jbyte *tmpBuffer = (jbyte *) &tmpStackBuffer[0];
     
     if (ctx->cif.nargs > 0) {
-        if (ctx->rawParameterSize > (MAX_STACK_ARGS * PARAM_SIZE)) {
-            tmpBuffer = alloca(ctx->rawParameterSize);
+        if (ctx->cif.bytes > (int) sizeof(tmpStackBuffer)) {
+            tmpBuffer = alloca(ctx->cif.bytes);
         }
-        (*env)->GetByteArrayRegion(env, paramBuffer, 0, ctx->rawParameterSize, tmpBuffer);
+
+        // calculate room needed for return address for struct returns
+        int adj = ctx->cif.rtype->type == FFI_TYPE_STRUCT ? sizeof(void *) : 0;
+
+        (*env)->GetByteArrayRegion(env, paramBuffer, 0, ctx->rawParameterSize, tmpBuffer + adj);
     }
+
+    // For struct return values, we need to push a return value address on the parameter stack
+    if (ctx->cif.rtype->type == FFI_TYPE_STRUCT) {
+        *(void **) tmpBuffer = returnBuffer;
+    }
+
     ffi_raw_call(&ctx->cif, FFI_FN(ctx->function), returnBuffer, (ffi_raw *) tmpBuffer);
-    set_last_error(errno);
-}
-
-static void
-invokeArrayNonRaw(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer, void* returnBuffer)
-{
-    Function* ctx = (Function *) (uintptr_t) ctxAddress;
-    union { double d; long long ll; jbyte tmp[PARAM_SIZE]; } tmpStackBuffer[MAX_STACK_ARGS];
-    jbyte *tmpBuffer = (jbyte *) &tmpStackBuffer[0];
-    void* ffiStackArgs[MAX_STACK_ARGS];
-    void** ffiArgs = ffiStackArgs;
-
-    if (ctx->cif.nargs > 0) {
-        unsigned int i;
-        if (ctx->cif.nargs > MAX_STACK_ARGS) {
-            tmpBuffer = alloca(ctx->cif.nargs * PARAM_SIZE);
-            ffiArgs = alloca(ctx->cif.nargs * sizeof(void *));
-        }
-        for (i = 0; i < ctx->cif.nargs; ++i) {
-            ffiArgs[i] = &tmpBuffer[ctx->rawParamOffsets[i]];
-        }
-        (*env)->GetByteArrayRegion(env, paramBuffer, 0, ctx->cif.nargs * PARAM_SIZE, tmpBuffer);
-    }
-    ffi_call(&ctx->cif, FFI_FN(ctx->function), returnBuffer, ffiArgs);
     set_last_error(errno);
 }
 
@@ -85,8 +71,6 @@ invokeArray(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer, void* returnB
     ffi_call(&ctx->cif, FFI_FN(ctx->function), returnBuffer, ffiArgs);
     set_last_error(errno);
 }
-#define invokeArrayNonRaw invokeArray
-
 #endif
 /*
  * Class:     com_kenai_jffi_Foreign
@@ -169,7 +153,7 @@ Java_com_kenai_jffi_Foreign_invokeArrayWithReturnBuffer(JNIEnv* env, jclass self
     Function* ctx = (Function *) (uintptr_t) ctxAddress;
     jbyte* retval = alloca(ctx->cif.rtype->size);
 
-    invokeArrayNonRaw(env, ctxAddress, paramBuffer, retval);
+    invokeArray(env, ctxAddress, paramBuffer, retval);
     (*env)->SetByteArrayRegion(env, returnBuffer, 0, ctx->cif.rtype->size, retval);
 }
 
@@ -177,12 +161,14 @@ Java_com_kenai_jffi_Foreign_invokeArrayWithReturnBuffer(JNIEnv* env, jclass self
 
 static void
 invokeArrayWithObjects_(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer,
-        jint objectCount, jint* infoBuffer, jobject* objectBuffer, FFIValue* retval)
+        jint objectCount, jint* infoBuffer, jobject* objectBuffer, void* retval)
 {
     Function* ctx = (Function *) (uintptr_t) ctxAddress;
     union { double d; long long ll; jbyte tmp[PARAM_SIZE]; } tmpStackBuffer[MAX_STACK_ARGS];
     jbyte *tmpBuffer = (jbyte *) &tmpStackBuffer[0];
-#if !defined(USE_RAW)
+#if defined(USE_RAW)
+    int rawAdj = ctx->cif.rtype->type == FFI_TYPE_STRUCT ? sizeof(void *) : 0;
+#else
     void* ffiStackArgs[MAX_STACK_ARGS], **ffiArgs = &ffiStackArgs[0];
 #endif
     Array stackArrays[MAX_STACK_OBJECTS], *arrays = &stackArrays[0];
@@ -193,7 +179,7 @@ invokeArrayWithObjects_(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer,
         tmpBuffer = alloca(ctx->cif.nargs * PARAM_SIZE);
     }
 #if defined(USE_RAW)
-    (*env)->GetByteArrayRegion(env, paramBuffer, 0, ctx->rawParameterSize, tmpBuffer);
+    (*env)->GetByteArrayRegion(env, paramBuffer, 0, ctx->rawParameterSize, tmpBuffer + rawAdj);
 #else
     if (ctx->cif.nargs > MAX_STACK_ARGS) {
         ffiArgs = alloca(ctx->cif.nargs * sizeof(void *));
@@ -240,12 +226,16 @@ invokeArrayWithObjects_(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer,
         }
 
 #if defined(USE_RAW)
-        *((void **)(tmpBuffer + ctx->rawParamOffsets[idx])) = ptr;
+        *((void **)(tmpBuffer + rawAdj + ctx->rawParamOffsets[idx])) = ptr;
 #else
         *((void **) ffiArgs[idx]) = ptr;
 #endif
     }
 #if defined(USE_RAW)
+    // For struct return values, we need to push a return value address on the parameter stack
+    if (ctx->cif.rtype->type == FFI_TYPE_STRUCT) {
+        *(void **) tmpBuffer = retval;
+    }
     ffi_raw_call(&ctx->cif, FFI_FN(ctx->function), retval, (ffi_raw *) tmpBuffer);
 #else
     ffi_call(&ctx->cif, FFI_FN(ctx->function), retval, ffiArgs);

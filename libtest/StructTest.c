@@ -165,6 +165,17 @@ struct_return_s8s32()
     return s;
 }
 
+struct s8s32
+struct_s8s32_set(char s8, int s32)
+{
+    struct s8s32 s;
+
+    s.s8 = s8;
+    s.s32 = s32;
+
+    return s;
+}
+
 int
 struct_s8s32_get_s8(struct s8s32 s)
 {
