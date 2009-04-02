@@ -46,14 +46,23 @@ public class ClosureManager {
         /** The code trampoline address */
         final long cbAddress;
 
+        /** 
+         * Keep references to the return and parameter types so they do not get
+         * garbage collected until the closure does.
+         */
+        private final Type returnType;
+        private final Type[] parameterTypes;
+
         /**
          * Creates a new Handle to lifecycle manager the native closure.
          *
          * @param handle The address of the native closure structure.
          */
-        Handle(long handle) {
+        Handle(long handle, Type returnType, Type[] parameterTypes) {
             this.handle = handle;
             cbAddress = IO.getAddress(handle);
+            this.returnType = returnType;
+            this.parameterTypes = (Type[]) parameterTypes.clone();
         }
 
         public long getAddress() {
@@ -134,8 +143,13 @@ public class ClosureManager {
             throw new IllegalArgumentException("Unsupported return type " + returnType);
         }
 
-        return new Handle(Foreign.getInstance().newClosure(proxy, Proxy.METHOD,
-                returnType.handle(), nativeParamTypes, 0));
+        long handle = Foreign.getInstance().newClosure(proxy, Proxy.METHOD,
+                returnType.handle(), nativeParamTypes, 0);
+        if (handle == 0) {
+            throw new RuntimeException("Failed to create native closure");
+        }
+        
+        return new Handle(handle, returnType, parameterTypes);
     }
 
     /**
