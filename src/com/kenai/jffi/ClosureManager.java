@@ -180,6 +180,10 @@ public class ClosureManager {
             return IO.getAddress(IO.getAddress(parameters + (index * PARAM_SIZE))) & ADDRESS_MASK;
         }
 
+        public final long getStruct(int index) {
+            return IO.getAddress(parameters + (index * PARAM_SIZE));
+        }
+
         public final void setByteReturn(byte value) {
             IO.putByte(retval, value);
         }

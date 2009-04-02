@@ -70,6 +70,13 @@ public interface Closure {
          */
         long getAddress(int index);
 
+        /**
+         * Gets the address of a struct parameter that is passed by value.
+         *
+         * @param index The parameter index
+         * @return A native memory address.
+         */
+        long getStruct(int index);
 
         /**
          * Sets the closure return value to an 8 bit integer value.
