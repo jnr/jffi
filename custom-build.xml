@@ -7,6 +7,7 @@
     <target name="-init-vars">
         <property name="build.native.dir" location="${build.dir}/jni"/>
         <property name="src.native.dir" location="jni"/>
+        <property name="complete.jar" value="${dist.dir}/jffi-complete.jar"/>
         <mkdir dir="${build.native.dir}"/>
         <condition property="platform" value="Darwin">
             <os family="Mac"/>
@@ -88,8 +89,9 @@
     </target>
     
     <target name="-assemble-final-jar" depends="-init-vars, -assemble-native-jar">
-        <jar jarfile="${dist.jar}" index="true" update="true" duplicate="preserve"
+        <jar jarfile="${complete.jar}" index="true" update="true" duplicate="preserve"
             filesetmanifest="skip">
+            <zipfileset src="${dist.jar}"/>
             <zipfileset src="${native.jar}"/>
         </jar>
     </target>
