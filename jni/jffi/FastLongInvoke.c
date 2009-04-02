@@ -1,11 +1,9 @@
 #include <sys/types.h>
 #include <stdlib.h>
-#ifdef __linux__
-#  include <endian.h>
-#endif
 #include <errno.h>
 #include <ffi.h>
 #include <jni.h>
+#include "endian.h"
 #include "jffi.h"
 #include "Exception.h"
 #include "Function.h"

@@ -26,9 +26,7 @@
 #ifndef _WIN32
 #  include <pthread.h>
 #endif
-#ifdef __linux__
-#  include <endian.h>
-#endif
+#include "endian.h"
 #include <jni.h>
 
 #ifndef roundup
