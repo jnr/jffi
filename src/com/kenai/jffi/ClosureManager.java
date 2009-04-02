@@ -122,12 +122,20 @@ public class ClosureManager {
      */
     public final Closure.Handle newClosure(Closure closure, Type returnType, Type[] parameterTypes, CallingConvention convention) {
         Proxy proxy = new Proxy(closure);
-        int[] nativeParamTypes = new int[parameterTypes.length];
+        long[] nativeParamTypes = new long[parameterTypes.length];
         for (int i = 0; i < parameterTypes.length; ++i) {
-            nativeParamTypes[i] = parameterTypes[i].value();
+            if (!(parameterTypes[i] instanceof Type.Builtin)) {
+                throw new IllegalArgumentException("Unsupported parameter type " + parameterTypes[i]);
+            }
+            nativeParamTypes[i] = parameterTypes[i].handle();
         }
+        
+        if (!(returnType instanceof Type.Builtin)) {
+            throw new IllegalArgumentException("Unsupported return type " + returnType);
+        }
+
         return new Handle(Foreign.getInstance().newClosure(proxy, Proxy.METHOD,
-                returnType.value(), nativeParamTypes, 0));
+                returnType.handle(), nativeParamTypes, 0));
     }
 
     /**

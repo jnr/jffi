@@ -193,9 +193,9 @@ public class UnitHelper {
         } if (returnType == long.class || returnType == Long.class) {
             return result.longValue();
         } if (returnType == float.class || returnType == Float.class) {
-            return result.floatValue();
+            return Float.intBitsToFloat(result.intValue());
         } if (returnType == double.class || returnType == double.class) {
-            return result.doubleValue();
+            return Double.longBitsToDouble(result.longValue());
         }
         throw new RuntimeException("Unknown return type: " + returnType);
     }

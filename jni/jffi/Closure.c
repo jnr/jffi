@@ -50,11 +50,11 @@ static void closure_invoke(ffi_cif* cif, void* retval, void** parameters, void* 
  */
 JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_newClosure(JNIEnv* env, jclass clazz,
-        jobject closureObject, jobject closureMethod, jint returnType, jintArray paramTypeArray, jint flags)
+        jobject closureObject, jobject closureMethod, jlong returnType, jlongArray paramTypeArray, jint flags)
 {
     Closure* closure = NULL;
     int argCount;
-    jint* paramTypes;
+    jlong* paramTypes;
     ffi_type* ffiReturnType;
     ffi_status status;
     ffi_abi abi;
@@ -86,18 +86,18 @@ Java_com_kenai_jffi_Foreign_newClosure(JNIEnv* env, jclass clazz,
         throwException(env, OutOfMemory, "Could not allocate space for parameter types");
         goto cleanup;
     }
-    paramTypes = alloca(argCount * sizeof(jint));
-    (*env)->GetIntArrayRegion(env, paramTypeArray, 0, argCount, paramTypes);
+    paramTypes = alloca(argCount * sizeof(jlong));
+    (*env)->GetLongArrayRegion(env, paramTypeArray, 0, argCount, paramTypes);
     for (i = 0; i < argCount; ++i) {
-        closure->ffiParamTypes[i] = jffi_TypeToFFI(paramTypes[i]);
+        closure->ffiParamTypes[i] = (ffi_type *) j2p(paramTypes[i]);
         if (closure->ffiParamTypes[i] == NULL) {
-            throwException(env, IllegalArgument, "Unknown argument type: %#x", paramTypes[i]);
+            throwException(env, NullPointer, "parameter type %d is null", i);
             goto cleanup;
         }
     }
-    ffiReturnType = jffi_TypeToFFI(returnType);
+    ffiReturnType = (ffi_type *) j2p(returnType);
     if (ffiReturnType == NULL) {
-        throwException(env, IllegalArgument, "Unknown return type: %#x", returnType);
+        throwException(env, NullPointer, "return type is null");
         goto cleanup;
     }
 #ifdef _WIN32

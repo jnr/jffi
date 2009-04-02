@@ -47,7 +47,7 @@ final class Foreign {
     final native boolean isRawParameterPackingEnabled();
     final native int getFunctionRawParameterSize(long handle);
     final native int getLastError();
-    final native long newClosure(Object proxy, Method closureMethod, int returnType, int[] paramTypes, int convention);
+    final native long newClosure(Object proxy, Method closureMethod, long returnType, long[] paramTypes, int convention);
     final native void freeClosure(long handle);
 
     /**
