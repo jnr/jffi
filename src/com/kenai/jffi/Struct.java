@@ -2,22 +2,20 @@
 package com.kenai.jffi;
 
 /**
- * A wrapper around FFI struct types
+ * Describes the layout of a C struct
  */
 public final class Struct extends Type {
+    /* Keep a strong reference to the field types so they do not GCed */
     private final Type[] fields;
-    
-    public Struct(Type[] fields) {
-        super(Type.STRUCT.type(), newNativeStruct(fields));
-        this.fields = (Type[]) fields.clone();
-    }
 
-    private static final long newNativeStruct(Type[] types) {
-        long[] ffiTypes = new long[types.length];
-        for (int i = 0; i < types.length; ++i) {
-            ffiTypes[i] = types[i].handle();
-        }
-        return Foreign.getInstance().newStruct(ffiTypes);
+    /**
+     * Creates a new C struct layout description.
+     *
+     * @param fields The fields contained in the struct.
+     */
+    public Struct(Type[] fields) {
+        super(Type.STRUCT.type(), Foreign.getInstance().newStruct(Type.nativeHandles(fields)));
+        this.fields = (Type[]) fields.clone();
     }
 
     @Override
