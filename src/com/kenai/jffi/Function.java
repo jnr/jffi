@@ -38,14 +38,7 @@ public final class Function {
     public Function(long address, Type returnType, Type[] paramTypes) {
         this(address, returnType, paramTypes, CallingConvention.DEFAULT);
     }
-    @Deprecated
-    public Function(Address address, Type returnType, Type[] paramTypes, CallingConvention convention) {
-        this(address.nativeAddress(), returnType, paramTypes, convention);
-    }
-    @Deprecated
-    public Function(Address address, Type returnType, Type[] paramTypes) {
-        this(address.nativeAddress(), returnType, paramTypes, CallingConvention.DEFAULT);
-    }
+
     final int getParameterCount() {
         return parameterCount;
     }
