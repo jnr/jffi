@@ -123,16 +123,12 @@ final class Foreign {
      * @param handle The FFI struct handle
      */
     final native void freeStruct(long handle);
-    
-    final native int invoke32VrI(int function);
-    final native int invoke64VrI(long function);
-    final native int invoke32IrI(int function, int arg1);
-    final native int invoke64IrI(long function, int arg1);
-    final native int invoke32IIrI(int function, int arg1, int arg2);
-    final native int invoke64IIrI(long function, int arg1, int arg2);
-    final native int invoke32IIIrI(int function, int arg1, int arg2, int arg3);
-    final native int invoke64IIIrI(long function, int arg1, int arg2, int arg3);
 
+    final native int invokeVrI(long functionContext);
+    final native int invokeIrI(long functionContext, int arg1);
+    final native int invokeIIrI(long functionContext, int arg1, int arg2);
+    final native int invokeIIIrI(long functionContext, int arg1, int arg2, int arg3);
+    
     /* ---------------------------------------------------------------------- */
 
     final native long invokeVrL(long function);

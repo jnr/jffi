@@ -87,21 +87,12 @@ public final class Function {
     }
 
     /**
-     * Gets the address of the function context as a 64 bit integer.
+     * Gets the address of the function context.
      *
      * @return The address of the native function context struct.
      */
-    final long getAddress64() {
+    final long getContextAddress() {
         return address;
-    }
-
-    /**
-     * Gets the address of the function context as a 32 bit integer
-     *
-     * @return The address of the native function context struct.
-     */
-    final int getAddress32() {
-        return address32;
     }
 
     /**
