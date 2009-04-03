@@ -14,7 +14,7 @@ public final class Struct extends Type {
      * @param fields The fields contained in the struct.
      */
     public Struct(Type[] fields) {
-        super(Type.STRUCT.type(), Foreign.getInstance().newStruct(Type.nativeHandles(fields), false));
+        super(Foreign.getInstance().newStruct(Type.nativeHandles(fields), false));
         this.fields = (Type[]) fields.clone();
     }
 

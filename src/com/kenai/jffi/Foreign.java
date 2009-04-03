@@ -34,6 +34,31 @@ final class Foreign {
         return SingletonHolder.INSTANCE;
     }
     private Foreign() {}
+    public final static int TYPE_VOID = 0;
+    public final static int TYPE_FLOAT = 2;
+    public final static int TYPE_DOUBLE = 3;
+    public final static int TYPE_LONGDOUBLE = 4;
+    public final static int TYPE_UINT8 = 5;
+    public final static int TYPE_SINT8 = 6;
+    public final static int TYPE_UINT16 = 7;
+    public final static int TYPE_SINT16 = 8;
+    public final static int TYPE_UINT32 = 9;
+    public final static int TYPE_SINT32 = 10;
+    public final static int TYPE_UINT64 = 11;
+    public final static int TYPE_SINT64 = 12;
+    public final static int TYPE_STRUCT = 13;
+    public final static int TYPE_POINTER = 14;
+
+    public final static int TYPE_UCHAR = 101;
+    public final static int TYPE_SCHAR = 102;
+    public final static int TYPE_USHORT = 103;
+    public final static int TYPE_SSHORT = 104;
+    public final static int TYPE_UINT = 105;
+    public final static int TYPE_SINT = 106;
+    public final static int TYPE_ULONG = 107;
+    public final static int TYPE_SLONG = 108;
+
+    
     final native long dlopen(String name, int flags);
     final native void dlclose(long handle);
     final native long dlsym(long handle, String name);

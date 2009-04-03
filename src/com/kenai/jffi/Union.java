@@ -14,7 +14,7 @@ public final class Union extends Type {
      * @param fields The fields contained in the struct.
      */
     public Union(Type[] fields) {
-        super(Type.STRUCT.type(), Foreign.getInstance().newStruct(Type.nativeHandles(fields), true));
+        super(Foreign.getInstance().newStruct(Type.nativeHandles(fields), true));
         this.fields = (Type[]) fields.clone();
     }
 

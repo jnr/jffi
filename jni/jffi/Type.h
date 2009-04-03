@@ -3,7 +3,5 @@
 
 #include <ffi.h>
 
-extern ffi_type* jffi_TypeToFFI(int type);
-
 #endif /* JFFI_TYPE_H */
 

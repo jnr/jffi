@@ -44,8 +44,8 @@ public class TypeTest {
     // public void hello() {}
     @Test public void lookupBuiltinType() throws Throwable {
         Foreign foreign = Foreign.getInstance();
-        long handle = foreign.lookupBuiltinType(Type.SINT8.value());
-        assertEquals("Incorrect type", Type.SINT8.value(), foreign.getTypeType(handle));
+        long handle = foreign.lookupBuiltinType(Foreign.TYPE_SINT8);
+        assertEquals("Incorrect type", Type.SINT8.type(), foreign.getTypeType(handle));
         assertEquals("Incorrect size", 1, foreign.getTypeSize(handle));
         assertEquals("Incorrect alignment", 1, foreign.getTypeAlign(handle));
     }
