@@ -10,6 +10,7 @@ import java.nio.ByteOrder;
 public final class HeapInvocationBuffer implements InvocationBuffer {
     private static final int PARAM_SIZE = 8;
     private static final Encoder encoder = getEncoder();
+    private final Function function;
     private final byte[] buffer;
     private ObjectBuffer objectBuffer = null;
     private int paramOffset = 0;
@@ -21,6 +22,7 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
      * @param function The function that this buffer is going to be used with.
      */
     public HeapInvocationBuffer(Function function) {
+        this.function = function;
         buffer = new byte[encoder.getBufferSize(function)];
     }
     
@@ -120,18 +122,22 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
         getObjectBuffer().putDirectBuffer(paramIndex++, value, offset, length);
     }
 
-    public final void putStruct(final byte[] struct, int offset, int length) {
+    public final void putStruct(final byte[] struct, int offset) {
+        final int size = function.paramTypes[paramIndex].size;
+
         if (encoder.isRaw()) {
-            System.arraycopy(struct, offset, buffer, paramOffset, length);
-            paramOffset = FFI_ALIGN(paramOffset + length, 4);
+            System.arraycopy(struct, offset, buffer, paramOffset, size);
+            paramOffset = FFI_ALIGN(paramOffset + size, 4);
         } else {
             paramOffset += encoder.putAddress(buffer, paramOffset, 0L);
-            getObjectBuffer().putArray(paramIndex, struct, offset, length, ObjectBuffer.IN);
+            getObjectBuffer().putArray(paramIndex, struct, offset, size, ObjectBuffer.IN);
         }
         ++paramIndex;
     }
 
-    public final void putStruct(final long struct, int size) {
+    public final void putStruct(final long struct) {
+        final int size = function.paramTypes[paramIndex].size;
+
         if (encoder.isRaw()) {
             MemoryIO.getInstance().getByteArray(struct, buffer, paramOffset, size);
             paramOffset = FFI_ALIGN(paramOffset + size, 4);

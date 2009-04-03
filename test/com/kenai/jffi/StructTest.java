@@ -118,7 +118,7 @@ public class StructTest {
         buf.putInt((byte) 0x12);
         buf.putInt(0x87654321);
         buf.flip();
-        paramBuffer.putStruct(buf.array(), buf.arrayOffset(), buf.limit());
+        paramBuffer.putStruct(buf.array(), buf.arrayOffset());
 
         int retval = Invoker.getInstance().invokeInt(get_s8, paramBuffer);
         assertEquals("Wrong s8 value", 0x12, retval);
@@ -138,10 +138,10 @@ public class StructTest {
         Function get_s8 = new Function(sym_s8.address, Type.SINT32, new Type[] { s8s32 });
         Function get_s32 = new Function(sym_s32.address, Type.SINT32, new Type[] { s8s32 });
         HeapInvocationBuffer paramBuffer = new HeapInvocationBuffer(get_s8);
-        long struct = MemoryIO.getInstance().allocateMemory(8, true);
+        long struct = MemoryIO.getInstance().allocateMemory(s8s32.size(), true);
         MemoryIO.getInstance().putInt(struct, 0x12);
         MemoryIO.getInstance().putInt(struct + 4, 0x87654321);
-        paramBuffer.putStruct(struct, 8);
+        paramBuffer.putStruct(struct);
 
         int retval = Invoker.getInstance().invokeInt(get_s8, paramBuffer);
         assertEquals("Wrong s8 value", 0x12, retval);
@@ -157,11 +157,11 @@ public class StructTest {
         Struct s8s32 = new Struct(new Type[] { Type.SINT8, Type.SINT32 });
         Function function = new Function(sym.address, Type.SINT32, new Type[] { s8s32, Type.SINT32 });
         HeapInvocationBuffer paramBuffer = new HeapInvocationBuffer(function);
-        ByteBuffer buf = ByteBuffer.allocate(8).order(ByteOrder.nativeOrder());
+        ByteBuffer buf = ByteBuffer.allocate(s8s32.size()).order(ByteOrder.nativeOrder());
         buf.putInt((byte) 0x12);
         buf.putInt(0x87654321);
         buf.flip();
-        paramBuffer.putStruct(buf.array(), buf.arrayOffset(), buf.limit());
+        paramBuffer.putStruct(buf.array(), buf.arrayOffset());
         paramBuffer.putInt(0xdeadbeef);
 
         int retval = Invoker.getInstance().invokeInt(function, paramBuffer);
@@ -176,10 +176,10 @@ public class StructTest {
         Struct s8s32 = new Struct(new Type[] { Type.SINT8, Type.SINT32 });
         Function function = new Function(sym.address, Type.SINT32, new Type[] { s8s32, Type.SINT32 });
         HeapInvocationBuffer paramBuffer = new HeapInvocationBuffer(function);
-        long struct = MemoryIO.getInstance().allocateMemory(8, true);
+        long struct = MemoryIO.getInstance().allocateMemory(s8s32.size(), true);
         MemoryIO.getInstance().putInt(struct, 0x12);
         MemoryIO.getInstance().putInt(struct + 4, 0x87654321);
-        paramBuffer.putStruct(struct, 8);
+        paramBuffer.putStruct(struct);
 
         // Add a following int32 param and ensure it is passed
         paramBuffer.putInt(0xdeadbeef);
@@ -196,11 +196,11 @@ public class StructTest {
         Struct s8s32 = new Struct(new Type[] { Type.SINT8, Type.SINT32 });
         Function function = new Function(sym.address, Type.SINT64, new Type[] { s8s32, Type.SINT64 });
         HeapInvocationBuffer paramBuffer = new HeapInvocationBuffer(function);
-        ByteBuffer buf = ByteBuffer.allocate(8).order(ByteOrder.nativeOrder());
+        ByteBuffer buf = ByteBuffer.allocate(s8s32.size()).order(ByteOrder.nativeOrder());
         buf.putInt((byte) 0x12);
         buf.putInt(0x87654321);
         buf.flip();
-        paramBuffer.putStruct(buf.array(), buf.arrayOffset(), buf.limit());
+        paramBuffer.putStruct(buf.array(), buf.arrayOffset());
         paramBuffer.putLong(0xdeadbeef);
 
         long retval = Invoker.getInstance().invokeLong(function, paramBuffer);
@@ -215,10 +215,10 @@ public class StructTest {
         Struct s8s32 = new Struct(new Type[] { Type.SINT8, Type.SINT32 });
         Function function = new Function(sym.address, Type.SINT64, new Type[] { s8s32, Type.SINT64 });
         HeapInvocationBuffer paramBuffer = new HeapInvocationBuffer(function);
-        long struct = MemoryIO.getInstance().allocateMemory(8, true);
+        long struct = MemoryIO.getInstance().allocateMemory(s8s32.size(), true);
         MemoryIO.getInstance().putInt(struct, 0x12);
         MemoryIO.getInstance().putInt(struct + 4, 0x87654321);
-        paramBuffer.putStruct(struct, 8);
+        paramBuffer.putStruct(struct);
 
         // Add a following int64 param and ensure it is passed
         paramBuffer.putLong(0xdeadbeef);

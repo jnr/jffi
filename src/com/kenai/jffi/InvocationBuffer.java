@@ -123,4 +123,23 @@ public interface InvocationBuffer {
      * @param length The length of the buffer to use.
      */
     public abstract void putDirectBuffer(final Buffer buffer, int offset, int length);
+
+    /**
+     * Adds a struct or union as a parameter.
+     *
+     * This passes the struct or union by value, not by reference.
+     * 
+     * @param struct A java byte array with the struct contents.
+     * @param offset The offset from the start of the array.
+     */
+    public void putStruct(final byte[] struct, int offset);
+
+    /**
+     * Adds a struct or union as a parameter.
+     *
+     * This passes the struct or union by value, not by reference.
+     *
+     * @param struct The native address to use as the struct contents.
+     */
+    public void putStruct(final long struct);
 }

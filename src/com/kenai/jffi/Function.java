@@ -6,8 +6,8 @@ public final class Function {
     private final long address;
     private final int parameterCount;
     private final int rawParameterSize;
-    private final Type returnType;
-    private final Type[] paramTypes;
+    final Type returnType;
+    final Type[] paramTypes;
     
     public Function(long address, Type returnType, Type[] paramTypes, CallingConvention convention) {
 
