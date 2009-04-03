@@ -9,10 +9,10 @@ package com.kenai.jffi;
  */
 public final class Function {
     /** The native address of the context */
-    private final int address32;
+    private final long contextAddress;
 
-    /** The native address of the context */
-    private final long address;
+    /** The address of the function */
+    private final long functionAddress;
 
     /** The number of parameters this function takes */
     private final int parameterCount;
@@ -36,12 +36,15 @@ public final class Function {
      */
     public Function(long address, Type returnType, Type[] paramTypes, CallingConvention convention) {
 
+        this.functionAddress = address;
+
         final long h = Foreign.getInstance().newFunction(address,
                 returnType.handle(), Type.nativeHandles(paramTypes),
                 convention == CallingConvention.STDCALL ? 1 : 0);
         if (h == 0) {
             throw new RuntimeException("Failed to create native function");
         }
+        this.contextAddress = h;
 
         //
         // Keep references to the return and parameter types so they do not get
@@ -51,9 +54,7 @@ public final class Function {
         this.paramTypes = (Type[]) paramTypes.clone();
 
         this.parameterCount = paramTypes.length;
-        this.rawParameterSize = Foreign.getInstance().getFunctionRawParameterSize(h);
-        this.address = h;
-        this.address32 = (int) h;
+        this.rawParameterSize = Foreign.getInstance().getFunctionRawParameterSize(h);        
     }
 
     /**
@@ -92,7 +93,16 @@ public final class Function {
      * @return The address of the native function context struct.
      */
     final long getContextAddress() {
-        return address;
+        return contextAddress;
+    }
+
+    /**
+     * Gets the address of the function.
+     *
+     * @return The address of the native function.
+     */
+    final long getFunctionAddress() {
+        return functionAddress;
     }
 
     /**
@@ -107,8 +117,8 @@ public final class Function {
     @Override
     protected void finalize() throws Throwable {
         try {
-            if (address != 0) {
-                Foreign.getInstance().freeFunction(address);
+            if (contextAddress != 0) {
+                Foreign.getInstance().freeFunction(contextAddress);
             }
         } finally {
             super.finalize();
