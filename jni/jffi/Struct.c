@@ -22,7 +22,7 @@
  * Signature: ([J)J
  */
 JNIEXPORT jlong JNICALL
-Java_com_kenai_jffi_Foreign_newStruct(JNIEnv* env, jobject self, jlongArray typeArray)
+Java_com_kenai_jffi_Foreign_newStruct(JNIEnv* env, jobject self, jlongArray typeArray, jboolean isUnion)
 {
     ffi_type* s = NULL;
     int fieldCount;
@@ -74,8 +74,11 @@ Java_com_kenai_jffi_Foreign_newStruct(JNIEnv* env, jobject self, jlongArray type
         }
 
         s->elements[i] = elem;
-        s->size = ALIGN(s->size, elem->alignment);
-        s->size += elem->size;
+        if (!isUnion) {
+            s->size = ALIGN(s->size, elem->alignment) + elem->size;
+        } else {
+            s->size = MAX(s->size, elem->size);
+        }
         s->alignment = MAX(s->alignment, elem->alignment);
         //printf("s->size=%d s->alignment=%d\n", s->size, s->alignment);
     }

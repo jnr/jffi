@@ -83,12 +83,14 @@ final class Foreign {
     final native int getTypeType(long handle);
 
     /**
-     * Allocates a new FFI struct layout
+     * Allocates a new FFI struct or union layout
      *
      * @param fields An array of ffi_type pointers desccribing the fields of the struct
+     * @param isUnion If true, then fields are all positioned at offset=0, else
+     * fiels are sequentially positioned.
      * @return The native address of the ffi_type structure for the new struct layout
      */
-    final native long newStruct(long[] fields);
+    final native long newStruct(long[] fields, boolean isUnion);
 
     /**
      * Frees a FFI struct handle allocated via {@linkl #newStruct}.

@@ -47,7 +47,7 @@ public class StructTest {
     @Test public void structS8() throws Throwable {
         Foreign foreign = Foreign.getInstance();
         long sint8 = foreign.lookupBuiltinType(Type.SINT8.value());
-        long struct = foreign.newStruct(new long[] { sint8 });
+        long struct = foreign.newStruct(new long[] { sint8 }, false);
         assertEquals("Incorrect size", 1, foreign.getTypeSize(struct));
         assertEquals("Incorrect alignment", 1, foreign.getTypeAlign(struct));
     }
@@ -59,7 +59,7 @@ public class StructTest {
         Foreign foreign = Foreign.getInstance();
         long sint8 = foreign.lookupBuiltinType(Type.SINT8.value());
         long sint32 = foreign.lookupBuiltinType(Type.SINT32.value());
-        long struct = foreign.newStruct(new long[] { sint8, sint32 });
+        long struct = foreign.newStruct(new long[] { sint8, sint32 }, false);
         assertEquals("Incorrect size", 8, foreign.getTypeSize(struct));
         assertEquals("Incorrect alignment", 4, foreign.getTypeAlign(struct));
     }
@@ -68,7 +68,7 @@ public class StructTest {
         Foreign foreign = Foreign.getInstance();
         long sint8 = foreign.lookupBuiltinType(Type.SINT8.value());
         long sint32 = foreign.lookupBuiltinType(Type.SINT32.value());
-        long struct = foreign.newStruct(new long[] { sint8, sint32 });
+        long struct = foreign.newStruct(new long[] { sint8, sint32 }, false);
         
         
         Address sym = UnitHelper.findSymbol("struct_return_s8s32");
