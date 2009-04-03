@@ -27,6 +27,28 @@ public class ClosureManager {
     private ClosureManager() { }
 
     /**
+     * Wraps a java object that implements the {@link Closure} interface in a
+     * native closure.
+     *
+     * @param closure The java object to be called when the native closure is invoked.
+     * @param returnType The return type of the closure.
+     * @param parameterTypes The parameter types of the closure.
+     * @param convention The calling convention of the closure.
+     * @return A new {@link Closure.Handle} instance.
+     */
+    public final Closure.Handle newClosure(Closure closure, Type returnType, Type[] parameterTypes, CallingConvention convention) {
+        Proxy proxy = new Proxy(closure, returnType, parameterTypes);
+
+        long handle = Foreign.getInstance().newClosure(proxy, Proxy.METHOD,
+                returnType.handle(), Type.nativeHandles(parameterTypes), 0);
+        if (handle == 0) {
+            throw new RuntimeException("Failed to create native closure");
+        }
+
+        return new Handle(handle, returnType, parameterTypes);
+    }
+
+    /**
      * Manages the lifecycle of a native closure.
      *
      * Implements {@link Closure.Handle} interface.
@@ -129,28 +151,6 @@ public class ClosureManager {
         void invoke(long retvalAddress, long paramAddress) {
             closure.invoke(new DirectBuffer(returnType, parameterTypes, retvalAddress, paramAddress));
         }
-    }
-
-    /**
-     * Wraps a java object that implements the {@link Closure} interface in a
-     * native closure.
-     *
-     * @param closure The java object to be called when the native closure is invoked.
-     * @param returnType The return type of the closure.
-     * @param parameterTypes The parameter types of the closure.
-     * @param convention The calling convention of the closure.
-     * @return A new {@link Closure.Handle} instance.
-     */
-    public final Closure.Handle newClosure(Closure closure, Type returnType, Type[] parameterTypes, CallingConvention convention) {
-        Proxy proxy = new Proxy(closure, returnType, parameterTypes);
-        
-        long handle = Foreign.getInstance().newClosure(proxy, Proxy.METHOD,
-                returnType.handle(), Type.nativeHandles(parameterTypes), 0);
-        if (handle == 0) {
-            throw new RuntimeException("Failed to create native closure");
-        }
-        
-        return new Handle(handle, returnType, parameterTypes);
     }
 
     /**
