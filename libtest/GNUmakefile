@@ -82,9 +82,9 @@ ifeq ($(CPU), x86_64)
   MODEL = 64
 endif
 
-ifeq ($(MODEL), 64)
-  CC += -m64
-  LD += -m64
+ifneq ($(OS), darwin)
+  CC += -m$(MODEL)
+  LD += -m$(MODEL)
 endif
 
 LIBTEST = $(BUILD_DIR)/$(LIBNAME)

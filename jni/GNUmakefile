@@ -117,11 +117,12 @@ ifeq ($(CPU), x86_64)
   MODEL = 64
 endif
 
-ifeq ($(MODEL), 64)
+# Don't force 32/64bit on darwin, since it builds fat binaries
+ifneq ($(OS), darwin)
   # Change the CC/LD instead of CFLAGS/LDFLAGS, incase other things in the flags
   # makes the libffi build choke
-  CC += -m64
-  LD += -m64
+  CC += -m$(MODEL)
+  LD += -m$(MODEL)
 endif
 
 JDK_HOME=$(shell if [ -d $(JAVA_HOME)/include ];then echo $(JAVA_HOME); else echo $(JAVA_HOME)/..; fi)
