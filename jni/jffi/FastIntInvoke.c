@@ -111,7 +111,7 @@ typedef unsigned int u32;
 JNIEXPORT jint JNICALL
 Java_com_kenai_jffi_Foreign_invokeVrI(JNIEnv* env, jclass self, jlong ctxAddress)
 {
-    Function* ctx = (Function *) (uintptr_t) ctxAddress;
+    Function* ctx = (Function *) j2p(ctxAddress);
     FFIValue retval;
     invokeVrI(ctx, &retval);
     set_last_error(errno);
@@ -123,7 +123,7 @@ JNIEXPORT jint JNICALL
 Java_com_kenai_jffi_Foreign_invokeIrI(JNIEnv* env, jclass self, jlong ctxAddress,
         jint arg1)
 {
-    Function* ctx = (Function *) (uintptr_t) ctxAddress;
+    Function* ctx = (Function *) j2p(ctxAddress);
     FFIValue retval;
     invokeIrI(ctx, &retval, arg1);
     set_last_error(errno);
@@ -134,7 +134,7 @@ JNIEXPORT jint JNICALL
 Java_com_kenai_jffi_Foreign_invokeIIrI(JNIEnv*env, jobject self, jlong ctxAddress,
         jint arg1, jint arg2)
 {
-    Function* ctx = (Function *) (uintptr_t) ctxAddress;
+    Function* ctx = (Function *) j2p(ctxAddress);
     FFIValue retval;
     invokeIIrI(ctx, &retval, arg1, arg2);
     set_last_error(errno);
@@ -145,7 +145,7 @@ JNIEXPORT jint JNICALL
 Java_com_kenai_jffi_Foreign_invokeIIIrI(JNIEnv*env, jobject self, jlong ctxAddress,
         jint arg1, jint arg2, jint arg3)
 {
-    Function* ctx = (Function *) (uintptr_t) ctxAddress;
+    Function* ctx = (Function *) j2p(ctxAddress);
     FFIValue retval;
     invokeIIIrI(ctx, &retval, arg1, arg2, arg3);
     set_last_error(errno);
