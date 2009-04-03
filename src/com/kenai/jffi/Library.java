@@ -26,24 +26,48 @@ import java.util.concurrent.ConcurrentHashMap;
  * Represents a native library
  */
 public final class Library {
+    /** A cache of opened libraries */
     private static final Map<String, WeakReference<Library>> cache
             = new ConcurrentHashMap<String, WeakReference<Library>>();
+    /** A lock used to serialize all dlopen/dlsym calls */
     private static final Object lock = new Object();
+
+    /** Stores the last error returned by a dlopen or dlsym call */
     private static final ThreadLocal<String> lastError = new ThreadLocal<String>();
 
+    /** A handle to the current process */
     private static final class DefaultLibrary {
         private static final Library INSTANCE = new Library(null, dlopen(null, LAZY));
     }
+
+    /** Perform  lazy  binding. Only resolve symbols as needed */
     public static final int LAZY   = 0x00001;
+
+    /** Resolve all symbols when loading the library */
     public static final int NOW    = 0x00002;
+
+    /** Symbols in this library are not made availabl to other libraries */
     public static final int LOCAL  = 0x00004;
+
+    /** All symbols in the library are made available to other libraries */
     public static final int GLOBAL = 0x00008;
 
     /** The native dl/LoadLibrary handle */
     private final long handle;
+
     /** The name of this <tt>Library</tt> */
     private final String name;
-    
+
+    /**
+     * Internal wrapper around dlopen.
+     *
+     * If the library open fails, then this stores the native error in a thread
+     * local variable for later retrieval.
+     *
+     * @param name The name of the library to open
+     * @param flags The flags to pass to dlopen
+     * @return The native handle for the opened library, or 0 if it failed to open.
+     */
     private static final long dlopen(String name, int flags) {
         final Foreign foreign = Foreign.getInstance();
         synchronized (lock) {
@@ -99,7 +123,8 @@ public final class Library {
      *
      * @param name The name or path of the library to open.
      * @param flags The library flags (e.g. <tt>LAZY, NOW, LOCAL, GLOBAL</tt>)
-     * @return A <tt>Library</tt> instance representing the named library.
+     * @return A <tt>Library</tt> instance representing the named library, or
+     * null if the library cannot be opened.
      */
     public static final Library openLibrary(String name, int flags) {
         // dlopen on some OS does not like flags=0, so set to sensible defaults
