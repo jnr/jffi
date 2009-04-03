@@ -4,6 +4,9 @@ package com.kenai.jffi;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
+/**
+ * Provides facilities to read and write native memory from java.
+ */
 public abstract class MemoryIO {
     private final Foreign foreign = Foreign.getInstance();
     private static final long ADDRESS_MASK = Platform.getPlatform().addressMask();
