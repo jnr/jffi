@@ -25,22 +25,7 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
     ObjectBuffer objectBuffer() {
         return objectBuffer;
     }
-    @Deprecated
-    public final void putInt8(final int value) {
-        putByte(value);
-    }
-    @Deprecated
-    public final void putInt16(final int value) {
-        putShort(value);
-    }
-    @Deprecated
-    public final void putInt32(final int value) {
-        putInt(value);
-    }
-    @Deprecated
-    public final void putInt64(final long value) {
-        putLong(value);
-    }
+    
     public final void putByte(final int value) {
         paramOffset += encoder.putByte(buffer, paramOffset, value);
         ++paramIndex;
