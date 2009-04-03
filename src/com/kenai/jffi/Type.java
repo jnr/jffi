@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 Wayne Meissner
+ * Copyright (C) 2008, 2009 Wayne Meissner
  *
  * This file is part of jffi.
  *
@@ -59,6 +59,23 @@ public abstract class Type {
         return handle;
     }
 
+    /** 
+     * Converts an array of <tt>Type</tt> objects into an array of pointers to
+     * ffi_type structures.
+     * 
+     * @param types An array of <tt>Type</tt>  objects
+     * @return An array of native ffi_type handles.
+     */
+    final static long[] nativeHandles(Type[] types) {
+
+        long[] nativeTypes = new long[types.length];
+        for (int i = 0; i < types.length; ++i) {
+            nativeTypes[i] = types[i].handle();
+        }
+
+        return nativeTypes;
+    }
+
     /**
      * Gets the size of this type.
      * 
@@ -67,7 +84,11 @@ public abstract class Type {
     final int size() {
         return Foreign.getInstance().getTypeSize(handle);
     }
-    public static final class Builtin extends Type {
+
+    /**
+     * Types that are built-in to libffi.
+     */
+    static final class Builtin extends Type {
         private Builtin(int type) {
             super(type, Foreign.getInstance().lookupBuiltinType(type));
         }

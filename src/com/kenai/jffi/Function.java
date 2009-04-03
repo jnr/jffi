@@ -10,14 +10,9 @@ public final class Function {
     private final Type[] paramTypes;
     
     public Function(long address, Type returnType, Type[] paramTypes, CallingConvention convention) {
-        
-        long[] nativeParamTypes = new long[paramTypes.length];
-        for (int i = 0; i < paramTypes.length; ++i) {
-            nativeParamTypes[i] = paramTypes[i].handle();
-        }
 
         final long h = Foreign.getInstance().newFunction(address,
-                returnType.handle(), nativeParamTypes,
+                returnType.handle(), Type.nativeHandles(paramTypes),
                 convention == CallingConvention.STDCALL ? 1 : 0);
         if (h == 0) {
             throw new RuntimeException("Failed to create native function");
@@ -30,7 +25,7 @@ public final class Function {
         this.returnType = returnType;
         this.paramTypes = (Type[]) paramTypes.clone();
 
-        this.parameterCount = nativeParamTypes.length;
+        this.parameterCount = paramTypes.length;
         this.rawParameterSize = Foreign.getInstance().getFunctionRawParameterSize(h);
         this.address = h;
         this.address32 = (int) h;

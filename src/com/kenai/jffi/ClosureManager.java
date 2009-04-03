@@ -143,13 +143,9 @@ public class ClosureManager {
      */
     public final Closure.Handle newClosure(Closure closure, Type returnType, Type[] parameterTypes, CallingConvention convention) {
         Proxy proxy = new Proxy(closure, returnType, parameterTypes);
-        long[] nativeParamTypes = new long[parameterTypes.length];
-        for (int i = 0; i < parameterTypes.length; ++i) {
-            nativeParamTypes[i] = parameterTypes[i].handle();
-        }
         
         long handle = Foreign.getInstance().newClosure(proxy, Proxy.METHOD,
-                returnType.handle(), nativeParamTypes, 0);
+                returnType.handle(), Type.nativeHandles(parameterTypes), 0);
         if (handle == 0) {
             throw new RuntimeException("Failed to create native closure");
         }
