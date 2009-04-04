@@ -132,7 +132,7 @@ public interface Closure {
          *
          * @param address The address of a native struct to return as a struct value from the closure.
          */
-        void setStructReturn(long value);
+        void setStructReturn(long address);
 
         /**
          * Sets the closure return value to the contents of a struct
