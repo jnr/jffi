@@ -3,9 +3,6 @@
 #ifdef __sun
 #  include <alloca.h>
 #endif
-#ifdef __linux__
-#  include <endian.h>
-#endif
 #include <errno.h>
 #include <ffi.h>
 #include <jni.h>
@@ -23,7 +20,7 @@
 static inline void
 invokeArray(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer, void* returnBuffer)
 {
-    Function* ctx = (Function *) (uintptr_t) ctxAddress;
+    Function* ctx = (Function *) j2p(ctxAddress);
     union { double d; long long ll; jbyte tmp[PARAM_SIZE]; } tmpStackBuffer[MAX_STACK_ARGS];
     jbyte *tmpBuffer = (jbyte *) &tmpStackBuffer[0];
     
@@ -51,7 +48,7 @@ invokeArray(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer, void* returnB
 static inline void
 invokeArray(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer, void* returnBuffer)
 {
-    Function* ctx = (Function *) (uintptr_t) ctxAddress;
+    Function* ctx = (Function *) j2p(ctxAddress);
     union { double d; long long ll; jbyte tmp[PARAM_SIZE]; } tmpStackBuffer[MAX_STACK_ARGS];
     jbyte *tmpBuffer = (jbyte *) &tmpStackBuffer[0];
     void* ffiStackArgs[MAX_STACK_ARGS];
@@ -157,7 +154,7 @@ JNIEXPORT void JNICALL
 Java_com_kenai_jffi_Foreign_invokeArrayWithReturnBuffer(JNIEnv* env, jclass self, jlong ctxAddress,
         jbyteArray paramBuffer, jbyteArray returnBuffer, jint offset)
 {
-    Function* ctx = (Function *) (uintptr_t) ctxAddress;
+    Function* ctx = (Function *) j2p(ctxAddress);
     jbyte* retval = alloca(ctx->cif.rtype->size);
 
     invokeArray(env, ctxAddress, paramBuffer, retval);
@@ -170,7 +167,7 @@ static void
 invokeArrayWithObjects_(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer,
         jint objectCount, jint* infoBuffer, jobject* objectBuffer, void* retval)
 {
-    Function* ctx = (Function *) (uintptr_t) ctxAddress;
+    Function* ctx = (Function *) j2p(ctxAddress);
     union { double d; long long ll; jbyte tmp[PARAM_SIZE]; } tmpStackBuffer[MAX_STACK_ARGS];
     jbyte *tmpBuffer = (jbyte *) &tmpStackBuffer[0];
 #if defined(USE_RAW)
