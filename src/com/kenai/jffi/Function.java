@@ -64,7 +64,7 @@ public final class Function {
      * @param returnType The return type of the native function.
      * @param paramTypes The parameter types the function accepts.
      */
-    public Function(long address, Type returnType, Type[] paramTypes) {
+    public Function(long address, Type returnType, Type... paramTypes) {
         this(address, returnType, paramTypes, CallingConvention.DEFAULT);
     }
 
