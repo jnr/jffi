@@ -96,7 +96,7 @@ Java_com_kenai_jffi_Foreign_isRawParameterPackingEnabled(JNIEnv* env, jobject se
  * Signature: (J[B)I
  */
 JNIEXPORT jint JNICALL
-Java_com_kenai_jffi_Foreign_invokeArrayInt32(JNIEnv* env, jclass self, jlong ctxAddress,
+Java_com_kenai_jffi_Foreign_invokeArrayReturnInt(JNIEnv* env, jclass self, jlong ctxAddress,
         jbyteArray paramBuffer)
 {
     FFIValue retval;
@@ -110,7 +110,7 @@ Java_com_kenai_jffi_Foreign_invokeArrayInt32(JNIEnv* env, jclass self, jlong ctx
  * Signature: (J[B)J
  */
 JNIEXPORT jlong JNICALL
-Java_com_kenai_jffi_Foreign_invokeArrayInt64(JNIEnv* env, jclass self, jlong ctxAddress,
+Java_com_kenai_jffi_Foreign_invokeArrayReturnLong(JNIEnv* env, jclass self, jlong ctxAddress,
         jbyteArray paramBuffer)
 {
     FFIValue retval;
@@ -124,7 +124,7 @@ Java_com_kenai_jffi_Foreign_invokeArrayInt64(JNIEnv* env, jclass self, jlong ctx
  * Signature: (J[B)F
  */
 JNIEXPORT jfloat JNICALL
-Java_com_kenai_jffi_Foreign_invokeArrayFloat(JNIEnv* env, jclass self, jlong ctxAddress,
+Java_com_kenai_jffi_Foreign_invokeArrayReturnFloat(JNIEnv* env, jclass self, jlong ctxAddress,
         jbyteArray paramBuffer)
 {
     FFIValue retval;
@@ -137,7 +137,7 @@ Java_com_kenai_jffi_Foreign_invokeArrayFloat(JNIEnv* env, jclass self, jlong ctx
  * Signature: (J[B)D
  */
 JNIEXPORT jdouble JNICALL
-Java_com_kenai_jffi_Foreign_invokeArrayDouble(JNIEnv* env, jclass self, jlong ctxAddress,
+Java_com_kenai_jffi_Foreign_invokeArrayReturnDouble(JNIEnv* env, jclass self, jlong ctxAddress,
         jbyteArray paramBuffer)
 {
     FFIValue retval;
@@ -147,11 +147,11 @@ Java_com_kenai_jffi_Foreign_invokeArrayDouble(JNIEnv* env, jclass self, jlong ct
 
 /*
  * Class:     com_kenai_jffi_Foreign
- * Method:    invokeArrayWithReturnBuffer
+ * Method:    invokeArrayReturnStruct
  * Signature: (J[B[B)V
  */
 JNIEXPORT void JNICALL
-Java_com_kenai_jffi_Foreign_invokeArrayWithReturnBuffer(JNIEnv* env, jclass self, jlong ctxAddress,
+Java_com_kenai_jffi_Foreign_invokeArrayReturnStruct(JNIEnv* env, jclass self, jlong ctxAddress,
         jbyteArray paramBuffer, jbyteArray returnBuffer, jint offset)
 {
     Function* ctx = (Function *) j2p(ctxAddress);

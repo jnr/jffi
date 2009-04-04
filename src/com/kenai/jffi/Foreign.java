@@ -248,7 +248,7 @@ final class Foreign {
      * @param buffer A byte array containing the aguments to the function.
      * @return A 32 bit integer value.
      */
-    final native int invokeArrayInt32(long function, byte[] buffer);
+    final native int invokeArrayReturnInt(long function, byte[] buffer);
 
     /**
      * Invokes a function that returns a 64 bit integer.
@@ -256,7 +256,7 @@ final class Foreign {
      * @param buffer A byte array containing the aguments to the function.
      * @return A 64 bit integer value.
      */
-    final native long invokeArrayInt64(long function, byte[] buffer);
+    final native long invokeArrayReturnLong(long function, byte[] buffer);
 
     /**
      * Invokes a function that returns a 32 bit floating point value.
@@ -264,7 +264,7 @@ final class Foreign {
      * @param buffer A byte array containing the aguments to the function.
      * @return A 32 bit floating point value.
      */
-    final native float invokeArrayFloat(long function, byte[] buffer);
+    final native float invokeArrayReturnFloat(long function, byte[] buffer);
 
     /**
      * Invokes a function that returns a 64 bit floating point value.
@@ -272,14 +272,14 @@ final class Foreign {
      * @param buffer A byte array containing the aguments to the function.
      * @return A 64 bit floating point value.
      */
-    final native double invokeArrayDouble(long function, byte[] buffer);
+    final native double invokeArrayReturnDouble(long function, byte[] buffer);
 
     /**
      * Invokes a function and pack the return value into a byte array.
      * @param function The address of the function context structure from {@link #newFunction}.
      * @param buffer A byte array containing the aguments to the function.
      */
-    final native void invokeArrayWithReturnBuffer(long function, byte[] paramBuffer, byte[] returnBuffer, int offset);
+    final native void invokeArrayReturnStruct(long function, byte[] paramBuffer, byte[] returnBuffer, int offset);
 
     /* ---------------------------------------------------------------------- */
     final native int invokeArrayWithObjectsInt32(long function, byte[] buffer, int objectCount, int[] objectInfo, Object[] objects);

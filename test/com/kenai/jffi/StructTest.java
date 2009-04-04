@@ -79,7 +79,7 @@ public class StructTest {
      
         byte[] paramBuffer = new byte[0];
         byte[] returnBuffer = new byte[8];
-        foreign.invokeArrayWithReturnBuffer(function, paramBuffer, returnBuffer, 0);
+        foreign.invokeArrayReturnStruct(function, paramBuffer, returnBuffer, 0);
         ByteBuffer buf = ByteBuffer.wrap(returnBuffer).order(ByteOrder.nativeOrder());
         assertEquals("Wrong s8 value", (byte) 0x7f, buf.get(0));
         assertEquals("Wrong s32 value", 0x12345678, buf.getInt(4));
@@ -96,7 +96,7 @@ public class StructTest {
 
         HeapInvocationBuffer paramBuffer = new HeapInvocationBuffer(function);
         byte[] returnBuffer = new byte[8];
-        foreign.invokeArrayWithReturnBuffer(function.getContextAddress(), paramBuffer.array(), returnBuffer, 0);
+        foreign.invokeArrayReturnStruct(function.getContextAddress(), paramBuffer.array(), returnBuffer, 0);
         ByteBuffer buf = ByteBuffer.wrap(returnBuffer).order(ByteOrder.nativeOrder());
         assertEquals("Wrong s8 value", (byte) 0x7f, buf.get(0));
         assertEquals("Wrong s32 value", 0x12345678, buf.getInt(4));
@@ -115,9 +115,9 @@ public class StructTest {
         Function get_s32 = new Function(sym_s32.address, Type.SINT32, new Type[] { s8s32 });
         HeapInvocationBuffer paramBuffer = new HeapInvocationBuffer(get_s8);
         ByteBuffer buf = ByteBuffer.allocate(8).order(ByteOrder.nativeOrder());
-        buf.putInt((byte) 0x12);
-        buf.putInt(0x87654321);
-        buf.flip();
+        buf.put(0, (byte) 0x12);
+        buf.putInt(4, 0x87654321);
+        
         paramBuffer.putStruct(buf.array(), buf.arrayOffset());
 
         int retval = Invoker.getInstance().invokeInt(get_s8, paramBuffer);
@@ -139,7 +139,7 @@ public class StructTest {
         Function get_s32 = new Function(sym_s32.address, Type.SINT32, new Type[] { s8s32 });
         HeapInvocationBuffer paramBuffer = new HeapInvocationBuffer(get_s8);
         long struct = MemoryIO.getInstance().allocateMemory(s8s32.size(), true);
-        MemoryIO.getInstance().putInt(struct, 0x12);
+        MemoryIO.getInstance().putByte(struct, (byte) 0x12);
         MemoryIO.getInstance().putInt(struct + 4, 0x87654321);
         paramBuffer.putStruct(struct);
 
@@ -158,9 +158,9 @@ public class StructTest {
         Function function = new Function(sym.address, Type.SINT32, new Type[] { s8s32, Type.SINT32 });
         HeapInvocationBuffer paramBuffer = new HeapInvocationBuffer(function);
         ByteBuffer buf = ByteBuffer.allocate(s8s32.size()).order(ByteOrder.nativeOrder());
-        buf.putInt((byte) 0x12);
-        buf.putInt(0x87654321);
-        buf.flip();
+        buf.put(0, (byte) 0x12);
+        buf.putInt(4, 0x87654321);
+        
         paramBuffer.putStruct(buf.array(), buf.arrayOffset());
         paramBuffer.putInt(0xdeadbeef);
 
@@ -177,7 +177,7 @@ public class StructTest {
         Function function = new Function(sym.address, Type.SINT32, new Type[] { s8s32, Type.SINT32 });
         HeapInvocationBuffer paramBuffer = new HeapInvocationBuffer(function);
         long struct = MemoryIO.getInstance().allocateMemory(s8s32.size(), true);
-        MemoryIO.getInstance().putInt(struct, 0x12);
+        MemoryIO.getInstance().putByte(struct, (byte) 0x12);
         MemoryIO.getInstance().putInt(struct + 4, 0x87654321);
         paramBuffer.putStruct(struct);
 
@@ -197,9 +197,9 @@ public class StructTest {
         Function function = new Function(sym.address, Type.SINT64, new Type[] { s8s32, Type.SINT64 });
         HeapInvocationBuffer paramBuffer = new HeapInvocationBuffer(function);
         ByteBuffer buf = ByteBuffer.allocate(s8s32.size()).order(ByteOrder.nativeOrder());
-        buf.putInt((byte) 0x12);
-        buf.putInt(0x87654321);
-        buf.flip();
+        buf.put(0, (byte) 0x12);
+        buf.putInt(4, 0x87654321);
+
         paramBuffer.putStruct(buf.array(), buf.arrayOffset());
         paramBuffer.putLong(0xdeadbeef);
 
@@ -216,7 +216,7 @@ public class StructTest {
         Function function = new Function(sym.address, Type.SINT64, new Type[] { s8s32, Type.SINT64 });
         HeapInvocationBuffer paramBuffer = new HeapInvocationBuffer(function);
         long struct = MemoryIO.getInstance().allocateMemory(s8s32.size(), true);
-        MemoryIO.getInstance().putInt(struct, 0x12);
+        MemoryIO.getInstance().putByte(struct, (byte) 0x12);
         MemoryIO.getInstance().putInt(struct + 4, 0x87654321);
         paramBuffer.putStruct(struct);
 
@@ -241,7 +241,7 @@ public class StructTest {
         paramBuffer.putInt(0x87654321);
 
         byte[] returnBuffer = new byte[s8s32.size()];
-        foreign.invokeArrayWithReturnBuffer(function.getContextAddress(), paramBuffer.array(), returnBuffer, 0);
+        foreign.invokeArrayReturnStruct(function.getContextAddress(), paramBuffer.array(), returnBuffer, 0);
         ByteBuffer buf = ByteBuffer.wrap(returnBuffer).order(ByteOrder.nativeOrder());
         assertEquals("Wrong s8 value", (byte) 0x12, buf.get(0));
         assertEquals("Wrong s32 value", 0x87654321, buf.getInt(4));

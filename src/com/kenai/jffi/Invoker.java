@@ -144,7 +144,7 @@ public abstract class Invoker {
         ObjectBuffer objectBuffer = buffer.objectBuffer();
         return objectBuffer != null
                 ? invokeArrayWithObjectsInt32(function, buffer, objectBuffer)
-                : foreign.invokeArrayInt32(function.getContextAddress(), buffer.array());
+                : foreign.invokeArrayReturnInt(function.getContextAddress(), buffer.array());
     }
 
     /**
@@ -158,7 +158,7 @@ public abstract class Invoker {
         ObjectBuffer objectBuffer = buffer.objectBuffer();
         return objectBuffer != null
                 ? foreign.invokeArrayWithObjectsInt64(function.getContextAddress(), buffer.array(), objectBuffer.objectCount(), objectBuffer.info(), objectBuffer.objects())
-                : foreign.invokeArrayInt64(function.getContextAddress(), buffer.array());
+                : foreign.invokeArrayReturnLong(function.getContextAddress(), buffer.array());
     }
 
     /**
@@ -172,7 +172,7 @@ public abstract class Invoker {
         ObjectBuffer objectBuffer = buffer.objectBuffer();
         return objectBuffer != null
                 ? foreign.invokeArrayWithObjectsFloat(function.getContextAddress(), buffer.array(), objectBuffer.objectCount(), objectBuffer.info(), objectBuffer.objects())
-                : foreign.invokeArrayFloat(function.getContextAddress(), buffer.array());
+                : foreign.invokeArrayReturnFloat(function.getContextAddress(), buffer.array());
     }
 
     /**
@@ -186,7 +186,7 @@ public abstract class Invoker {
         ObjectBuffer objectBuffer = buffer.objectBuffer();
         return objectBuffer != null
                 ? foreign.invokeArrayWithObjectsDouble(function.getContextAddress(), buffer.array(), objectBuffer.objectCount(), objectBuffer.info(), objectBuffer.objects())
-                : foreign.invokeArrayDouble(function.getContextAddress(), buffer.array());
+                : foreign.invokeArrayReturnDouble(function.getContextAddress(), buffer.array());
     }
 
     /**
@@ -198,7 +198,7 @@ public abstract class Invoker {
      */
     public final byte[] invokeBuffer(Function function, HeapInvocationBuffer buffer) {
         byte[] returnBuffer = new byte[function.getReturnType().size()];
-        foreign.invokeArrayWithReturnBuffer(function.getContextAddress(), buffer.array(), returnBuffer, 0);
+        foreign.invokeArrayReturnStruct(function.getContextAddress(), buffer.array(), returnBuffer, 0);
 
         return returnBuffer;
     }
@@ -212,7 +212,7 @@ public abstract class Invoker {
      * @param offset The offset within returnBuffer to place the return value.
      */
     public final void invokeBuffer(Function function, HeapInvocationBuffer buffer, byte[] returnBuffer, int offset) {
-        foreign.invokeArrayWithReturnBuffer(function.getContextAddress(), buffer.array(), returnBuffer, offset);
+        foreign.invokeArrayReturnStruct(function.getContextAddress(), buffer.array(), returnBuffer, offset);
     }
 
     /**
