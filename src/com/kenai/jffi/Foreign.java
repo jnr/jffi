@@ -58,10 +58,52 @@ final class Foreign {
     public final static int TYPE_ULONG = 107;
     public final static int TYPE_SLONG = 108;
 
-    
+    /** Perform  lazy  binding. Only resolve symbols as needed */
+    public static final int RTLD_LAZY   = 0x00001;
+
+    /** Resolve all symbols when loading the library */
+    public static final int RTLD_NOW    = 0x00002;
+
+    /** Symbols in this library are not made availabl to other libraries */
+    public static final int RTLD_LOCAL  = 0x00004;
+
+    /** All symbols in the library are made available to other libraries */
+    public static final int RTLD_GLOBAL = 0x00008;
+
+    /**
+     * Opens a dynamic library.
+     *
+     * This is a very thin wrapper around the native dlopen(3) call.
+     *
+     * @param name The name of the dynamic library to open.  Pass null to get a
+     * handle to the current process.
+     * @param flags The flags to dlopen.  A bitmask of {@link RTLD_LAZY}, {@link RTLD_NOW},
+     * {@link RTLD_LOCAL}, {@link RTLD_GLOBAL}
+     * @return A native handle to the dynamic library.
+     */
     final native long dlopen(String name, int flags);
+
+    /**
+     * Closes a dynamic library opened by {@link dlopen}.
+     *
+     * @param handle The dynamic library handle returned by {@dlopen}
+     */
     final native void dlclose(long handle);
+
+    /**
+     * Locates the memory address of a dynamic library symbol.
+     *
+     * @param handle A dynamic library handle obtained from {@dlopen}
+     * @param name The name of the symbol.
+     * @return The address where the symbol in loaded in memory.
+     */
     final native long dlsym(long handle, String name);
+
+    /**
+     * Gets the last error raised by {@dlopen} or {@dlsym}
+     *
+     * @return The error string.
+     */
     final native String dlerror();
 
     final native long allocateMemory(long size, boolean clear);
@@ -124,24 +166,119 @@ final class Foreign {
      */
     final native void freeStruct(long handle);
 
+    /**
+     * Invokes a function with no arguments, and returns a 32 bit integer.
+     *
+     * @param function The address of the function context structure from {@link #newFunction}.
+     * @return A 32 bit integer value.
+     */
     final native int invokeVrI(long functionContext);
+
+    /**
+     * Invokes a function with one integer argument, and returns a 32 bit integer.
+     *
+     * @param function The address of the function context structure from {@link #newFunction}.
+     * @param arg1 The 32 bit integer argument.
+     * @return A 32 bit integer value.
+     */
     final native int invokeIrI(long functionContext, int arg1);
+
+    /**
+     * Invokes a function with two integer arguments, and returns a 32 bit integer.
+     *
+     * @param function The address of the function context structure from {@link #newFunction}.
+     * @param arg1 The first 32 bit integer argument.
+     * @param arg2 The second 32 bit integer argument.
+     * @return A 32 bit integer value.
+     */
     final native int invokeIIrI(long functionContext, int arg1, int arg2);
+
+    /**
+     * Invokes a function with three integer arguments, and returns a 32 bit integer.
+     *
+     * @param function The address of the function context structure from {@link #newFunction}.
+     * @param arg1 The first 32 bit integer argument.
+     * @param arg2 The second 32 bit integer argument.
+     * @param arg3 The third 32 bit integer argument.
+     * @return A 32 bit integer value.
+     */
     final native int invokeIIIrI(long functionContext, int arg1, int arg2, int arg3);
     
-    /* ---------------------------------------------------------------------- */
-
+    /**
+     * Invokes a function with no arguments, and returns a 64 bit integer.
+     *
+     * @param function The address of the function context structure from {@link #newFunction}.
+     * @return A 64 bit integer value.
+     */
     final native long invokeVrL(long function);
+
+    /**
+     * Invokes a function with one 64 bit integer argument, and returns a 64 bit integer.
+     *
+     * @param function The address of the function context structure from {@link #newFunction}.
+     * @param arg1 The 64 bit integer argument.
+     * @return A 64 bit integer value.
+     */
     final native long invokeLrL(long function, long arg1);
+
+    /**
+     * Invokes a function with two 64 bit integer arguments, and returns a 64 bit integer.
+     *
+     * @param function The address of the function context structure from {@link #newFunction}.
+     * @param arg1 The first 64 bit integer argument.
+     * @param arg2 The second 64 bit integer argument.
+     * @return A 64 bit integer value.
+     */
     final native long invokeLLrL(long function, long arg1, long arg2);
+
+    /**
+     * Invokes a function with three 64 bit integer arguments, and returns a 64 bit integer.
+     *
+     * @param function The address of the function context structure from {@link #newFunction}.
+     * @param arg1 The first 64 bit integer argument.
+     * @param arg2 The second 64 bit integer argument.
+     * @param arg3 The third 64 bit integer argument.
+     * @return A 64 bit integer value.
+     */
     final native long invokeLLLrL(long function, long arg1, long arg2, long arg3);
 
-    /* ---------------------------------------------------------------------- */
-
+    /**
+     * Invokes a function that returns a 32 bit integer.
+     * @param function The address of the function context structure from {@link #newFunction}.
+     * @param buffer A byte array containing the aguments to the function.
+     * @return A 32 bit integer value.
+     */
     final native int invokeArrayInt32(long function, byte[] buffer);
+
+    /**
+     * Invokes a function that returns a 64 bit integer.
+     * @param function The address of the function context structure from {@link #newFunction}.
+     * @param buffer A byte array containing the aguments to the function.
+     * @return A 64 bit integer value.
+     */
     final native long invokeArrayInt64(long function, byte[] buffer);
+
+    /**
+     * Invokes a function that returns a 32 bit floating point value.
+     * @param function The address of the function context structure from {@link #newFunction}.
+     * @param buffer A byte array containing the aguments to the function.
+     * @return A 32 bit floating point value.
+     */
     final native float invokeArrayFloat(long function, byte[] buffer);
+
+    /**
+     * Invokes a function that returns a 64 bit floating point value.
+     * @param function The address of the function context structure from {@link #newFunction}.
+     * @param buffer A byte array containing the aguments to the function.
+     * @return A 64 bit floating point value.
+     */
     final native double invokeArrayDouble(long function, byte[] buffer);
+
+    /**
+     * Invokes a function and pack the return value into a byte array.
+     * @param function The address of the function context structure from {@link #newFunction}.
+     * @param buffer A byte array containing the aguments to the function.
+     */
     final native void invokeArrayWithReturnBuffer(long function, byte[] paramBuffer, byte[] returnBuffer, int offset);
 
     /* ---------------------------------------------------------------------- */
