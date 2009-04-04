@@ -85,7 +85,7 @@ public class StructTest {
 
         Function f = new Function(sym.address, s8s32, new Type[0]);
 
-        byte[] returnBuffer = Invoker.getInstance().invokeBuffer(f, new HeapInvocationBuffer(f));
+        byte[] returnBuffer = Invoker.getInstance().invokeStruct(f, new HeapInvocationBuffer(f));
         ByteBuffer buf = ByteBuffer.wrap(returnBuffer).order(ByteOrder.nativeOrder());
         assertEquals("Wrong s8 value", (byte) 0x7f, buf.get(0));
         assertEquals("Wrong s32 value", 0x12345678, buf.getInt(4));
@@ -100,7 +100,7 @@ public class StructTest {
         Function f = new Function(sym.address, s8s32, new Type[0]);
 
         byte[] returnBuffer = new byte[s8s32.size()];
-        Invoker.getInstance().invokeBuffer(f, new HeapInvocationBuffer(f), returnBuffer, 0);
+        Invoker.getInstance().invokeStruct(f, new HeapInvocationBuffer(f), returnBuffer, 0);
         
         ByteBuffer buf = ByteBuffer.wrap(returnBuffer).order(ByteOrder.nativeOrder());
         assertEquals("Wrong s8 value", (byte) 0x7f, buf.get(0));
@@ -117,7 +117,7 @@ public class StructTest {
 
         int adj = 8;
         byte[] returnBuffer = new byte[adj + s8s32.size()];
-        Invoker.getInstance().invokeBuffer(f, new HeapInvocationBuffer(f), returnBuffer, adj);
+        Invoker.getInstance().invokeStruct(f, new HeapInvocationBuffer(f), returnBuffer, adj);
 
         ByteBuffer buf = ByteBuffer.wrap(returnBuffer, adj, s8s32.size()).slice().order(ByteOrder.nativeOrder());
 
@@ -257,8 +257,7 @@ public class StructTest {
         paramBuffer.putByte((byte) 0x12);
         paramBuffer.putInt(0x87654321);
 
-        byte[] returnBuffer = new byte[s8s32.size()];
-        Invoker.getInstance().invokeBuffer(function, paramBuffer, returnBuffer, 0);
+        byte[] returnBuffer = Invoker.getInstance().invokeStruct(function, paramBuffer);
 
         ByteBuffer buf = ByteBuffer.wrap(returnBuffer).order(ByteOrder.nativeOrder());
         assertEquals("Wrong s8 value", (byte) 0x12, buf.get(0));

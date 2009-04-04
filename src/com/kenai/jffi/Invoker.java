@@ -190,13 +190,13 @@ public abstract class Invoker {
     }
 
     /**
-     * Invokes a function, encoding the return value in a byte array
+     * Invokes a function that returns a C struct by value.
      *
      * @param function The <tt>Function</tt> to invoke.
      * @param buffer The parameter buffer.
      * @return A byte array with the return value encoded in native byte order.
      */
-    public final byte[] invokeBuffer(Function function, HeapInvocationBuffer buffer) {
+    public final byte[] invokeStruct(Function function, HeapInvocationBuffer buffer) {
         byte[] returnBuffer = new byte[function.getReturnType().size()];
         foreign.invokeArrayReturnStruct(function.getContextAddress(), buffer.array(), returnBuffer, 0);
 
@@ -204,14 +204,14 @@ public abstract class Invoker {
     }
 
     /**
-     * Invokes a function, encoding the return value in a byte array
+     * Invokes a function that returns a C struct by value.
      *
      * @param function The <tt>Function</tt> to invoke.
      * @param buffer The parameter buffer.
      * @param returnBuffer The output buffer to place the return value in.
      * @param offset The offset within returnBuffer to place the return value.
      */
-    public final void invokeBuffer(Function function, HeapInvocationBuffer buffer, byte[] returnBuffer, int offset) {
+    public final void invokeStruct(Function function, HeapInvocationBuffer buffer, byte[] returnBuffer, int offset) {
         foreign.invokeArrayReturnStruct(function.getContextAddress(), buffer.array(), returnBuffer, offset);
     }
 

@@ -256,7 +256,7 @@ public class ClosureTest {
         HeapInvocationBuffer paramBuffer = new HeapInvocationBuffer(f);
         paramBuffer.putAddress(handle.getAddress());
 
-        ByteBuffer retval = ByteBuffer.wrap(Invoker.getInstance().invokeBuffer(f, paramBuffer));
+        ByteBuffer retval = ByteBuffer.wrap(Invoker.getInstance().invokeStruct(f, paramBuffer));
         retval.order(ByteOrder.nativeOrder());
         assertTrue("Closure not called", called[0]);
         assertEquals("Wrong s8 field value", S8_MAGIC, retval.get(0));
@@ -291,7 +291,7 @@ public class ClosureTest {
         HeapInvocationBuffer paramBuffer = new HeapInvocationBuffer(f);
         paramBuffer.putAddress(handle.getAddress());
         
-        ByteBuffer retval = ByteBuffer.wrap(Invoker.getInstance().invokeBuffer(f, paramBuffer));
+        ByteBuffer retval = ByteBuffer.wrap(Invoker.getInstance().invokeStruct(f, paramBuffer));
         retval.order(ByteOrder.nativeOrder());
         assertTrue("Closure not called", called[0]);
         assertEquals("Wrong s8 field value", S8_MAGIC, retval.get(0));
