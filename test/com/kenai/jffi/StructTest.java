@@ -240,12 +240,11 @@ public class StructTest {
         paramBuffer.putByte((byte) 0x12);
         paramBuffer.putInt(0x87654321);
 
-        byte[] returnBuffer = new byte[16];
+        byte[] returnBuffer = new byte[s8s32.size()];
         foreign.invokeArrayWithReturnBuffer(function.getContextAddress(), paramBuffer.array(), returnBuffer, 0);
         ByteBuffer buf = ByteBuffer.wrap(returnBuffer).order(ByteOrder.nativeOrder());
         assertEquals("Wrong s8 value", (byte) 0x12, buf.get(0));
         assertEquals("Wrong s32 value", 0x87654321, buf.getInt(4));
     }
-
-
 }
+
