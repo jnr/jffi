@@ -16,8 +16,16 @@
 #define PARAM_SIZE (8)
 #define MAX_STACK_ARGS (8)
 
+
+/*
+ * Always align memory on a 8 byte boundary
+ */
+#define MIN_ALIGN (8)
+#define alloca_aligned(size, align) \
+    ((void *) ((((uintptr_t) alloca(size + align - 1)) & ~(align - 1)) + align))
+
 #ifdef USE_RAW
-static inline void
+static void
 invokeArray(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer, void* returnBuffer)
 {
     Function* ctx = (Function *) j2p(ctxAddress);
@@ -26,7 +34,7 @@ invokeArray(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer, void* returnB
     
     if (ctx->cif.nargs > 0) {
         if (ctx->cif.bytes > (int) sizeof(tmpStackBuffer)) {
-            tmpBuffer = alloca(ctx->cif.bytes);
+            tmpBuffer = alloca_aligned(ctx->cif.bytes, MIN_ALIGN);
         }
 
         // calculate room needed for return address for struct returns
@@ -45,7 +53,7 @@ invokeArray(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer, void* returnB
 }
 
 #else
-static inline void
+static void
 invokeArray(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer, void* returnBuffer)
 {
     Function* ctx = (Function *) j2p(ctxAddress);
@@ -57,8 +65,8 @@ invokeArray(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer, void* returnB
     if (ctx->cif.nargs > 0) {
         unsigned int i;
         if (ctx->cif.nargs > MAX_STACK_ARGS) {
-            tmpBuffer = alloca(ctx->cif.nargs * PARAM_SIZE);
-            ffiArgs = alloca(ctx->cif.nargs * sizeof(void *));
+            tmpBuffer = alloca_aligned(ctx->cif.nargs * PARAM_SIZE, MIN_ALIGN);
+            ffiArgs = alloca_aligned(ctx->cif.nargs * sizeof(void *), MIN_ALIGN);
         }
         
         (*env)->GetByteArrayRegion(env, paramBuffer, 0, ctx->cif.nargs * PARAM_SIZE, tmpBuffer);
@@ -155,8 +163,8 @@ Java_com_kenai_jffi_Foreign_invokeArrayReturnStruct(JNIEnv* env, jclass self, jl
         jbyteArray paramBuffer, jbyteArray returnBuffer, jint offset)
 {
     Function* ctx = (Function *) j2p(ctxAddress);
-    jbyte* retval = alloca(ctx->cif.rtype->size);
-
+    jbyte* retval = alloca_aligned(ctx->cif.rtype->size, MIN_ALIGN);
+    
     invokeArray(env, ctxAddress, paramBuffer, retval);
     (*env)->SetByteArrayRegion(env, returnBuffer, offset, ctx->cif.rtype->size, retval);
 }
@@ -180,13 +188,13 @@ invokeArrayWithObjects_(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer,
     unsigned int i, arrayCount = 0;
 
     if (ctx->cif.nargs > MAX_STACK_ARGS) {
-        tmpBuffer = alloca(ctx->cif.nargs * PARAM_SIZE);
+        tmpBuffer = alloca_aligned(ctx->cif.nargs * PARAM_SIZE, MIN_ALIGN);
     }
 #if defined(USE_RAW)
     (*env)->GetByteArrayRegion(env, paramBuffer, 0, ctx->rawParameterSize, tmpBuffer + rawAdj);
 #else
     if (ctx->cif.nargs > MAX_STACK_ARGS) {
-        ffiArgs = alloca(ctx->cif.nargs * sizeof(void *));
+        ffiArgs = alloca_aligned(ctx->cif.nargs * sizeof(void *), MIN_ALIGN);
     }
     for (i = 0; i < ctx->cif.nargs; ++i) {
         ffiArgs[i] = &tmpBuffer[i * PARAM_SIZE];
@@ -195,7 +203,7 @@ invokeArrayWithObjects_(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer,
 #endif
     
     if (objectCount > MAX_STACK_OBJECTS) {
-        arrays = alloca(objectCount * sizeof(Array));
+        arrays = alloca_aligned(objectCount * sizeof(Array), MIN_ALIGN);
     }
     initStackAllocator(&alloc);
     for (i = 0; i < (unsigned int) objectCount; ++i) {
