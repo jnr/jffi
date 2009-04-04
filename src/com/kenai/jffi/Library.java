@@ -41,16 +41,16 @@ public final class Library {
     }
 
     /** Perform  lazy  binding. Only resolve symbols as needed */
-    public static final int LAZY   = 0x00001;
+    public static final int LAZY   = Foreign.RTLD_LAZY;
 
     /** Resolve all symbols when loading the library */
-    public static final int NOW    = 0x00002;
+    public static final int NOW    = Foreign.RTLD_NOW;
 
     /** Symbols in this library are not made availabl to other libraries */
-    public static final int LOCAL  = 0x00004;
+    public static final int LOCAL  = Foreign.RTLD_LOCAL;
 
     /** All symbols in the library are made available to other libraries */
-    public static final int GLOBAL = 0x00008;
+    public static final int GLOBAL = Foreign.RTLD_GLOBAL;
 
     /** The native dl/LoadLibrary handle */
     private final long handle;

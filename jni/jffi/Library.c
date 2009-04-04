@@ -18,7 +18,6 @@
 #include "jffi.h"
 
 #include "com_kenai_jffi_Foreign.h"
-#include "com_kenai_jffi_Library.h"
 
 #if defined(_WIN32) || defined(__WIN32__)
 static void* dl_open(const char* name, int flags);
@@ -57,7 +56,7 @@ Java_com_kenai_jffi_Foreign_dlopen(JNIEnv* env, jobject self, jstring jPath, jin
     char path_[PATH_MAX];
     const char* path = NULL; // Handle dlopen(NULL, flags);
     int flags = 0;
-#define F(x) (jFlags & com_kenai_jffi_Library_##x) != 0 ? RTLD_##x : 0;
+#define F(x) (jFlags & com_kenai_jffi_Foreign_RTLD_##x) != 0 ? RTLD_##x : 0;
     flags |= F(LAZY);
     flags |= F(GLOBAL);
     flags |= F(LOCAL);

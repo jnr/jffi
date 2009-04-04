@@ -45,7 +45,6 @@
           <arg line="-d ${build.native.dir}"/>
           <arg line="-classpath ${build.classes.dir}"/>
           <arg line="com.kenai.jffi.Foreign"/>
-          <arg line="com.kenai.jffi.Library"/>
           <arg line="com.kenai.jffi.ObjectBuffer"/>
         </exec>
     </target>
