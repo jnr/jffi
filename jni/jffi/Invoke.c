@@ -267,9 +267,9 @@ cleanup:
     }
 }
 
-static inline void
+static void
 invokeArrayWithObjects(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer,
-        jint objectCount, jintArray objectInfo, jobjectArray objectArray, FFIValue* retval)
+        jint objectCount, jintArray objectInfo, jobjectArray objectArray, void* retval)
 {
     jint stackInfoBuffer[MAX_STACK_OBJECTS * 3], *infoBuffer = &stackInfoBuffer[0];
     jobject stackObjectBuffer[MAX_STACK_OBJECTS], *objectBuffer = &stackObjectBuffer[0];
@@ -372,5 +372,22 @@ Java_com_kenai_jffi_Foreign_invokeArrayWithObjectsDouble(JNIEnv* env, jobject se
     FFIValue retval;
     invokeArrayWithObjects(env, ctxAddress, paramBuffer, objectCount, objectInfo, objectArray, &retval);
     return retval.d;
+}
+
+/*
+ * Class:     com_kenai_jffi_Foreign
+ * Method:    invokeArrayWithObjectsReturnStruct
+ * Signature: (J[BI[I[Ljava/lang/Object;[BI)V
+ */
+JNIEXPORT void JNICALL
+Java_com_kenai_jffi_Foreign_invokeArrayWithObjectsReturnStruct(JNIEnv* env, jobject self,
+       jlong ctxAddress, jbyteArray paramBuffer, jint objectCount, jintArray objectInfo,
+       jobjectArray objectArray, jbyteArray returnBuffer, jint returnBufferOffset)
+{
+    Function* ctx = (Function *) j2p(ctxAddress);
+    jbyte* retval = alloca_aligned(ctx->cif.rtype->size, MIN_ALIGN);
+
+    invokeArrayWithObjects(env, ctxAddress, paramBuffer, objectCount, objectInfo, objectArray, retval);
+    (*env)->SetByteArrayRegion(env, returnBuffer, returnBufferOffset, ctx->cif.rtype->size, retval);
 }
 

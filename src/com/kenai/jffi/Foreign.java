@@ -286,6 +286,8 @@ final class Foreign {
     final native long invokeArrayWithObjectsInt64(long function, byte[] buffer, int objectCount, int[] objectInfo, Object[] objects);
     final native float invokeArrayWithObjectsFloat(long function, byte[] buffer, int objectCount, int[] objectInfo, Object[] objects);
     final native double invokeArrayWithObjectsDouble(long function, byte[] buffer, int objectCount, int[] objectInfo, Object[] objects);
+    final native void invokeArrayWithObjectsReturnStruct(long function, byte[] buffer, int objectCount, int[] objectInfo, Object[] objects,
+            byte[] returnBuffer, int returnBufferOffset);
     /* ---------------------------------------------------------------------- */
     final native int invokeArrayO1Int32(long function, byte[] buffer, Object o1, int o1Info, int o1off, int o1len);
     final native int invokeArrayO2Int32(long function, byte[] buffer, Object o1, int o1Info, int o1off, int o1len,
