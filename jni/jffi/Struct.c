@@ -54,7 +54,7 @@ Java_com_kenai_jffi_Foreign_newStruct(JNIEnv* env, jobject self, jlongArray type
     }
 
     // Copy out all the field descriptors
-    fieldTypes = alloca(fieldCount * sizeof(long));
+    fieldTypes = alloca(fieldCount * sizeof(jlong));
     (*env)->GetLongArrayRegion(env, typeArray, 0, fieldCount, fieldTypes);
     
     s->type = FFI_TYPE_STRUCT;
