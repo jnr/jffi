@@ -16,11 +16,13 @@
  * version 3 along with this work.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <sys/param.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
 #ifdef __sun
+#  include <sys/sysmacros.h>
 #  include <alloca.h>
 #endif
 #include <jni.h>
@@ -81,7 +83,7 @@ Java_com_kenai_jffi_Foreign_newClosure(JNIEnv* env, jclass clazz,
         throwException(env, IllegalArgument, "Could not obtain reference to Closure method");
         goto cleanup;
     }
-    closure->ffiParamTypes = calloc(argCount, sizeof(ffi_type *));
+    closure->ffiParamTypes = calloc(MAX(1, argCount), sizeof(ffi_type *));
     if (closure->ffiParamTypes == NULL) {
         throwException(env, OutOfMemory, "Could not allocate space for parameter types");
         goto cleanup;

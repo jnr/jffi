@@ -1,7 +1,9 @@
+#include <sys/param.h>
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdlib.h>
 #ifdef __sun
+#  include <sys/sysmacros.h>
 #  include <alloca.h>
 #endif
 #include <ffi.h>
@@ -36,12 +38,12 @@ Java_com_kenai_jffi_Foreign_newFunction(JNIEnv* env, jobject self,
         throwException(env, OutOfMemory, "Failed to allocate CallContext");
         goto cleanup;
     }
-    ctx->ffiParamTypes = calloc(paramCount, sizeof(ffi_type *));
+    ctx->ffiParamTypes = calloc(MAX(1, paramCount), sizeof(ffi_type *));
     if (ctx->ffiParamTypes == NULL) {
         throwException(env, OutOfMemory, "Failed to allocate CallContext#ffiParamTypes");
         goto cleanup;
     }
-    ctx->rawParamOffsets = calloc(paramCount, sizeof(*ctx->rawParamOffsets));
+    ctx->rawParamOffsets = calloc(MAX(1, paramCount), sizeof(*ctx->rawParamOffsets));
     if (ctx->rawParamOffsets == NULL) {
         throwException(env, OutOfMemory, "Failed to allocate CallContext#rawParamOffsets");
         goto cleanup;
