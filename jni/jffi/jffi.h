@@ -28,6 +28,7 @@
 #endif
 #include "endian.h"
 #include <jni.h>
+#include <ffi.h>
 
 #ifndef roundup
 #  define roundup(x, y)   ((((x)+((y)-1))/(y))*(y))
@@ -113,6 +114,8 @@ typedef union FFIValue {
     float f;
     double d;
     void* p;
+    ffi_sarg sarg;
+    ffi_arg arg;
 } FFIValue;
 
 typedef struct ThreadData {
