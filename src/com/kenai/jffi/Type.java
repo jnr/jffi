@@ -137,7 +137,7 @@ public abstract class Type {
      *
      * @return The size of this type, in bytes.
      */
-    final int size() {
+    public final int size() {
         return size;
     }
 
@@ -146,7 +146,7 @@ public abstract class Type {
      *
      * @return The alignment of this type, in bytes.
      */
-    final int alignment() {
+    public final int alignment() {
         return align;
     }
 
