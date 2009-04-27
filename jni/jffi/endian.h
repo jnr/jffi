@@ -19,4 +19,8 @@
 # endif
 #endif
 
+#if !defined(BYTE_ORDER) || !defined(LITTLE_ENDIAN) || !defined(BIG_ENDIAN)
+#  error "Cannot determine the endian-ness of this platform"
+#endif
+
 #endif /* JFFI_ENDIAN_H */
