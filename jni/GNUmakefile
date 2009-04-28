@@ -107,7 +107,7 @@ ifeq ($(OS), solaris)
 endif
 
 ifeq ($(OS), aix)
-  SOFLAGS = -shared -mimpure-text -static-libgcc
+  SOFLAGS = -shared -static-libgcc
   PICFLAGS += -pthread
 endif
 
