@@ -42,6 +42,7 @@ public abstract class Platform {
         LINUX,
         SOLARIS,
         WINDOWS,
+        AIX,
 
         UNKNOWN;
     }
@@ -65,6 +66,8 @@ public abstract class Platform {
             return OS.LINUX;
         } else if (osName.startsWith("sunos") || osName.startsWith("solaris")) {
             return OS.SOLARIS;
+        } else if (osName.startsWith("aix")) {
+            return OS.AIX; 
         } else if (osName.startsWith("openbsd")) {
             return OS.OPENBSD;
         } else if (osName.startsWith("freebsd")) {

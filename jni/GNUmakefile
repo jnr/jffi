@@ -105,6 +105,12 @@ ifeq ($(OS), solaris)
   SOFLAGS = -shared -static-libgcc -mimpure-text
   LIBS += -ldl
 endif
+
+ifeq ($(OS), aix)
+  SOFLAGS = -shared -mimpure-text -static-libgcc
+  PICFLAGS += -pthread
+endif
+
 ifeq ($(CPU), sparcv9)
   MODEL = 64
 endif
@@ -117,8 +123,8 @@ ifeq ($(CPU), x86_64)
   MODEL = 64
 endif
 
-# Don't force 32/64bit on darwin, since it builds fat binaries
-ifneq ($(OS), darwin)
+# On platforms (linux, solaris) that support both 32bit and 64bit, force building for one or the other
+ifneq ($(or $(findstring linux, $(OS)), $(findstring solaris, $(OS))),)
   # Change the CC/LD instead of CFLAGS/LDFLAGS, incase other things in the flags
   # makes the libffi build choke
   CC += -m$(MODEL)

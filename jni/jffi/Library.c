@@ -10,7 +10,7 @@
 #else
 # include <dlfcn.h>
 #endif
-#ifdef __sun
+#if defined (__sun) || defined(_AIX)
 #  include <alloca.h>
 #endif
 #include <ffi.h>

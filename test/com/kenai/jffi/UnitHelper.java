@@ -59,6 +59,12 @@ public class UnitHelper {
                 return "libc.dylib";
             case WINDOWS:
                 return "msvcrt.dll";
+            case AIX:
+                if (Platform.getPlatform().addressSize() == 32){
+                    return "libc.a(shr.o)";
+                } else {
+                    return "libc.a(shr_64.o)";
+                }
             default:
                 return "libc.so";
         }

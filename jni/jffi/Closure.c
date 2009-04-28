@@ -21,7 +21,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
-#ifdef __sun
+#if defined(__sun) || defined(_AIX)
 #  include <sys/sysmacros.h>
 #  include <alloca.h>
 #endif
