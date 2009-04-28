@@ -109,6 +109,8 @@ endif
 ifeq ($(OS), aix)
   SOFLAGS = -shared -static-libgcc
   PICFLAGS += -pthread
+  LIBEXT = a
+  JNIEXT = a
 endif
 
 ifeq ($(CPU), sparcv9)
