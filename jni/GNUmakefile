@@ -81,7 +81,7 @@ ifeq ($(OS), win32)
 endif
 ifeq ($(OS), darwin)
   PLATFORM = darwin
-  ARCHES = i386 x86_64
+  ARCHES = i386 x86_64 ppc
   CFLAGS += -isysroot /Developer/SDKs/MacOSX10.4u.sdk -DTARGET_RT_MAC_CFM=0
   CFLAGS += $(foreach arch, $(ARCHES),-arch $(arch))
   LDFLAGS = $(foreach arch, $(ARCHES),-arch $(arch)) -dynamiclib -framework JavaVM \
