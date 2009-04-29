@@ -109,6 +109,7 @@ endif
 ifeq ($(OS), aix)
   SOFLAGS = -shared -static-libgcc
   PICFLAGS += -pthread
+  LDFLAGS += -lpthread
   LIBEXT = a
   JNIEXT = a
 endif
