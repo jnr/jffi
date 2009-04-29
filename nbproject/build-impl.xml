@@ -20,6 +20,13 @@ is divided into following sections:
 
         -->
 <project xmlns:j2seproject1="http://www.netbeans.org/ns/j2se-project/1" xmlns:j2seproject3="http://www.netbeans.org/ns/j2se-project/3" xmlns:jaxrpc="http://www.netbeans.org/ns/j2se-project/jax-rpc" basedir=".." default="default" name="jffi-impl">
+    <fail message="Please build using Ant 1.7.1 or higher.">
+        <condition>
+            <not>
+                <antversion atleast="1.7.1"/>
+            </not>
+        </condition>
+    </fail>
     <target depends="test,jar,javadoc" description="Build and test whole project." name="default"/>
     <!-- 
                 ======================
@@ -296,6 +303,8 @@ is divided into following sections:
                 <java classname="@{classname}" dir="${work.dir}" fork="true">
                     <jvmarg line="${debug-args-line}"/>
                     <jvmarg value="-Xrunjdwp:transport=${debug-transport},address=${jpda.address}"/>
+                    <jvmarg value="-Dfile.encoding=${source.encoding}"/>
+                    <redirector errorencoding="${source.encoding}" inputencoding="${source.encoding}" outputencoding="${source.encoding}"/>
                     <jvmarg line="${run.jvmargs}"/>
                     <classpath>
                         <path path="@{classpath}"/>
@@ -316,6 +325,8 @@ is divided into following sections:
             <element name="customize" optional="true"/>
             <sequential>
                 <java classname="@{classname}" dir="${work.dir}" fork="true">
+                    <jvmarg value="-Dfile.encoding=${source.encoding}"/>
+                    <redirector errorencoding="${source.encoding}" inputencoding="${source.encoding}" outputencoding="${source.encoding}"/>
                     <jvmarg line="${run.jvmargs}"/>
                     <classpath>
                         <path path="@{classpath}"/>
