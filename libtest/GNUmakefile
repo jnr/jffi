@@ -92,7 +92,7 @@ endif
 
 ifeq ($(OS), aix)
   LIBEXT = a
-  SOFLAGS = -shared -mimpure-text -static-libgcc
+  SOFLAGS = -shared -static-libgcc
   PICFLAGS += -pthread
 endif
 
