@@ -22,6 +22,14 @@ public class ClosureTest {
         float testClosureVrF(Address closure);
         double testClosureVrD(Address closure);
         void testClosureTrV(Address closure, Address struct);
+
+        void testClosureBrV(Address closure, byte value);
+        void testClosureSrV(Address closure, short value);
+        void testClosureIrV(Address closure, int value);
+        void testClosureLrV(Address closure, long value);
+        void testClosureFrV(Address closure, float value);
+        void testClosureDrV(Address closure, double value);
+        
     }
     private LibClosureTest lib, fastint, fastlong;
     public ClosureTest() {
@@ -149,6 +157,28 @@ public class ClosureTest {
     }
     @Test public void fastLongClosureVrI() throws Throwable {
         testClosureVrI(fastlong);
+    }
+
+    private void testClosureVrL(LibClosureTest lib) {
+        final boolean called[] = { false };
+        final long MAGIC = 0x12345678cafebabeL;
+        Closure closure = new Closure() {
+            public void invoke(Buffer buffer) {
+                called[0] = true;
+                buffer.setLongReturn(MAGIC);
+            }
+        };
+        Closure.Handle handle = ClosureManager.getInstance().newClosure(closure,
+                Type.SINT64, new Type[0], CallingConvention.DEFAULT);
+        long retval = lib.testClosureVrL(new Address(handle));
+        assertTrue("Closure not called", called[0]);
+        assertEquals("Wrong value returned by closure", MAGIC, retval);
+    }
+    @Test public void defaultClosureVrL() throws Throwable {
+        testClosureVrL(lib);
+    }
+    @Test public void fastLongClosureVrL() throws Throwable {
+        testClosureVrL(fastlong);
     }
 
     private void testClosureVrF(LibClosureTest lib) {
@@ -299,5 +329,144 @@ public class ClosureTest {
         assertTrue("Wrong f32 field value", (F32_MAGIC - retval.getFloat(4)) < 0.0001);
 
     }
+    private void testClosureBrV(LibClosureTest lib) {
+        final boolean called[] = { false };
+        final byte MAGIC = (byte) 0x12;
+        final byte[] data = { 0 };
+        Closure closure = new Closure() {
+            public void invoke(Buffer buffer) {
+                called[0] = true;
+                data[0] = buffer.getByte(0);
+            }
+        };
+        Closure.Handle handle = ClosureManager.getInstance().newClosure(closure,
+                Type.VOID, new Type[] { Type.SINT8 }, CallingConvention.DEFAULT);
+        lib.testClosureBrV(new Address(handle), MAGIC);
+        assertTrue("Closure not called", called[0]);
+        assertEquals("Wrong value passed to closure", MAGIC, data[0]);
+    }
+    @Test public void defaultClosureBrV() throws Throwable {
+        testClosureBrV(lib);
+    }
+    @Test public void fastIntClosureBrV() throws Throwable {
+        testClosureBrV(fastint);
+    }
+    @Test public void fastLongClosureBrV() throws Throwable {
+        testClosureBrV(fastlong);
+    }
+    private void testClosureSrV(LibClosureTest lib) {
+        final boolean called[] = { false };
+        final short MAGIC = (byte) 0x1234;
+        final short[] data = { 0 };
+        Closure closure = new Closure() {
+            public void invoke(Buffer buffer) {
+                called[0] = true;
+                data[0] = buffer.getShort(0);
+            }
+        };
+        Closure.Handle handle = ClosureManager.getInstance().newClosure(closure,
+                Type.VOID, new Type[] { Type.SINT16 }, CallingConvention.DEFAULT);
+        lib.testClosureSrV(new Address(handle), MAGIC);
+        assertTrue("Closure not called", called[0]);
+        assertEquals("Wrong value passed to closure", MAGIC, data[0]);
+    }
+    @Test public void defaultClosureSrV() throws Throwable {
+        testClosureSrV(lib);
+    }
+    @Test public void fastIntClosureSrV() throws Throwable {
+        testClosureSrV(fastint);
+    }
+    @Test public void fastLongClosureSrV() throws Throwable {
+        testClosureSrV(fastlong);
+    }
+
+    private void testClosureIrV(LibClosureTest lib) {
+        final boolean called[] = { false };
+        final int MAGIC = 0x12345678;
+        final int[] data = { 0 };
+        Closure closure = new Closure() {
+            public void invoke(Buffer buffer) {
+                called[0] = true;
+                data[0] = buffer.getInt(0);
+            }
+        };
+        Closure.Handle handle = ClosureManager.getInstance().newClosure(closure,
+                Type.VOID, new Type[] { Type.SINT32 }, CallingConvention.DEFAULT);
+        lib.testClosureIrV(new Address(handle), MAGIC);
+        assertTrue("Closure not called", called[0]);
+        assertEquals("Wrong value passed to closure", MAGIC, data[0]);
+    }
+    @Test public void defaultClosureIrV() throws Throwable {
+        testClosureIrV(lib);
+    }
+    @Test public void fastIntClosureIrV() throws Throwable {
+        testClosureIrV(fastint);
+    }
+    @Test public void fastLongClosureIrV() throws Throwable {
+        testClosureIrV(fastlong);
+    }
     
+    private void testClosureLrV(LibClosureTest lib) {
+        final boolean called[] = { false };
+        final long MAGIC = 0x12345678fee1deadL;
+        final long[] data = { 0 };
+        Closure closure = new Closure() {
+            public void invoke(Buffer buffer) {
+                called[0] = true;
+                data[0] = buffer.getLong(0);
+            }
+        };
+        Closure.Handle handle = ClosureManager.getInstance().newClosure(closure,
+                Type.VOID, new Type[] { Type.SINT64 }, CallingConvention.DEFAULT);
+        lib.testClosureLrV(new Address(handle), MAGIC);
+        assertTrue("Closure not called", called[0]);
+        assertEquals("Wrong value passed to closure", MAGIC, data[0]);
+    }
+    @Test public void defaultClosureLrV() throws Throwable {
+        testClosureLrV(lib);
+    }
+    @Test public void fastLongClosureLrV() throws Throwable {
+        testClosureLrV(fastlong);
+    }
+
+    private void testClosureFrV(LibClosureTest lib) {
+        final boolean called[] = { false };
+        final float MAGIC = (float) 0x12345678;
+        final float[] data = { 0 };
+        Closure closure = new Closure() {
+            public void invoke(Buffer buffer) {
+                called[0] = true;
+                data[0] = buffer.getFloat(0);
+            }
+        };
+        Closure.Handle handle = ClosureManager.getInstance().newClosure(closure,
+                Type.VOID, new Type[] { Type.FLOAT }, CallingConvention.DEFAULT);
+        lib.testClosureFrV(new Address(handle), MAGIC);
+        assertTrue("Closure not called", called[0]);
+        assertTrue("Wrong value passed to closure", (MAGIC - data[0]) < 0.0001);
+    }
+    @Test public void defaultClosureFrV() throws Throwable {
+        testClosureFrV(lib);
+    }
+    
+    private void testClosureDrV(LibClosureTest lib) {
+        final boolean called[] = { false };
+        final double MAGIC = (double) 0x12345678;
+        final double[] data = { 0 };
+        Closure closure = new Closure() {
+            public void invoke(Buffer buffer) {
+                called[0] = true;
+                data[0] = buffer.getDouble(0);
+            }
+        };
+        Closure.Handle handle = ClosureManager.getInstance().newClosure(closure,
+                Type.VOID, new Type[] { Type.DOUBLE }, CallingConvention.DEFAULT);
+        lib.testClosureDrV(new Address(handle), MAGIC);
+        assertTrue("Closure not called", called[0]);
+        assertTrue("Wrong value passed to closure", (MAGIC - data[0]) < 0.0001);
+    }
+
+    @Test public void defaultClosureDrV() throws Throwable {
+        testClosureDrV(lib);
+    }
 }

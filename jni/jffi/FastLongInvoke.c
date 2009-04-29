@@ -16,6 +16,8 @@
 #else
 #  define ARGPTR(argp, type) (argp)
 #endif
+/* for return values <= sizeof(long), need to use an ffi_sarg sized return value */
+#define RETVAL(retval, rtype) ((rtype)->size > sizeof(ffi_sarg) ? (retval).j : (retval).sarg)
 
 /*
  * Class:     com_kenai_jffi_Foreign
@@ -31,7 +33,8 @@ Java_com_kenai_jffi_Foreign_invokeVrL(JNIEnv* env, jobject self, jlong ctxAddres
     void* ffiValues[] = { &arg0 };
     ffi_call(cif, FFI_FN(ctx->function), &retval, ffiValues);
     set_last_error(errno);
-    return retval.j;
+
+    return RETVAL(retval, cif->rtype);
 }
 
 /*
@@ -50,7 +53,8 @@ Java_com_kenai_jffi_Foreign_invokeLrL(JNIEnv* env, jobject self, jlong ctxAddres
     };
     ffi_call(cif, FFI_FN(ctx->function), &retval, ffiValues);
     set_last_error(errno);
-    return retval.j;
+
+    return RETVAL(retval, cif->rtype);
 }
 
 /*
@@ -70,7 +74,8 @@ Java_com_kenai_jffi_Foreign_invokeLLrL(JNIEnv* env, jobject self, jlong ctxAddre
     };
     ffi_call(cif, FFI_FN(ctx->function), &retval, ffiValues);
     set_last_error(errno);
-    return retval.j;
+
+    return RETVAL(retval, cif->rtype);
 }
 
 /*
@@ -92,5 +97,6 @@ Java_com_kenai_jffi_Foreign_invokeLLLrL(JNIEnv* env, jobject self, jlong ctxAddr
     };
     ffi_call(cif, FFI_FN(ctx->function), &retval, ffiValues);
     set_last_error(errno);
-    return retval.j;
+
+    return RETVAL(retval, cif->rtype);
 }

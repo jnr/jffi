@@ -10,7 +10,7 @@
 #else
 # include <dlfcn.h>
 #endif
-#ifdef __sun
+#if defined (__sun) || defined(_AIX)
 #  include <alloca.h>
 #endif
 #include <ffi.h>
@@ -62,6 +62,11 @@ Java_com_kenai_jffi_Foreign_dlopen(JNIEnv* env, jobject self, jstring jPath, jin
     flags |= F(LOCAL);
     flags |= F(NOW);
 #undef F
+
+#ifdef _AIX
+    flags |= RTLD_MEMBER; //  Needed for AIX
+#endif
+    
     if (jPath != NULL) {
         path = path_;
         getMultibyteString(env, path_, jPath, sizeof(path_));

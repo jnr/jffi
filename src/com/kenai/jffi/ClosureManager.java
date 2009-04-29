@@ -159,8 +159,11 @@ public class ClosureManager {
      */
     private static final class DirectBuffer implements Closure.Buffer {
         private static final com.kenai.jffi.MemoryIO IO = com.kenai.jffi.MemoryIO.getInstance();
+        private static final NativeWordIO WordIO = NativeWordIO.getInstance();
         private static final int PARAM_SIZE = Platform.getPlatform().addressSize() / 8;
         private final long retval, parameters;
+
+        /* Keep references to the return and parameter types to prevent garbage collection */
         private final Type returnType;
         private final Type[] parameterTypes;
 
@@ -204,15 +207,15 @@ public class ClosureManager {
         }
 
         public final void setByteReturn(byte value) {
-            IO.putByte(retval, value);
+            WordIO.put(retval, value);
         }
 
         public final void setShortReturn(short value) {
-            IO.putShort(retval, value);
+            WordIO.put(retval, value);
         }
 
         public final void setIntReturn(int value) {
-            IO.putInt(retval, value);
+            WordIO.put(retval, value);
         }
 
         public final void setLongReturn(long value) {
@@ -237,6 +240,59 @@ public class ClosureManager {
 
         public void setStructReturn(byte[] data, int offset) {
             IO.putByteArray(retval, data, offset, returnType.size());
+        }
+    }
+
+    /**
+     * Reads annd writes data types that are smaller than the size of a native
+     * long, as a native long for compatibility with FFI.
+     */
+    private static abstract class NativeWordIO {
+        public static final NativeWordIO getInstance() {
+            return Platform.getPlatform().addressSize() == 32
+                    ? NativeWordIO32.INSTANCE : NativeWordIO64.INSTANCE;
+        }
+
+        /**
+         * Writes a native long argument to native memory.
+         *
+         * @param address The address to write the value at
+         * @param value The value to write.
+         */
+        abstract void put(long address, int value);
+
+        /**
+         * Reads a native long argument from native memory.
+         * @param address The memory address to read the value from
+         * @return An integer
+         */
+        abstract int get(long address);
+    }
+
+    private static final class NativeWordIO32 extends NativeWordIO {
+        private static final com.kenai.jffi.MemoryIO IO = com.kenai.jffi.MemoryIO.getInstance();
+        static final NativeWordIO INSTANCE = new NativeWordIO32();
+
+        void put(long address, int value) {
+            IO.putInt(address, value);
+        }
+
+        int get(long address) {
+            return IO.getInt(address);
+        }
+    }
+
+    private static final class NativeWordIO64 extends NativeWordIO {
+
+        private static final com.kenai.jffi.MemoryIO IO = com.kenai.jffi.MemoryIO.getInstance();
+        static final NativeWordIO INSTANCE = new NativeWordIO64();
+
+        void put(long address, int value) {
+            IO.putLong(address, value);
+        }
+
+        int get(long address) {
+            return (int) IO.getLong(address);
         }
     }
 }

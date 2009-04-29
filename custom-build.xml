@@ -22,6 +22,7 @@
           <or>
             <os name="FreeBSD"/>
             <os name="OpenBSD"/>
+            <os name="AIX"/>
           </or>
         </condition>
         <condition property="make.exe" value="/usr/sfw/bin/gmake">
@@ -83,6 +84,7 @@
                 <include name="libjffi.so"/>
                 <include name="libjffi.jnilib"/>
                 <include name="libjffi.dylib"/>
+                <include name="libjffi.a"/>
             </zipfileset>
         </jar>
     </target>
@@ -102,6 +104,9 @@
             <zipfileset src="archive/Darwin.jar"/>
             <zipfileset src="archive/x86-SunOS.jar"/>
             <zipfileset src="archive/amd64-SunOS.jar"/>
+            <zipfileset src="archive/sparc-SunOS.jar"/>
+            <zipfileset src="archive/sparcv9-SunOS.jar"/>
+            <zipfileset src="archive/ppc-AIX.jar"/>
         </jar>
     </target>
     <target name="-archive-platform-jar" depends="-build-platform-jar">
