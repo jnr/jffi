@@ -40,7 +40,11 @@ LIBNAME = jffi
 #   http://weblogs.java.net/blog/kellyohair/archive/2006/01/compilation_of_1.html
 JFLAGS = -fno-omit-frame-pointer -fno-strict-aliasing -DNDEBUG
 OFLAGS = -O2 $(JFLAGS)
-WFLAGS = -W -Werror -Wall -Wno-unused -Wno-parentheses -Wundef
+
+# MacOS headers aren't completely warning free, so turn them off
+ifneq (($OS),darwin)
+  WFLAGS = -W -Werror -Wall -Wno-unused -Wno-parentheses -Wundef
+endif
 PICFLAGS = -fPIC
 SOFLAGS = # Filled in for each OS specifically
 LDFLAGS += $(SOFLAGS)
