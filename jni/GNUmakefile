@@ -34,9 +34,6 @@ OBJS = $(patsubst %.c, $(JFFI_BUILD_DIR)/%.o, $(notdir $(SRCS)))
 
 vpath %.h $(JFFI_SRC_DIR)
 
-TEST_SRCS = $(wildcard $(SRC_DIR)/libtest/*.c)
-TEST_OBJS := $(patsubst %.c, $(BUILD_DIR)/libtest/%.o, $(notdir $(TEST_OBJS)))
-	
 LIBNAME = jffi
 #
 # Compiler/linker flags from:
@@ -95,7 +92,7 @@ endif
 
 ifeq ($(OS), linux)
   SOFLAGS = -shared -mimpure-text -static-libgcc -Wl,-soname,$(@F) -Wl,-O1
-  PICFLAGS += -pthread
+  CFLAGS += -pthread
 endif
 ifeq ($(OS), solaris)
   CC = /usr/sfw/bin/gcc -std=c99
@@ -108,8 +105,8 @@ endif
 
 ifeq ($(OS), aix)
   SOFLAGS = -shared -static-libgcc
-  PICFLAGS += -pthread
-  LDFLAGS += -lpthread
+  CFLAGS += -pthread
+  LDFLAGS += -pthread
   LIBEXT = a
   JNIEXT = a
 endif
@@ -136,13 +133,12 @@ endif
 
 JDK_HOME=$(shell if [ -d $(JAVA_HOME)/include ];then echo $(JAVA_HOME); else echo $(JAVA_HOME)/..; fi)
 LIBJFFI = $(BUILD_DIR)/$(PREFIX)$(LIBNAME).$(JNIEXT)
-LIBTEST = $(BUILD_DIR)/$(PREFIX)$(LIBNAME)test.$(LIBEXT)
 FFI_CONFIGURE = $(LIBFFI_SRC_DIR)/configure --disable-static \
 	--with-pic=yes --disable-dependency-tracking
 ifneq ($(MINGW32),)
 	FFI_CONFIGURE += --host=i386-mingw32
 endif
-all:	$(LIBJFFI) $(LIBTEST)
+all:	$(LIBJFFI)
 
 debug:
 	@echo OS="$(OS)"
@@ -152,11 +148,8 @@ debug:
 	@echo "OBJS=$(OBJS) JFFI_BUILD_DIR=$(JFFI_BUILD_DIR) PLATFORM=$(PLATFORM)"
 
 $(LIBJFFI):  $(LIBFFI) $(OBJS)
-	$(CC) -o $@ $(LDFLAGS) $(JFFI_SOFLAGS) $(OBJS) $(LIBFFI) $(LIBS)
+	$(CC) -o $@ $(LDFLAGS) $(SOFLAGS) $(OBJS) $(LIBFFI) $(LIBS)
 
-$(LIBTEST):  $(TEST_OBJS)
-	$(CC) -o $@ $(LDFLAGS) $(TEST_SOFLAGS) $(TEST_OBJS) -lm
-	
 $(BUILD_DIR)/%.o : $(SRC_DIR)/%.c jffi.h
 	@mkdir -p $(@D)
 	$(CCACHE) $(CC) $(CFLAGS) -c $< -o $@
