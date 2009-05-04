@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2007 Wayne Meissner. All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *
@@ -38,6 +38,21 @@ typedef long long s64;
 typedef float f32;
 typedef double f64;
 
+typedef struct bugged_struct {
+  unsigned char visible;
+  unsigned int x;
+  unsigned int y;
+  short rx;
+  short ry;
+  unsigned char order;
+  unsigned char size;
+} bugged_struct_t;
+
+unsigned int
+bugged_struct_size() {
+    return sizeof(bugged_struct_t);
+}
+
 struct test1 {
     char b;
     short s;
@@ -49,16 +64,35 @@ struct test1 {
     char string[32];
 };
 
-struct point {
-    char id;
-    int x;
-    int y;
+struct struct_with_array {
+    char c;
+    int a[5];
 };
 
-struct rectangle {
-    struct point a;
-    struct point b;
+struct nested {
+    int i;
 };
+
+struct container {
+    char first;
+    struct nested s;
+};
+
+int
+struct_align_nested_struct(struct container* a) { return a->s.i; }
+
+void*
+struct_field_array(struct struct_with_array* s) { return &s->a; }
+
+struct container*
+struct_make_container_struct(int i)
+{
+    static struct container cs;
+    memset(&cs, 0, sizeof(cs));
+    cs.first = 1;
+    cs.s.i = i;
+    return &cs;
+}
 
 #define T(x, type) \
     type struct_field_##type(struct test1* t) { return t->x; } \
@@ -73,14 +107,14 @@ T(f, f32);
 T(d, f64);
 T(l, long);
 
-void 
-struct_set_string(struct test1* t, char* s) 
+void
+struct_set_string(struct test1* t, char* s)
 {
     strcpy(t->string, s);
 }
 
 struct test1*
-struct_make_struct(char b, short s, int i, long long ll, float f, double d) 
+struct_make_struct(char b, short s, int i, long long ll, float f, double d)
 {
     static struct test1 t;
     memset(&t, 0, sizeof(t));
@@ -113,41 +147,21 @@ struct_call_sub_cb(struct test2* t, int a1, int a2)
 }
 
 
-struct point*
-struct_make_point(char id, unsigned int x, unsigned int y)
+struct struct_with_array*
+struct_make_struct_with_array(int a_0, int a_1, int a_2, int a_3, int a_4)
 {
-    struct point* p = malloc(sizeof (p));
-    p->id = id;
-    p->x = x;
-    p->y = y;
-    return p;
-};
+    static struct struct_with_array s;
 
-struct rectangle*
-struct_make_rectangle(char a_id, int a_x, int a_y, char b_id, int b_x, int b_y)
-{
-    static struct rectangle r;
-    memset(&r, 0, sizeof (r));
-    r.a.id = a_id;
-    r.a.x = a_x;
-    r.a.y = a_y;
-    r.b.id = b_id;
-    r.b.x = b_x;
-    r.b.y = b_y;
+    memset(&s, 0, sizeof(s));
 
-    return &r;
-};
+    s.a[0] = a_0;
+    s.a[1] = a_1;
+    s.a[2] = a_2;
+    s.a[3] = a_3;
+    s.a[4] = a_4;
 
-struct point* 
-get_point_a(struct rectangle* r)
-{
-    return &r->a;
-}
+    return &s;
 
-struct point* 
-get_point_b(struct rectangle* r)
-{
-    return &r->b;
 }
 
 struct s8s32 {

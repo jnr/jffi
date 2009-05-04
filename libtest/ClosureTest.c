@@ -53,6 +53,10 @@ double testClosureVrD(double (*closure)(void))
 {
     return (*closure)();
 }
+void* testClosureVrP(void* (*closure)(void))
+{
+    return (*closure)();
+}
 void testClosureBrV(void (*closure)(char), char a1)
 {
     (*closure)(a1);
@@ -76,6 +80,12 @@ void testClosureFrV(void (*closure)(float), float a1)
 void testClosureDrV(void (*closure)(double), double a1)
 {
     (*closure)(a1);
+}
+void testOptionalClosureBrV(void (*closure)(char), char a1)
+{
+    if (closure) {
+        (*closure)(a1);
+    }
 }
 
 struct s8f32s32 {
