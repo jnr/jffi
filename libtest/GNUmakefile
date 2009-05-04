@@ -13,7 +13,6 @@ TEST_BUILD_DIR = $(BUILD_DIR)/libtest
 # Set defaults to unix (linux/solaris/bsd)
 PREFIX = lib
 LIBEXT = so
-JNIEXT = so
 LIBNAME = $(PREFIX)test.$(LIBEXT)
 
 export MACOSX_DEPLOYMENT_TARGET=10.4
@@ -43,9 +42,15 @@ ifeq ($(OS), win32)
 	LDFLAGS += -mno-cygwin -Wl,--add-stdcall-alias
 endif
 ifeq ($(OS), darwin)
-  CFLAGS += -arch i386 -arch ppc -arch x86_64 -isysroot /Developer/SDKs/MacOSX10.4u.sdk -DTARGET_RT_MAC_CFM=0
-  LDFLAGS = -arch i386 -arch ppc -arch x86_64 -dynamiclib \
-	-Wl,-syslibroot,$(SDKROOT) -mmacosx-version-min=10.4
+  ARCHFLAGS = -arch ppc
+  ifeq ($(CPU),i386)
+    ARCHFLAGS += -arch i386 -arch x86_64
+  endif
+  CFLAGS += $(ARCHFLAGS) -isysroot /Developer/SDKs/MacOSX10.4u.sdk -DTARGET_RT_MAC_CFM=0
+  CFLAGS += -fno-common
+  LDFLAGS = $(ARCHFLAGS) -dynamiclib -Wl,-syslibroot,$(SDKROOT) -mmacosx-version-min=10.4
+  # link against the universal libraries on ppc machines
+  LDFLAGS += -L/Developer/SDKs/MacOSX10.4u.sdk/usr/lib
   LIBEXT = dylib
   FFI_CFLAGS += -isysroot /Developer/SDKs/MacOSX10.4u.sdk
   PICFLAGS =
@@ -55,11 +60,19 @@ endif
 ifeq ($(OS), linux)
   SOFLAGS += -Wl,-soname,$(LIBNAME)
 endif
+
 ifeq ($(OS), solaris)
   CC = /usr/sfw/bin/gcc -std=c99
   LD = /usr/ccs/bin/ld
   SOFLAGS = -shared -static-libgcc 
 endif
+
+ifeq ($(OS), aix)
+  LIBEXT = a
+  SOFLAGS = -shared -static-libgcc
+  PICFLAGS += -pthread
+endif
+
 ifneq ($(findstring cygwin, $(OS)),)
   CFLAGS += -mno-cygwin -mwin32
   LIBEXT = dll
@@ -89,13 +102,6 @@ ifneq ($(or $(findstring linux, $(OS)), $(findstring solaris, $(OS))),)
   CC += -m$(MODEL)
   LD += -m$(MODEL)
 endif
-
-ifeq ($(OS), aix)
-  LIBEXT = a
-  SOFLAGS = -shared -static-libgcc
-  PICFLAGS += -pthread
-endif
-
 
 LIBTEST = $(BUILD_DIR)/$(LIBNAME)
 
