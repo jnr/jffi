@@ -73,7 +73,7 @@ public final class Function {
      *
      * @return The number of parameters the native function accepts.
      */
-    final int getParameterCount() {
+    public final int getParameterCount() {
         return parameterCount;
     }
 
@@ -101,7 +101,7 @@ public final class Function {
      *
      * @return The address of the native function.
      */
-    final long getFunctionAddress() {
+    public final long getFunctionAddress() {
         return functionAddress;
     }
 
@@ -110,10 +110,20 @@ public final class Function {
      *
      * @return The native return type of this function.
      */
-    final Type getReturnType() {
+    public final Type getReturnType() {
         return returnType;
     }
     
+    /**
+     * Gets the type of a parameter.
+     * 
+     * @param index The index of the parameter in the function signature
+     * @return The <tt>Type</tt> of the parameter.
+     */
+    public final Type getParameterType(int index) {
+        return paramTypes[index];
+    }
+
     @Override
     protected void finalize() throws Throwable {
         try {
