@@ -62,7 +62,8 @@ ifeq ($(OS), linux)
 endif
 
 ifeq ($(OS), solaris)
-  CC = /usr/sfw/bin/gcc -std=c99
+  CC = gcc
+  CFLAGS += -std=c99
   LD = /usr/ccs/bin/ld
   SOFLAGS = -shared -static-libgcc 
 endif
