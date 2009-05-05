@@ -99,8 +99,8 @@ ifeq ($(OS), linux)
   CFLAGS += -pthread
 endif
 ifeq ($(OS), solaris)
-  CC = /usr/sfw/bin/gcc -std=c99
-  CFLAGS += -D__EXTENSIONS__
+  CC = gcc
+  CFLAGS += -D__EXTENSIONS__ -std=c99
   LD = /usr/ccs/bin/ld
   CCACHE=
   SOFLAGS = -shared -static-libgcc -mimpure-text
