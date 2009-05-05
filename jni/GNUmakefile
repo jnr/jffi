@@ -12,7 +12,6 @@ PLATFORM = $(CPU)-$(OS)
 
 # Set defaults to unix (linux/solaris/bsd)
 PREFIX = lib
-LIBEXT = so
 JNIEXT = so
 
 export MACOSX_DEPLOYMENT_TARGET=10.4
@@ -86,7 +85,6 @@ ifeq ($(OS), darwin)
   CFLAGS += $(foreach arch, $(ARCHES),-arch $(arch))
   LDFLAGS = $(foreach arch, $(ARCHES),-arch $(arch)) -dynamiclib -framework JavaVM \
 	-Wl,-syslibroot,$(SDKROOT) -mmacosx-version-min=10.4
-  LIBEXT = dylib
   JNIEXT = jnilib
   FFI_CFLAGS += -isysroot /Developer/SDKs/MacOSX10.4u.sdk
   PICFLAGS =
@@ -110,7 +108,6 @@ ifeq ($(OS), aix)
   SOFLAGS = -shared -static-libgcc
   CFLAGS += -pthread
   LDFLAGS += -pthread
-  LIBEXT = a
   JNIEXT = a
 endif
 
