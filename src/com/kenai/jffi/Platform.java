@@ -102,6 +102,10 @@ public abstract class Platform {
             return CPU.POWERPC;
         } else if ("ppc64".equals(archString)) {
             return CPU.POWERPC64;
+        } else if ("sparc".equals(archString)) {
+            return CPU.SPARC;
+        } else if ("sparcv9".equals(archString)) {
+            return CPU.SPARCV9;
         } else {
             throw new ExceptionInInitializerError("Unsupported CPU architecture: " + archString);
         }
