@@ -47,7 +47,6 @@ ifneq (($OS),darwin)
 endif
 PICFLAGS = -fPIC
 SOFLAGS = # Filled in for each OS specifically
-LDFLAGS += $(SOFLAGS)
 FFI_MMAP_EXEC = -DFFI_MMAP_EXEC_WRIT
 
 FFI_CC=$(CCACHE) $(CC)
