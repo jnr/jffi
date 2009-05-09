@@ -391,3 +391,45 @@ Java_com_kenai_jffi_Foreign_invokeArrayWithObjectsReturnStruct(JNIEnv* env, jobj
     (*env)->SetByteArrayRegion(env, returnBuffer, returnBufferOffset, ctx->cif.rtype->size, retval);
 }
 
+/*
+ * Class:     com_kenai_jffi_Foreign
+ * Method:    invokePointerParameterArray
+ * Signature: (JJ[J)V
+ */
+JNIEXPORT void JNICALL
+Java_com_kenai_jffi_Foreign_invokePointerParameterArray(JNIEnv *env, jobject self, jlong ctxAddress,
+        jlong returnBuffer, jlongArray parameterArray)
+{
+    Function* ctx = (Function *) j2p(ctxAddress);
+    int parameterCount;
+    jlong* params = NULL;
+    void** ffiArgs = NULL;
+    int i;
+
+    if (ctxAddress == 0LL) {
+        throwException(env, NullPointer, "context address is null");
+        return;
+    }
+
+    if (returnBuffer == 0LL) {
+        throwException(env, NullPointer, "result buffer is null");
+        return;
+    }
+
+    if (parameterArray == NULL) {
+        throwException(env, NullPointer, "parameter array is null");
+        return;
+    }
+
+    parameterCount = (*env)->GetArrayLength(env, parameterArray);
+    if (parameterCount > 0) {
+         params = alloca(parameterCount * sizeof(jlong));
+         ffiArgs = alloca(parameterCount * sizeof(void *));
+        (*env)->GetLongArrayRegion(env, parameterArray, 0, parameterCount, params);
+        for (i = 0; i < parameterCount; ++i) {
+            ffiArgs[i] = j2p(params[i]);
+        }
+    }
+    
+    ffi_call(&ctx->cif, FFI_FN(ctx->function), j2p(returnBuffer), ffiArgs);
+}

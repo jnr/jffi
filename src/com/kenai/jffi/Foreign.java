@@ -293,6 +293,20 @@ final class Foreign {
     final native int invokeArrayO2Int32(long function, byte[] buffer, Object o1, int o1Info, int o1off, int o1len,
             Object o2, int o2info, int o2off, int o2len);
 
+    /* ---------------------------------------------------------------------- */
+
+    /**
+     * Invokes a function, with the parameters loaded into native memory buffers,
+     * and the function result is stored in a native memory buffer.
+     *
+     * @param functionContext The address of the function context structure from {@link #newFunction}.
+     * @param returnBuffer The address of the native buffer to place the result
+     * of the function call in.
+     * @param parameters An array of addresses of the function parameters.
+     */
+    final native void invokePointerParameterArray(long functionContext,
+            long returnBuffer, long[] parameters);
+
     final native byte getByte(long address);
     final native short getShort(long address);
     final native int getInt(long address);

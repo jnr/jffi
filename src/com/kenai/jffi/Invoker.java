@@ -216,6 +216,19 @@ public abstract class Invoker {
     }
 
     /**
+     * Invokes a function, with the parameters loaded into native memory buffers,
+     * and the function result is stored in a native memory buffer.
+     *
+     * @param function The <tt>Function</tt> to invoke.
+     * @param returnBuffer The address of the native buffer to place the result
+     * of the function call in.
+     * @param parameters An array of addresses of the function parameters.
+     */
+    public final void invoke(Function function, long returnBuffer, long[] parameters) {
+        foreign.invokePointerParameterArray(function.getContextAddress(), returnBuffer, parameters);
+    }
+
+    /**
      * Convenience method to pass the objects and object descriptor array down as
      * normal arguments, so hotspot can optimize it.  This is faster than the native
      * code pulling the objects and descriptors out of arrays.

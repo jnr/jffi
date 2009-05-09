@@ -12,7 +12,8 @@ public class UnitHelper {
     public enum InvokerType {
         Default,
         FastInt,
-        FastLong
+        FastLong,
+        PointerArray
     }
     public static final class Address extends java.lang.Number {
 
@@ -155,6 +156,8 @@ public class UnitHelper {
                 return new FastIntMethodInvoker(library, function, returnType, parameterTypes);
             case FastLong:
                 return new FastLongMethodInvoker(library, function, returnType, parameterTypes);
+            case PointerArray:
+                return new PointerArrayMethodInvoker(library, function, returnType, parameterTypes);
             case Default:
                 return new DefaultMethodInvoker(library, function, returnType, parameterTypes);
             default:
@@ -326,6 +329,84 @@ public class UnitHelper {
                     throw new IndexOutOfBoundsException("fast-long invoker limited to 3 parameters");
             }
             return convertResult(returnType, result);
+        }
+    }
+
+    private static final class PointerArrayMethodInvoker implements MethodInvoker {
+        private static final MemoryIO Memory = MemoryIO.getInstance();
+        private final Library library;
+        private final Function function;
+        private final Class returnType;
+        private final Class[] parameterTypes;
+        public PointerArrayMethodInvoker(Library library, Function function, Class returnType, Class[] parameterTypes) {
+            this.library = library;
+            this.function = function;
+            this.returnType = returnType;
+            this.parameterTypes = parameterTypes;
+        }
+        private static final class MemoryHolder {
+            private final long address;
+
+            public MemoryHolder(long address) {
+                this.address = address;
+            }
+
+            @Override
+            protected void finalize() throws Throwable {
+                MemoryIO.getInstance().freeMemory(address);
+            }
+
+        }
+        public Object invoke(Object[] args) {
+            MemoryHolder[] memoryHolders = new MemoryHolder[function.getParameterCount()];
+            long[] parameterAddresses = new long[function.getParameterCount()];
+            for (int i = 0; i < parameterAddresses.length; ++i) {
+                // Allocate 8 bytes; enough to store long long and double
+                parameterAddresses[i] = Memory.allocateMemory(8, true);
+                memoryHolders[i] = new MemoryHolder(parameterAddresses[i]);
+            }
+
+            for (int i = 0; i < args.length; ++i) {
+                if (parameterTypes[i] == byte.class || parameterTypes[i] == Byte.class) {
+                    Memory.putByte(parameterAddresses[i], ((Number) args[i]).byteValue());
+                } else if (parameterTypes[i] == short.class || parameterTypes[i] == Short.class) {
+                    Memory.putShort(parameterAddresses[i], ((Number) args[i]).shortValue());
+                } else if (parameterTypes[i] == int.class || parameterTypes[i] == Integer.class) {
+                    Memory.putInt(parameterAddresses[i], ((Number) args[i]).intValue());
+                } else if (parameterTypes[i] == long.class || parameterTypes[i] == Long.class) {
+                    Memory.putLong(parameterAddresses[i], ((Number) args[i]).longValue());
+                } else if (parameterTypes[i] == float.class || parameterTypes[i] == Float.class) {
+                    Memory.putFloat(parameterAddresses[i], ((Number) args[i]).floatValue());
+                } else if (parameterTypes[i] == double.class || parameterTypes[i] == Double.class) {
+                    Memory.putDouble(parameterAddresses[i], ((Number) args[i]).doubleValue());
+                } else if (Address.class.isAssignableFrom(parameterTypes[i])) {
+                    Memory.putAddress(parameterAddresses[i], ((Address) args[i]).address);
+                } else {
+                    throw new RuntimeException("Unknown parameter type: " + parameterTypes[i]);
+                }
+            }
+            long returnBuffer = Memory.allocateMemory(8, true);
+            MemoryHolder resultHolder = new MemoryHolder(returnBuffer);
+            Invoker.getInstance().invoke(function, returnBuffer, parameterAddresses);
+
+            if (returnType == void.class || returnType == Void.class) {
+                return null;
+            } else if (returnType == byte.class || returnType == Byte.class) {
+                return Memory.getByte(returnBuffer);
+            } else if (returnType == short.class || returnType == Short.class) {
+                return Memory.getShort(returnBuffer);
+            } else if (returnType == int.class || returnType == Integer.class) {
+                return Memory.getInt(returnBuffer);
+            } else if (returnType == long.class || returnType == Long.class) {
+                return Memory.getLong(returnBuffer);
+            } else if (returnType == float.class || returnType == Float.class) {
+                return Memory.getFloat(returnBuffer);
+            } else if (returnType == double.class || returnType == double.class) {
+                return Memory.getDouble(returnBuffer);
+            } else if (Address.class.isAssignableFrom(returnType)) {
+                return new Address(Memory.getAddress(returnBuffer));
+            }
+            throw new RuntimeException("Unknown return type: " + returnType);
         }
     }
 }

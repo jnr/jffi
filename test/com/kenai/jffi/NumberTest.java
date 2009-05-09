@@ -66,6 +66,12 @@ public class NumberTest {
     @Test public void returnFastLongU8() {
         returnU8(InvokerType.FastLong);
     }
+    @Test public void returnPointerArrayS8() {
+        returnS8(InvokerType.PointerArray);
+    }
+    @Test public void returnPointerArrayU8() {
+        returnU8(InvokerType.PointerArray);
+    }
     private void returnS8(InvokerType type) {
         LibNumberTest lib = UnitHelper.loadTestLibrary(LibNumberTest.class, type);
         for (int i = 0; i < s8_values.length; ++i) {
@@ -88,6 +94,9 @@ public class NumberTest {
     @Test public void returnFastLongS16() {
         returnS16(InvokerType.FastLong);
     }
+    @Test public void returnPointerArrayS16() {
+        returnS16(InvokerType.PointerArray);
+    }
     private void returnS16(InvokerType type) {
         LibNumberTest lib = UnitHelper.loadTestLibrary(LibNumberTest.class, type);
         for (int i = 0; i < s16_values.length; ++i) {
@@ -102,6 +111,9 @@ public class NumberTest {
     }
     @Test public void returnFastLongU16() {
         returnU16(InvokerType.FastLong);
+    }
+    @Test public void returnPointerArrayU16() {
+        returnU16(InvokerType.PointerArray);
     }
     private void returnU16(InvokerType type) {
         LibNumberTest lib = UnitHelper.loadTestLibrary(LibNumberTest.class, type);
@@ -118,6 +130,9 @@ public class NumberTest {
     @Test public void returnFastLongS32() {
         returnS32(InvokerType.FastLong);
     }
+    @Test public void returnPointerArrayS32() {
+        returnS32(InvokerType.PointerArray);
+    }
     private void returnS32(InvokerType type) {
         LibNumberTest lib = UnitHelper.loadTestLibrary(LibNumberTest.class, type);
         for (int i = 0; i < s32_values.length; ++i) {
@@ -133,6 +148,9 @@ public class NumberTest {
     @Test public void returnFastLongU32() {
         returnU32(InvokerType.FastLong);
     }
+    @Test public void returnPointerArrayU32() {
+        returnU32(InvokerType.PointerArray);
+    }
     private void returnU32(InvokerType type) {
         LibNumberTest lib = UnitHelper.loadTestLibrary(LibNumberTest.class, type);
         for (int i = 0; i < u32_values.length; ++i) {
@@ -145,6 +163,9 @@ public class NumberTest {
     @Test public void returnFastLongS64() {
         returnS64(InvokerType.FastLong);
     }
+    @Test public void returnPointerArrayS64() {
+        returnS64(InvokerType.PointerArray);
+    }
     private void returnS64(InvokerType type) {
         LibNumberTest lib = UnitHelper.loadTestLibrary(LibNumberTest.class, type);
         for (int i = 0; i < s64_values.length; ++i) {
@@ -156,6 +177,9 @@ public class NumberTest {
     }
     @Test public void returnFastLongU64() {
         returnU64(InvokerType.FastLong);
+    }
+    @Test public void returnPointerArrayU64() {
+        returnU64(InvokerType.PointerArray);
     }
     private void returnU64(InvokerType type) {
         LibNumberTest lib = UnitHelper.loadTestLibrary(LibNumberTest.class, type);
