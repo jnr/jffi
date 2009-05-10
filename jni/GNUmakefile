@@ -16,7 +16,7 @@ JNIEXT = so
 
 export MACOSX_DEPLOYMENT_TARGET=10.4
 
-#CCACHE=$(shell /usr/bin/which ccache)
+CCACHE = $(strip $(realpath $(shell /usr/bin/which ccache)))
 SRC_DIR ?= $(shell pwd)/jni
 JNI_DIR ?= $(SRC_DIR)
 BUILD_DIR ?= $(shell pwd)/build
