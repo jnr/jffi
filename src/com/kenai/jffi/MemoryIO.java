@@ -119,6 +119,14 @@ public abstract class MemoryIO {
         return foreign.memchr(address, value, maxlen);
     }
 
+    public final java.nio.ByteBuffer newDirectByteBuffer(long address, long capacity) {
+        return foreign.newDirectByteBuffer(address, capacity);
+    }
+
+    public final long getDirectBufferAddress(java.nio.Buffer buffer) {
+        return foreign.getDirectBufferAddress(buffer);
+    }
+
     private static abstract class NativeImpl extends MemoryIO {
         protected static final Foreign foreign = Foreign.getInstance();
         public final byte getByte(long address) {

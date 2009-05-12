@@ -156,3 +156,24 @@ Java_com_kenai_jffi_Foreign_freeMemory(JNIEnv* env, jobject self, jlong address)
     free(j2p(address));
 }
 
+/*
+ * Class:     com_kenai_jffi_Foreign
+ * Method:    newDirectByteBuffer
+ * Signature: (J)Ljava/nio/ByteBuffer;
+ */
+JNIEXPORT jobject JNICALL
+Java_com_kenai_jffi_Foreign_newDirectByteBuffer(JNIEnv* env, jobject self, jlong address, jlong capacity)
+{
+    return (*env)->NewDirectByteBuffer(env, j2p(address), capacity);
+}
+
+/*
+ * Class:     com_kenai_jffi_Foreign
+ * Method:    getDirectBufferAddress
+ * Signature: (Lcom/kenai/jffi/Closure/Buffer;)J
+ */
+JNIEXPORT jlong JNICALL
+Java_com_kenai_jffi_Foreign_getDirectBufferAddress(JNIEnv* env, jobject self, jobject buffer)
+{
+    return p2j((*env)->GetDirectBufferAddress(env, buffer));
+}
