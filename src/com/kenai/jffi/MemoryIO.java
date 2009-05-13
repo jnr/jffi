@@ -112,6 +112,35 @@ public abstract class MemoryIO {
     public final long getStringLength(long address) {
         return foreign.strlen(address);
     }
+
+    /**
+     * Reads a byte array from native memory, stopping when a zero byte is found.
+     *
+     * This can be used to read ascii or utf-8 strings from native memory.
+     *
+     * @param address The address to read the data from.
+     * @return The byte array containing a copy of the native data.  Any zero
+     * byte is stripped from the end.
+     */
+    public final byte[] getZeroTerminatedByteArray(long address) {
+        return foreign.getZeroTerminatedByteArray(address);
+    }
+
+    /**
+     * Reads a byte array from native memory, stopping when a zero byte is found,
+     * or the maximum length is reached.
+     *
+     * This can be used to read ascii or utf-8 strings from native memory.
+     *
+     * @param address The address to read the data from.
+     * @param maxlen The limit of the memory area to scan for a zero byte.
+     * @return The byte array containing a copy of the native data.  Any zero
+     * byte is stripped from the end.
+     */
+    public final byte[] getZeroTerminatedByteArray(long address, long maxlen) {
+        return foreign.getZeroTerminatedByteArray(address, maxlen);
+    }
+
     public final long indexOf(long address, byte value) {
         return foreign.memchr(address, value, Integer.MAX_VALUE);
     }

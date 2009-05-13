@@ -341,6 +341,8 @@ final class Foreign {
     final native void putDoubleArray(long address, double[] data, int offset, int length);
     final native long memchr(long address, int value, long len);
     final native long strlen(long address);
+    final native byte[] getZeroTerminatedByteArray(long address);
+    final native byte[] getZeroTerminatedByteArray(long address, long maxlen);
 
     final native ByteBuffer newDirectByteBuffer(long address, long capacity);
     final native long getDirectBufferAddress(Buffer buffer);

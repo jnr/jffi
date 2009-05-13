@@ -132,6 +132,40 @@ Java_com_kenai_jffi_Foreign_strlen(JNIEnv* env, jobject self, jlong address)
 
 /*
  * Class:     com_kenai_jffi_Foreign
+ * Method:    getUTF8StringAsBytes
+ * Signature: (J)[B
+ */
+JNIEXPORT jbyteArray JNICALL
+Java_com_kenai_jffi_Foreign_getZeroTerminatedByteArray__J(JNIEnv* env, jobject self, jlong address)
+{
+    const char* str = (const char*) j2p(address);
+    int len = strlen(str);
+
+    jbyteArray bytes = (*env)->NewByteArray(env, len);
+    (*env)->SetByteArrayRegion(env, bytes, 0, len, (jbyte *) str);
+    
+    return bytes;
+}
+
+/*
+ * Class:     com_kenai_jffi_Foreign
+ * Method:    getUTF8StringAsBytes
+ * Signature: (JJ)[B
+ */
+JNIEXPORT jbyteArray JNICALL
+Java_com_kenai_jffi_Foreign_getZeroTerminatedByteArray__JJ(JNIEnv* env, jobject self, jlong address, jlong maxlen)
+{
+    const char *str = (const char*) j2p(address), *zp;
+    jsize len = ((zp = memchr(str, 0, (size_t) maxlen)) != NULL) ? zp - str : maxlen;
+    
+    jbyteArray bytes = (*env)->NewByteArray(env, len);
+    (*env)->SetByteArrayRegion(env, bytes, 0, len, (jbyte *) str);
+
+    return bytes;
+}
+
+/*
+ * Class:     com_kenai_jffi_Foreign
  * Method:    allocateMemory
  * Signature: (JZ)J
  */
