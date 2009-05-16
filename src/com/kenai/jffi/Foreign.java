@@ -344,6 +344,6 @@ final class Foreign {
     final native byte[] getZeroTerminatedByteArray(long address);
     final native byte[] getZeroTerminatedByteArray(long address, long maxlen);
 
-    final native ByteBuffer newDirectByteBuffer(long address, long capacity);
+    final native ByteBuffer newDirectByteBuffer(long address, int capacity);
     final native long getDirectBufferAddress(Buffer buffer);
 }

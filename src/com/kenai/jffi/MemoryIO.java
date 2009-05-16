@@ -148,7 +148,7 @@ public abstract class MemoryIO {
         return foreign.memchr(address, value, maxlen);
     }
 
-    public final java.nio.ByteBuffer newDirectByteBuffer(long address, long capacity) {
+    public final java.nio.ByteBuffer newDirectByteBuffer(long address, int capacity) {
         return foreign.newDirectByteBuffer(address, capacity);
     }
 
