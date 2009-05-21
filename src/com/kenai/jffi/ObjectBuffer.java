@@ -30,6 +30,7 @@ final class ObjectBuffer {
 
     static final int ARRAY = 0x10 << TYPE_SHIFT;
     static final int BUFFER = 0x20 << TYPE_SHIFT;
+    static final int JNI = 0x40 << TYPE_SHIFT;
     
     static final int BYTE = 0x1 << TYPE_SHIFT;
     static final int SHORT = 0x2 << TYPE_SHIFT;
@@ -37,6 +38,13 @@ final class ObjectBuffer {
     static final int LONG = 0x4 << TYPE_SHIFT;
     static final int FLOAT = 0x5 << TYPE_SHIFT;
     static final int DOUBLE = 0x6 << TYPE_SHIFT;
+
+    /* NOTE: The JNI types can overlap the primitive type, since they are mutually exclusive */
+    /** The JNIEnv address */
+    public static final int JNIENV = 0x1 << TYPE_SHIFT;
+
+    /** The jobject handle */
+    public static final int JNIOBJECT = 0x2 << TYPE_SHIFT;
 
     /** The objects stored in this buffer */
     private Object[] objects = new Object[1];
@@ -116,6 +124,10 @@ final class ObjectBuffer {
      */
     private static final int makeBufferFlags(int index) {
         return ((index << INDEX_SHIFT) & INDEX_MASK) | BUFFER;
+    }
+
+    private static final int makeJNIFlags(int index, int type) {
+        return ((index << INDEX_SHIFT) & INDEX_MASK) | JNI | type;
     }
 
     /**
@@ -199,6 +211,16 @@ final class ObjectBuffer {
     public void putDirectBuffer(int index, java.nio.Buffer obj, int offset, int length) {
         putObject(obj, offset, length, makeBufferFlags(index));
     }
+
+    /**
+     * Put the address of the current JNIEnv into this parameter position
+     *
+     * @param index The index of the parameter.
+     */
+    public void putJNI(int index, int type) {
+        putObject(null, 0, 0, makeJNIFlags(index, type));
+    }
+
     private void putObject(Object array, int offset, int length, int flags) {
         ensureSpace();
         objects[objectIndex++] = array;

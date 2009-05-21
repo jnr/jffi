@@ -147,6 +147,11 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
         ++paramIndex;
     }
 
+    public final void putJNIEnvironment() {
+        paramOffset += encoder.putAddress(buffer, paramOffset, 0L);
+        getObjectBuffer().putJNI(paramIndex++, ObjectBuffer.JNIENV);
+    }
+
     private static final Encoder getEncoder() {
         if (Platform.getPlatform().getCPU() == Platform.CPU.I386) {
             return Foreign.getInstance().isRawParameterPackingEnabled()

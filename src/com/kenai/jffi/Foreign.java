@@ -283,6 +283,17 @@ final class Foreign {
      */
     final native void invokeArrayReturnStruct(long function, byte[] paramBuffer, byte[] returnBuffer, int offset);
 
+    /**
+     * Invokes a function that returns a java object.
+     *
+     * This is only useful when calling JNI functions directly.
+     *
+     * @param function The address of the function context structure from {@link #newFunction}.
+     * @param buffer A byte array containing the aguments to the function.
+     */
+    final native Object invokeArrayWithObjectsReturnObject(long function, byte[] paramBuffer,
+            int objectCount, int[] objectInfo, Object[] objects);
+
     /* ---------------------------------------------------------------------- */
     final native int invokeArrayWithObjectsInt32(long function, byte[] buffer, int objectCount, int[] objectInfo, Object[] objects);
     final native long invokeArrayWithObjectsInt64(long function, byte[] buffer, int objectCount, int[] objectInfo, Object[] objects);

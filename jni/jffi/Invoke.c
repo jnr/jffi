@@ -231,6 +231,22 @@ invokeArrayWithObjects_(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer,
                 }
                 ptr = ((char *) ptr + offset);
                 break;
+
+            case com_kenai_jffi_ObjectBuffer_JNI:
+                switch (type & com_kenai_jffi_ObjectBuffer_TYPE_MASK) {
+                    case com_kenai_jffi_ObjectBuffer_JNIENV:
+                        ptr = env;
+                        break;
+                    case com_kenai_jffi_ObjectBuffer_JNIOBJECT:
+                        ptr = (void *) object;
+                        break;
+                    default:
+                        throwException(env, IllegalArgument, "Unsupported object type: %#x",
+                            type & com_kenai_jffi_ObjectBuffer_TYPE_MASK);
+                        goto cleanup;
+                }
+                
+                break;
             default:
                 throwException(env, IllegalArgument, "Unsupported object type: %#x", 
                         type & com_kenai_jffi_ObjectBuffer_TYPE_MASK);

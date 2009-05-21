@@ -215,6 +215,12 @@ public abstract class Invoker {
         foreign.invokeArrayReturnStruct(function.getContextAddress(), buffer.array(), returnBuffer, offset);
     }
 
+    public final Object invokeObject(Function function, HeapInvocationBuffer buffer) {
+        ObjectBuffer objectBuffer = buffer.objectBuffer();
+        return foreign.invokeArrayWithObjectsReturnObject(function.getContextAddress(),
+                buffer.array(), objectBuffer.objectCount(), objectBuffer.info(), objectBuffer.objects());
+    }
+
     /**
      * Invokes a function, with the parameters loaded into native memory buffers,
      * and the function result is stored in a native memory buffer.
