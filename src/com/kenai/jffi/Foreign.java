@@ -357,4 +357,16 @@ final class Foreign {
 
     final native ByteBuffer newDirectByteBuffer(long address, int capacity);
     final native long getDirectBufferAddress(Buffer buffer);
+
+    final native int getJNIVersion();
+    final native long getJavaVM();
+    final native void fatalError(String msg);
+    final native Class defineClass(String name, Object loader, byte[] buf, int off, int len);
+    final native Class defineClass(String name, Object loader, ByteBuffer buf);
+    final native Object allocObject(Class clazz);
+
+    final native int registerNatives(Class clazz, long methods,  int methodCount);
+    final native int unregisterNatives(Class clazz);
+    
+    
 }
