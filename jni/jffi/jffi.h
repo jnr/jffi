@@ -87,20 +87,6 @@ jboolean loadClass(JNIEnv* env, const char *name, jclass *classp)
     *classp = (jclass)(*env)->NewGlobalRef(env, tmp);
     return JNI_TRUE;
 }
-static inline jint
-getInt(void* address) 
-{
-    jint tmp;
-    memcpy(&tmp, address, sizeof(tmp));
-    return tmp;
-}
-static inline jlong
-getLong(void* address) 
-{
-    jlong tmp;
-    memcpy(&tmp, address, sizeof(tmp));
-    return tmp;
-}
 
 typedef union FFIValue {
     
