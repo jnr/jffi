@@ -31,7 +31,7 @@
 #define ARRAY_NULTERMINATE com_kenai_jffi_ObjectBuffer_ZERO_TERMINATE
 #define ARRAY_IN com_kenai_jffi_ObjectBuffer_IN
 #define ARRAY_OUT com_kenai_jffi_ObjectBuffer_OUT
-#define ARRAY_PINNED com_kenai_jffi_ObjectBuffer_OUT
+#define ARRAY_PINNED com_kenai_jffi_ObjectBuffer_PINNED
 #define ARGPRIM_MASK com_kenai_jffi_ObjectBuffer_PRIM_MASK
 #define ARGTYPE_MASK com_kenai_jffi_ObjectBuffer_TYPE_MASK
 #define ARGTYPE_SHIFT com_kenai_jffi_ObjectBuffer_TYPE_SHIFT
@@ -80,9 +80,13 @@ jffi_getArray(JNIEnv* env, jobject buf, jsize offset, jsize length, int paramTyp
     if (buf == NULL) {
         return NULL;
     }
+
+#ifdef notyet
     if ((paramType & ARRAY_PINNED) != 0) {
         return jffi_getArrayCritical(env, buf, offset, length, paramType, array);
     }
+#endif
+    
     switch (paramType & ARGPRIM_MASK) {
     case com_kenai_jffi_ObjectBuffer_BYTE:
         ARRAY(Byte, jbyte, paramType, buf, offset, length, array);
