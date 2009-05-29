@@ -1,5 +1,5 @@
 # -*- makefile -*-
-BUILD_OS = $(shell uname -s | tr '[:upper:]' '[:lower:]')
+BUILD_OS = $(strip $(shell uname -s | tr '[:upper:]' '[:lower:]'))
 OS = $(BUILD_OS)
 ifeq ($(OS),sunos)
   OS = solaris
@@ -41,7 +41,7 @@ JFLAGS = -fno-omit-frame-pointer -fno-strict-aliasing -DNDEBUG
 OFLAGS = -O2 $(JFLAGS)
 
 # MacOS headers aren't completely warning free, so turn them off
-ifneq (($OS),darwin)
+ifneq ($(OS),darwin)
   WFLAGS = -W -Werror -Wall -Wno-unused -Wno-parentheses -Wundef
 endif
 PICFLAGS = -fPIC
