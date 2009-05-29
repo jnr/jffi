@@ -83,7 +83,7 @@ public class StructTest {
         
         Address sym = UnitHelper.findSymbol("struct_return_s8s32");
 
-        Function f = new Function(sym.address, s8s32, new Type[0]);
+        Function f = new Function(sym.address, s8s32/*, new Type[0]*/);
 
         byte[] returnBuffer = Invoker.getInstance().invokeStruct(f, new HeapInvocationBuffer(f));
         ByteBuffer buf = ByteBuffer.wrap(returnBuffer).order(ByteOrder.nativeOrder());
@@ -97,7 +97,7 @@ public class StructTest {
 
         Address sym = UnitHelper.findSymbol("struct_return_s8s32");
 
-        Function f = new Function(sym.address, s8s32, new Type[0]);
+        Function f = new Function(sym.address, s8s32/*, new Type[0]*/);
 
         byte[] returnBuffer = new byte[s8s32.size()];
         Invoker.getInstance().invokeStruct(f, new HeapInvocationBuffer(f), returnBuffer, 0);
@@ -229,7 +229,7 @@ public class StructTest {
         Address sym = UnitHelper.findSymbol("struct_s8s32_s64_ret_s64");
         
         Struct s8s32 = new Struct(new Type[] { Type.SINT8, Type.SINT32 });
-        Function function = new Function(sym.address, Type.SINT64, new Type[] { s8s32, Type.SINT64 });
+        Function function = new Function(sym.address, Type.SINT64, s8s32, Type.SINT64);
 
         
         long struct = MemoryIO.getInstance().allocateMemory(s8s32.size(), true);
@@ -251,7 +251,7 @@ public class StructTest {
         Address sym = UnitHelper.findSymbol("struct_s8s32_set");
         
         Struct s8s32 = new Struct(Type.SINT8, Type.SINT32);
-        Function function = new Function(sym.address, s8s32, new Type[] { Type.SINT8, Type.SINT32 });
+        Function function = new Function(sym.address, s8s32, Type.SINT8, Type.SINT32);
         
         HeapInvocationBuffer paramBuffer = new HeapInvocationBuffer(function);
         paramBuffer.putByte((byte) 0x12);
