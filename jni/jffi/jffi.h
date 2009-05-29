@@ -33,6 +33,14 @@
 #ifndef roundup
 #  define roundup(x, y)   ((((x)+((y)-1))/(y))*(y))
 #endif
+#ifdef __GNUC__
+#  define likely(x) __builtin_expect((x), 1)
+#  define unlikely(x) __builtin_expect((x), 0)
+#else 
+#  define likely(x) (x)
+#  define unlikely(x) (x)
+#endif
+
 typedef struct StackAllocator {
     size_t used;
     char data[256];
@@ -43,7 +51,7 @@ typedef struct StackAllocator {
 static inline void*
 allocStack(StackAllocator* alloc, size_t size) 
 {
-    if ((alloc->used + size + 7) < sizeof(alloc->data)) {
+    if (likely((alloc->used + size + 7) < sizeof(alloc->data))) {
         uintptr_t data = roundup((uintptr_t) &alloc->data[alloc->used], 8);
         alloc->used = (data + size) - (uintptr_t) &alloc->data[0];
         return (void *) data;
@@ -125,7 +133,7 @@ static inline ThreadData*
 thread_data_get()
 {
     ThreadData* td = pthread_getspecific(jffi_threadDataKey);
-    return td != NULL ? td : jffi_thread_data_init();
+    return likely(td != NULL) ? td : jffi_thread_data_init();
 }
 
 #if defined(__i386__)
