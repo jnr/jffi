@@ -38,11 +38,7 @@ typedef struct StackAllocator {
     char data[256];
 } StackAllocator;
 
-static inline void 
-initStackAllocator(StackAllocator* alloc) 
-{
-    alloc->used = 0;
-}
+#define initStackAllocator(alloc) ((alloc)->used = 0)
 
 static inline void*
 allocStack(StackAllocator* alloc, size_t size) 
