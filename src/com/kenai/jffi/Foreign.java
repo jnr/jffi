@@ -36,6 +36,10 @@ final class Foreign {
         return SingletonHolder.INSTANCE;
     }
     private Foreign() {}
+    public final static int VERSION_MAJOR = 0;
+    public final static int VERSION_MINOR = 5;
+    public final static int VERSION_MICRO = 0;
+
     public final static int TYPE_VOID = 0;
     public final static int TYPE_FLOAT = 2;
     public final static int TYPE_DOUBLE = 3;
@@ -71,6 +75,13 @@ final class Foreign {
 
     /** All symbols in the library are made available to other libraries */
     public static final int RTLD_GLOBAL = 0x00008;
+
+    /**
+     * Gets the native stub library version.
+     *
+     * @return The version in the form of (VERSION_MAJOR << 16 | VERSION_MINOR << 8 | VERSION_MICRO)
+     */
+    final native int getVersion();
 
     /**
      * Opens a dynamic library.

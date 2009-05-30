@@ -2,6 +2,7 @@
 #include <pthread.h>
 #include <jni.h>
 #include "Exception.h"
+#include "com_kenai_jffi_Foreign.h"
 #include "jffi.h"
 
 pthread_key_t jffi_threadDataKey;
@@ -26,6 +27,14 @@ static void
 thread_data_free(void *ptr)
 {
     free(ptr);
+}
+
+JNIEXPORT jint JNICALL
+Java_com_kenai_jffi_Foreign_getVersion(JNIEnv* env, jobject self)
+{
+    return (com_kenai_jffi_Foreign_VERSION_MAJOR << 16)
+        | (com_kenai_jffi_Foreign_VERSION_MINOR << 8)
+        | (com_kenai_jffi_Foreign_VERSION_MICRO);
 }
 
 JNIEXPORT jint JNICALL
