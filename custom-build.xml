@@ -131,8 +131,8 @@
             <zipfileset src="${dist.dir}/${platform}.jar"/>
             <zipfileset src="archive/i386-Linux.jar"/>
             <zipfileset src="archive/Darwin.jar"/>
-            <zipfileset src="archive/x86-SunOS.jar"/>
-            <zipfileset src="archive/amd64-SunOS.jar"/>
+            <zipfileset src="archive/i386-SunOS.jar"/>
+            <zipfileset src="archive/x86_64-SunOS.jar"/>
             <zipfileset src="archive/sparc-SunOS.jar"/>
             <zipfileset src="archive/sparcv9-SunOS.jar"/>
             <zipfileset src="archive/ppc-AIX.jar"/>
