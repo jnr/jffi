@@ -46,11 +46,17 @@ public abstract class Platform {
 
         UNKNOWN;
     }
+    /**
+     * The common names of cpu architectures.
+     *
+     * <b>Note</b> The names of the enum values are used in other parts of the
+     * code to determine where to find the native stub library.  Do not rename.
+     */
     public enum CPU {
         I386,
         X86_64,
-        POWERPC,
-        POWERPC64,
+        PPC,
+        PPC64,
         SPARC,
         SPARCV9,
         UNKNOWN;
@@ -99,9 +105,9 @@ public abstract class Platform {
         } else if ("x86_64".equals(archString) || "amd64".equals(archString)) {
             return CPU.X86_64;
         } else if ("ppc".equals(archString) || "powerpc".equals(archString)) {
-            return CPU.POWERPC;
+            return CPU.PPC;
         } else if ("ppc64".equals(archString)) {
-            return CPU.POWERPC64;
+            return CPU.PPC64;
         } else if ("sparc".equals(archString)) {
             return CPU.SPARC;
         } else if ("sparcv9".equals(archString)) {
@@ -118,12 +124,12 @@ public abstract class Platform {
         if (dataModel != 32 && dataModel != 64) {
             switch (cpu) {
                 case I386:
-                case POWERPC:
+                case PPC:
                 case SPARC:
                     dataModel = 32;
                     break;
                 case X86_64:
-                case POWERPC64:
+                case PPC64:
                 case SPARCV9:
                     dataModel = 64;
                     break;
@@ -215,7 +221,7 @@ public abstract class Platform {
      */
     public String getName() {
         String osName = System.getProperty("os.name").split(" ")[0];
-        return System.getProperty("os.arch") + "-" + osName;
+        return getCPU().name().toLowerCase() + "-" + osName;
     }
 
     /**
@@ -295,16 +301,16 @@ public abstract class Platform {
      * @return <tt>true</tt> if the platform is supported, else false.
      */
     public boolean isSupported() {
-        try {
-            //
-            // Call a function in the stub library - this will throw an
-            // exception if there is no stub lib for this platform.
-            //
-            Foreign.getInstance().isRawParameterPackingEnabled();
+        //
+        // Call a function in the stub library - this will throw an
+        // exception if there is no stub lib for this platform.
+        //
+        int version = Foreign.getInstance().getVersion();
+        if ((version & 0xffff00) == (Foreign.VERSION_MAJOR << 16 | Foreign.VERSION_MINOR << 8)) {
             return true;
-        } catch (Throwable t) {
-            return false;
         }
+
+        throw new UnsatisfiedLinkError("Incorrect native library version");
     }
 
     private static final class Default extends Platform {

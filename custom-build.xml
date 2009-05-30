@@ -9,12 +9,41 @@
         <property name="src.native.dir" location="jni"/>
         <property name="complete.jar" value="${dist.dir}/jffi-complete.jar"/>
         <mkdir dir="${build.native.dir}"/>
+
+        <!-- normalize the various os.arch naming conventions -->
+        <condition property="platform.cpu" value="i386">
+            <or>
+                <os arch="i386"/>
+                <os arch="x86"/>
+            </or>
+        </condition>
+        <condition property="platform.cpu" value="x86_64">
+            <or>
+                <os arch="amd64"/>
+                <os arch="x86_64"/>
+            </or>
+        </condition>
+        <condition property="platform.cpu" value="ppc">
+            <or>
+                <os arch="ppc"/>
+                <os arch="powerpc"/>
+            </or>
+        </condition>
+        
+        <!-- default to os.arch for the cpu -->
+        <condition property="platform.cpu" value="${os.arch}">
+            <not><isset property="platform.cpu"/></not>
+        </condition>
+        <condition property="platform.os" value="${os.name}">
+            <not><isset property="platform.os"/></not>
+        </condition>
         <condition property="platform" value="Darwin">
             <os family="Mac"/>
         </condition>
-        <condition property="platform" value="${os.arch}-${os.name}">
-          <not><isset property="platform"/></not>
+        <condition property="platform" value="${platform.cpu}-${platform.os}">
+            <not><isset property="platform"/></not>
         </condition>
+        
         <condition property="native.jar" value="${build.dir}/native.jar">
           <not><isset property="native.jar"/></not>
         </condition>
