@@ -12,63 +12,69 @@
 
 typedef unsigned int u32;
 
-#if BYTE_ORDER == BIG_ENDIAN
+#ifndef BYTE_ORDER
+# error "BYTE_ORDER not defined"
+#endif
+
+#if BYTE_ORDER == LITTLE_ENDIAN
+#  define ARGPTR(argp, type) (argp)
+#elif BYTE_ORDER == BIG_ENDIAN
 #  define ARGPTR(argp, type) (((caddr_t) (argp)) + sizeof(*argp) - (type)->size)
+#else
+#  error "Unsupported BYTE_ORDER"
 #endif
 
 #if defined(BYPASS_FFI)
-#  define invokeVrI(ctx, retval) do { \
+# define invokeVrI(ctx, retval) do { \
         (retval)->i = ((jint (*)()) (ctx)->function)(); \
     } while (0)
 
-#else
-#  define invokeVrI(ctx, retval) do { \
-        FFIValue arg0; \
-        void* ffiValues[] = { &arg0 }; \
-        ffi_call(&(ctx)->cif, FFI_FN((ctx)->function), (retval), ffiValues); \
-    } while (0)
-#endif
-
-
-
-#if defined(BYPASS_FFI)
 # define invokeIrI(ctx, retval, arg1) do { \
         (retval)->i = ((jint (*)(jint)) (ctx)->function)(arg1); \
     } while (0)
 
-#elif defined(USE_RAW) && defined(__i386__)
-# define invokeIrI(ctx, retval, arg1) do { \
-        ffi_raw_call(&(ctx)->cif, FFI_FN((ctx)->function), (retval), (ffi_raw *) &arg1); \
-    } while (0)
-
-#elif BYTE_ORDER == LITTLE_ENDIAN
-# define invokeIrI(ctx, retval, arg1) do { \
-        void* ffiValues[] = { &arg1 }; \
-        ffi_call(&(ctx)->cif, FFI_FN((ctx)->function), (retval), ffiValues); \
-    } while (0)
-
-#else
-# define invokeIrI(ctx, retval, arg1) do { \
-        void* ffiValues[] = {  ARGPTR(&(arg1), (ctx)->cif.arg_types[0]) }; \
-        ffi_call(&(ctx)->cif, FFI_FN((ctx)->function), (retval), ffiValues); \
-    } while (0)
-#endif
-
-#if defined(BYPASS_FFI)
 # define invokeIIrI(ctx, retval, arg1, arg2) do { \
         (retval)->i = ((jint (*)(jint, jint)) (ctx)->function)((arg1), (arg2)); \
     } while (0)
 
+# define invokeIIIrI(ctx, retval, arg1, arg2, arg3) do { \
+        (retval)->i = ((jint (*)(jint, jint, jint)) (ctx)->function)(arg1, arg2, arg3); \
+    } while (0)
+
 #elif defined(USE_RAW) && defined(__i386__)
+
+# define invokeVrI(ctx, retval) do { \
+        FFIValue arg0; \
+        void* ffiValues[] = { &arg0 }; \
+        ffi_call(&(ctx)->cif, FFI_FN((ctx)->function), (retval), ffiValues); \
+    } while (0)
+
+# define invokeIrI(ctx, retval, arg1) do { \
+        ffi_raw_call(&(ctx)->cif, FFI_FN((ctx)->function), (retval), (ffi_raw *) &arg1); \
+    } while (0)
+
 # define invokeIIrI(ctx, retval, arg1, arg2) do { \
         ffi_raw_call(&(ctx)->cif, FFI_FN((ctx)->function), (retval), (ffi_raw *) &arg1); \
     } while (0)
-#elif BYTE_ORDER == LITTLE_ENDIAN
-# define invokeIIrI(ctx, retval, arg1, arg2) do { \
-        void* ffiValues[] = { &arg1, &arg2 }; \
+
+# define invokeIIIrI(ctx, retval, arg1, arg2, arg3) do { \
+        void* ffiValues[] = { &arg1, &arg2, &arg3 }; \
+        ffi_call(&ctx->cif, FFI_FN(ctx->function), (retval), ffiValues); \
+    } while (0)
+
+#else /* Anything that is BIG endian or non-i386 little endian */
+
+# define invokeVrI(ctx, retval) do { \
+        FFIValue arg0; \
+        void* ffiValues[] = { &arg0 }; \
         ffi_call(&(ctx)->cif, FFI_FN((ctx)->function), (retval), ffiValues); \
     } while (0)
-#else
+
+# define invokeIrI(ctx, retval, arg1) do { \
+        void* ffiValues[] = {  ARGPTR(&(arg1), (ctx)->cif.arg_types[0]) }; \
+        ffi_call(&(ctx)->cif, FFI_FN((ctx)->function), (retval), ffiValues); \
+    } while (0)
+
 # define invokeIIrI(ctx, retval, arg1, arg2) do {\
         void* ffiValues[] = { \
             ARGPTR(&arg1, (ctx)->cif.arg_types[0]), \
@@ -76,23 +82,7 @@ typedef unsigned int u32;
         }; \
         ffi_call(&(ctx)->cif, FFI_FN((ctx)->function), (retval), ffiValues); \
     } while (0)
-#endif
 
-#if defined(BYPASS_FFI)
-# define invokeIIIrI(ctx, retval, arg1, arg2, arg3) do { \
-        (retval)->i = ((jint (*)(jint, jint, jint)) (ctx)->function)(arg1, arg2, arg3); \
-    } while (0)
-
-#elif defined(USE_RAW) && defined(__i386__)
-# define invokeIIIrI(ctx, retval, arg1, arg2, arg3) do { \
-        ffi_raw_call(&(ctx)->cif, FFI_FN((ctx)->function), (retval), (ffi_raw *) &arg1); \
-    } while (0)
-#elif BYTE_ORDER == LITTLE_ENDIAN
-# define invokeIIIrI(ctx, retval, arg1, arg2, arg3) do { \
-        void* ffiValues[] = { &arg1, &arg2, &arg3 }; \
-        ffi_call(&ctx->cif, FFI_FN(ctx->function), (retval), ffiValues); \
-    } while (0)
-#else
 # define invokeIIIrI(ctx, retval, arg1, arg2, arg3) do { \
         void* ffiValues[] = { \
             ARGPTR(&arg1, (ctx)->cif.arg_types[0]), \
@@ -102,6 +92,7 @@ typedef unsigned int u32;
         ffi_call(&(ctx)->cif, FFI_FN((ctx)->function), (retval), ffiValues); \
     } while (0)
 #endif
+
 
 /*
  * Class:     com_kenai_jffi_Foreign
