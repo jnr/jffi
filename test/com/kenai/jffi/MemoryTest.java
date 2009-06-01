@@ -54,4 +54,16 @@ public class MemoryTest {
         byte[] string = MemoryIO.getInstance().getZeroTerminatedByteArray(memory, 4);
         assertArrayEquals(MAGIC, string);
     }
+
+    @Test public void putZeroTerminatedByteArray() {
+        final byte[] DIRTY = { 'd', 'i', 'r', 't', 'y' };
+        final byte[] MAGIC = { 't', 'e', 's', 't' };
+        long memory = MemoryIO.getInstance().allocateMemory(MAGIC.length + 1, true);
+        MemoryIO.getInstance().putByteArray(memory, DIRTY, 0, DIRTY.length);
+
+        MemoryIO.getInstance().putZeroTerminatedByteArray(memory, MAGIC, 0, MAGIC.length);
+        assertArrayEquals("String not written to native memory", MAGIC,
+                MemoryIO.getInstance().getZeroTerminatedByteArray(memory, 4));
+        assertEquals("String not NUL terminated", (byte)0, MemoryIO.getInstance().getByte(memory + 4));
+    }
 }

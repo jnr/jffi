@@ -363,8 +363,43 @@ final class Foreign {
     final native void putDoubleArray(long address, double[] data, int offset, int length);
     final native long memchr(long address, int value, long len);
     final native long strlen(long address);
+
+    /**
+     * Copies a zero (nul) terminated by array from native memory.
+     *
+     * This method will search for a zero byte, starting from <tt>address</tt>
+     * and stop once a zero byte is encountered.  The returned byte array does not
+     * contain the terminating zero byte.
+     *
+     * @param address The address to copy the array from
+     * @return A byte array containing the bytes copied from native memory.
+     */
     final native byte[] getZeroTerminatedByteArray(long address);
+
+    /**
+     * Copies a zero (nul) terminated by array from native memory.
+     *
+     * This method will search for a zero byte, starting from <tt>address</tt>
+     * and stop once a zero byte is encountered.  The returned byte array does not
+     * contain the terminating zero byte.
+     *
+     * @param address The address to copy the array from
+     * @param maxlen The maximum number of bytes to search for the nul terminator
+     * @return A byte array containing the bytes copied from native memory.
+     */
     final native byte[] getZeroTerminatedByteArray(long address, long maxlen);
+
+    /**
+     * Copies a java byte array to native memory and appends a NUL terminating byte.
+     *
+     * <b>Note</b> A total of length + 1 bytes is written to native memory.
+     *
+     * @param address The address to copy to.
+     * @param data The byte array to copy to native memory
+     * @param offset The offset within the byte array to begin copying from
+     * @param length The number of bytes to copy to native memory
+     */
+    final native void putZeroTerminatedByteArray(long address, byte[] data, int offset, int length);
 
     final native ByteBuffer newDirectByteBuffer(long address, int capacity);
     final native long getDirectBufferAddress(Buffer buffer);

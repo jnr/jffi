@@ -166,6 +166,19 @@ Java_com_kenai_jffi_Foreign_getZeroTerminatedByteArray__JJ(JNIEnv* env, jobject 
 
 /*
  * Class:     com_kenai_jffi_Foreign
+ * Method:    putZeroTerminatedByteArray
+ * Signature: (J[BII)V
+ */
+JNIEXPORT void JNICALL
+Java_com_kenai_jffi_Foreign_putZeroTerminatedByteArray(JNIEnv *env, jobject self,
+                                                       jlong address, jbyteArray data, jint offset, jint length)
+{
+    (*env)->GetByteArrayRegion(env, data, offset, length, (jbyte *)j2p(address));
+    *((char *) (uintptr_t) address + length) = '\0';
+}
+
+/*
+ * Class:     com_kenai_jffi_Foreign
  * Method:    allocateMemory
  * Signature: (JZ)J
  */

@@ -141,6 +141,20 @@ public abstract class MemoryIO {
         return foreign.getZeroTerminatedByteArray(address, maxlen);
     }
 
+    /**
+     * Copies a java byte array to native memory and appends a NUL terminating byte.
+     *
+     * <b>Note</b> A total of length + 1 bytes is written to native memory.
+     *
+     * @param address The address to copy to.
+     * @param data The byte array to copy to native memory
+     * @param offset The offset within the byte array to begin copying from
+     * @param length The number of bytes to copy to native memory
+     */
+    public final void putZeroTerminatedByteArray(long address, byte[] data, int offset, int length) {
+        foreign.putZeroTerminatedByteArray(address, data, offset, length);
+    }
+
     public final long indexOf(long address, byte value) {
         return foreign.memchr(address, value, Integer.MAX_VALUE);
     }
