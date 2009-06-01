@@ -188,6 +188,16 @@ final class Foreign {
     final native int invokeVrI(long functionContext);
 
     /**
+     * Invokes a function with no arguments, and returns a 32 bit integer.
+     *
+     * This method does not save the errno value.
+     *
+     * @param function The address of the function context structure from {@link #newFunction}.
+     * @return A 32 bit integer value.
+     */
+    final native int invokeNoErrnoVrI(long functionContext);
+
+    /**
      * Invokes a function with one integer argument, and returns a 32 bit integer.
      *
      * @param function The address of the function context structure from {@link #newFunction}.
@@ -195,6 +205,17 @@ final class Foreign {
      * @return A 32 bit integer value.
      */
     final native int invokeIrI(long functionContext, int arg1);
+
+    /**
+     * Invokes a function with one integer argument, and returns a 32 bit integer.
+     *
+     * This method does not save the errno value.
+     *
+     * @param function The address of the function context structure from {@link #newFunction}.
+     * @param arg1 The 32 bit integer argument.
+     * @return A 32 bit integer value.
+     */
+    final native int invokeNoErrnoIrI(long functionContext, int arg1);
 
     /**
      * Invokes a function with two integer arguments, and returns a 32 bit integer.
@@ -207,6 +228,18 @@ final class Foreign {
     final native int invokeIIrI(long functionContext, int arg1, int arg2);
 
     /**
+     * Invokes a function with two integer arguments, and returns a 32 bit integer.
+     *
+     * This method does not save the errno value.
+     *
+     * @param function The address of the function context structure from {@link #newFunction}.
+     * @param arg1 The first 32 bit integer argument.
+     * @param arg2 The second 32 bit integer argument.
+     * @return A 32 bit integer value.
+     */
+    final native int invokeNoErrnoIIrI(long functionContext, int arg1, int arg2);
+
+    /**
      * Invokes a function with three integer arguments, and returns a 32 bit integer.
      *
      * @param function The address of the function context structure from {@link #newFunction}.
@@ -216,6 +249,19 @@ final class Foreign {
      * @return A 32 bit integer value.
      */
     final native int invokeIIIrI(long functionContext, int arg1, int arg2, int arg3);
+
+    /**
+     * Invokes a function with three integer arguments, and returns a 32 bit integer.
+     *
+     * This method does not save the errno value.
+     *
+     * @param function The address of the function context structure from {@link #newFunction}.
+     * @param arg1 The first 32 bit integer argument.
+     * @param arg2 The second 32 bit integer argument.
+     * @param arg3 The third 32 bit integer argument.
+     * @return A 32 bit integer value.
+     */
+    final native int invokeNoErrnoIIIrI(long functionContext, int arg1, int arg2, int arg3);
     
     /**
      * Invokes a function with no arguments, and returns a 64 bit integer.

@@ -26,19 +26,19 @@ typedef unsigned int u32;
 
 #if defined(BYPASS_FFI)
 # define invokeVrI(ctx, retval) do { \
-        (retval)->i = ((jint (*)()) (ctx)->function)(); \
+        *(int *)(retval) = ((jint (*)()) (ctx)->function)(); \
     } while (0)
 
 # define invokeIrI(ctx, retval, arg1) do { \
-        (retval)->i = ((jint (*)(jint)) (ctx)->function)(arg1); \
+        *(int *)(retval) = ((jint (*)(jint)) (ctx)->function)(arg1); \
     } while (0)
 
 # define invokeIIrI(ctx, retval, arg1, arg2) do { \
-        (retval)->i = ((jint (*)(jint, jint)) (ctx)->function)((arg1), (arg2)); \
+        *(int *)(retval) = ((jint (*)(jint, jint)) (ctx)->function)((arg1), (arg2)); \
     } while (0)
 
 # define invokeIIIrI(ctx, retval, arg1, arg2, arg3) do { \
-        (retval)->i = ((jint (*)(jint, jint, jint)) (ctx)->function)(arg1, arg2, arg3); \
+        *(int *)(retval) = ((jint (*)(jint, jint, jint)) (ctx)->function)(arg1, arg2, arg3); \
     } while (0)
 
 #elif defined(USE_RAW) && defined(__i386__)
@@ -103,22 +103,51 @@ JNIEXPORT jint JNICALL
 Java_com_kenai_jffi_Foreign_invokeVrI(JNIEnv* env, jclass self, jlong ctxAddress)
 {
     Function* ctx = (Function *) j2p(ctxAddress);
-    FFIValue retval;
+    ffi_sarg retval;
     invokeVrI(ctx, &retval);
     set_last_error(errno);
-    return_int(retval);
+
+    return (int) retval;
 }
 
+/*
+ * Class:     com_kenai_jffi_Foreign
+ * Method:    invokeVrI
+ * Signature: (J)I
+ */
+JNIEXPORT jint JNICALL
+Java_com_kenai_jffi_Foreign_invokeNoErrnoVrI(JNIEnv* env, jclass self, jlong ctxAddress)
+{
+    Function* ctx = (Function *) j2p(ctxAddress);
+    ffi_sarg retval;
+    invokeVrI(ctx, &retval);
+
+    return (int) retval;
+}
 
 JNIEXPORT jint JNICALL
 Java_com_kenai_jffi_Foreign_invokeIrI(JNIEnv* env, jclass self, jlong ctxAddress,
         jint arg1)
 {
     Function* ctx = (Function *) j2p(ctxAddress);
-    FFIValue retval;
+    ffi_sarg retval;
+
     invokeIrI(ctx, &retval, arg1);
     set_last_error(errno);
-    return_int(retval);
+
+    return (int) retval;
+}
+
+JNIEXPORT jint JNICALL
+Java_com_kenai_jffi_Foreign_invokeNoErrnoIrI(JNIEnv* env, jclass self, jlong ctxAddress,
+        jint arg1)
+{
+    Function* ctx = (Function *) j2p(ctxAddress);
+    ffi_sarg retval;
+
+    invokeIrI(ctx, &retval, arg1);
+
+    return (int) retval;
 }
 
 JNIEXPORT jint JNICALL
@@ -126,10 +155,24 @@ Java_com_kenai_jffi_Foreign_invokeIIrI(JNIEnv*env, jobject self, jlong ctxAddres
         jint arg1, jint arg2)
 {
     Function* ctx = (Function *) j2p(ctxAddress);
-    FFIValue retval;
+    ffi_sarg retval;
+
     invokeIIrI(ctx, &retval, arg1, arg2);
     set_last_error(errno);
-    return_int(retval);
+
+    return (int) retval;
+}
+
+JNIEXPORT jint JNICALL
+Java_com_kenai_jffi_Foreign_invokeNoErrnoIIrI(JNIEnv*env, jobject self, jlong ctxAddress,
+        jint arg1, jint arg2)
+{
+    Function* ctx = (Function *) j2p(ctxAddress);
+    ffi_sarg retval;
+
+    invokeIIrI(ctx, &retval, arg1, arg2);
+
+    return (int) retval;
 }
 
 JNIEXPORT jint JNICALL
@@ -137,9 +180,23 @@ Java_com_kenai_jffi_Foreign_invokeIIIrI(JNIEnv*env, jobject self, jlong ctxAddre
         jint arg1, jint arg2, jint arg3)
 {
     Function* ctx = (Function *) j2p(ctxAddress);
-    FFIValue retval;
+    ffi_sarg retval;
+
     invokeIIIrI(ctx, &retval, arg1, arg2, arg3);
     set_last_error(errno);
-    return_int(retval);
+
+    return (int) retval;
+}
+
+JNIEXPORT jint JNICALL
+Java_com_kenai_jffi_Foreign_invokeNoErrnoIIIrI(JNIEnv*env, jobject self, jlong ctxAddress,
+        jint arg1, jint arg2, jint arg3)
+{
+    Function* ctx = (Function *) j2p(ctxAddress);
+    ffi_sarg retval;
+
+    invokeIIIrI(ctx, &retval, arg1, arg2, arg3);
+
+    return (int) retval;
 }
 

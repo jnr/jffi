@@ -43,6 +43,18 @@ public abstract class Invoker {
     }
 
     /**
+     * Invokes a function with no arguments, and returns a 32 bit integer.
+     *
+     * This method does not save the errno value.
+     *
+     * @param function The <tt>Function</tt> to invoke.
+     * @return A 32 bit integer value.
+     */
+    public final int invokeNoErrnoVrI(Function function) {
+        return foreign.invokeNoErrnoVrI(function.getContextAddress());
+    }
+
+    /**
      * Invokes a function with one integer argument, and returns a 32 bit integer.
      *
      * @param function The <tt>Function</tt> to invoke.
@@ -51,6 +63,19 @@ public abstract class Invoker {
      */
     public final int invokeIrI(Function function, int arg1) {
         return foreign.invokeIrI(function.getContextAddress(), arg1);
+    }
+
+    /**
+     * Invokes a function with one integer argument, and returns a 32 bit integer.
+     *
+     * This method does not save the errno value.
+     *
+     * @param function The <tt>Function</tt> to invoke.
+     * @param arg1 A 32 bit integer argument.
+     * @return A 32 bit integer value.
+     */
+    public final int invokeNoErrnoIrI(Function function, int arg1) {
+        return foreign.invokeNoErrnoIrI(function.getContextAddress(), arg1);
     }
 
     /**
@@ -66,6 +91,20 @@ public abstract class Invoker {
     }
 
     /**
+     * Invokes a function with two integer arguments, and returns a 32 bit integer.
+     *
+     * This method does not save the errno value.
+     *
+     * @param function The <tt>Function</tt> to invoke.
+     * @param arg1 The first 32 bit integer argument.
+     * @param arg2 The second 32 bit integer argument.
+     * @return A 32 bit integer value.
+     */
+    public final int invokeNoErrnoIIrI(Function function, int arg1, int arg2) {
+        return foreign.invokeNoErrnoIIrI(function.getContextAddress(), arg1, arg2);
+    }
+
+    /**
      * Invokes a function with three integer arguments, and returns a 32 bit integer.
      *
      * @param function The <tt>Function</tt> to invoke.
@@ -76,6 +115,21 @@ public abstract class Invoker {
      */
     public final int invokeIIIrI(Function function, int arg1, int arg2, int arg3) {
         return foreign.invokeIIIrI(function.getContextAddress(), arg1, arg2, arg3);
+    }
+
+    /**
+     * Invokes a function with three integer arguments, and returns a 32 bit integer.
+     *
+     * This method does not save the errno value.
+     * 
+     * @param function The <tt>Function</tt> to invoke.
+     * @param arg1 The first 32 bit integer argument.
+     * @param arg2 The second 32 bit integer argument.
+     * @param arg3 The third 32 bit integer argument.
+     * @return A 32 bit integer value.
+     */
+    public final int invokeNoErrnoIIIrI(Function function, int arg1, int arg2, int arg3) {
+        return foreign.invokeNoErrnoIIIrI(function.getContextAddress(), arg1, arg2, arg3);
     }
 
     /**
