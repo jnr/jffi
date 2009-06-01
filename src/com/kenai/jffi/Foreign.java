@@ -387,7 +387,7 @@ final class Foreign {
      * @param maxlen The maximum number of bytes to search for the nul terminator
      * @return A byte array containing the bytes copied from native memory.
      */
-    final native byte[] getZeroTerminatedByteArray(long address, long maxlen);
+    final native byte[] getZeroTerminatedByteArray(long address, int maxlen);
 
     /**
      * Copies a java byte array to native memory and appends a NUL terminating byte.

@@ -137,8 +137,13 @@ public abstract class MemoryIO {
      * @return The byte array containing a copy of the native data.  Any zero
      * byte is stripped from the end.
      */
-    public final byte[] getZeroTerminatedByteArray(long address, long maxlen) {
+    public final byte[] getZeroTerminatedByteArray(long address, int maxlen) {
         return foreign.getZeroTerminatedByteArray(address, maxlen);
+    }
+
+    @Deprecated
+    public final byte[] getZeroTerminatedByteArray(long address, long maxlen) {
+        return foreign.getZeroTerminatedByteArray(address, (int) maxlen);
     }
 
     /**

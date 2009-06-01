@@ -153,10 +153,10 @@ Java_com_kenai_jffi_Foreign_getZeroTerminatedByteArray__J(JNIEnv* env, jobject s
  * Signature: (JJ)[B
  */
 JNIEXPORT jbyteArray JNICALL
-Java_com_kenai_jffi_Foreign_getZeroTerminatedByteArray__JJ(JNIEnv* env, jobject self, jlong address, jlong maxlen)
+Java_com_kenai_jffi_Foreign_getZeroTerminatedByteArray__JI(JNIEnv* env, jobject self, jlong address, jint maxlen)
 {
     const char *str = (const char*) j2p(address), *zp;
-    jsize len = ((zp = memchr(str, 0, (size_t) maxlen)) != NULL) ? zp - str : maxlen;
+    jsize len = ((zp = memchr(str, 0, maxlen)) != NULL) ? zp - str : maxlen;
     
     jbyteArray bytes = (*env)->NewByteArray(env, len);
     (*env)->SetByteArrayRegion(env, bytes, 0, len, (jbyte *) str);
@@ -171,7 +171,7 @@ Java_com_kenai_jffi_Foreign_getZeroTerminatedByteArray__JJ(JNIEnv* env, jobject 
  */
 JNIEXPORT void JNICALL
 Java_com_kenai_jffi_Foreign_putZeroTerminatedByteArray(JNIEnv *env, jobject self,
-                                                       jlong address, jbyteArray data, jint offset, jint length)
+   jlong address, jbyteArray data, jint offset, jint length)
 {
     (*env)->GetByteArrayRegion(env, data, offset, length, (jbyte *)j2p(address));
     *((char *) (uintptr_t) address + length) = '\0';
