@@ -316,6 +316,10 @@ final class Foreign {
     final native int invokeArrayO1Int32(long function, byte[] buffer, Object o1, int o1Info, int o1off, int o1len);
     final native int invokeArrayO2Int32(long function, byte[] buffer, Object o1, int o1Info, int o1off, int o1len,
             Object o2, int o2info, int o2off, int o2len);
+    
+    final native long invokeArrayO1Int64(long function, byte[] buffer, Object o1, int o1Info, int o1off, int o1len);
+    final native long invokeArrayO2Int64(long function, byte[] buffer, Object o1, int o1Info, int o1off, int o1len,
+            Object o2, int o2info, int o2off, int o2len);
 
     /* ---------------------------------------------------------------------- */
 

@@ -364,6 +364,43 @@ Java_com_kenai_jffi_Foreign_invokeArrayWithObjectsInt64(JNIEnv* env, jobject sel
 
 /*
  * Class:     com_kenai_jffi_Foreign
+ * Method:    invokeArrayO1Int64
+ * Signature: (J[BLjava/lang/Object;III)J
+ */
+JNIEXPORT jlong JNICALL
+Java_com_kenai_jffi_Foreign_invokeArrayO1Int64(JNIEnv* env, jobject self, jlong ctxAddress,
+        jbyteArray paramBuffer, jobject o1, jint o1info, jint o1off, jint o1len)
+{
+    FFIValue retval;
+    jint info[] = { o1info, o1off, o1len };
+    jobject objects[] = { o1 };
+
+    invokeArrayWithObjects_(env, ctxAddress, paramBuffer, 1, info, objects, &retval);
+
+    return retval.j;
+}
+
+/*
+ * Class:     com_kenai_jffi_Foreign
+ * Method:    invokeArrayO2Int64
+ * Signature: (J[BLjava/lang/Object;IIILjava/lang/Object;III)J
+ */
+JNIEXPORT jlong JNICALL
+Java_com_kenai_jffi_Foreign_invokeArrayO2Int64(JNIEnv* env, jobject self, jlong ctxAddress,
+        jbyteArray paramBuffer, jobject o1, jint o1info, jint o1off, jint o1len,
+        jobject o2, jint o2info, jint o2off, jint o2len)
+{
+    FFIValue retval;
+    jint info[] = { o1info, o1off, o1len, o2info, o2off, o2len };
+    jobject objects[] = { o1, o2 };
+
+    invokeArrayWithObjects_(env, ctxAddress, paramBuffer, 2, info, objects, &retval);
+
+    return retval.j;
+}
+
+/*
+ * Class:     com_kenai_jffi_Foreign
  * Method:    invokeArrayWithObjectsFloat
  * Signature: (J[BI[I[Ljava/lang/Object;)F
  */
