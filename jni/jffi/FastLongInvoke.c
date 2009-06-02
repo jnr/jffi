@@ -32,7 +32,7 @@ Java_com_kenai_jffi_Foreign_invokeVrL(JNIEnv* env, jobject self, jlong ctxAddres
     FFIValue retval, arg0;
     void* ffiValues[] = { &arg0 };
     ffi_call(cif, FFI_FN(ctx->function), &retval, ffiValues);
-    set_last_error(errno);
+    SAVE_ERRNO(ctx);
 
     return RETVAL(retval, cif->rtype);
 }
@@ -52,7 +52,7 @@ Java_com_kenai_jffi_Foreign_invokeLrL(JNIEnv* env, jobject self, jlong ctxAddres
         ARGPTR(&arg1, cif->arg_types[0])
     };
     ffi_call(cif, FFI_FN(ctx->function), &retval, ffiValues);
-    set_last_error(errno);
+    SAVE_ERRNO(ctx);
 
     return RETVAL(retval, cif->rtype);
 }
@@ -73,7 +73,7 @@ Java_com_kenai_jffi_Foreign_invokeLLrL(JNIEnv* env, jobject self, jlong ctxAddre
         ARGPTR(&arg2, cif->arg_types[1])
     };
     ffi_call(cif, FFI_FN(ctx->function), &retval, ffiValues);
-    set_last_error(errno);
+    SAVE_ERRNO(ctx);
 
     return RETVAL(retval, cif->rtype);
 }
@@ -96,7 +96,7 @@ Java_com_kenai_jffi_Foreign_invokeLLLrL(JNIEnv* env, jobject self, jlong ctxAddr
         ARGPTR(&arg3, cif->arg_types[2])
     };
     ffi_call(cif, FFI_FN(ctx->function), &retval, ffiValues);
-    set_last_error(errno);
+    SAVE_ERRNO(ctx);
 
     return RETVAL(retval, cif->rtype);
 }

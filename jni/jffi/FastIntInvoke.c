@@ -105,7 +105,7 @@ Java_com_kenai_jffi_Foreign_invokeVrI(JNIEnv* env, jclass self, jlong ctxAddress
     Function* ctx = (Function *) j2p(ctxAddress);
     ffi_sarg retval;
     invokeVrI(ctx, &retval);
-    set_last_error(errno);
+    SAVE_ERRNO(ctx);
 
     return (int) retval;
 }
@@ -133,7 +133,7 @@ Java_com_kenai_jffi_Foreign_invokeIrI(JNIEnv* env, jclass self, jlong ctxAddress
     ffi_sarg retval;
 
     invokeIrI(ctx, &retval, arg1);
-    set_last_error(errno);
+    SAVE_ERRNO(ctx);
 
     return (int) retval;
 }
@@ -158,7 +158,7 @@ Java_com_kenai_jffi_Foreign_invokeIIrI(JNIEnv*env, jobject self, jlong ctxAddres
     ffi_sarg retval;
 
     invokeIIrI(ctx, &retval, arg1, arg2);
-    set_last_error(errno);
+    SAVE_ERRNO(ctx);
 
     return (int) retval;
 }
@@ -183,7 +183,7 @@ Java_com_kenai_jffi_Foreign_invokeIIIrI(JNIEnv*env, jobject self, jlong ctxAddre
     ffi_sarg retval;
 
     invokeIIIrI(ctx, &retval, arg1, arg2, arg3);
-    set_last_error(errno);
+    SAVE_ERRNO(ctx);
 
     return (int) retval;
 }

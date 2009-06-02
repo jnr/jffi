@@ -76,6 +76,24 @@ final class Foreign {
     /** All symbols in the library are made available to other libraries */
     public static final int RTLD_GLOBAL = 0x00008;
 
+    /*
+     * Function flags
+     */
+    /**
+     * Default calling convention
+     */
+    public static final int F_DEFAULT = 0x0;
+
+    /**
+     * Windows STDCALL calling convention
+     */
+    public static final int F_STDCALL = 0x1;
+
+    /**
+     * Do not save errno after each call
+     */
+    public static final int F_NOERRNO = 0x2;
+
     /**
      * Gets the native stub library version.
      *
@@ -122,8 +140,24 @@ final class Foreign {
     final native long allocateMemory(long size, boolean clear);
     final native void freeMemory(long address);
 
-    final native long newFunction(long address, long returnType, long[] paramTypes, int convention);
+    /**
+     * Creates a new native function context.
+     *
+     * @param address The address of the native function to call
+     * @param returnType The return type of the function
+     * @param paramTypes The types of the parameters
+     * @param flags A bitmask of F_DEFAULT, F_STDCALL or F_NOERRNO
+     * @return The native address of a new function context
+     */
+    final native long newFunction(long address, long returnType, long[] paramTypes, int flags);
+
+    /**
+     * Frees a function context created by {@link #newFunction}
+     *
+     * @param handle The native function context to free
+     */
     final native void freeFunction(long handle);
+
     final native boolean isRawParameterPackingEnabled();
     final native int getFunctionRawParameterSize(long handle);
     final native int getLastError();

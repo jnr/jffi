@@ -49,7 +49,7 @@ invokeArray(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer, void* returnB
     }
 
     ffi_raw_call(&ctx->cif, FFI_FN(ctx->function), returnBuffer, (ffi_raw *) tmpBuffer);
-    set_last_error(errno);
+    SAVE_ERRNO(ctx);
 }
 
 #else
@@ -81,7 +81,7 @@ invokeArray(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer, void* returnB
     }
 
     ffi_call(&ctx->cif, FFI_FN(ctx->function), returnBuffer, ffiArgs);
-    set_last_error(errno);
+    SAVE_ERRNO(ctx);
 }
 #endif
 /*
@@ -272,7 +272,7 @@ invokeArrayWithObjects_(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer,
 #else
     ffi_call(&ctx->cif, FFI_FN(ctx->function), retval, ffiArgs);
 #endif
-    set_last_error(errno);
+    SAVE_ERRNO(ctx);
 cleanup:
     /* Release any array backing memory */
     for (i = 0; i < arrayCount; ++i) {

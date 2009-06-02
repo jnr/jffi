@@ -11,6 +11,7 @@
 #include "jffi.h"
 #include "Exception.h"
 #include "Function.h"
+#include "com_kenai_jffi_Foreign.h"
 
 static inline int FFI_ALIGN(int v, int a) {
     return ((((size_t) v) - 1) | (a - 1)) +1;
@@ -23,7 +24,7 @@ static inline int FFI_ALIGN(int v, int a) {
  */
 JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_newFunction(JNIEnv* env, jobject self,
-        jlong function, jlong returnType, jlongArray paramArray, jint convention)
+        jlong function, jlong returnType, jlongArray paramArray, jint flags)
 {
     Function* ctx = NULL;
     jlong* paramTypes;
@@ -63,7 +64,7 @@ Java_com_kenai_jffi_Foreign_newFunction(JNIEnv* env, jobject self,
         rawOffset += FFI_ALIGN(type->size, FFI_SIZEOF_ARG);
     }
 #ifdef _WIN32
-    abi = convention != 0 ? FFI_STDCALL : FFI_DEFAULT_ABI;
+    abi = (flags & com_kenai_jffi_Foreign_F_STDCALL) != 0 ? FFI_STDCALL : FFI_DEFAULT_ABI;
 #else
     abi = FFI_DEFAULT_ABI;
 #endif
@@ -83,6 +84,9 @@ Java_com_kenai_jffi_Foreign_newFunction(JNIEnv* env, jobject self,
     }
     ctx->rawParameterSize = rawOffset;
     ctx->function = j2p(function);
+    /* Save errno unless explicitly told not to do so */
+    ctx->saveErrno = (flags & com_kenai_jffi_Foreign_F_NOERRNO) == 0;
+
     return p2j(ctx);
 cleanup:
     if (ctx != NULL) {

@@ -40,7 +40,7 @@ public final class Function {
 
         final long h = Foreign.getInstance().newFunction(address,
                 returnType.handle(), Type.nativeHandles(paramTypes),
-                convention == CallingConvention.STDCALL ? 1 : 0);
+                convention == CallingConvention.STDCALL ? Foreign.F_STDCALL : Foreign.F_DEFAULT);
         if (h == 0) {
             throw new RuntimeException("Failed to create native function");
         }
