@@ -217,7 +217,7 @@ invokeArrayWithObjects_(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer,
         switch (type & com_kenai_jffi_ObjectBuffer_TYPE_MASK & ~com_kenai_jffi_ObjectBuffer_PRIM_MASK) {
             case com_kenai_jffi_ObjectBuffer_ARRAY:
                 ptr = jffi_getArray(env, object, offset, length, type, &alloc, &arrays[arrayCount]);
-                if (ptr == NULL) {
+                if (unlikely(ptr == NULL)) {
                     throwException(env, NullPointer, "Could not allocate array");
                     goto cleanup;
                 }
@@ -225,7 +225,7 @@ invokeArrayWithObjects_(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer,
                 break;
             case com_kenai_jffi_ObjectBuffer_BUFFER:
                 ptr = (*env)->GetDirectBufferAddress(env, object);
-                if (ptr == NULL) {
+                if (unlikely(ptr == NULL)) {
                     throwException(env, NullPointer, "Could not get direct Buffer address");
                     goto cleanup;
                 }
