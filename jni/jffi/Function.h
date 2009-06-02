@@ -14,7 +14,7 @@ typedef struct Function {
 
 #define SAVE_ERRNO(ctx) do { \
     if (unlikely(ctx->saveErrno)) { \
-        set_last_error(errno); \
+        jffi_save_errno(); \
     } \
 } while(0)
 

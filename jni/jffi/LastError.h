@@ -3,8 +3,7 @@
 
 #include "jffi.h"
 
-#define get_last_error() (thread_data_get()->error)
-#define set_last_error(err) (thread_data_get()->error = (err))
+extern void jffi_save_errno(void);
 
 #endif /* JFFI_LASTERRROR_H */
 

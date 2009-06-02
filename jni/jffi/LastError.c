@@ -1,3 +1,6 @@
+#include <stdlib.h>
+#include <errno.h>
+
 #include <jni.h>
 #include "LastError.h"
 
@@ -9,6 +12,11 @@
 JNIEXPORT jint JNICALL
 Java_com_kenai_jffi_Foreign_getLastError(JNIEnv* env, jobject self)
 {
-    return get_last_error();
+    return thread_data_get()->error;
 }
 
+void
+jffi_save_errno(void)
+{
+    thread_data_get()->error = errno;
+}
