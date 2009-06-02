@@ -148,16 +148,6 @@ Java_com_kenai_jffi_Foreign_getZeroTerminatedByteArray__J(JNIEnv* env, jobject s
 }
 
 /*
- * This version of getZeroTerminatedByteArray is deprecated and only here for
- * binary backwards compatibility.
- */
-JNIEXPORT jbyteArray JNICALL
-Java_com_kenai_jffi_Foreign_getZeroTerminatedByteArray__JJ(JNIEnv* env, jobject self, jlong address, jlong maxlen)
-{
-    return Java_com_kenai_jffi_Foreign_getZeroTerminatedByteArray__JI(env, self, address, (jint) maxlen);
-}
-
-/*
  * Class:     com_kenai_jffi_Foreign
  * Method:    getZeroTerminatedByteArray
  * Signature: (JI)[B
