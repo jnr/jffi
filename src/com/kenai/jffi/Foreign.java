@@ -156,10 +156,27 @@ final class Foreign {
      *
      * @param handle The native function context to free
      */
-    final native void freeFunction(long handle);
+    final native void freeFunction(long functionContext);
 
+    /**
+     * Gets the address of the function in a function context.
+     *
+     * @param functionContext The function context
+     * @return The address of the native function.
+     */
+    final native long getFunctionAddress(long functionContext);
+
+    /**
+     * Gets the size required to pack parameters for the function in libffi raw format.
+     * 
+     * @param functionContext The function context
+     * @return The size in bytes required to pack parameters in raw format
+     */
+    final native int getFunctionRawParameterSize(long functionContext);
+
+    
     final native boolean isRawParameterPackingEnabled();
-    final native int getFunctionRawParameterSize(long handle);
+    
     final native int getLastError();
     final native long newClosure(Object proxy, Method closureMethod, long returnType, long[] paramTypes, int convention);
     final native void freeClosure(long handle);

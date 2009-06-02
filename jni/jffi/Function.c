@@ -132,3 +132,14 @@ Java_com_kenai_jffi_Foreign_getFunctionRawParameterSize(JNIEnv* env, jobject sel
     Function* ctx = (Function *) j2p(handle);
     return ctx->rawParameterSize;
 }
+
+/*
+ * Class:     com_kenai_jffi_Foreign
+ * Method:    getFunctionAddress
+ * Signature: (J)J
+ */
+JNIEXPORT jlong JNICALL
+Java_com_kenai_jffi_Foreign_getFunctionAddress(JNIEnv* env, jobject self, jlong handle)
+{
+    return p2j(((Function *) j2p(handle))->function);
+}

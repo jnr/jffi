@@ -4,8 +4,8 @@
 #include <stdbool.h>
 
 typedef struct Function {
-    void* function;
     ffi_cif cif;
+    void* function;
     int rawParameterSize;
     ffi_type** ffiParamTypes;
     int* rawParamOffsets;
