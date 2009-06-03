@@ -27,7 +27,21 @@ public final class Function {
     final Type[] paramTypes;
 
     /**
+     * Creates a new instance of <tt>Function</tt> with default calling convention.
+     *
+     * @param address The native address of the function to invoke.
+     * @param returnType The return type of the native function.
+     * @param paramTypes The parameter types the function accepts.
+     */
+    public Function(long address, Type returnType, Type... paramTypes) {
+        this(address, returnType, paramTypes, CallingConvention.DEFAULT, true);
+    }
+
+    /**
      * Creates a new instance of <tt>Function</tt>.
+     *
+     * <tt>Function</tt> instances created with this constructor will save the
+     * C errno contents after each call.
      *
      * @param address The native address of the function to invoke.
      * @param returnType The return type of the native function.
@@ -35,12 +49,27 @@ public final class Function {
      * @param convention The calling convention of the function.
      */
     public Function(long address, Type returnType, Type[] paramTypes, CallingConvention convention) {
+        this(address, returnType, paramTypes, convention, true);
+    }
+
+    /**
+     * Creates a new instance of <tt>Function</tt>.
+     *
+     * @param address The native address of the function to invoke.
+     * @param returnType The return type of the native function.
+     * @param paramTypes The parameter types the function accepts.
+     * @param convention The calling convention of the function.
+     * @param saveErrno Whether the errno should be saved or not
+     */
+    public Function(long address, Type returnType, Type[] paramTypes, CallingConvention convention, boolean saveErrno) {
 
         this.functionAddress = address;
+        final int flags = (!saveErrno ? Foreign.F_NOERRNO : 0)
+                | (convention == CallingConvention.STDCALL ? Foreign.F_STDCALL : Foreign.F_DEFAULT);
 
         final long h = Foreign.getInstance().newFunction(address,
                 returnType.handle(), Type.nativeHandles(paramTypes),
-                convention == CallingConvention.STDCALL ? Foreign.F_STDCALL : Foreign.F_DEFAULT);
+                flags);
         if (h == 0) {
             throw new RuntimeException("Failed to create native function");
         }
@@ -55,18 +84,7 @@ public final class Function {
 
         this.parameterCount = paramTypes.length;
         this.rawParameterSize = Foreign.getInstance().getFunctionRawParameterSize(h);        
-    }
-
-    /**
-     * Creates a new instance of <tt>Function</tt> with default calling convention.
-     *
-     * @param address The native address of the function to invoke.
-     * @param returnType The return type of the native function.
-     * @param paramTypes The parameter types the function accepts.
-     */
-    public Function(long address, Type returnType, Type... paramTypes) {
-        this(address, returnType, paramTypes, CallingConvention.DEFAULT);
-    }
+    }    
 
     /**
      * Gets the number of parameters the native function accepts.
