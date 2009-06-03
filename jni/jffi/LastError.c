@@ -20,3 +20,4 @@ jffi_save_errno(void)
 {
     thread_data_get()->error = errno;
 }
+
