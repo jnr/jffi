@@ -110,6 +110,31 @@
           <target>1.5</target>
         </configuration>
       </plugin>
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>1.1</version>
+        <executions>
+          <execution>
+            <id>build-native-library</id>
+            <phase>process-classes</phase>
+            <configuration>
+              <tasks>
+                <property name="os.name" value="${os.name}"/>
+                <property name="os.arch" value="${os.arch}"/>
+                <property name="java.home" value="${java.home}"/>
+                <property name="dist.dir" value="${project.build.directory}"/>
+                <property name="build.dir" value="${project.build.directory}"/>
+                <property name="build.classes.dir" value="${project.build.outputDirectory}"/>
+                <ant antfile="custom-build.xml" dir="." target="-assemble-native-jar"/>
+                <unjar src="${project.build.directory}/native.jar" dest="${project.build.outputDirectory}"/>
+              </tasks>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
     <extensions>
       <extension>
