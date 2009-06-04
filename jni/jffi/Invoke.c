@@ -438,10 +438,12 @@ Java_com_kenai_jffi_Foreign_invokeArrayWithObjectsReturnStruct(JNIEnv* env, jobj
        jobjectArray objectArray, jbyteArray returnBuffer, jint returnBufferOffset)
 {
     Function* ctx = (Function *) j2p(ctxAddress);
-    jbyte* retval = alloca_aligned(ctx->cif.rtype->size, MIN_ALIGN);
+    caddr_t mem = malloc(ctx->cif.rtype->size + ctx->cif.rtype->alignment - 1);
+    jbyte* retval = ((void *) ((((uintptr_t) mem) & ~(ctx->cif.rtype->alignment - 1)) + ctx->cif.rtype->alignment));
 
     invokeArrayWithObjects(env, ctxAddress, paramBuffer, objectCount, objectInfo, objectArray, retval);
     (*env)->SetByteArrayRegion(env, returnBuffer, returnBufferOffset, ctx->cif.rtype->size, retval);
+    free(mem);
 }
 
 /*
