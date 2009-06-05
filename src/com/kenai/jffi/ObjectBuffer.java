@@ -17,6 +17,9 @@ final class ObjectBuffer {
     /** Pin the array memory and pass the JVM memory pointer directly to the function */
     public static final int PINNED = 0x8;
 
+    /** For OUT arrays, clear the temporary native memory area */
+    public static final int CLEAR = 0x10;
+
     /*
      * WARNING: The following flags cannot be altered without recompiling the native code 
      */

@@ -17,6 +17,9 @@ public final class ArrayFlags {
     /** Append a NUL byte to the array contents after copying to native memory */
     public static final int NULTERMINATE = ObjectBuffer.ZERO_TERMINATE;
 
+    /** For OUT arrays, clear the native memory area before passing to the native function */
+    public static final int CLEAR = ObjectBuffer.CLEAR;
+
     /**
      * Tests if the flags indicate data should be copied from native memory.
      *
