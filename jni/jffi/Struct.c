@@ -5,6 +5,9 @@
 #if defined(__sun) || defined(_AIX)
 #  include <alloca.h>
 #endif
+#ifdef _WIN32
+#  include <malloc.h>
+#endif
 #include <ffi.h>
 #include <jni.h>
 #include "com_kenai_jffi_Foreign.h"

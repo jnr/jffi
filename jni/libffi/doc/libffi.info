@@ -1,5 +1,6 @@
-This is doc/libffi.info, produced by makeinfo version 4.12 from
-./doc/libffi.texi.
+This is /cygdrive/c/src/jffi~core/jni/libffi/doc/libffi.info, produced
+by makeinfo version 4.13 from
+/cygdrive/c/src/jffi~core/jni/libffi/doc/libffi.texi.
 
 This manual is for Libffi, a portable foreign-function interface
 library.
@@ -510,24 +511,24 @@ Index
 * ffi_type_ushort:                       Primitive Types.      (line 53)
 * ffi_type_void:                         Primitive Types.      (line 10)
 * Foreign Function Interface:            Introduction.         (line 31)
-* void <1>:                              The Closure API.      (line 20)
-* void:                                  The Basics.           (line 43)
+* void <1>:                              The Basics.           (line 43)
+* void:                                  The Closure API.      (line 27)
 
 
 
 Tag Table:
-Node: Top670
-Node: Introduction1406
-Node: Using libffi3042
-Node: The Basics3477
-Node: Simple Example6084
-Node: Types7111
-Node: Primitive Types7394
-Node: Structures9214
-Node: Type Example10074
-Node: Multiple ABIs11297
-Node: The Closure API11668
-Node: Missing Features14588
-Node: Index15081
+Node: Top742
+Node: Introduction1478
+Node: Using libffi3114
+Node: The Basics3549
+Node: Simple Example6156
+Node: Types7183
+Node: Primitive Types7466
+Node: Structures9286
+Node: Type Example10146
+Node: Multiple ABIs11369
+Node: The Closure API11740
+Node: Missing Features14660
+Node: Index15153
 
 End Tag Table

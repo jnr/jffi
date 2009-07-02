@@ -29,7 +29,9 @@
                 <os arch="powerpc"/>
             </or>
         </condition>
-        
+        <condition property="platform.os" value="Windows">
+            <os family="Windows"/>
+        </condition>
         <!-- default to os.arch for the cpu -->
         <condition property="platform.cpu" value="${os.arch}">
             <not><isset property="platform.cpu"/></not>
@@ -64,33 +66,61 @@
     
     <target name="-generate-native-headers" depends="-init-vars,-compile-java">
         <mkdir dir="${build.native.dir}"/>
-        <!--
         <javah classpath="${build.classes.dir}" destdir="${build.native.dir}" force="yes">
             <class name="com.kenai.jffi.Foreign"/>
-            <class name="com.kenai.jffi.Library"/>
             <class name="com.kenai.jffi.ObjectBuffer"/>
         </javah>
-        -->
+        <!--
         <exec executable="javah" failonerror="true">
           <arg line="-d ${build.native.dir}"/>
           <arg line="-classpath ${build.classes.dir}"/>
           <arg line="com.kenai.jffi.Foreign"/>
           <arg line="com.kenai.jffi.ObjectBuffer"/>
         </exec>
+        -->
     </target>
     
     <target name="-build-native-library" depends="-init-vars, -generate-native-headers">
         <mkdir dir="${build.native.dir}"/>
-
-        <exec executable="${make.exe}" failonerror="true">
-            <arg value="JAVA_HOME=${java.home}"/>
-            <arg value="SRC_DIR=${src.native.dir}"/>
-            <arg value="JNI_DIR=${src.native.dir}"/>
-            <arg value="BUILD_DIR=${build.native.dir}"/>
-            <arg value="CPU=${os.arch}"/>
-            <arg value="-f"/>
+        
+        <exec executable="cygpath" outputproperty="jni.GNUmakefile" osfamily="Windows">
+            <arg value="-u"/>
             <arg value="${src.native.dir}/GNUmakefile"/>
         </exec>
+        <exec executable="cygpath" outputproperty="jni.src.dir" osfamily="Windows">
+            <arg value="-u"/>
+            <arg value="${src.native.dir}"/>
+        </exec>
+        <exec executable="cygpath" outputproperty="jni.build.dir" osfamily="Windows">
+            <arg value="-u"/>
+            <arg value="${build.native.dir}"/>
+        </exec>
+        <exec executable="cygpath" outputproperty="jni.java.home" osfamily="Windows">
+            <arg value="-u"/>
+            <arg value="${java.home}"/>
+        </exec>
+        <condition property="jni.GNUmakefile" value="${src.native.dir}/GNUmakefile">
+          <not><isset property="jni.GNUmakefile"/></not>
+        </condition>
+        <condition property="jni.src.dir" value="${src.native.dir}">
+          <not><isset property="jni.src.dir"/></not>
+        </condition>
+        <condition property="jni.build.dir" value="${build.native.dir}">
+          <not><isset property="jni.build.dir"/></not>
+        </condition>
+        <condition property="jni.java.home" value="${java.home}">
+          <not><isset property="jni.java.home"/></not>
+        </condition>
+        <exec executable="${make.exe}" failonerror="true">
+            <arg value="JAVA_HOME=${jni.java.home}"/>
+            <arg value="SRC_DIR=${jni.src.dir}"/>
+            <arg value="JNI_DIR=${jni.src.dir}"/>
+            <arg value="BUILD_DIR=${jni.build.dir}"/>
+            <arg value="CPU=${os.arch}"/>
+            <arg value="-f"/>
+            <arg value="${jni.GNUmakefile}"/>
+        </exec>
+
     </target>
     
     <target name="-build-native-testlib" depends="-init-vars">

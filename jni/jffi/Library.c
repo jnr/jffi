@@ -50,7 +50,7 @@ Java_com_kenai_jffi_Foreign_dlopen(JNIEnv* env, jobject self, jstring jPath, jin
 {
 #ifdef _WIN32
     wchar_t path[PATH_MAX];
-    getWideString(env, path, jstr, sizeof(path) / sizeof(path[0]));
+    getWideString(env, path, jPath, sizeof(path) / sizeof(path[0]));
     return p2j(LoadLibraryExW(path, NULL, LOAD_WITH_ALTERED_SEARCH_PATH));
 #else
     char path_[PATH_MAX];

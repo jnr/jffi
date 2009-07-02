@@ -9,14 +9,14 @@ CPU ?= $(shell uname -m | sed -e 's/i[345678]86/i386/')
 MODEL = 32 # Default to 32bit compiles
 PLATFORM = $(CPU)-$(OS)
 
-
+JDK_HOME=$(shell if [ -d "$(JAVA_HOME)"/include ];then echo "$(JAVA_HOME)"; else echo "$(JAVA_HOME)"/..; fi)
 # Set defaults to unix (linux/solaris/bsd)
 PREFIX = lib
 JNIEXT = so
 
 export MACOSX_DEPLOYMENT_TARGET=10.4
 
-CCACHE = $(strip $(realpath $(shell /usr/bin/which ccache)))
+CCACHE := $(strip $(realpath $(shell /usr/bin/which ccache 2> /dev/null)))
 SRC_DIR ?= $(shell pwd)/jni
 JNI_DIR ?= $(SRC_DIR)
 BUILD_DIR ?= $(shell pwd)/build
@@ -52,8 +52,8 @@ FFI_CC=$(CCACHE) $(CC)
 FFI_LD=$(LD)
 FFI_CFLAGS = $(FFI_MMAP_EXEC) $(OFLAGS)
 
-JDK_INCLUDES= -I"$(JDK_HOME)/include" -I"$(JDK_HOME)/include/$(OS)"
-IFLAGS = -I"$(BUILD_DIR)" -I"$(JFFI_SRC_DIR)" -I"$(LIBFFI_BUILD_DIR)/include"
+JDK_INCLUDES = -I"$(JDK_HOME)/include" -I"$(JDK_HOME)/include/$(OS)"
+IFLAGS = -I"$(BUILD_DIR)" -I"$(BUILD_DIR)"/jni -I"$(JFFI_SRC_DIR)" -I"$(LIBFFI_BUILD_DIR)"/include
 CFLAGS = $(OFLAGS) $(WFLAGS) $(IFLAGS) $(PICFLAGS) $(JDK_INCLUDES)
 CFLAGS += -D_REENTRANT -D_LARGEFILE64_SOURCE -D_GNU_SOURCE
 
@@ -71,12 +71,15 @@ ifeq ($(OS),mingw32)
 endif
 ifneq ($(findstring cygwin,$(BUILD_OS)),)
   OS = win32
-  JAVA_HOME := $(shell cygpath -u \""$(JAVA_HOME)"\")
+  JAVA_HOME := $(shell cygpath -u $(JAVA_HOME))
 endif
 ifeq ($(OS), win32)
   CC += -mno-cygwin
   LDFLAGS += -mno-cygwin -Wl,--add-stdcall-alias
   PICFLAGS=
+  SOFLAGS += -shared
+  PREFIX =
+  JNIEXT=dll
 endif
 ifeq ($(OS), darwin)
   PLATFORM = darwin
@@ -131,7 +134,6 @@ ifneq ($(strip $(findstring $(OS), linux solaris)),)
   LD += -m$(MODEL)
 endif
 
-JDK_HOME=$(shell if [ -d $(JAVA_HOME)/include ];then echo $(JAVA_HOME); else echo $(JAVA_HOME)/..; fi)
 LIBJFFI = $(BUILD_DIR)/$(PREFIX)$(LIBNAME).$(JNIEXT)
 FFI_CONFIGURE = $(LIBFFI_SRC_DIR)/configure --disable-static \
 	--with-pic=yes --disable-dependency-tracking
