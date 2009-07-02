@@ -108,6 +108,7 @@ typedef union FFIValue {
     ffi_arg arg;
 } FFIValue;
 
+#ifndef _WIN32
 typedef struct ThreadData {
     int error;
 } ThreadData;
@@ -121,6 +122,7 @@ thread_data_get()
     ThreadData* td = pthread_getspecific(jffi_threadDataKey);
     return likely(td != NULL) ? td : jffi_thread_data_init();
 }
+#endif /* !_WIN32 */
 
 #if defined(__i386__)
 #  define USE_RAW 1

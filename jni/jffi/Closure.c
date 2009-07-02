@@ -25,6 +25,9 @@
 #  include <sys/sysmacros.h>
 #  include <alloca.h>
 #endif
+#ifdef _WIN32
+#  include <malloc.h>
+#endif
 #include <jni.h>
 #include "jffi.h"
 #include "Exception.h"
@@ -42,6 +45,9 @@ typedef struct Closure {
     int flags;
 } Closure;
 
+#ifndef MAX
+#  define MAX(a,b) ((a) > (b) ? (a) : (b))
+#endif
 
 static void closure_invoke(ffi_cif* cif, void* retval, void** parameters, void* user_data);
 
@@ -103,7 +109,7 @@ Java_com_kenai_jffi_Foreign_newClosure(JNIEnv* env, jclass clazz,
         goto cleanup;
     }
 #ifdef _WIN32
-    abi = (flags & STDCALL) ? FFI_STDCALL : FFI_DEFAULT_ABI;
+    abi = (flags & com_kenai_jffi_Foreign_F_STDCALL) ? FFI_STDCALL : FFI_DEFAULT_ABI;
 #else
     abi = FFI_DEFAULT_ABI;
 #endif

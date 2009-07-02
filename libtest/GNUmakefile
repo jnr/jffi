@@ -6,6 +6,9 @@ PLATFORM = $(CPU)-$(OS)
 ifeq ($(OS), sunos)
   OS = solaris
 endif
+ifneq ($(findstring cygwin,$(BUILD_OS)),)
+  OS = win32
+endif
 
 SRC_DIR = libtest
 BUILD_DIR ?= build
@@ -38,8 +41,8 @@ IFLAGS = -I"$(BUILD_DIR)"
 CFLAGS = $(OFLAGS) $(WFLAGS) $(IFLAGS) $(PICFLAGS) -D_REENTRANT
 
 ifeq ($(OS), win32)
-	CC += -mno-cygwin
-	LDFLAGS += -mno-cygwin -Wl,--add-stdcall-alias
+  CC += -mno-cygwin
+  LDFLAGS += -mno-cygwin -Wl,--add-stdcall-alias
 endif
 ifeq ($(OS), darwin)
   ARCHFLAGS = -arch ppc
@@ -76,9 +79,10 @@ endif
 
 ifneq ($(findstring cygwin, $(OS)),)
   CFLAGS += -mno-cygwin -mwin32
+  LDFLAGS += -mno-cygwin -Wl,--add-stdcall-alias
   LIBEXT = dll
-#  PREFIX =
-  PICFLAGS=
+  PREFIX =
+  PICFLAGS =
 endif
 ifneq ($(findstring mingw, $(OS)),)
   LIBEXT = dll

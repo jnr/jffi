@@ -6,12 +6,19 @@
 #  include <sys/sysmacros.h>
 #  include <alloca.h>
 #endif
+#ifdef _WIN32
+#  include <malloc.h>
+#endif
 #include <ffi.h>
 #include <jni.h>
 #include "jffi.h"
 #include "Exception.h"
 #include "Function.h"
 #include "com_kenai_jffi_Foreign.h"
+
+#ifndef MAX
+#  define MAX(a,b) ((a) > (b) ? (a) : (b))
+#endif
 
 static inline int FFI_ALIGN(int v, int a) {
     return ((((size_t) v) - 1) | (a - 1)) +1;

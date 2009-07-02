@@ -1,20 +1,27 @@
 #include <stdlib.h>
-#include <pthread.h>
+#ifndef _WIN32
+#  include <pthread.h>
+#endif
 #include <jni.h>
 #include "Exception.h"
 #include "com_kenai_jffi_Foreign.h"
 #include "jffi.h"
 
+#ifndef _WIN32
 pthread_key_t jffi_threadDataKey;
 static void thread_data_free(void *ptr);
+#endif
 
 JNIEXPORT jint JNICALL
 JNI_OnLoad(JavaVM *vm, void *reserved)
 {
+#ifndef _WIN32
     pthread_key_create(&jffi_threadDataKey, thread_data_free);
+#endif
     return JNI_VERSION_1_4;
 }
 
+#ifndef _WIN32
 ThreadData*
 jffi_thread_data_init()
 {
@@ -28,6 +35,7 @@ thread_data_free(void *ptr)
 {
     free(ptr);
 }
+#endif /* !_WIN32 */
 
 JNIEXPORT jint JNICALL
 Java_com_kenai_jffi_Foreign_getVersion(JNIEnv* env, jobject self)
