@@ -18,16 +18,7 @@
 
 package com.kenai.jffi;
 
-import java.io.File;
-import java.io.FilenameFilter;
-import java.io.InputStream;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.regex.Pattern;
-
 public abstract class Platform {
-    private static final String stubLibraryName = "jffi";
     private final OS os;
     private final CPU cpu;
     private final int addressSize;
@@ -51,6 +42,9 @@ public abstract class Platform {
         AIX,
 
         UNKNOWN;
+
+        @Override
+        public String toString() { return name().toLowerCase(); }
     }
 
     /**
@@ -67,6 +61,9 @@ public abstract class Platform {
         SPARC,
         SPARCV9,
         UNKNOWN;
+
+        @Override
+        public String toString() { return name().toLowerCase(); }
     }
 
     /**
@@ -112,8 +109,6 @@ public abstract class Platform {
         switch (os) {
             case DARWIN:
                 return new Darwin();
-            case LINUX:
-                return new Linux();
             case WINDOWS:
                 return new Windows();
             case UNKNOWN:
@@ -132,7 +127,7 @@ public abstract class Platform {
      * @return A member of the <tt>CPU</tt> enum.
      */
     private static final CPU determineCPU() {
-        String archString = System.getProperty("os.arch").toLowerCase();
+        String archString = System.getProperty("os.arch", "unknown").toLowerCase();
         if ("x86".equals(archString) || "i386".equals(archString) || "i86pc".equals(archString)) {
             return CPU.I386;
         } else if ("x86_64".equals(archString) || "amd64".equals(archString)) {
@@ -296,53 +291,6 @@ public abstract class Platform {
     }
 
     /**
-     * Searches through a list of directories for a native library.
-     *
-     * @param libName the base name (e.g. "c") of the library to locate
-     * @param libraryPath the list of directories to search
-     * @return the path of the library
-     */
-    public File locateLibrary(String libName, List<String> libraryPath) {
-        String mappedName = mapLibraryName(libName);
-        for (String path : libraryPath) {
-            File libFile = new File(path, mappedName);
-            if (libFile.exists()) {
-                return libFile;
-            }
-        }
-        // Default to letting the system search for it
-        return new File(mappedName);
-    }
-
-    /**
-     * Gets the name of the stub library.
-     * 
-     * @return The name of the stub library as a <tt>String</tt>
-     */
-    public String getStubLibraryName() {
-        return stubLibraryName;
-    }
-
-    /**
-     * Gets the path within the jar file of the stub native library.
-     *
-     * @return The path of the jar file.
-     */
-    public String getStubLibraryPath() {
-        return "/jni/" + getName() + "/"+ System.mapLibraryName(stubLibraryName);
-    }
-
-    /**
-     * Gets an <tt>InputStream</tt> representing the stub library image stored in
-     * the jar file.
-     *
-     * @return A new <tt>InputStream</tt>
-     */
-    public InputStream getStubLibraryStream() {
-        return Platform.class.getResourceAsStream(getStubLibraryPath());
-    }
-
-    /**
      * Checks if the current platform is supported by JFFI.
      *
      * @return <tt>true</tt> if the platform is supported, else false.
@@ -390,71 +338,12 @@ public abstract class Platform {
         public String getLibraryNamePattern() {
             return "lib.*\\.(dylib|jnilib)$";
         }
-        @Override
-        public InputStream getStubLibraryStream() {
-            InputStream is = super.getStubLibraryStream();
-            if (is != null) {
-                return is;
-            }
-            return Platform.class.getResourceAsStream(getStubLibraryPath().replaceAll("dylib", "jnilib"));
-        }
-
+        
         @Override
         public String getName() {
             return "Darwin";
         }
 
-    }
-    /**
-     * A {@link Platform} subclass representing the Linux operating system.
-     */
-    private static final class Linux extends Platform {
-
-        public Linux() {
-            super(OS.LINUX);
-        }
-
-        @Override
-        public File locateLibrary(final String libName, List<String> libraryPath) {
-            FilenameFilter filter = new FilenameFilter() {
-                Pattern p = Pattern.compile("lib" + libName + "\\.so\\.[0-9]+$");
-                String exact = "lib" + libName + ".so";
-                public boolean accept(File dir, String name) {
-                    return p.matcher(name).matches() || exact.equals(name);
-                }
-            };
-
-            List<File> matches = new LinkedList<File>();
-            for (String path : libraryPath) {
-                File[] files = new File(path).listFiles(filter);
-                if (files != null && files.length > 0) {
-                    matches.addAll(Arrays.asList(files));
-                }
-            }
-
-            //
-            // Search through the results and return the highest numbered version
-            // i.e. libc.so.6 is preferred over libc.so.5
-            //
-            int version = 0;
-            String bestMatch = null;
-            for (File file : matches) {
-                String path = file.getAbsolutePath();
-                if (bestMatch == null && path.endsWith(".so")) {
-                    bestMatch = path;
-                    version = 0;
-                } else {
-                    String num = path.substring(path.lastIndexOf(".so.") + 4);
-                    try {
-                        if (Integer.parseInt(num) >= version) {
-                            bestMatch = path;
-                        }
-                    } catch (NumberFormatException e) {
-                    } // Just skip if not a number
-                }
-            }
-            return bestMatch != null ? new File(bestMatch) : new File(mapLibraryName(libName));
-        }
     }
 
     /**

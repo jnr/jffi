@@ -27,50 +27,73 @@ import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 
+/**
+ * Utility class to load the jffi stub library
+ */
 final class Init {
+    private static final String stubLibraryName = "jffi";
+    /**
+     * This is a dummy function which when called, makes the <code>static{}</code>
+     * section load, and the library gets loaded.
+     */
     static final void init() {}
+
     static {
         load();
     }
+
+    /**
+     * Loads the stub library
+     */
     private static final void load() {
-        final String libName = Platform.getPlatform().getStubLibraryName();
+        final String libName = getStubLibraryName();
         String bootPath = System.getProperty("jffi.boot.library.path");
-        if (bootPath != null) {
-            String[] dirs = bootPath.split(File.pathSeparator);
-            for (int i = 0; i < dirs.length; ++i) {
-                String path = new File(new File(dirs[i]), System.mapLibraryName(libName)).getAbsolutePath();
-                try {
-                    System.load(path);
-                    return;
-                } catch (UnsatisfiedLinkError ex) {}
-                if (Platform.getPlatform().getOS() == Platform.OS.DARWIN) {
-                    String orig, ext;
-                    if (path.endsWith("dylib")) {
-                        orig = "dylib";
-                        ext = "jnilib";
-                    } else {
-                        orig = "jnilib";
-                        ext = "dylib";
-                    }
-                    try {
-                        System.load(path.substring(0, path.lastIndexOf(orig)) + ext);
-                        return;
-                    } catch (UnsatisfiedLinkError ex) {}
-                }
-            }
+        if (bootPath != null && loadFromBootPath(libName, bootPath)) {
+            return;
         }
+        
         try {
             System.loadLibrary(libName);
             return;
         } catch (UnsatisfiedLinkError ex) {}
-        InputStream is = Platform.getPlatform().getStubLibraryStream();
-        if (is == null) {
-            throw new UnsatisfiedLinkError("Could not locate " + libName + " in jar file");
-        }
 
+        loadFromJar();
+    }
+
+    private static final boolean loadFromBootPath(String libName, String bootPath) {
+        String[] dirs = bootPath.split(File.pathSeparator);
+        for (int i = 0; i < dirs.length; ++i) {
+            String path = new File(new File(dirs[i]), System.mapLibraryName(libName)).getAbsolutePath();
+            try {
+                System.load(path);
+                return true;
+            } catch (UnsatisfiedLinkError ex) {
+            }
+            if (Platform.getPlatform().getOS() == Platform.OS.DARWIN) {
+                String orig, ext;
+                if (path.endsWith("dylib")) {
+                    orig = "dylib";
+                    ext = "jnilib";
+                } else {
+                    orig = "jnilib";
+                    ext = "dylib";
+                }
+                try {
+                    System.load(path.substring(0, path.lastIndexOf(orig)) + ext);
+                    return true;
+                } catch (UnsatisfiedLinkError ex) {
+                }
+            }
+        }
+        return false;
+    }
+
+    private static final void loadFromJar() {
+        InputStream is = getStubLibraryStream();
         File dstFile = null;
+
         try {
-            dstFile = File.createTempFile(libName, null);
+            dstFile = File.createTempFile("jffi", null);
             dstFile.deleteOnExit();
             FileChannel dstChannel = new FileOutputStream(dstFile).getChannel();
             ReadableByteChannel srcChannel = Channels.newChannel(is);
@@ -84,4 +107,46 @@ final class Init {
         } finally {
         }
     }
+
+    /**
+     * Gets an <tt>InputStream</tt> representing the stub library image stored in
+     * the jar file.
+     *
+     * @return A new <tt>InputStream</tt>
+     */
+    private static final InputStream getStubLibraryStream() {
+        String path = getStubLibraryPath();
+
+        InputStream is = Init.class.getResourceAsStream(path);
+
+        // On MacOS, the stub might be named .dylib or .jnilib - cater for both
+        if (is == null && Platform.getPlatform().getOS() == Platform.OS.DARWIN) {
+            is = Init.class.getResourceAsStream(path.replaceAll("dylib", "jnilib"));
+        }
+        if (is == null) {
+            throw new UnsatisfiedLinkError("Could not locate stub library ("
+                    + path + ") in jar file");
+        }
+
+        return is;
+    }
+
+    /**
+     * Gets the name of the stub library.
+     *
+     * @return The name of the stub library as a <tt>String</tt>
+     */
+    private static final String getStubLibraryName() {
+        return stubLibraryName;
+    }
+
+    /**
+     * Gets the path within the jar file of the stub native library.
+     *
+     * @return The path of the jar file.
+     */
+    private static final String getStubLibraryPath() {
+        return "/jni/" + Platform.getPlatform().getName() + "/"+ System.mapLibraryName(stubLibraryName);
+    }
+
 }
