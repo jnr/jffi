@@ -16,7 +16,7 @@ JNIEXT = so
 
 export MACOSX_DEPLOYMENT_TARGET=10.4
 
-CCACHE := $(strip $(realpath $(shell /usr/bin/which ccache 2> /dev/null)))
+CCACHE := $(strip $(realpath $(shell which ccache 2> /dev/null)))
 SRC_DIR ?= $(shell pwd)/jni
 JNI_DIR ?= $(SRC_DIR)
 BUILD_DIR ?= $(shell pwd)/build
@@ -102,7 +102,6 @@ ifeq ($(OS), solaris)
   CC = gcc
   CFLAGS += -D__EXTENSIONS__ -std=c99
   LD = /usr/ccs/bin/ld
-  CCACHE=
   SOFLAGS = -shared -static-libgcc -mimpure-text
   LIBS += -ldl
 endif
