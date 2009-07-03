@@ -189,8 +189,21 @@ final class Foreign {
 
     
     final native boolean isRawParameterPackingEnabled();
-    
+
+    /**
+     * Gets the last error returned by a native function
+     *
+     * @return An integer.
+     */
     final native int getLastError();
+    
+    /**
+     * Sets the native errno value
+     * 
+     * @param error The value to set errno to.
+     */
+    final native void setLastError(int error);
+    
     final native long newClosure(Object proxy, Method closureMethod, long returnType, long[] paramTypes, int convention);
     final native void freeClosure(long handle);
 

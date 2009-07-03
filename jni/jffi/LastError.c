@@ -29,6 +29,21 @@ Java_com_kenai_jffi_Foreign_getLastError(JNIEnv* env, jobject self)
 #endif
 }
 
+/*
+ * Class:     com_kenai_jffi_Foreign
+ * Method:    setLastError
+ * Signature: (I)V
+ */
+JNIEXPORT void JNICALL
+Java_com_kenai_jffi_Foreign_setLastError(JNIEnv* env, jobject self, jint value)
+{
+#ifdef _WIN32
+    SetLastError(value);
+#else
+    thread_data_get()->error = errno = value;
+#endif
+}
+
 void
 jffi_save_errno(void)
 {
