@@ -192,7 +192,7 @@ public abstract class MemoryIO {
     public abstract void putFloat(long address, float value);
 
     /**
-     * Writes a 32 bit floating point value to a native memory location.
+     * Writes a 64 bit floating point value to a native memory location.
      *
      * @param address The memory location to put the value.
      * @param value The value to write to memory.

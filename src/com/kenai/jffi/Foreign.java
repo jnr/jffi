@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007, 2008 Wayne Meissner
+ * Copyright (C) 2007, 2008, 2009 Wayne Meissner
  *
  * This file is part of jffi.
  *
@@ -432,37 +432,292 @@ final class Foreign {
     final native void invokePointerParameterArray(long functionContext,
             long returnBuffer, long[] parameters);
 
+    /**
+     * Reads an 8 bit integer from a native memory location.
+     *
+     * @param address The memory location to get the value from.
+     * @return A byte containing the value.
+     */
     final native byte getByte(long address);
+
+    /**
+     * Reads a 16 bit integer from a native memory location.
+     *
+     * @param address The memory location to get the value from.
+     * @return A short containing the value.
+     */
     final native short getShort(long address);
+
+    /**
+     * Reads a 32 bit integer from a native memory location.
+     *
+     * @param address The memory location to get the value from.
+     * @return An int containing the value.
+     */
     final native int getInt(long address);
+
+    /**
+     * Reads a 64 bit integer from a native memory location.
+     *
+     * @param address The memory location to get the value from.
+     * @return A long containing the value.
+     */
     final native long getLong(long address);
+
+    /**
+     * Reads a 32 bit floating point value from a native memory location.
+     *
+     * @param address The memory location to get the value from.
+     * @return A float containing the value.
+     */
     final native float getFloat(long address);
+
+    /**
+     * Reads a 64 bit floating point value from a native memory location.
+     *
+     * @param address The memory location to get the value from.
+     * @return A double containing the value.
+     */
     final native double getDouble(long address);
+
+    /**
+     * Reads a native memory address from a native memory location.
+     *
+     * @param address The memory location to get the value from.
+     * @return A long containing the value.
+     */
     final native long getAddress(long address);
+
+    /**
+     * Writes an 8 bit integer value to a native memory location.
+     *
+     * @param address The memory location to put the value.
+     * @param value The value to write to memory.
+     */
     final native void putByte(long address, byte value);
+
+    /**
+     * Writes a 16 bit integer value to a native memory location.
+     *
+     * @param address The memory location to put the value.
+     * @param value The value to write to memory.
+     */
     final native void putShort(long address, short value);
+
+    /**
+     * Writes a 32 bit integer value to a native memory location.
+     *
+     * @param address The memory location to put the value.
+     * @param value The value to write to memory.
+     */
     final native void putInt(long address, int value);
+
+    /**
+     * Writes a 64 bit integer value to a native memory location.
+     *
+     * @param address The memory location to put the value.
+     * @param value The value to write to memory.
+     */
     final native void putLong(long address, long value);
+
+    /**
+     * Writes a 32 bit floating point value to a native memory location.
+     *
+     * @param address The memory location to put the value.
+     * @param value The value to write to memory.
+     */
     final native void putFloat(long address, float value);
+
+    /**
+     * Writes a 64 bit floating point value to a native memory location.
+     *
+     * @param address The memory location to put the value.
+     * @param value The value to write to memory.
+     */
     final native void putDouble(long address, double value);
+
+    /**
+     * Writes a native memory address value to a native memory location.
+     *
+     * @param address The memory location to put the value.
+     * @param value The value to write to memory.
+     */
     final native void putAddress(long address, long value);
+
+    /**
+     * Sets a region of native memory to a specific byte value.
+     *
+     * @param address The address of start of the native memory.
+     * @param size The number of bytes to set.
+     * @param value The value to set the native memory to.
+     */
     final native void setMemory(long address, long size, byte value);
+
+    /**
+     * Copies contents of a native memory location to another native memory location.
+     *
+     * @param src The source memory address.
+     * @param dst The destination memory address.
+     * @param size The number of bytes to copy.
+     */
     final native void copyMemory(long src, long dst, long size);
+
+    /**
+     * Writes a java byte array to native memory.
+     *
+     * @param address The native memory address to copy the array to.
+     * @param data The java array to copy.
+     * @param offset The offset within the array to start copying from.
+     * @param length The number of array elements to copy.
+     */
     final native void putByteArray(long address, byte[] data, int offset, int length);
+
+    /**
+     * Reads a java byte array from native memory.
+     *
+     * @param address The native memory address to copy the array from.
+     * @param data The java array to copy.
+     * @param offset The offset within the array to start copying to.
+     * @param length The number of array elements to copy.
+     */
     final native void getByteArray(long address, byte[] data, int offset, int length);
+
+    /**
+     * Writes a java char array to native memory.
+     *
+     * @param address The native memory address to copy the array to.
+     * @param data The java array to copy.
+     * @param offset The offset within the array to start copying from.
+     * @param length The number of array elements to copy.
+     */
     final native void putCharArray(long address, char[] data, int offset, int length);
+
+    /**
+     * Reads a java char array from native memory.
+     *
+     * @param address The native memory address to copy the array from.
+     * @param data The java array to copy.
+     * @param offset The offset within the array to start copying to.
+     * @param length The number of array elements to copy.
+     */
     final native void getCharArray(long address, char[] data, int offset, int length);
+
+    /**
+     * Writes a java short array to native memory.
+     *
+     * @param address The native memory address to copy the array to.
+     * @param data The java array to copy.
+     * @param offset The offset within the array to start copying from.
+     * @param length The number of array elements to copy.
+     */
     final native void putShortArray(long address, short[] data, int offset, int length);
+
+    /**
+     * Reads a java short array from native memory.
+     *
+     * @param address The native memory address to copy the array from.
+     * @param data The java array to copy.
+     * @param offset The offset within the array to start copying to.
+     * @param length The number of array elements to copy.
+     */
     final native void getShortArray(long address, short[] data, int offset, int length);
+
+    /**
+     * Writes a java int array to native memory.
+     *
+     * @param address The native memory address to copy the array to.
+     * @param data The java array to copy.
+     * @param offset The offset within the array to start copying from.
+     * @param length The number of array elements to copy.
+     */
     final native void putIntArray(long address, int[] data, int offset, int length);
+
+    /**
+     * Reads a java int array from native memory.
+     *
+     * @param address The native memory address to copy the array from.
+     * @param data The java array to copy.
+     * @param offset The offset within the array to start copying to.
+     * @param length The number of array elements to copy.
+     */
     final native void getIntArray(long address, int[] data, int offset, int length);
-    final native void getLongArray(long address, long[] data, int offset, int length);
+
+    /**
+     * Writes a java long array to native memory.
+     *
+     * @param address The native memory address to copy the array to.
+     * @param data The java array to copy.
+     * @param offset The offset within the array to start copying from.
+     * @param length The number of array elements to copy.
+     */
     final native void putLongArray(long address, long[] data, int offset, int length);
-    final native void getFloatArray(long address, float[] data, int offset, int length);
+
+    /**
+     * Reads a java long array from native memory.
+     *
+     * @param address The native memory address to copy the array from.
+     * @param data The java array to copy.
+     * @param offset The offset within the array to start copying to.
+     * @param length The number of array elements to copy.
+     */
+    final native void getLongArray(long address, long[] data, int offset, int length);
+
+    /**
+     * Writes a java double array to native memory.
+     *
+     * @param address The native memory address to copy the array to.
+     * @param data The java array to copy.
+     * @param offset The offset within the array to start copying from.
+     * @param length The number of array elements to copy.
+     */
     final native void putFloatArray(long address, float[] data, int offset, int length);
-    final native void getDoubleArray(long address, double[] data, int offset, int length);
+
+    /**
+     * Reads a java float array from native memory.
+     *
+     * @param address The native memory address to copy the array from.
+     * @param data The java array to copy.
+     * @param offset The offset within the array to start copying to.
+     * @param length The number of array elements to copy.
+     */
+    final native void getFloatArray(long address, float[] data, int offset, int length);
+
+    /**
+     * Writes a java double array to native memory.
+     *
+     * @param address The native memory address to copy the array to.
+     * @param data The java array to copy.
+     * @param offset The offset within the array to start copying from.
+     * @param length The number of array elements to copy.
+     */
     final native void putDoubleArray(long address, double[] data, int offset, int length);
+
+    /**
+     * Reads a java double array from native memory.
+     *
+     * @param address The native memory address to copy the array from.
+     * @param data The java array to copy.
+     * @param offset The offset within the array to start copying to.
+     * @param length The number of array elements to copy.
+     */
+    final native void getDoubleArray(long address, double[] data, int offset, int length);
+
+    /**
+     * Gets the address of a byte value in a native memory region.
+     *
+     * @param address The native memory address to start searching.
+     * @param value The value to search for.
+     * @param len The size of the native memory region being searched.
+     * @return The address of the value, or 0 (zero) if not found.
+     */
     final native long memchr(long address, int value, long len);
+
+    /**
+     * Gets the length of a native ascii or utf-8 string.
+     *
+     * @param address The native address of the string.
+     * @return The length of the string, in bytes.
+     */
     final native long strlen(long address);
 
     /**
@@ -502,7 +757,21 @@ final class Foreign {
      */
     final native void putZeroTerminatedByteArray(long address, byte[] data, int offset, int length);
 
+    /**
+     * Creates a new Direct ByteBuffer for a native memory region.
+     *
+     * @param address The start of the native memory region.
+     * @param capacity The size of the native memory region.
+     * @return A ByteBuffer representing the native memory region.
+     */
     final native ByteBuffer newDirectByteBuffer(long address, int capacity);
+
+    /**
+     * Gets the native memory address of a direct ByteBuffer
+     *
+     * @param buffer A direct ByteBuffer to get the address of.
+     * @return The native memory address of the buffer contents, or null if not a direct buffer.
+     */
     final native long getDirectBufferAddress(Buffer buffer);
 
     final native int getJNIVersion();
