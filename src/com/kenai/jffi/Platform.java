@@ -34,6 +34,12 @@ public abstract class Platform {
     private final long addressMask;
     private final int javaVersionMajor;
 
+    /**
+     * The common names of operating systems.
+     *
+     * <b>Note</b> The names of the enum values are used in other parts of the
+     * code to determine where to find the native stub library.  Do not rename.
+     */
     public enum OS {
         DARWIN,
         FREEBSD,
@@ -46,6 +52,7 @@ public abstract class Platform {
 
         UNKNOWN;
     }
+
     /**
      * The common names of cpu architectures.
      *
@@ -61,9 +68,19 @@ public abstract class Platform {
         SPARCV9,
         UNKNOWN;
     }
+
+    /**
+     * Holds a single, lazily loaded instance of <tt>Platform</tt>
+     */
     private static final class SingletonHolder {
         static final Platform PLATFORM = determinePlatform(determineOS());
     }
+
+    /**
+     * Determines the operating system jffi is running on
+     *
+     * @return An member of the <tt>OS</tt> enum.
+     */
     private static final OS determineOS() {
         String osName = System.getProperty("os.name").split(" ")[0].toLowerCase();
         if (osName.startsWith("mac") || osName.startsWith("darwin")) {
@@ -84,6 +101,13 @@ public abstract class Platform {
             throw new ExceptionInInitializerError("Unsupported operating system");
         }
     }
+
+    /**
+     * Determines the <tt>Platform</tt> that best describes the <tt>OS</tt>
+     *
+     * @param os The operating system.
+     * @return An instance of <tt>Platform</tt>
+     */
     private static final Platform determinePlatform(OS os) {
         switch (os) {
             case DARWIN:
@@ -98,6 +122,15 @@ public abstract class Platform {
                 return new Default(os);
         }
     }
+
+    /**
+     * Determines the CPU architecture the JVM is running on.
+     *
+     * This normalizes all the variations that are equivalent (e.g. i386, x86, i86pc)
+     * into a common cpu type.
+     *
+     * @return A member of the <tt>CPU</tt> enum.
+     */
     private static final CPU determineCPU() {
         String archString = System.getProperty("os.arch").toLowerCase();
         if ("x86".equals(archString) || "i386".equals(archString) || "i86pc".equals(archString)) {
@@ -116,11 +149,23 @@ public abstract class Platform {
             throw new ExceptionInInitializerError("Unsupported CPU architecture: " + archString);
         }
     }
-    
+
+    /**
+     * Constructs a new <tt>Platform</tt> instance.
+     *
+     * @param os The current operating system.
+     */
     private Platform(OS os) {
         this.os = os;
         this.cpu = determineCPU();
-        int dataModel = Integer.getInteger("sun.arch.data.model");
+
+        
+        int dataModel = Integer.getInteger("sun.arch.data.model", 0);
+
+        //
+        // If we're running on a broken JVM that doesn't support the sun.arch.data.model property
+        // try to deduce the data model using the CPU type.
+        //
         if (dataModel != 32 && dataModel != 64) {
             switch (cpu) {
                 case I386:
@@ -137,6 +182,7 @@ public abstract class Platform {
                     throw new ExceptionInInitializerError("Cannot determine cpu address size");
             }
         }
+
         addressSize = dataModel;
         addressMask = addressSize == 32 ? 0xffffffffL : 0xffffffffffffffffL;
         int version = 5;
@@ -151,6 +197,7 @@ public abstract class Platform {
         }
         javaVersionMajor = version;
     }
+    
     /**
      * Gets the current <tt>Platform</tt>
      *
