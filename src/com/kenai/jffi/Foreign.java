@@ -137,7 +137,20 @@ final class Foreign {
      */
     final native String dlerror();
 
+    /**
+     * Allocates native memory.
+     *
+     * @param size The number of bytes of memory to allocate
+     * @param clear Whether the memory should be cleared (each byte set to zero).
+     * @return The native address of the allocated memory.
+     */
     final native long allocateMemory(long size, boolean clear);
+
+    /**
+     * Releases memory allocated via {@link allocateMemory} back to the system.
+     *
+     * @param address The address of the memory to release.
+     */
     final native void freeMemory(long address);
 
     /**
