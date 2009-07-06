@@ -74,7 +74,7 @@ ifeq ($(OS), win32)
     CC += -mno-cygwin
     LDFLAGS += -mno-cygwin
   endif
-  CFLAGS += -mwin32
+  CFLAGS += -mwin32 -D_JNI_IMPLEMENTATION_
   LDFLAGS += -Wl,--add-stdcall-alias
   PICFLAGS=
   SOFLAGS += -shared
