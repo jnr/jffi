@@ -5,6 +5,10 @@ package com.kenai.jffi;
  * Flags to use when adding an array as a pointer parameter
  */
 public final class ArrayFlags {
+
+    /* Stop ArrayFlags from being intantiated */
+    private ArrayFlags() {}
+
     /** Copy the array contents to native memory before calling the function */
     public static final int IN = ObjectBuffer.IN;
 

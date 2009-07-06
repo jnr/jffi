@@ -8,6 +8,7 @@ import java.nio.ByteOrder;
  * a java heap allocated buffer.
  */
 public final class HeapInvocationBuffer implements InvocationBuffer {
+    private static final int FFI_SIZEOF_ARG = Platform.getPlatform().addressSize() / 8;
     private static final int PARAM_SIZE = 8;
     private static final Encoder encoder = getEncoder();
     private final Function function;
@@ -45,37 +46,37 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
     }
     
     public final void putByte(final int value) {
-        paramOffset += encoder.putByte(buffer, paramOffset, value);
+        paramOffset = encoder.putByte(buffer, paramOffset, value);
         ++paramIndex;
     }
 
     public final void putShort(final int value) {
-        paramOffset += encoder.putShort(buffer, paramOffset, value);
+        paramOffset = encoder.putShort(buffer, paramOffset, value);
         ++paramIndex;
     }
 
     public final void putInt(final int value) {
-        paramOffset += encoder.putInt(buffer, paramOffset, value);
+        paramOffset = encoder.putInt(buffer, paramOffset, value);
         ++paramIndex;
     }
 
     public final void putLong(final long value) {
-        paramOffset += encoder.putLong(buffer, paramOffset, value);
+        paramOffset = encoder.putLong(buffer, paramOffset, value);
         ++paramIndex;
     }
 
     public final void putFloat(final float value) {
-        paramOffset += encoder.putFloat(buffer, paramOffset, value);
+        paramOffset = encoder.putFloat(buffer, paramOffset, value);
         ++paramIndex;
     }
 
     public final void putDouble(final double value) {
-        paramOffset += encoder.putDouble(buffer, paramOffset, value);
+        paramOffset = encoder.putDouble(buffer, paramOffset, value);
         ++paramIndex;
     }
 
     public final void putAddress(final long value) {
-        paramOffset += encoder.putAddress(buffer, paramOffset, value);
+        paramOffset = encoder.putAddress(buffer, paramOffset, value);
         ++paramIndex;
     }
 
@@ -88,67 +89,69 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
     }
 
     public final void putArray(final byte[] array, int offset, int length, int flags) {
-        paramOffset += encoder.putAddress(buffer, paramOffset, 0L);
+        paramOffset = encoder.putAddress(buffer, paramOffset, 0L);
         getObjectBuffer().putArray(paramIndex++, array, offset, length, flags);
     }
 
     public final void putArray(final short[] array, int offset, int length, int flags) {
-        paramOffset += encoder.putAddress(buffer, paramOffset, 0L);
+        paramOffset = encoder.putAddress(buffer, paramOffset, 0L);
         getObjectBuffer().putArray(paramIndex++, array, offset, length, flags);
     }
 
     public final void putArray(final int[] array, int offset, int length, int flags) {
-        paramOffset += encoder.putAddress(buffer, paramOffset, 0L);
+        paramOffset = encoder.putAddress(buffer, paramOffset, 0L);
         getObjectBuffer().putArray(paramIndex++, array, offset, length, flags);
     }
 
     public final void putArray(final long[] array, int offset, int length, int flags) {
-        paramOffset += encoder.putAddress(buffer, paramOffset, 0L);
+        paramOffset = encoder.putAddress(buffer, paramOffset, 0L);
         getObjectBuffer().putArray(paramIndex++, array, offset, length, flags);
     }
 
     public final void putArray(final float[] array, int offset, int length, int flags) {
-        paramOffset += encoder.putAddress(buffer, paramOffset, 0L);
+        paramOffset = encoder.putAddress(buffer, paramOffset, 0L);
         getObjectBuffer().putArray(paramIndex++, array, offset, length, flags);
     }
 
     public final void putArray(final double[] array, int offset, int length, int flags) {
-        paramOffset += encoder.putAddress(buffer, paramOffset, 0L);
+        paramOffset = encoder.putAddress(buffer, paramOffset, 0L);
         getObjectBuffer().putArray(paramIndex++, array, offset, length, flags);
     }
 
     public final void putDirectBuffer(final java.nio.Buffer value, int offset, int length) {
-        paramOffset += encoder.putAddress(buffer, paramOffset, 0L);
+        paramOffset = encoder.putAddress(buffer, paramOffset, 0L);
         getObjectBuffer().putDirectBuffer(paramIndex++, value, offset, length);
     }
 
     public final void putStruct(final byte[] struct, int offset) {
-        final int size = function.paramTypes[paramIndex].size;
+        final Type type = function.getParameterType(paramIndex);
 
         if (encoder.isRaw()) {
-            System.arraycopy(struct, offset, buffer, paramOffset, size);
-            paramOffset = FFI_ALIGN(paramOffset + size, 4);
+            paramOffset = FFI_ALIGN(paramOffset, type.align);
+            System.arraycopy(struct, offset, buffer, paramOffset, type.size);
+            paramOffset = FFI_ALIGN(paramOffset + type.size, FFI_SIZEOF_ARG);
         } else {
-            paramOffset += encoder.putAddress(buffer, paramOffset, 0L);
-            getObjectBuffer().putArray(paramIndex, struct, offset, size, ObjectBuffer.IN);
+            paramOffset = encoder.putAddress(buffer, paramOffset, 0L);
+            getObjectBuffer().putArray(paramIndex, struct, offset, type.size, ObjectBuffer.IN);
         }
         ++paramIndex;
     }
 
     public final void putStruct(final long struct) {
-        final int size = function.paramTypes[paramIndex].size;
+        final Type type = function.getParameterType(paramIndex);
 
         if (encoder.isRaw()) {
-            MemoryIO.getInstance().getByteArray(struct, buffer, paramOffset, size);
-            paramOffset = FFI_ALIGN(paramOffset + size, 4);
+            paramOffset = FFI_ALIGN(paramOffset, type.align);
+            MemoryIO.getInstance().getByteArray(struct, buffer, paramOffset, type.size);
+            paramOffset = FFI_ALIGN(paramOffset + type.size, FFI_SIZEOF_ARG);
         } else {
-            paramOffset += encoder.putAddress(buffer, paramOffset, struct);
+            paramOffset = encoder.putAddress(buffer, paramOffset, struct);
         }
         ++paramIndex;
     }
 
     public final void putJNIEnvironment() {
-        paramOffset += encoder.putAddress(buffer, paramOffset, 0L);
+        paramOffset = encoder.putAddress(buffer, paramOffset, 0L);
         getObjectBuffer().putJNI(paramIndex++, ObjectBuffer.JNIENV);
     }
 
@@ -278,25 +281,25 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
             return function.getRawParameterSize();
         }
         public final int putByte(byte[] buffer, int offset, int value) {
-            IO.putByte(buffer, offset, value); return 4;
+            IO.putByte(buffer, offset, value); return offset + 4;
         }
         public final int putShort(byte[] buffer, int offset, int value) {
-            IO.putShort(buffer, offset, value); return 4;
+            IO.putShort(buffer, offset, value); return offset + 4;
         }
         public final int putInt(byte[] buffer, int offset, int value) {
-            IO.putInt(buffer, offset, value); return 4;
+            IO.putInt(buffer, offset, value); return offset + 4;
         }
         public final int putLong(byte[] buffer, int offset, long value) {
-            IO.putLong(buffer, offset, value); return 8;
+            IO.putLong(buffer, offset, value); return offset + 8;
         }
         public final int putFloat(byte[] buffer, int offset, float value) {
-            IO.putFloat(buffer, offset, value); return 4;
+            IO.putFloat(buffer, offset, value); return offset + 4;
         }
         public final int putDouble(byte[] buffer, int offset, double value) {
-            IO.putDouble(buffer, offset, value); return 8;
+            IO.putDouble(buffer, offset, value); return offset + 8;
         }
         public final int putAddress(byte[] buffer, int offset, long value) {
-            IO.putAddress(buffer, offset, value); return 4;
+            IO.putAddress(buffer, offset, value); return offset + 4;
         }
     }
     private static final class DefaultEncoder extends Encoder {
@@ -314,25 +317,25 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
             return function.getParameterCount() * PARAM_SIZE;
         }
         public final int putByte(byte[] buffer, int offset, int value) {
-            io.putByte(buffer, offset, value); return PARAM_SIZE;
+            io.putByte(buffer, offset, value); return offset + PARAM_SIZE;
         }
         public final int putShort(byte[] buffer, int offset, int value) {
-            io.putShort(buffer, offset, value); return PARAM_SIZE;
+            io.putShort(buffer, offset, value); return offset + PARAM_SIZE;
         }
         public final int putInt(byte[] buffer, int offset, int value) {
-            io.putInt(buffer, offset, value); return PARAM_SIZE;
+            io.putInt(buffer, offset, value); return offset + PARAM_SIZE;
         }
         public final int putLong(byte[] buffer, int offset, long value) {
-            io.putLong(buffer, offset, value); return PARAM_SIZE;
+            io.putLong(buffer, offset, value); return offset + PARAM_SIZE;
         }
         public final int putFloat(byte[] buffer, int offset, float value) {
-            io.putFloat(buffer, offset, value); return PARAM_SIZE;
+            io.putFloat(buffer, offset, value); return offset + PARAM_SIZE;
         }
         public final int putDouble(byte[] buffer, int offset, double value) {
-            io.putDouble(buffer, offset, value); return PARAM_SIZE;
+            io.putDouble(buffer, offset, value); return offset + PARAM_SIZE;
         }
         public final int putAddress(byte[] buffer, int offset, long value) {
-            io.putAddress(buffer, offset, value); return PARAM_SIZE;
+            io.putAddress(buffer, offset, value); return offset + PARAM_SIZE;
         }
     }
 

@@ -5,20 +5,40 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 /**
- * Provides facilities to read and write native memory from java.
+ * Provides facilities to access native memory from java.
  */
 public abstract class MemoryIO {
+    /** A handle to the JNI accessor */
     private final Foreign foreign = Foreign.getInstance();
+
+    /** The address mask used to truncate 32bit addresses contained in long values */
     private static final long ADDRESS_MASK = Platform.getPlatform().addressMask();
+
+    /** Holds a single instance of <tt>MemoryIO</tt> */
     private static final class SingletonHolder {
-        private static final MemoryIO INSTANCE = getImpl();
+        private static final MemoryIO INSTANCE = newMemoryIO();
     }
+
+    /**
+     * Gets an instance of <tt>MemoryIO</tt> that can be used to access native memory.
+     *
+     * @return A <tt>MemoryIO</tt> instance.
+     */
     public static MemoryIO getInstance() {
         return SingletonHolder.INSTANCE;
     }
+
+    /* Restrict construction of instances to subclasses defined in this class only */
     private MemoryIO() {}
-    private static final MemoryIO getImpl() {
+
+    /**
+     * Creates a new instance of <tt>MemoryIO</tt> optimized for the current platform.
+     *
+     * @return An instance of <tt>MemoryIO</tt>
+     */
+    private static final MemoryIO newMemoryIO() {
         try {
+            // Use sun.misc.Unsafe unless explicitly disabled by the user, or not available
             return !Boolean.getBoolean("jffi.unsafe.disabled") && isUnsafeAvailable()
                     ? newUnsafeImpl() : newNativeImpl();
         } catch (Throwable t) {
@@ -36,79 +56,369 @@ public abstract class MemoryIO {
         return Platform.getPlatform().addressSize() == 32
                 ? newNativeImpl32() : newNativeImpl64();
     }
+
+    /**
+     * Creates a new JNI implementation of <tt>MemoryIO</tt> optimized for 32 bit platforms
+     *
+     * @return An instance of <tt>MemoryIO</tt>
+     */
     private static final MemoryIO newNativeImpl32() { return new NativeImpl32();}
+
+    /**
+     * Creates a new JNI implementation of <tt>MemoryIO</tt> optimized for 64 bit platforms
+     *
+     * @return An instance of <tt>MemoryIO</tt>
+     */
     private static final MemoryIO newNativeImpl64() { return new NativeImpl64();}
+
+    /**
+     * Creates a new sun.misc.Unsafe implementation of <tt>MemoryIO</tt>
+     *
+     * @return An instance of <tt>MemoryIO</tt>
+     */
     private static final MemoryIO newUnsafeImpl() {
         return Platform.getPlatform().addressSize() == 32
                 ? newUnsafeImpl32() : newUnsafeImpl64();
     }
+
+    /**
+     * Creates a new sun.misc.Unsafe implementation of <tt>MemoryIO</tt> optimized for 32 bit platforms
+     *
+     * @return An instance of <tt>MemoryIO</tt>
+     */
     private static final MemoryIO newUnsafeImpl32() { return new UnsafeImpl32(); }
+
+    /**
+     * Creates a new sun.misc.Unsafe implementation of <tt>MemoryIO</tt> optimized for 64 bit platforms
+     *
+     * @return An instance of <tt>MemoryIO</tt>
+     */
     private static final MemoryIO newUnsafeImpl64() { return new UnsafeImpl64(); }
-    
+
+    /**
+     * Reads an 8 bit integer from a native memory location.
+     *
+     * @param address The memory location to get the value from.
+     * @return A byte containing the value.
+     */
     public abstract byte getByte(long address);
+
+    /**
+     * Reads a 16 bit integer from a native memory location.
+     *
+     * @param address The memory location to get the value from.
+     * @return A short containing the value.
+     */
     public abstract short getShort(long address);
+
+    /**
+     * Reads a 32 bit integer from a native memory location.
+     *
+     * @param address The memory location to get the value from.
+     * @return An int containing the value.
+     */
     public abstract int getInt(long address);
+
+    /**
+     * Reads a 64 bit integer from a native memory location.
+     *
+     * @param address The memory location to get the value from.
+     * @return A long containing the value.
+     */
     public abstract long getLong(long address);
+
+    /**
+     * Reads a 32 bit floating point value from a native memory location.
+     *
+     * @param address The memory location to get the value from.
+     * @return A float containing the value.
+     */
     public abstract float getFloat(long address);
+
+    /**
+     * Reads a 64 bit floating point value from a native memory location.
+     *
+     * @param address The memory location to get the value from.
+     * @return A double containing the value.
+     */
     public abstract double getDouble(long address);
+
+    /**
+     * Reads a native memory address from a native memory location.
+     *
+     * @param address The memory location to get the value from.
+     * @return A long containing the value.
+     */
     public abstract long getAddress(long address);
+
+    /**
+     * Writes an 8 bit integer value to a native memory location.
+     *
+     * @param address The memory location to put the value.
+     * @param value The value to write to memory.
+     */
     public abstract void putByte(long address, byte value);
+
+    /**
+     * Writes a 16 bit integer value to a native memory location.
+     *
+     * @param address The memory location to put the value.
+     * @param value The value to write to memory.
+     */
     public abstract void putShort(long address, short value);
+
+    /**
+     * Writes a 32 bit integer value to a native memory location.
+     *
+     * @param address The memory location to put the value.
+     * @param value The value to write to memory.
+     */
     public abstract void putInt(long address, int value);
+
+    /**
+     * Writes a 64 bit integer value to a native memory location.
+     *
+     * @param address The memory location to put the value.
+     * @param value The value to write to memory.
+     */
     public abstract void putLong(long address, long value);
+
+    /**
+     * Writes a 32 bit floating point value to a native memory location.
+     *
+     * @param address The memory location to put the value.
+     * @param value The value to write to memory.
+     */
     public abstract void putFloat(long address, float value);
+
+    /**
+     * Writes a 64 bit floating point value to a native memory location.
+     *
+     * @param address The memory location to put the value.
+     * @param value The value to write to memory.
+     */
     public abstract void putDouble(long address, double value);
+
+    /**
+     * Writes a native memory address value to a native memory location.
+     *
+     * @param address The memory location to put the value.
+     * @param value The value to write to memory.
+     */
     public abstract void putAddress(long address, long value);
+
+    /**
+     * Copies contents of a native memory location to another native memory location.
+     *
+     * @param src The source memory address.
+     * @param dst The destination memory address.
+     * @param size The number of bytes to copy.
+     */
     public abstract void copyMemory(long src, long dst, long size);
-    public abstract void setMemory(long src, long size, byte value);
+
+    /**
+     * Sets a region of native memory to a specific byte value.
+     *
+     * @param address The address of start of the native memory.
+     * @param size The number of bytes to set.
+     * @param value The value to set the native memory to.
+     */
+    public abstract void setMemory(long address, long size, byte value);
+
+    /**
+     * Writes a java byte array to native memory.
+     *
+     * @param address The native memory address to copy the array to.
+     * @param data The java array to copy.
+     * @param offset The offset within the array to start copying from.
+     * @param length The number of array elements to copy.
+     */
     public final void putByteArray(long address, byte[] data, int offset, int length) {
         foreign.putByteArray(address, data, offset, length);
     }
+
+    /**
+     * Reads a java byte array from native memory.
+     *
+     * @param address The native memory address to copy the array from.
+     * @param data The java array to copy.
+     * @param offset The offset within the array to start copying to.
+     * @param length The number of array elements to copy.
+     */
     public final void getByteArray(long address, byte[] data, int offset, int length) {
         foreign.getByteArray(address, data, offset, length);
     }
+
+    /**
+     * Writes a java char array to native memory.
+     *
+     * @param address The native memory address to copy the array to.
+     * @param data The java array to copy.
+     * @param offset The offset within the array to start copying from.
+     * @param length The number of array elements to copy.
+     */
     public final void putCharArray(long address, char[] data, int offset, int length) {
         foreign.putCharArray(address, data, offset, length);
     }
+    
+    /**
+     * Reads a java char array from native memory.
+     *
+     * @param address The native memory address to copy the array from.
+     * @param data The java array to copy.
+     * @param offset The offset within the array to start copying to.
+     * @param length The number of array elements to copy.
+     */
     public final void getCharArray(long address, char[] data, int offset, int length) {
         foreign.getCharArray(address, data, offset, length);
     }
+
+    /**
+     * Writes a java short array to native memory.
+     *
+     * @param address The native memory address to copy the array to.
+     * @param data The java array to copy.
+     * @param offset The offset within the array to start copying from.
+     * @param length The number of array elements to copy.
+     */
     public final void putShortArray(long address, short[] data, int offset, int length) {
         foreign.putShortArray(address, data, offset, length);
     }
+    
+    /**
+     * Reads a java short array from native memory.
+     *
+     * @param address The native memory address to copy the array from.
+     * @param data The java array to copy.
+     * @param offset The offset within the array to start copying to.
+     * @param length The number of array elements to copy.
+     */
     public final void getShortArray(long address, short[] data, int offset, int length) {
         foreign.getShortArray(address, data, offset, length);
     }
+
+    /**
+     * Writes a java int array to native memory.
+     *
+     * @param address The native memory address to copy the array to.
+     * @param data The java array to copy.
+     * @param offset The offset within the array to start copying from.
+     * @param length The number of array elements to copy.
+     */
     public final void putIntArray(long address, int[] data, int offset, int length) {
         foreign.putIntArray(address, data, offset, length);
     }
+
+    /**
+     * Reads a java int array from native memory.
+     *
+     * @param address The native memory address to copy the array from.
+     * @param data The java array to copy.
+     * @param offset The offset within the array to start copying to.
+     * @param length The number of array elements to copy.
+     */
     public final void getIntArray(long address, int[] data, int offset, int length) {
         foreign.getIntArray(address, data, offset, length);
     }
-    public final void getLongArray(long address, long[] data, int offset, int length) {
-        foreign.getLongArray(address, data, offset, length);
-    }
+
+    /**
+     * Writes a java long array to native memory.
+     *
+     * @param address The native memory address to copy the array to.
+     * @param data The java array to copy.
+     * @param offset The offset within the array to start copying from.
+     * @param length The number of array elements to copy.
+     */
     public final void putLongArray(long address, long[] data, int offset, int length) {
         foreign.putLongArray(address, data, offset, length);
     }
-    public final void getFloatArray(long address, float[] data, int offset, int length) {
-        foreign.getFloatArray(address, data, offset, length);
+
+    /**
+     * Reads a java long array from native memory.
+     *
+     * @param address The native memory address to copy the array from.
+     * @param data The java array to copy.
+     * @param offset The offset within the array to start copying to.
+     * @param length The number of array elements to copy.
+     */
+    public final void getLongArray(long address, long[] data, int offset, int length) {
+        foreign.getLongArray(address, data, offset, length);
     }
+
+    /**
+     * Writes a java double array to native memory.
+     *
+     * @param address The native memory address to copy the array to.
+     * @param data The java array to copy.
+     * @param offset The offset within the array to start copying from.
+     * @param length The number of array elements to copy.
+     */
     public final void putFloatArray(long address, float[] data, int offset, int length) {
         foreign.putFloatArray(address, data, offset, length);
     }
-    public final void getDoubleArray(long address, double[] data, int offset, int length) {
-        foreign.getDoubleArray(address, data, offset, length);
+  
+    /**
+     * Reads a java float array from native memory.
+     *
+     * @param address The native memory address to copy the array from.
+     * @param data The java array to copy.
+     * @param offset The offset within the array to start copying to.
+     * @param length The number of array elements to copy.
+     */
+    public final void getFloatArray(long address, float[] data, int offset, int length) {
+        foreign.getFloatArray(address, data, offset, length);
     }
+
+    /**
+     * Writes a java double array to native memory.
+     *
+     * @param address The native memory address to copy the array to.
+     * @param data The java array to copy.
+     * @param offset The offset within the array to start copying from.
+     * @param length The number of array elements to copy.
+     */
     public final void putDoubleArray(long address, double[] data, int offset, int length) {
         foreign.putDoubleArray(address, data, offset, length);
     }
+
+    /**
+     * Reads a java double array from native memory.
+     *
+     * @param address The native memory address to copy the array from.
+     * @param data The java array to copy.
+     * @param offset The offset within the array to start copying to.
+     * @param length The number of array elements to copy.
+     */
+    public final void getDoubleArray(long address, double[] data, int offset, int length) {
+        foreign.getDoubleArray(address, data, offset, length);
+    }
+
+    /**
+     * Allocates native memory.
+     *
+     * @param size The number of bytes of memory to allocate
+     * @param clear Whether the memory should be cleared (each byte set to zero).
+     * @return The native address of the allocated memory.
+     */
     public final long allocateMemory(long size, boolean clear) {
         return foreign.allocateMemory(size, clear);
     }
+
+    /**
+     * Releases memory allocated via {@link allocateMemory} back to the system.
+     *
+     * @param address The address of the memory to release.
+     */
     public final void freeMemory(long address) {
         foreign.freeMemory(address);
     }
+
+    /**
+     * Gets the length of a native ascii or utf-8 string.
+     *
+     * @param address The native address of the string.
+     * @return The length of the string, in bytes.
+     */
     public final long getStringLength(long address) {
         return foreign.strlen(address);
     }
@@ -160,21 +470,54 @@ public abstract class MemoryIO {
         foreign.putZeroTerminatedByteArray(address, data, offset, length);
     }
 
+    /**
+     * Finds the location of a byte value in a native memory region.
+     *
+     * @param address The native memory address to start searching from.
+     * @param value The value to search for.
+     * @return The memory location of the value, if found, else -1 (minus one).
+     */
     public final long indexOf(long address, byte value) {
         return foreign.memchr(address, value, Integer.MAX_VALUE);
     }
+
+    /**
+     * Finds the location of a byte value in a native memory region.
+     *
+     * @param address The native memory address to start searching from.
+     * @param value The value to search for.
+     * @param maxlen The maximum number of bytes to search.
+     * @return The memory location of the value, if found, else -1 (minus one).
+     */
     public final long indexOf(long address, byte value, int maxlen) {
         return foreign.memchr(address, value, maxlen);
     }
 
+    /**
+     * Creates a new Direct ByteBuffer for a native memory region.
+     *
+     * @param address The start of the native memory region.
+     * @param capacity The size of the native memory region.
+     * @return A ByteBuffer representing the native memory region.
+     */
     public final java.nio.ByteBuffer newDirectByteBuffer(long address, int capacity) {
         return foreign.newDirectByteBuffer(address, capacity);
     }
 
+    /**
+     * Gets the native memory address of a direct ByteBuffer
+     *
+     * @param buffer A direct ByteBuffer to get the address of.
+     * @return The native memory address of the buffer contents, or null if not a direct buffer.
+     */
     public final long getDirectBufferAddress(java.nio.Buffer buffer) {
         return foreign.getDirectBufferAddress(buffer);
     }
 
+
+    /**
+     * An implementation of MemoryIO using JNI methods.
+     */
     private static abstract class NativeImpl extends MemoryIO {
         protected static final Foreign foreign = Foreign.getInstance();
         public final byte getByte(long address) {
@@ -220,6 +563,10 @@ public abstract class MemoryIO {
             foreign.copyMemory(src, dst, size);
         }
     }
+
+    /**
+     * A 32 bit optimized implementation of <tt>MemoryIO</tt> using JNI.
+     */
     private static final class NativeImpl32 extends NativeImpl {
         public final long getAddress(long address) {
             // Mask with ADDRESS_MASK to cancel out any sign extension
@@ -229,6 +576,10 @@ public abstract class MemoryIO {
             foreign.putAddress(address, value & ADDRESS_MASK);
         }
     }
+
+    /**
+     * A 64 bit optimized implementation of <tt>MemoryIO</tt> using JNI.
+     */
     private static final class NativeImpl64 extends NativeImpl {
         public final long getAddress(long address) {
             return foreign.getAddress(address);
@@ -237,6 +588,10 @@ public abstract class MemoryIO {
             foreign.putAddress(address, value);
         }
     }
+
+    /**
+     * An implementation of <tt>MemoryIO</tt> using sun.misc.Unsafe
+     */
     private static abstract class UnsafeImpl extends MemoryIO {
         protected static sun.misc.Unsafe unsafe = sun.misc.Unsafe.class.cast(getUnsafe());
         private static final Object getUnsafe() {
@@ -292,6 +647,10 @@ public abstract class MemoryIO {
             unsafe.setMemory(src, size, value);
         }
     }
+
+    /**
+     * A 32 bit optimized implementation of <tt>MemoryIO</tt> using sun.misc.Unsafe
+     */
     private static final class UnsafeImpl32 extends UnsafeImpl {
         public final long getAddress(long address) {
             return unsafe.getAddress(address) & ADDRESS_MASK;
@@ -300,6 +659,10 @@ public abstract class MemoryIO {
             unsafe.putAddress(address, value & ADDRESS_MASK);
         }
     }
+
+    /**
+     * A 64 bit optimized implementation of <tt>MemoryIO</tt> using sun.misc.Unsafe
+     */
     private static final class UnsafeImpl64 extends UnsafeImpl {
         public final long getAddress(long address) {
             return unsafe.getAddress(address);
@@ -308,6 +671,16 @@ public abstract class MemoryIO {
             unsafe.putAddress(address, value);
         }
     }
+
+
+    /**
+     * Verifies that there is are accessor functions (get,put) for a particular
+     * primitive type in the sun.misc.Unsafe class.
+     *
+     * @param unsafeClass The class of sun.misc.Unsafe
+     * @param primitive The class of the primitive type.
+     * @throws NoSuchMethodException If no accessors for that primitive type exist.
+     */
     @SuppressWarnings("unchecked")
     private static final void verifyAccessor(Class unsafeClass, Class primitive) throws NoSuchMethodException {
         String primitiveName = primitive.getSimpleName();
