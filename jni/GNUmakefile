@@ -74,10 +74,12 @@ ifneq ($(findstring cygwin,$(BUILD_OS)),)
   JAVA_HOME := $(shell cygpath -u $(JAVA_HOME))
 endif
 ifeq ($(OS), win32)
-  CC += -mno-cygwin
-  LDFLAGS += -mno-cygwin -Wl,--add-stdcall-alias
+  ifneq ($(findstring cygwin,$(BUILD_OS)),)
+    CC += -mno-cygwin -mwin32
+    LDFLAGS += -mno-cygwin -Wl,--add-stdcall-alias
+  endif
   PICFLAGS=
-  SOFLAGS += -shared
+  SOFLAGS += -shared -mimpure-text -static-libgcc
   PREFIX =
   JNIEXT=dll
 endif
