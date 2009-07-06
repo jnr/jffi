@@ -1,6 +1,6 @@
 # -*- makefile -*-
-BUILD_OS = $(strip $(shell uname -s | tr '[:upper:]' '[:lower:]'))
-OS = $(BUILD_OS)
+BUILD_OS := $(strip $(shell uname -s | tr '[:upper:]' '[:lower:]'))
+OS ?= $(BUILD_OS)
 ifeq ($(OS),sunos)
   OS = solaris
 endif
@@ -57,25 +57,25 @@ IFLAGS = -I"$(BUILD_DIR)" -I"$(BUILD_DIR)"/jni -I"$(JFFI_SRC_DIR)" -I"$(LIBFFI_B
 CFLAGS = $(OFLAGS) $(WFLAGS) $(IFLAGS) $(PICFLAGS) $(JDK_INCLUDES)
 CFLAGS += -D_REENTRANT -D_LARGEFILE64_SOURCE -D_GNU_SOURCE
 
-ifeq ($(OS),mingw32)
-  OS = win32
-  CPU = i386
-  JDK_INCLUDES=-I$(JNI_DIR)/include -I$(JNI_DIR)/include/win32
-  ifneq ($(OS),$(BUILD_OS))
-    CC ?= i386-mingw32-gcc
-    LD ?= i386-mingw32-ld
-  else
-    CC = gcc
-    LD = ld
-  endif
+ifeq ($(OS),cross-mingw32)
+  override OS = win32
+  override CPU = i386
+  JDK_INCLUDES=-I$(JNI_DIR)/win32/include -I$(JNI_DIR)/win32/include/win32
+  CC = i386-mingw32-gcc
+  LD = i386-mingw32-ld
+  CONFIGURE_HOST = i386-mingw32
 endif
 ifneq ($(findstring cygwin,$(BUILD_OS)),)
   OS = win32
   JAVA_HOME := $(shell cygpath -u $(JAVA_HOME))
 endif
 ifeq ($(OS), win32)
-  CC += -mno-cygwin
-  LDFLAGS += -mno-cygwin -Wl,--add-stdcall-alias
+  ifneq ($(findstring cygwin, $(BUILD_OS)),)
+    CC += -mno-cygwin
+    LDFLAGS += -mno-cygwin
+  endif
+  CFLAGS += -mwin32
+  LDFLAGS += -Wl,--add-stdcall-alias
   PICFLAGS=
   SOFLAGS += -shared
   PREFIX =
@@ -136,8 +136,8 @@ endif
 LIBJFFI = $(BUILD_DIR)/$(PREFIX)$(LIBNAME).$(JNIEXT)
 FFI_CONFIGURE = $(LIBFFI_SRC_DIR)/configure --disable-static \
 	--with-pic=yes --disable-dependency-tracking
-ifneq ($(MINGW32),)
-	FFI_CONFIGURE += --host=i386-mingw32
+ifdef CONFIGURE_HOST
+	FFI_CONFIGURE += --host=$(CONFIGURE_HOST)
 endif
 all:	$(LIBJFFI)
 
