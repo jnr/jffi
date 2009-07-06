@@ -136,6 +136,10 @@
             <arg value="-f"/>
             <arg value="jni/GNUmakefile"/>
         </exec>
+        <exec executable="i386-mingw32-strip" failonerror="true">
+            <arg value="-S"/> <!-- Strip debug symbols only -->
+            <arg value="${build.native.dir}/jffi.dll"/>
+        </exec>
         <mkdir dir="${dist.dir}"/>
         <jar jarfile="${dist.dir}/i386-Windows.jar">
             <zipfileset prefix="jni/i386-Windows" dir="${build.native.dir}">
