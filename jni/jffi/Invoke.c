@@ -199,23 +199,20 @@ invokeArrayWithObjects_(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer,
     Function* ctx = (Function *) j2p(ctxAddress);
     union { double d; long long ll; jbyte tmp[PARAM_SIZE]; } tmpStackBuffer[MAX_STACK_ARGS];
     jbyte *tmpBuffer = (jbyte *) &tmpStackBuffer[0];
-#if defined(USE_RAW)
-    int rawAdj = unlikely(ctx->cif.rtype->type == FFI_TYPE_STRUCT) ? sizeof(void *) : 0;
-#else
     void* ffiStackArgs[MAX_STACK_ARGS], **ffiArgs = &ffiStackArgs[0];
-#endif
     Array stackArrays[MAX_STACK_OBJECTS], *arrays = &stackArrays[0];
     StackAllocator alloc;
     unsigned int i, arrayCount = 0;
 
-    if (unlikely(ctx->cif.nargs > MAX_STACK_ARGS)) {
-        tmpBuffer = alloca_aligned(ctx->cif.nargs * PARAM_SIZE, MIN_ALIGN);
-    }
 #if defined(USE_RAW)
-    (*env)->GetByteArrayRegion(env, paramBuffer, 0, ctx->rawParameterSize, tmpBuffer + rawAdj);
+    if (unlikely((unsigned int) ctx->rawParameterSize > sizeof(tmpStackBuffer))) {
+        tmpBuffer = alloca_aligned(ctx->rawParameterSize, MIN_ALIGN);
+    }
+    (*env)->GetByteArrayRegion(env, paramBuffer, 0, ctx->rawParameterSize, tmpBuffer);
 #else
     if (unlikely(ctx->cif.nargs > MAX_STACK_ARGS)) {
         ffiArgs = alloca_aligned(ctx->cif.nargs * sizeof(void *), MIN_ALIGN);
+        tmpBuffer = alloca_aligned(ctx->cif.nargs * PARAM_SIZE, MIN_ALIGN);
     }
     for (i = 0; i < ctx->cif.nargs; ++i) {
         ffiArgs[i] = &tmpBuffer[i * PARAM_SIZE];
@@ -275,7 +272,7 @@ invokeArrayWithObjects_(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer,
         }
 
 #if defined(USE_RAW)
-        *((void **)(tmpBuffer + rawAdj + ctx->rawParamOffsets[idx])) = ptr;
+        *((void **)(tmpBuffer + ctx->rawParamOffsets[idx])) = ptr;
 #else
         if (unlikely(ctx->cif.arg_types[idx]->type == FFI_TYPE_STRUCT)) {
             ffiArgs[idx] = ptr;
@@ -285,11 +282,17 @@ invokeArrayWithObjects_(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer,
 #endif
     }
 #if defined(USE_RAW)
-    // For struct return values, we need to push a return value address on the parameter stack
+    //
+    // Special case for struct return values - unroll into a ptr array and
+    // use ffi_call, since ffi_raw_call with struct return values is undocumented.
+    //
     if (unlikely(ctx->cif.rtype->type == FFI_TYPE_STRUCT)) {
-        *(void **) tmpBuffer = retval;
+        ffiArgs = alloca(ctx->cif.nargs * sizeof(void *));
+        ffi_raw_to_ptrarray(&ctx->cif, (ffi_raw *) tmpBuffer, ffiArgs);
+        ffi_call(&ctx->cif, FFI_FN(ctx->function), retval, ffiArgs);
+    } else {
+        ffi_raw_call(&ctx->cif, FFI_FN(ctx->function), retval, (ffi_raw *) tmpBuffer);
     }
-    ffi_raw_call(&ctx->cif, FFI_FN(ctx->function), retval, (ffi_raw *) tmpBuffer);
 #else
     ffi_call(&ctx->cif, FFI_FN(ctx->function), retval, ffiArgs);
 #endif
