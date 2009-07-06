@@ -43,15 +43,7 @@ invokeArray(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer, void* returnB
             tmpBuffer = alloca_aligned(ctx->cif.bytes, MIN_ALIGN);
         }
 
-        // calculate room needed for return address for struct returns
-        int adj = unlikely(ctx->cif.rtype->type == FFI_TYPE_STRUCT) ? sizeof(void *) : 0;
-
-        (*env)->GetByteArrayRegion(env, paramBuffer, 0, ctx->rawParameterSize, tmpBuffer + adj);
-    }
-
-    // For struct return values, we need to push a return value address on the parameter stack
-    if (unlikely(ctx->cif.rtype->type == FFI_TYPE_STRUCT)) {
-        *(void **) tmpBuffer = returnBuffer;
+        (*env)->GetByteArrayRegion(env, paramBuffer, 0, ctx->rawParameterSize, tmpBuffer);
     }
 
     ffi_raw_call(&ctx->cif, FFI_FN(ctx->function), returnBuffer, (ffi_raw *) tmpBuffer);
@@ -170,8 +162,31 @@ Java_com_kenai_jffi_Foreign_invokeArrayReturnStruct(JNIEnv* env, jclass self, jl
 {
     Function* ctx = (Function *) j2p(ctxAddress);
     jbyte* retval = alloca_aligned(ctx->cif.rtype->size, MIN_ALIGN);
-    
-    invokeArray(env, ctxAddress, paramBuffer, retval);
+    jbyte* tmpBuffer;
+    void** ffiArgs;
+    int i;
+
+    //
+    // Due to the undocumented and somewhat strange struct-return handling when
+    // using ffi_raw_call(), we convert from raw to ptr array, then call via normal
+    // ffi_call
+    //
+
+    ffiArgs = alloca(ctx->cif.nargs * sizeof(void *));
+
+#ifdef USE_RAW
+    tmpBuffer = alloca(ctx->rawParameterSize);
+    (*env)->GetByteArrayRegion(env, paramBuffer, 0, ctx->rawParameterSize, tmpBuffer);
+    ffi_raw_to_ptrarray(&ctx->cif, (ffi_raw *) tmpBuffer, ffiArgs);
+#else
+    tmpBuffer = alloca_aligned(ctx->cif.nargs * PARAM_SIZE, MIN_ALIGN);
+    (*env)->GetByteArrayRegion(env, paramBuffer, 0, ctx->cif.nargs * PARAM_SIZE, tmpBuffer);
+    for (i = 0; i < ctx->cif.nargs; ++i) {
+        ffiArgs[i] = &tmpBuffer[i * PARAM_SIZE];
+    }
+#endif
+    ffi_call(&ctx->cif, FFI_FN(ctx->function), retval, ffiArgs);
+    SAVE_ERRNO(ctx);
     (*env)->SetByteArrayRegion(env, returnBuffer, offset, ctx->cif.rtype->size, retval);
 }
 
