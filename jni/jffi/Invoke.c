@@ -177,7 +177,9 @@ Java_com_kenai_jffi_Foreign_invokeArrayReturnStruct(JNIEnv* env, jclass self, jl
 #ifdef USE_RAW
     tmpBuffer = alloca(ctx->rawParameterSize);
     (*env)->GetByteArrayRegion(env, paramBuffer, 0, ctx->rawParameterSize, tmpBuffer);
-    ffi_raw_to_ptrarray(&ctx->cif, (ffi_raw *) tmpBuffer, ffiArgs);
+    for (i = 0; i < (int) ctx->cif.nargs; ++i) {
+        ffiArgs[i] = (tmpBuffer + ctx->rawParamOffsets[i]);
+    }
 #else
     tmpBuffer = alloca_aligned(ctx->cif.nargs * PARAM_SIZE, MIN_ALIGN);
     (*env)->GetByteArrayRegion(env, paramBuffer, 0, ctx->cif.nargs * PARAM_SIZE, tmpBuffer);
@@ -288,7 +290,9 @@ invokeArrayWithObjects_(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer,
     //
     if (unlikely(ctx->cif.rtype->type == FFI_TYPE_STRUCT)) {
         ffiArgs = alloca(ctx->cif.nargs * sizeof(void *));
-        ffi_raw_to_ptrarray(&ctx->cif, (ffi_raw *) tmpBuffer, ffiArgs);
+        for (i = 0; i < ctx->cif.nargs; ++i) {
+            ffiArgs[i] = (tmpBuffer + ctx->rawParamOffsets[i]);
+        }
         ffi_call(&ctx->cif, FFI_FN(ctx->function), retval, ffiArgs);
     } else {
         ffi_raw_call(&ctx->cif, FFI_FN(ctx->function), retval, (ffi_raw *) tmpBuffer);
