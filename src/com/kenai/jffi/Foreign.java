@@ -76,6 +76,27 @@ final class Foreign {
     /** All symbols in the library are made available to other libraries */
     public static final int RTLD_GLOBAL = 0x00008;
 
+    /** Pages can be read */
+    public static final int PROT_READ  = 0x1;
+
+    /** Pages can be written */
+    public static final int PROT_WRITE = 0x2;
+
+    /** Pages can be executed */
+    public static final int PROT_EXEC  = 0x4;
+
+    /** Pages cannot be accessed */
+    public static final int PROT_NONE  = 0x0;
+
+    /** Use the specified address */
+    public static final int MEM_FIXED = 0x10;
+
+    /** Code segment memory */
+    public static final int MEM_TEXT = 0x20;
+
+    /** Data segment memory */
+    public static final int MEM_DATA = 0x40;
+    
     /*
      * Function flags
      */
@@ -152,6 +173,43 @@ final class Foreign {
      * @param address The address of the memory to release.
      */
     final native void freeMemory(long address);
+
+    /**
+     * Gets the size of a page of memory.
+     *
+     * @return The size of a memory page in bytes.
+     */
+    final native long pageSize();
+
+    /**
+     * Allocates virtual memory.
+     *
+     * @param addr The address to request the memory be mapped at.
+     * @param size The size in bytes of the memory to allocate.
+     * @param prot The protection mode for the memory area.
+     * @param flags Other flags.
+     * @return The memory address, or -1 on error.
+     */
+    final native long vmalloc(long addr, long size, int prot, int flags);
+
+    /**
+     * De-allocates virtual memory.
+     *
+     * @param address The address to release.
+     * @param size The size of the memory region.
+     * @return <tt>true</tt> if the memory was released.
+     */
+    final native boolean vmfree(long address, long size);
+
+    /**
+     * Alters the protection of a virtual memory area.
+     *
+     * @param address The address of the start of the memory region to protect.
+     * @param size The size of the memory region.
+     * @param prot The new protection mode to apply.
+     * @return <tt>true</tt> if the new mode was set successfully.
+     */
+    final native boolean vmprotect(long address, long size, int prot);
 
     /**
      * Creates a new native function context.
