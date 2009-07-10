@@ -123,7 +123,7 @@
 
     </target>
 
-    <target name="cross-mingw32" depends="-init-vars, -generate-native-headers">
+    <target name="cross-mingw32" depends="init, -generate-native-headers">
         <mkdir dir="${build.native.dir}"/>
 
         <exec executable="${make.exe}" failonerror="true">
