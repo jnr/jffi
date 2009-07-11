@@ -183,7 +183,7 @@ Java_com_kenai_jffi_Foreign_invokeArrayReturnStruct(JNIEnv* env, jclass self, jl
 #else
     tmpBuffer = alloca_aligned(ctx->cif.nargs * PARAM_SIZE, MIN_ALIGN);
     (*env)->GetByteArrayRegion(env, paramBuffer, 0, ctx->cif.nargs * PARAM_SIZE, tmpBuffer);
-    for (i = 0; i < ctx->cif.nargs; ++i) {
+    for (i = 0; i < (int) ctx->cif.nargs; ++i) {
         ffiArgs[i] = &tmpBuffer[i * PARAM_SIZE];
     }
 #endif
@@ -216,7 +216,7 @@ invokeArrayWithObjects_(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer,
         ffiArgs = alloca_aligned(ctx->cif.nargs * sizeof(void *), MIN_ALIGN);
         tmpBuffer = alloca_aligned(ctx->cif.nargs * PARAM_SIZE, MIN_ALIGN);
     }
-    for (i = 0; i < ctx->cif.nargs; ++i) {
+    for (i = 0; i < (unsigned int) ctx->cif.nargs; ++i) {
         ffiArgs[i] = &tmpBuffer[i * PARAM_SIZE];
     }
     (*env)->GetByteArrayRegion(env, paramBuffer, 0, ctx->cif.nargs * PARAM_SIZE, tmpBuffer);
