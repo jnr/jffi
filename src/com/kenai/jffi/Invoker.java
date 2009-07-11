@@ -12,7 +12,7 @@ public abstract class Invoker {
     /** A mask to apply to native memory addresses to cancel sign extension */
     private static final long ADDRESS_MASK = Platform.getPlatform().addressMask();
     
-    final Foreign foreign = Foreign.getInstance();
+    private final Foreign foreign = Foreign.getInstance();
 
     /** Lazy initialization singleton holder */
     private static final class SingletonHolder {
