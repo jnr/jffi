@@ -27,15 +27,16 @@ import java.nio.ByteBuffer;
 
 final class Foreign {
     private static final class SingletonHolder {
-        static {
-            Init.init();
-        }
         private static final Foreign INSTANCE = new Foreign();
     }
+
     public static final Foreign getInstance() {
         return SingletonHolder.INSTANCE;
     }
-    private Foreign() {}
+    
+    private Foreign() {
+        Init.init();
+    }
 
     private final static int getVersionField(String name) {
         try {

@@ -31,7 +31,8 @@ import java.nio.channels.ReadableByteChannel;
  * Utility class to load the jffi stub library
  */
 final class Init {
-    private static final String stubLibraryName = "jffi";
+    private static final String stubLibraryName
+            = String.format("jffi-%d.%d", Foreign.VERSION_MAJOR, Foreign.VERSION_MINOR);
     /**
      * This is a dummy function which when called, makes the <code>static{}</code>
      * section load, and the library gets loaded.

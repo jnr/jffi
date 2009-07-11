@@ -133,7 +133,7 @@ ifneq ($(strip $(findstring $(OS), linux solaris)),)
   LD += -m$(MODEL)
 endif
 
-LIBJFFI = $(BUILD_DIR)/$(PREFIX)$(LIBNAME).$(JNIEXT)
+LIBJFFI = $(BUILD_DIR)/$(PREFIX)$(LIBNAME)-$(VERSION).$(JNIEXT)
 FFI_CONFIGURE = $(LIBFFI_SRC_DIR)/configure --disable-static \
 	--with-pic=yes --disable-dependency-tracking
 ifdef CONFIGURE_HOST

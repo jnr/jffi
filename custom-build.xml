@@ -135,6 +135,7 @@
             <arg value="JNI_DIR=${jni.src.dir}"/>
             <arg value="BUILD_DIR=${jni.build.dir}"/>
             <arg value="CPU=${os.arch}"/>
+            <arg value="VERSION=${jffi.version.major}.${jffi.version.minor}"/>
             <arg value="-f"/>
             <arg value="${jni.GNUmakefile}"/>
         </exec>
@@ -150,6 +151,7 @@
             <arg value="SRC_DIR=${src.native.dir}"/>
             <arg value="JNI_DIR=${src.native.dir}"/>
             <arg value="BUILD_DIR=${build.native.dir}"/>
+            <arg value="VERSION=${jffi.version.major}.${jffi.version.minor}"/>
             <arg value="CPU=${os.arch}"/>
             <arg value="-f"/>
             <arg value="jni/GNUmakefile"/>
@@ -161,7 +163,7 @@
         <mkdir dir="${dist.dir}"/>
         <jar jarfile="${dist.dir}/i386-Windows.jar">
             <zipfileset prefix="jni/i386-Windows" dir="${build.native.dir}">
-                <include name="jffi.dll"/>
+                <include name="jffi*.dll"/>
             </zipfileset>
         </jar>
     </target>
@@ -182,11 +184,11 @@
         <echo message="platform=${platform}"/>
         <jar jarfile="${dist.dir}/${platform}.jar">
             <zipfileset prefix="jni/${platform}" dir="${build.native.dir}">
-                <include name="jffi.dll"/>
-                <include name="libjffi.so"/>
-                <include name="libjffi.jnilib"/>
-                <include name="libjffi.dylib"/>
-                <include name="libjffi.a"/>
+                <include name="jffi*.dll"/>
+                <include name="libjffi*.so"/>
+                <include name="libjffi*.jnilib"/>
+                <include name="libjffi*.dylib"/>
+                <include name="libjffi*.a"/>
             </zipfileset>
         </jar>
     </target>
