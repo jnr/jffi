@@ -3,7 +3,7 @@
 <project name="custom-build" default="default" basedir=".">
     <target name="-compile-java"/>
     <target name="build-native" depends="-build-platform-jar, -assemble-final-jar"/>
-    
+
     <target name="-init-vars">
         <property name="build.native.dir" location="${build.dir}/jni"/>
         <property name="src.native.dir" location="jni"/>
@@ -174,7 +174,7 @@
         <exec executable="${make.exe}" failonerror="true">
             <arg value="JAVA_HOME=${java.home}"/>
             <arg value="BUILD_DIR=${build.dir}"/>
-            <arg value="CPU=i386"/>
+            <arg value="CPU=${os.arch}"/>
             <arg value="-f"/>
             <arg value="libtest/GNUmakefile"/>
         </exec>

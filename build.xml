@@ -71,6 +71,25 @@
     nbproject/build-impl.xml file. 
 
     -->
+    <target name="-pre-init">
+        <condition property="run.jvm.model" value="-d64">
+          <or>
+            <os arch="amd64"/>
+            <os arch="x86_64"/>
+            <os arch="sparcv9"/>
+          </or>
+        </condition>
+        <condition property="run.jvm.model" value="-d32">
+          <or>
+            <os arch="i386"/>
+            <os arch="x86"/>
+            <os arch="powerpc"/>
+            <os arch="sparc"/>
+          </or>
+        </condition>
+        <property name="run.jvmargs" value="${run.jvm.model} -Djffi.library.path=build/jni -Djffi.boot.library.path=build/jni"/>
+    </target>
+
     <import file="custom-build.xml"/>
     <target name="-post-init" depends="-init-vars"/>
     <target name="-post-compile" depends="-build-native-library"/>
