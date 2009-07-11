@@ -18,6 +18,9 @@
 
 package com.kenai.jffi;
 
+/**
+ * Convenience class to interrogate the system about various platform-specific details.
+ */
 public abstract class Platform {
     private final OS os;
     private final CPU cpu;
@@ -32,15 +35,23 @@ public abstract class Platform {
      * code to determine where to find the native stub library.  Do not rename.
      */
     public enum OS {
+        /** MacOSX */
         DARWIN,
+        /** FreeBSD */
         FREEBSD,
+        /** NetBSD */
         NETBSD,
+        /** OpenBSD */
         OPENBSD,
+        /** Linux */
         LINUX,
+        /** Solaris (and OpenSolaris) */
         SOLARIS,
+        /** The evil borg operating system */
         WINDOWS,
+        /** IBM AIX */
         AIX,
-
+        /** No idea what the operating system is */
         UNKNOWN;
 
         @Override
@@ -54,12 +65,19 @@ public abstract class Platform {
      * code to determine where to find the native stub library.  Do not rename.
      */
     public enum CPU {
+        /** Intel ia32 */
         I386,
+        /** AMD 64 bit (aka EM64T/X64) */
         X86_64,
+        /** Power PC 32 bit */
         PPC,
+        /** Power PC 64 bit */
         PPC64,
+        /** Sun sparc 32 bit */
         SPARC,
+        /** Sun sparc 64 bit */
         SPARCV9,
+        /** Unknown CPU */
         UNKNOWN;
 
         @Override
