@@ -8,6 +8,9 @@
         <property name="build.native.dir" location="${build.dir}/jni"/>
         <property name="src.native.dir" location="jni"/>
         <property name="complete.jar" value="${dist.dir}/jffi-complete.jar"/>
+        <property name="jffi.version.major" value="0"/>
+        <property name="jffi.version.minor" value="6"/>
+        <property name="jffi.version.micro" value="0"/>
         <mkdir dir="${build.native.dir}"/>
         
         <!-- normalize the various os.arch naming conventions -->
@@ -63,12 +66,27 @@
           <not><isset property="make.exe"/></not>
         </condition>
     </target>
-
-    <target name="-generate-native-headers" depends="-init-vars,-compile-java">
+    <target name="-generate-version" depends="init">
+        <!-- <delete file="${build.dir}/java/com/kenai/jffi/Version.java" quiet="true"/> -->
+        <echo message="Generating Version.java"/>
+        <mkdir dir="${build.dir}/java/com/kenai/jffi"/>
+        <echo file="${build.dir}/java/com/kenai/jffi/Version.java" append="false">
+            package com.kenai.jffi;
+            public final class Version {
+                private Version() {}
+                public static final int MAJOR = ${jffi.version.major};
+                public static final int MINOR = ${jffi.version.minor};
+                public static final int MICRO = ${jffi.version.micro};
+            }
+        </echo>
+        <javac destdir="${build.classes.dir}" srcdir="${build.dir}/java"/>
+    </target>
+    <target name="-generate-native-headers" depends="-init-vars,-generate-version,-compile-java">
         <mkdir dir="${build.native.dir}"/>
         <javah classpath="${build.classes.dir}" destdir="${build.native.dir}" force="yes">
             <class name="com.kenai.jffi.Foreign"/>
             <class name="com.kenai.jffi.ObjectBuffer"/>
+            <class name="com.kenai.jffi.Version"/>
         </javah>
         <!--
         <exec executable="javah" failonerror="true">
@@ -80,7 +98,7 @@
         -->
     </target>
     
-    <target name="-build-native-library" depends="-init-vars, -generate-native-headers">
+    <target name="-build-native-library" depends="-init-vars, -generate-native-headers, -generate-version">
         <mkdir dir="${build.native.dir}"/>
         
         <exec executable="cygpath" outputproperty="jni.GNUmakefile" osfamily="Windows">

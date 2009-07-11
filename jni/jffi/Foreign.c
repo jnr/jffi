@@ -5,6 +5,7 @@
 #include <jni.h>
 #include "Exception.h"
 #include "com_kenai_jffi_Foreign.h"
+#include "com_kenai_jffi_Version.h"
 #include "jffi.h"
 
 #ifndef _WIN32
@@ -40,9 +41,9 @@ thread_data_free(void *ptr)
 JNIEXPORT jint JNICALL
 Java_com_kenai_jffi_Foreign_getVersion(JNIEnv* env, jobject self)
 {
-    return (com_kenai_jffi_Foreign_VERSION_MAJOR << 16)
-        | (com_kenai_jffi_Foreign_VERSION_MINOR << 8)
-        | (com_kenai_jffi_Foreign_VERSION_MICRO);
+    return (com_kenai_jffi_Version_MAJOR << 16)
+        | (com_kenai_jffi_Version_MINOR << 8)
+        | (com_kenai_jffi_Version_MICRO);
 }
 
 JNIEXPORT jint JNICALL

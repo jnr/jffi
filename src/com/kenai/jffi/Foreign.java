@@ -36,9 +36,18 @@ final class Foreign {
         return SingletonHolder.INSTANCE;
     }
     private Foreign() {}
-    public final static int VERSION_MAJOR = 0;
-    public final static int VERSION_MINOR = 5;
-    public final static int VERSION_MICRO = 0;
+
+    private final static int getVersionField(String name) {
+        try {
+        Class c = Class.forName(Foreign.class.getPackage().getName() + ".Version");
+            return (Integer) c.getField(name).get(c);
+        } catch (Throwable t) {
+            throw new RuntimeException(t);
+        }
+    }
+    public final static int VERSION_MAJOR = getVersionField("MAJOR");
+    public final static int VERSION_MINOR = getVersionField("MINOR");
+    public final static int VERSION_MICRO = getVersionField("MICRO");
 
     public final static int TYPE_VOID = 0;
     public final static int TYPE_FLOAT = 2;
