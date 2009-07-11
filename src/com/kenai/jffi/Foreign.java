@@ -88,15 +88,44 @@ final class Foreign {
     /** Pages cannot be accessed */
     public static final int PROT_NONE  = 0x0;
 
+    /** Share changes */
+    public static final int MAP_SHARED = 0x1;
+
+    public static final int MAP_PRIVATE = 0x2;
+
     /** Use the specified address */
-    public static final int MEM_FIXED = 0x10;
+    public static final int MAP_FIXED = 0x10;
+
+    public static final int MAP_NORESERVE = 0x40;
+
+    public static final int MAP_ANON = 0x100;
+
+    public static final int MAP_ALIGN = 0x200;
 
     /** Code segment memory */
-    public static final int MEM_TEXT = 0x20;
+    public static final int MAP_TEXT = 0x400;
 
-    /** Data segment memory */
-    public static final int MEM_DATA = 0x40;
-    
+    /** Win32 VirtualAlloc/VirtualProtect flags */
+    public static final int PAGE_NOACCESS = 0x0001;
+    public static final int PAGE_READONLY = 0x0002;
+    public static final int PAGE_READWRITE = 0x0004;
+    public static final int PAGE_WRITECOPY = 0x0008;
+    public static final int PAGE_EXECUTE           = 0x0010;
+    public static final int PAGE_EXECUTE_READ      = 0x0020;
+    public static final int PAGE_EXECUTE_READWRITE = 0x0040;
+    public static final int PAGE_EXECUTE_WRITECOPY = 0x0080;
+    public static final int MEM_COMMIT    =      0x1000;
+    public static final int MEM_RESERVE   =      0x2000;
+    public static final int MEM_DECOMMIT  =      0x4000;
+    public static final int MEM_RELEASE   =      0x8000;
+    public static final int MEM_FREE      =     0x10000;
+    public static final int MEM_PRIVATE   =     0x20000;
+    public static final int MEM_MAPPED    =     0x40000;
+    public static final int MEM_RESET     =     0x80000;
+    public static final int MEM_TOP_DOWN  =    0x100000;
+    public static final int MEM_PHYSICAL  =    0x400000;
+    public static final int MEM_4MB_PAGES =  0x80000000;
+
     /*
      * Function flags
      */
@@ -182,35 +211,46 @@ final class Foreign {
     final native long pageSize();
 
     /**
-     * Allocates virtual memory.
+     * Calls the Unix mmap(2) function
      *
-     * @param addr The address to request the memory be mapped at.
-     * @param size The size in bytes of the memory to allocate.
-     * @param prot The protection mode for the memory area.
-     * @param flags Other flags.
-     * @return The memory address, or -1 on error.
+     * This method is undefined on windows.
+     *
+     * @param addr The desired address to map the memory at, or 0 for random address.
+     * @param len The length of the memory region.
+     * @param prot The protection mode for the memory region.
+     * @param flags
+     * @param fd
+     * @param off
+     * @return The address of the mapping on success, -1 on error.
      */
-    final native long vmalloc(long addr, long size, int prot, int flags);
+    final native long mmap(long addr, long len, int prot, int flags, int fd, long off);
 
     /**
-     * De-allocates virtual memory.
+     * Calls the Unix munmap(2) function.
      *
-     * @param address The address to release.
-     * @param size The size of the memory region.
-     * @return <tt>true</tt> if the memory was released.
+     * @param addr The address to unmap.
+     * @param len The size of the region.
+     * @return 0 on success, -1 on error.
      */
-    final native boolean vmfree(long address, long size);
+
+    final native int munmap(long addr, long len);
 
     /**
-     * Alters the protection of a virtual memory area.
-     *
-     * @param address The address of the start of the memory region to protect.
-     * @param size The size of the memory region.
-     * @param prot The new protection mode to apply.
-     * @return <tt>true</tt> if the new mode was set successfully.
+     * Calls the Unix mprotect(2) function.
+     * @param addr The address to unmap.
+     * @param len The size of the region.
+     * @param prot The new protection mode.
+     * @return 0 on success, -1 on error.
      */
-    final native boolean vmprotect(long address, long size, int prot);
+    final native int mprotect(long addr, long len, int prot);
 
+
+    final native long VirtualAlloc(long addr, int size, int flags, int prot);
+
+    final native boolean VirtualFree(long addr, int size, int flags);
+
+    final native boolean VirtualProtect(long addr, int size, int prot);
+    
     /**
      * Creates a new native function context.
      *

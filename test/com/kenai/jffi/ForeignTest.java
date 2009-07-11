@@ -47,28 +47,38 @@ public class ForeignTest {
         long pageSize = Foreign.getInstance().pageSize();
         assertNotSame("Invalid page size", 0, pageSize);
     }
-    @Test public void vmalloc() {
-        long addr = Foreign.getInstance().vmalloc(0, 123, Foreign.PROT_READ | Foreign.PROT_WRITE, Foreign.MEM_DATA);
-        assertNotSame("Failed to allocate memory", -1, addr);
+    @Test public void mmap() {
+        if (Platform.getPlatform().getOS() != Platform.OS.WINDOWS) {
+            final int SIZE = 123;
+            long addr = Foreign.getInstance().mmap(0, SIZE, Foreign.PROT_READ | Foreign.PROT_WRITE,
+                Foreign.MAP_PRIVATE | Foreign.MAP_ANON, -1, 0);
+            assertNotSame("Failed to allocate memory", -1L, addr);
+        }
     }
 
-    @Test public void vmfree() {
-        final int SIZE = 123;
-        long addr = Foreign.getInstance().vmalloc(0, SIZE, Foreign.PROT_READ | Foreign.PROT_WRITE, Foreign.MEM_DATA);
-        assertNotSame("Failed to allocate memory", -1, addr);
-        assertTrue("Failed to free memory", Foreign.getInstance().vmfree(addr, SIZE));
+    @Test public void munmap() {
+        if (Platform.getPlatform().getOS() != Platform.OS.WINDOWS) {
+            final int SIZE = 123;
+            long addr = Foreign.getInstance().mmap(0, SIZE, Foreign.PROT_READ | Foreign.PROT_WRITE,
+                    Foreign.MAP_PRIVATE | Foreign.MAP_ANON, -1, 0);
+            assertNotSame("Failed to allocate memory", -1, addr);
+            assertTrue("Failed to free memory", Foreign.getInstance().munmap(addr, SIZE) == 0);
+        }
     }
 
     @Test public void writeToAllocatedMemory() {
-        final int SIZE = 257;
-        final byte[] MAGIC = { 't', 'e', 's', 't' };
-        long addr = Foreign.getInstance().vmalloc(0, SIZE, Foreign.PROT_READ | Foreign.PROT_WRITE, Foreign.MEM_DATA);
-        assertNotSame("Failed to allocate memory", -1, addr);
-        MemoryIO.getInstance().putByteArray(addr, MAGIC, 0, MAGIC.length);
-        byte[] tmp = new byte[MAGIC.length];
-        MemoryIO.getInstance().getByteArray(addr, tmp, 0, MAGIC.length);
-        assertArrayEquals("Incorrect data read back", MAGIC, tmp);
-        assertTrue("Failed to free memory", Foreign.getInstance().vmfree(addr, SIZE));
+        if (Platform.getPlatform().getOS() != Platform.OS.WINDOWS) {
+            final int SIZE = 257;
+            final byte[] MAGIC = {'t', 'e', 's', 't'};
+            long addr = Foreign.getInstance().mmap(0, SIZE, Foreign.PROT_READ | Foreign.PROT_WRITE,
+                    Foreign.MAP_PRIVATE | Foreign.MAP_ANON, -1, 0);
+            assertNotSame("Failed to allocate memory", -1, addr);
+            MemoryIO.getInstance().putByteArray(addr, MAGIC, 0, MAGIC.length);
+            byte[] tmp = new byte[MAGIC.length];
+            MemoryIO.getInstance().getByteArray(addr, tmp, 0, MAGIC.length);
+            assertArrayEquals("Incorrect data read back", MAGIC, tmp);
+            assertTrue("Failed to free memory", Foreign.getInstance().munmap(addr, SIZE) == 0);
+        }
     }
 
 }

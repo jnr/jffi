@@ -13,8 +13,6 @@
 #include "com_kenai_jffi_Foreign.h"
 #include "jffi.h"
 
-static int PROT(int p);
-
 /*
  * Class:     com_kenai_jffi_Foreign
  * Method:    pageSize
@@ -33,103 +31,64 @@ Java_com_kenai_jffi_Foreign_pageSize(JNIEnv *env, jobject self)
 #endif
 }
 
+#ifndef _WIN32
+static int PROT(int p);
+static int FLAGS(int f);
+
 /*
  * Class:     com_kenai_jffi_Foreign
- * Method:    vmalloc
- * Signature: (JJII)J
+ * Method:    mmap
+ * Signature: (JJIIIJ)J
  */
 JNIEXPORT jlong JNICALL
-Java_com_kenai_jffi_Foreign_vmalloc(JNIEnv *env, jobject self, jlong addr, jlong size,
-        jint prot, jint flags)
+Java_com_kenai_jffi_Foreign_mmap(JNIEnv *env, jobject self, jlong addr, jlong len,
+        jint prot, jint flags, jint fd, jlong off)
 {
-    void* ptr;
-#ifndef _WIN32
-#define ALLOC_ERROR ((caddr_t) -1)
+    caddr_t result;
     
-    int f = 0;
-    f |= ((flags & com_kenai_jffi_Foreign_MEM_FIXED) != 0) ? MAP_FIXED : 0;
-#ifdef MAP_TEXT
-    f |= ((flags & com_kenai_jffi_Foreign_MEM_TEXT) != 0) ? MAP_TEXT : 0;
-#endif
-
-    ptr = mmap(j2p(addr), (size_t) size, PROT(prot), f | MAP_ANON | MAP_PRIVATE,
-            -1, 0);
-#else
-#define ALLOC_ERROR (NULL)
-    ptr = VirtualAlloc(j2p(addr), size, MEM_RESERVE | MEM_COMMIT, PROT(prot));
-#endif
-    if (ptr == ALLOC_ERROR) {
+    result = mmap(j2p(addr), len, PROT(prot), FLAGS(flags), fd, off);
+    if (unlikely(result == (caddr_t) -1)) {
         jffi_save_errno();
         return -1;
     }
-    return p2j(ptr);
+
+    return p2j(result);
 }
 
 /*
  * Class:     com_kenai_jffi_Foreign
- * Method:    vmfree
- * Signature: (JJ)Z
+ * Method:    munmap
+ * Signature: (JJ)I
  */
-JNIEXPORT jboolean JNICALL
-Java_com_kenai_jffi_Foreign_vmfree(JNIEnv *env, jobject self, jlong addr, jlong size)
+JNIEXPORT jint JNICALL
+Java_com_kenai_jffi_Foreign_munmap(JNIEnv *env, jobject self, jlong addr, jlong len)
 {
-    jboolean result;
-#ifndef _WIN32
-    result = munmap(j2p(addr), (size_t) size) == 0;
-#else
-    result = VirtualFree(j2p(addr), size, MEM_RELEASE);
-#endif
-    if (!result) {
+    int result = munmap(j2p(addr), len);
+    if (unlikely(result != 0)) {
         jffi_save_errno();
-        return JNI_FALSE;
+        return -1;
     }
-    return JNI_TRUE;
+
+    return 0;
 }
 
 /*
  * Class:     com_kenai_jffi_Foreign
- * Method:    vmprotect
- * Signature: (JJI)Z
+ * Method:    mprotect
+ * Signature: (JJI)I
  */
-JNIEXPORT jboolean JNICALL
-Java_com_kenai_jffi_Foreign_vmprotect(JNIEnv *env, jobject self, jlong addr, jlong size, jint prot)
+JNIEXPORT jint JNICALL
+Java_com_kenai_jffi_Foreign_mprotect(JNIEnv *env, jobject self, jlong addr, jlong len, jint prot)
 {
-    jboolean result;
-#ifndef _WIN32
-    result = mprotect(j2p(addr), (size_t) size, PROT(prot)) == 0;
-#else
-    DWORD oldprot;
-    result = VirtualProtect(j2p(addr), size, PROT(prot), &oldprot);
-#endif
-    if (!result) {
+    int result = mprotect(j2p(addr), len, PROT(prot));
+    if (unlikely(result != 0)) {
         jffi_save_errno();
-        return JNI_FALSE;
-    }
-    return JNI_TRUE;
-}
-
-
-#ifdef _WIN32
-static int
-PROT(int p)
-{
-    int n = 0;
-
-    if ((p & com_kenai_jffi_Foreign_PROT_EXEC) != 0) {
-        n = ((p & com_kenai_jffi_Foreign_PROT_WRITE) != 0)
-                ? PAGE_EXECUTE_READWRITE : PAGE_EXECUTE_READ;
-    } else if ((p & com_kenai_jffi_Foreign_PROT_WRITE) != 0) {
-        n = PAGE_READWRITE;
-    } else if ((p & com_kenai_jffi_Foreign_PROT_READ) != 0) {
-        n = PAGE_READONLY;
-    } else {
-        n = PAGE_NOACCESS;
+        return -1;
     }
 
-    return n;
+    return 0;
 }
 
-#else
 static int
 PROT(int p)
 {
@@ -143,4 +102,77 @@ PROT(int p)
     return n;
 }
 
+static int
+FLAGS(int j)
+{
+    int m = 0;
+#define M(x) m |= ((j & com_kenai_jffi_Foreign_MAP_##x) != 0) ? MAP_##x : 0
+    M(FIXED);
+    M(SHARED);
+    M(PRIVATE);
+#ifdef MAP_NORESERVE
+    M(NORESERVE);
 #endif
+    M(ANON);
+#ifdef MAP_ALIGN
+    M(ALIGN);
+#endif
+#ifdef MAP_TEXT
+    M(TEXT);
+#endif
+
+    return m;
+}
+
+#else /* _WIN32 */
+/*
+ * Class:     com_kenai_jffi_Foreign
+ * Method:    VirtualAlloc
+ * Signature: (JIII)J
+ */
+JNIEXPORT jlong JNICALL
+Java_com_kenai_jffi_Foreign_VirtualAlloc(JNIEnv *env, jobject self, jlong addr, jint size, jint flags, jint prot)
+{
+    void* ptr = VirtualAlloc(j2p(addr), size, flags, prot);
+    if (unlikely(ptr == NULL)) {
+        jffi_save_errno();
+        return 0;
+    }
+
+    return p2j(ptr);
+}
+
+/*
+ * Class:     com_kenai_jffi_Foreign
+ * Method:    VirtualFree
+ * Signature: (JI)Z
+ */
+JNIEXPORT jboolean JNICALL
+Java_com_kenai_jffi_Foreign_VirtualFree(JNIEnv *env, jobject self, jlong addr, jint size, jint flags)
+{
+    if (!VirtualFree(j2p(addr), size, flags)) {
+        jffi_save_errno();
+        return JNI_FALSE;
+    }
+
+    return JNI_TRUE;
+}
+
+/*
+ * Class:     com_kenai_jffi_Foreign
+ * Method:    VirtualProtect
+ * Signature: (JII)Z
+ */
+JNIEXPORT jboolean JNICALL
+Java_com_kenai_jffi_Foreign_VirtualProtect(JNIEnv *env, jobject self, jlong addr, jint size, jint prot)
+{
+    DWORD oldprot;
+    if (!VirtualProtect(j2p(addr), size, prot, &oldprot)) {
+        jffi_save_errno();
+        return JNI_FALSE;
+    }
+
+    return JNI_TRUE;
+}
+
+#endif /* !_WIN32 */
