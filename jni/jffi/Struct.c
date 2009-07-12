@@ -17,7 +17,7 @@
 #ifndef MAX
 #  define MAX(x,y)  ((x) > (y) ? (x) : (y))
 #endif
-#define ALIGN(v, a)  (((((size_t) (v))-1) | ((a)-1))+1)
+#define FFI_ALIGN(v, a)  (((((size_t) (v))-1) | ((a)-1))+1)
 
 /*
  * Class:     com_kenai_jffi_Foreign
@@ -78,7 +78,7 @@ Java_com_kenai_jffi_Foreign_newStruct(JNIEnv* env, jobject self, jlongArray type
 
         s->elements[i] = elem;
         if (!isUnion) {
-            s->size = ALIGN(s->size, elem->alignment) + elem->size;
+            s->size = FFI_ALIGN(s->size, elem->alignment) + elem->size;
         } else {
             s->size = MAX(s->size, elem->size);
         }
@@ -91,7 +91,7 @@ Java_com_kenai_jffi_Foreign_newStruct(JNIEnv* env, jobject self, jlongArray type
     }
     
     // Include tail padding
-    s->size = ALIGN(s->size, s->alignment);
+    s->size = FFI_ALIGN(s->size, s->alignment);
     return p2j(s);
     
 error:

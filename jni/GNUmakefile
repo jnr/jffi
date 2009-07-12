@@ -113,6 +113,12 @@ ifeq ($(OS), aix)
   JNIEXT = a
 endif
 
+ifneq ($(findstring bsd, $(OS)),)
+  SOFLAGS = -shared -static-libgcc
+  CFLAGS += -pthread
+  LDFLAGS += -pthread
+endif
+
 ifeq ($(CPU), sparcv9)
   MODEL = 64
 endif
