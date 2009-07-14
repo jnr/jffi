@@ -51,6 +51,7 @@ FFI_MMAP_EXEC = -DFFI_MMAP_EXEC_WRIT
 FFI_CC=$(CCACHE) $(CC)
 FFI_LD=$(LD)
 FFI_CFLAGS = $(FFI_MMAP_EXEC) $(OFLAGS)
+STRIP = strip --strip-debug
 
 JDK_INCLUDES = -I"$(JDK_HOME)/include" -I"$(JDK_HOME)/include/$(OS)"
 IFLAGS = -I"$(BUILD_DIR)" -I"$(BUILD_DIR)"/jni -I"$(JFFI_SRC_DIR)" -I"$(LIBFFI_BUILD_DIR)"/include
@@ -63,6 +64,7 @@ ifeq ($(OS),cross-mingw32)
   JDK_INCLUDES=-I$(JNI_DIR)/win32/include -I$(JNI_DIR)/win32/include/win32
   CC = i386-mingw32-gcc
   LD = i386-mingw32-ld
+  STRIP = i386-mingw32-strip --strip-debug
   CONFIGURE_HOST = i386-mingw32
 endif
 ifneq ($(findstring cygwin,$(BUILD_OS)),)
@@ -156,6 +158,7 @@ debug:
 
 $(LIBJFFI):  $(LIBFFI) $(OBJS)
 	$(CC) -o $@ $(LDFLAGS) $(SOFLAGS) $(OBJS) $(LIBFFI) $(LIBS)
+	$(STRIP) $@
 
 $(BUILD_DIR)/%.o : $(SRC_DIR)/%.c jffi.h
 	@mkdir -p $(@D)
