@@ -4,10 +4,11 @@ package com.kenai.jffi;
 import java.lang.reflect.Method;
 
 /**
- * Allocates and manages the lifecycle of native closures (aka callbacks).
+ * Allocates and manages the lifecycle of native closures (aka callbacks).rm hs
  */
 public class ClosureManager {
     private static final long ADDRESS_MASK = Platform.getPlatform().addressMask();
+    private static final Object lock = new Object();
 
     /** Holder class to do lazy allocation of the ClosureManager instance */
     private static final class SingletonHolder {
@@ -39,8 +40,11 @@ public class ClosureManager {
     public final Closure.Handle newClosure(Closure closure, Type returnType, Type[] parameterTypes, CallingConvention convention) {
         Proxy proxy = new Proxy(closure, returnType, parameterTypes);
 
-        long handle = Foreign.getInstance().newClosure(proxy, Proxy.METHOD,
+        long handle = 0;
+        synchronized (lock) {
+            handle = Foreign.getInstance().newClosure(proxy, Proxy.METHOD,
                 returnType.handle(), Type.nativeHandles(parameterTypes), 0);
+        }
         if (handle == 0) {
             throw new RuntimeException("Failed to create native closure");
         }
@@ -94,7 +98,9 @@ public class ClosureManager {
         @Override
         protected void finalize() throws Throwable {
             try {
-                Foreign.getInstance().freeClosure(handle);
+                synchronized (lock) {
+                    Foreign.getInstance().freeClosure(handle);
+                }
             } finally {
                 super.finalize();
             }
