@@ -41,6 +41,6 @@ jffi_throwExceptionByName(JNIEnv* env, const char* exceptionName, const char* fm
 const char* jffi_IllegalArgumentException = "java/lang/IllegalArgumentException";
 const char* jffi_NullPointerException = "java/lang/NullPointerException";
 const char* jffi_OutOfBoundsException = "java/lang/IndexOutOfBoundsException";
-const char* jffi_OutOfMemoryException = "java/lang/IndexOutOfMemoryError";
+const char* jffi_OutOfMemoryException = "java/lang/OutOfMemoryError";
 const char* jffi_RuntimeException = "java/lang/RuntimeError";
 
