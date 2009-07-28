@@ -1,6 +1,7 @@
 
 package com.kenai.jffi;
 
+import java.lang.reflect.Method;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -80,5 +81,12 @@ public class ForeignTest {
             assertTrue("Failed to free memory", Foreign.getInstance().munmap(addr, SIZE) == 0);
         }
     }
-
+    class ClosureProxy {
+        void invoke(Closure.Buffer buf) {}
+    }
+    @Test public void freeClosure() throws Throwable {
+        Method m = ClosureProxy.class.getDeclaredMethod("invoke", new Class[] { Closure.Buffer.class});
+        long cl = Foreign.getInstance().newClosure(new ClosureProxy(), m, Type.VOID.handle, new long[0], 0);
+        Foreign.getInstance().freeClosure(cl);
+    }
 }
