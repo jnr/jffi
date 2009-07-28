@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007, 2008 Wayne Meissner
+ * Copyright (C) 2007-2009 Wayne Meissner
  *
  * This file is part of jffi.
  *
@@ -62,7 +62,6 @@ Java_com_kenai_jffi_Foreign_newClosure(JNIEnv* env, jclass clazz,
 {
     Closure* closure = NULL;
     int argCount;
-    jlong* paramTypes;
     ffi_type* ffiReturnType;
     ffi_status status;
     ffi_abi abi;
@@ -74,45 +73,55 @@ Java_com_kenai_jffi_Foreign_newClosure(JNIEnv* env, jclass clazz,
     if (closure == NULL) {
         goto cleanup;
     }
+
     closure->ffi_closure = ffi_closure_alloc(sizeof(*closure->ffi_closure), &closure->code);
     if (closure->ffi_closure == NULL) {
         throwException(env, OutOfMemory, "Could not allocate space for closure");
         goto cleanup;
     }
+
     closure->javaObject = (*env)->NewGlobalRef(env, closureObject);
     if (closure->javaObject == NULL) {
         throwException(env, IllegalArgument, "Could not obtain reference to Closure");
         goto cleanup;
     }
+
     closure->javaMethod = (*env)->FromReflectedMethod(env, closureMethod);
     if (closure->javaMethod == NULL) {
         throwException(env, IllegalArgument, "Could not obtain reference to Closure method");
         goto cleanup;
     }
+
     closure->ffiParamTypes = calloc(MAX(1, argCount), sizeof(ffi_type *));
     if (closure->ffiParamTypes == NULL) {
         throwException(env, OutOfMemory, "Could not allocate space for parameter types");
         goto cleanup;
     }
-    paramTypes = alloca(argCount * sizeof(jlong));
-    (*env)->GetLongArrayRegion(env, paramTypeArray, 0, argCount, paramTypes);
-    for (i = 0; i < argCount; ++i) {
-        closure->ffiParamTypes[i] = (ffi_type *) j2p(paramTypes[i]);
-        if (closure->ffiParamTypes[i] == NULL) {
-            throwException(env, NullPointer, "parameter type %d is null", i);
-            goto cleanup;
+
+    if (argCount > 0) {
+        jlong* paramTypes = alloca(argCount * sizeof (jlong));
+        (*env)->GetLongArrayRegion(env, paramTypeArray, 0, argCount, paramTypes);
+        for (i = 0; i < argCount; ++i) {
+            closure->ffiParamTypes[i] = (ffi_type *) j2p(paramTypes[i]);
+            if (closure->ffiParamTypes[i] == NULL) {
+                throwException(env, NullPointer, "parameter type %d is null", i);
+                goto cleanup;
+            }
         }
     }
+
     ffiReturnType = (ffi_type *) j2p(returnType);
     if (ffiReturnType == NULL) {
         throwException(env, NullPointer, "return type is null");
         goto cleanup;
     }
+
 #ifdef _WIN32
     abi = (flags & com_kenai_jffi_Foreign_F_STDCALL) ? FFI_STDCALL : FFI_DEFAULT_ABI;
 #else
     abi = FFI_DEFAULT_ABI;
 #endif
+
     status = ffi_prep_cif(&closure->ffi_cif, abi, argCount, ffiReturnType, closure->ffiParamTypes);
     switch (status) {
         case FFI_BAD_ABI:
@@ -127,8 +136,22 @@ Java_com_kenai_jffi_Foreign_newClosure(JNIEnv* env, jclass clazz,
             throwException(env, IllegalArgument, "Unknown FFI error");
             goto cleanup;
     }
-    ffi_prep_closure_loc(closure->ffi_closure, &closure->ffi_cif,
+
+    status = ffi_prep_closure_loc(closure->ffi_closure, &closure->ffi_cif,
             closure_invoke, closure, closure->code);
+    switch (status) {
+        case FFI_BAD_ABI:
+            throwException(env, IllegalArgument, "Invalid ABI specified");
+            goto cleanup;
+        case FFI_BAD_TYPEDEF:
+            throwException(env, IllegalArgument, "Invalid argument type specified");
+            goto cleanup;
+        case FFI_OK:
+            break;
+        default:
+            throwException(env, IllegalArgument, "Unknown FFI error");
+            goto cleanup;
+    }
 
     closure->flags = flags;
     (*env)->GetJavaVM(env, &closure->jvm);
@@ -145,6 +168,7 @@ cleanup:
         if (closure->javaObject != NULL) {
             (*env)->DeleteGlobalRef(env, closure->javaObject);
         }
+        free(closure);
     }
     return 0;
 }
@@ -154,13 +178,24 @@ cleanup:
  * Method:    freeClosure
  * Signature: (J)V
  */
-JNIEXPORT void JNICALL
-Java_com_googlecode_jffi_lowlevel_Foreign_freeClosure(JNIEnv* env, jclass clazz, jlong address)
+/*
+ * Class:     com_kenai_jffi_Foreign
+ * Method:    freeClosure
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL Java_com_kenai_jffi_Foreign_freeClosure(JNIEnv* env, jobject self, jlong address)
 {
     Closure* closure = j2p(address);
 
-    (*env)->DeleteGlobalRef(env, closure->javaObject);
+    if (closure == NULL) {
+        throwException(env, NullPointer, "closure == null");
+        return;
+    }
+
+    free(closure->ffiParamTypes);
     ffi_closure_free(closure->ffi_closure);
+    (*env)->DeleteGlobalRef(env, closure->javaObject);
+    //(*env)->DeleteGlobalRef(env, (jobject) closure->javaMethod);
     free(closure);
 }
 
@@ -174,6 +209,7 @@ closure_begin(Closure* closure, JNIEnv** penv, bool* detach)
         (**penv)->ExceptionClear(*penv);
     }
 }
+
 static void
 closure_end(Closure* closure, JNIEnv* env, bool detach)
 {
