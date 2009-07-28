@@ -101,6 +101,8 @@ public class ClosureManager {
                 synchronized (lock) {
                     Foreign.getInstance().freeClosure(handle);
                 }
+            } catch (Throwable t) {
+                t.printStackTrace(System.err);
             } finally {
                 super.finalize();
             }
