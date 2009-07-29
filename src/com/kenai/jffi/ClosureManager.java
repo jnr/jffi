@@ -2,6 +2,7 @@
 package com.kenai.jffi;
 
 import java.lang.reflect.Method;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Allocates and manages the lifecycle of native closures (aka callbacks).rm hs
@@ -61,6 +62,9 @@ public class ClosureManager {
         /** Store a reference to the MemoryIO accessor here for easy access */
         private static final com.kenai.jffi.MemoryIO IO = com.kenai.jffi.MemoryIO.getInstance();
 
+        private final AtomicBoolean released = new AtomicBoolean(false);
+        private volatile boolean autorelease = true;
+
         /**
          * The address of the native closure structure.
          *
@@ -95,11 +99,26 @@ public class ClosureManager {
             return cbAddress;
         }
 
+        public void setAutoRelease(boolean autorelease) {
+            this.autorelease = autorelease;
+        }
+
+        public void free() {
+            if (released.getAndSet(true)) {
+                throw new IllegalStateException("Closure already released");
+            }
+            synchronized (lock) {
+                Foreign.getInstance().freeClosure(handle);
+            }
+        }
+
         @Override
         protected void finalize() throws Throwable {
             try {
-                synchronized (lock) {
-                    Foreign.getInstance().freeClosure(handle);
+                if (autorelease && !released.getAndSet(true)) {
+                    synchronized (lock) {
+                        Foreign.getInstance().freeClosure(handle);
+                    }
                 }
             } catch (Throwable t) {
                 t.printStackTrace(System.err);

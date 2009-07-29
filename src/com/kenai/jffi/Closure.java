@@ -156,5 +156,24 @@ public interface Closure {
          * @return The native address of the closure code.
          */
         long getAddress();
+
+        /**
+         * Sets whether the closure memory should be released when the <tt>Handle</tt> is
+         * garbage collected or not.
+         *
+         * @param autorelease If true, the closure memory is automatically managed,
+         * else the closure memory must be explicitly freed.
+         */
+        void setAutoRelease(boolean autorelease);
+
+        /**
+         * Releases the closure memory back to the operating system.
+         *
+         * Although the closure trampoline memory will normally be released when
+         * the <tt>Handle</tt> is garbage collected, this may not happen for some
+         * time, and is non-deterministic.  This allows explicit control over
+         * memory reclamation.
+         */
+        void free();
     }
 }
