@@ -51,7 +51,7 @@ FFI_MMAP_EXEC = -DFFI_MMAP_EXEC_WRIT
 FFI_CC=$(CCACHE) $(CC)
 FFI_LD=$(LD)
 FFI_CFLAGS = $(FFI_MMAP_EXEC) $(OFLAGS)
-STRIP = strip --strip-debug
+STRIP = strip -S
 
 JDK_INCLUDES = -I"$(JDK_HOME)/include" -I"$(JDK_HOME)/include/$(OS)"
 IFLAGS = -I"$(BUILD_DIR)" -I"$(BUILD_DIR)"/jni -I"$(JFFI_SRC_DIR)" -I"$(LIBFFI_BUILD_DIR)"/include
