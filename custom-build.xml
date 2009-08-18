@@ -66,9 +66,10 @@
           <not><isset property="make.exe"/></not>
         </condition>
     </target>
-    <target name="-generate-version" depends="init">
+    <target name="-generate-version" depends="init,-init-vars">
         <!-- <delete file="${build.dir}/java/com/kenai/jffi/Version.java" quiet="true"/> -->
         <echo message="Generating Version.java"/>
+        <mkdir dir="${build.classes.dir}"/>
         <mkdir dir="${build.dir}/java/com/kenai/jffi"/>
         <echo file="${build.dir}/java/com/kenai/jffi/Version.java" append="false">
             package com.kenai.jffi;
@@ -83,6 +84,7 @@
     </target>
     <target name="-generate-native-headers" depends="-init-vars,-generate-version,-compile-java">
         <mkdir dir="${build.native.dir}"/>
+        <mkdir dir="${build.classes.dir}"/>
         <javah classpath="${build.classes.dir}" destdir="${build.native.dir}" force="yes">
             <class name="com.kenai.jffi.Foreign"/>
             <class name="com.kenai.jffi.ObjectBuffer"/>
