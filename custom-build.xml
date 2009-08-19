@@ -11,6 +11,7 @@
         <property name="jffi.version.major" value="0"/>
         <property name="jffi.version.minor" value="6"/>
         <property name="jffi.version.micro" value="0"/>
+        <property name="ant.build.javac.target" value="1.5"/>
         <mkdir dir="${build.native.dir}"/>
         
         <!-- normalize the various os.arch naming conventions -->
@@ -80,7 +81,7 @@
                 public static final int MICRO = ${jffi.version.micro};
             }
         </echo>
-        <javac destdir="${build.classes.dir}" srcdir="${build.dir}/java"/>
+        <javac target="1.5" destdir="${build.classes.dir}" srcdir="${build.dir}/java"/>
     </target>
     <target name="-generate-native-headers" depends="-init-vars,-generate-version,-compile-java">
         <mkdir dir="${build.native.dir}"/>
