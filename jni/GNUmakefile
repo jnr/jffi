@@ -160,7 +160,13 @@ $(LIBJFFI):  $(LIBFFI) $(OBJS)
 	$(CC) -o $@ $(LDFLAGS) $(SOFLAGS) $(OBJS) $(LIBFFI) $(LIBS)
 	$(STRIP) $@
 
-$(BUILD_DIR)/%.o : $(SRC_DIR)/%.c jffi.h
+# For the primitive int interface, don't do frame pointer save/restore
+$(JFFI_BUILD_DIR)/FastIntInvoke.o : $(JFFI_SRC_DIR)/FastIntInvoke.c $(wildcard $(JFFI_SRC_DIR)/*.h)
+	@mkdir -p $(@D)
+	$(CCACHE) $(CC) $(CFLAGS) -fomit-frame-pointer -c $< -o $@
+
+
+$(BUILD_DIR)/%.o : $(SRC_DIR)/%.c $(wildcard $(JFFI_SRC_DIR)/*.h)
 	@mkdir -p $(@D)
 	$(CCACHE) $(CC) $(CFLAGS) -c $< -o $@
 
