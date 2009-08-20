@@ -26,19 +26,19 @@ typedef unsigned int u32;
 
 #if defined(BYPASS_FFI)
 # define invokeVrI(ctx, retval) do { \
-        *(int *)(retval) = ((jint (*)()) (ctx)->function)(); \
+            *(int *)(retval) = ((jint (*)()) (ctx)->function)(); \
     } while (0)
 
 # define invokeIrI(ctx, retval, arg1) do { \
-        *(int *)(retval) = ((jint (*)(jint)) (ctx)->function)(arg1); \
+            *(int *)(retval) = ((jint (*)(jint)) (ctx)->function)(arg1); \
     } while (0)
 
 # define invokeIIrI(ctx, retval, arg1, arg2) do { \
-        *(int *)(retval) = ((jint (*)(jint, jint)) (ctx)->function)((arg1), (arg2)); \
+            *(int *)(retval) = ((jint (*)(jint, jint)) (ctx)->function)((arg1), (arg2)); \
     } while (0)
 
 # define invokeIIIrI(ctx, retval, arg1, arg2, arg3) do { \
-        *(int *)(retval) = ((jint (*)(jint, jint, jint)) (ctx)->function)(arg1, arg2, arg3); \
+            *(int *)(retval) = ((jint (*)(jint, jint, jint)) (ctx)->function)(arg1, arg2, arg3); \
     } while (0)
 
 #elif defined(USE_RAW) && defined(__i386__)
@@ -57,9 +57,8 @@ typedef unsigned int u32;
         ffi_raw_call(&(ctx)->cif, FFI_FN((ctx)->function), (retval), (ffi_raw *) &arg1); \
     } while (0)
 
-# define invokeIIIrI(ctx, retval, arg1, arg2, arg3) do { \
-        void* ffiValues[] = { &arg1, &arg2, &arg3 }; \
-        ffi_call(&ctx->cif, FFI_FN(ctx->function), (retval), ffiValues); \
+# define invokeIIIrI(ctx, retval, arg1, arg2, arg3) do {
+        ffi_raw_call(&(ctx)->cif, FFI_FN((ctx)->function), (retval), (ffi_raw *) &arg1); \
     } while (0)
 
 #else /* Anything that is BIG endian or non-i386 little endian */
@@ -200,3 +199,73 @@ Java_com_kenai_jffi_Foreign_invokeNoErrnoIIIrI(JNIEnv*env, jobject self, jlong c
     return (int) retval;
 }
 
+JNIEXPORT jfloat JNICALL
+Java_com_kenai_jffi_Foreign_invokeVrF(JNIEnv* env, jclass self, jlong ctxAddress)
+{
+    Function* ctx = (Function *) j2p(ctxAddress);
+    ffi_sarg retval;
+
+#ifdef BYPASS_FFI
+    *(float *) &retval = ((float (*)(void)) (ctx)->function)();
+#else
+    invokeVrI(ctx, &retval);
+#endif
+
+    SAVE_ERRNO(ctx);
+
+    return *(float *) &retval;
+}
+
+JNIEXPORT jfloat JNICALL
+Java_com_kenai_jffi_Foreign_invokeIrF(JNIEnv* env, jclass self, jlong ctxAddress,
+        jint arg1)
+{
+    Function* ctx = (Function *) j2p(ctxAddress);
+    ffi_sarg retval;
+
+#ifdef BYPASS_FFI
+    *(float *) &retval = ((float (*)(jint)) (ctx)->function)(arg1);
+#else
+    invokeIrI(ctx, &retval, arg1);
+#endif
+
+    SAVE_ERRNO(ctx);
+
+    return *(float *) &retval;
+}
+
+JNIEXPORT jfloat JNICALL
+Java_com_kenai_jffi_Foreign_invokeIIrF(JNIEnv*env, jobject self, jlong ctxAddress,
+        jint arg1, jint arg2)
+{
+    Function* ctx = (Function *) j2p(ctxAddress);
+    ffi_sarg retval;
+
+#ifdef BYPASS_FFI
+    *(float *) &retval = ((float (*)(jint, jint)) (ctx)->function)(arg1, arg2);
+#else
+    invokeIIrI(ctx, &retval, arg1, arg2);
+#endif
+
+    SAVE_ERRNO(ctx);
+
+    return *(float *) &retval;
+}
+
+JNIEXPORT jfloat JNICALL
+Java_com_kenai_jffi_Foreign_invokeIIIrF(JNIEnv*env, jobject self, jlong ctxAddress,
+        jint arg1, jint arg2, jint arg3)
+{
+    Function* ctx = (Function *) j2p(ctxAddress);
+    ffi_sarg retval;
+
+#ifdef BYPASS_FFI
+    *(float *) &retval = ((float (*)(jint, jint, jint)) (ctx)->function)(arg1, arg2, arg3);
+#else
+    invokeIIIrI(ctx, &retval, arg1, arg2, arg3);
+#endif
+
+    SAVE_ERRNO(ctx);
+
+    return *(float *) &retval;
+}

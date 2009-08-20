@@ -19,7 +19,15 @@ public class NumberTest {
         int ret_u32(int v);
         long ret_s64(long v);
         long ret_u64(long v);
+        float ret_float(float v);
+        double ret_double(double v);
     }
+
+    private static interface LibM {
+        float powf(float x, float y);
+        float cosf(float x);
+    }
+
     public NumberTest() {
     }
 
@@ -185,6 +193,24 @@ public class NumberTest {
         LibNumberTest lib = UnitHelper.loadTestLibrary(LibNumberTest.class, type);
         for (int i = 0; i < u64_values.length; ++i) {
             assertEquals("Value not returned correctly", u64_values[i], lib.ret_u64(u64_values[i]));
+        }
+    }
+
+    @Test public void returnDefaultF32() {
+        returnF32(InvokerType.Default);
+    }
+    @Test public void returnFastIntF32() {
+        returnF32(InvokerType.FastInt);
+    }
+    @Test public void returnPointerArrayF32() {
+        returnF32(InvokerType.PointerArray);
+    }
+
+    private void returnF32(InvokerType type) {
+        LibNumberTest lib = UnitHelper.loadTestLibrary(LibNumberTest.class, type);
+        float[] values = { 0f, 1.0f, -2.0f };
+        for (int i = 0; i < values.length; ++i) {
+            assertEquals("Value not returned correctly", values[i], lib.ret_float(values[i]), 0.1f);
         }
     }
 }

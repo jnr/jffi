@@ -373,6 +373,14 @@ final class Foreign {
     final native int invokeVrI(long functionContext);
 
     /**
+     * Invokes a function with no arguments, and returns a 32 bit float.
+     *
+     * @param function The address of the function context structure from {@link #newFunction}.
+     * @return A 32 bit float value.
+     */
+    final native float invokeVrF(long functionContext);
+
+    /**
      * Invokes a function with no arguments, and returns a 32 bit integer.
      *
      * This method does not save the errno value.
@@ -403,6 +411,15 @@ final class Foreign {
     final native int invokeNoErrnoIrI(long functionContext, int arg1);
 
     /**
+     * Invokes a function with one integer argument, and returns a 32 bit float.
+     *
+     * @param function The address of the function context structure from {@link #newFunction}.
+     * @param arg1 The 32 bit integer argument.
+     * @return A 32 bit float value.
+     */
+    final native float invokeIrF(long functionContext, int arg1);
+
+    /**
      * Invokes a function with two integer arguments, and returns a 32 bit integer.
      *
      * @param function The address of the function context structure from {@link #newFunction}.
@@ -411,6 +428,16 @@ final class Foreign {
      * @return A 32 bit integer value.
      */
     final native int invokeIIrI(long functionContext, int arg1, int arg2);
+
+    /**
+     * Invokes a function with two integer arguments, and returns a 32 bit float.
+     *
+     * @param function The address of the function context structure from {@link #newFunction}.
+     * @param arg1 The first 32 bit integer argument.
+     * @param arg2 The second 32 bit integer argument.
+     * @return A 32 bit float value.
+     */
+    final native float invokeIIrF(long functionContext, int arg1, int arg2);
 
     /**
      * Invokes a function with two integer arguments, and returns a 32 bit integer.
@@ -436,6 +463,17 @@ final class Foreign {
     final native int invokeIIIrI(long functionContext, int arg1, int arg2, int arg3);
 
     /**
+     * Invokes a function with three integer arguments, and returns a 32 bit float.
+     *
+     * @param function The address of the function context structure from {@link #newFunction}.
+     * @param arg1 The first 32 bit integer argument.
+     * @param arg2 The second 32 bit integer argument.
+     * @param arg3 The third 32 bit integer argument.
+     * @return A 32 bit float value.
+     */
+    final native float invokeIIIrF(long functionContext, int arg1, int arg2, int arg3);
+
+    /**
      * Invokes a function with three integer arguments, and returns a 32 bit integer.
      *
      * This method does not save the errno value.
@@ -457,6 +495,14 @@ final class Foreign {
     final native long invokeVrL(long function);
 
     /**
+     * Invokes a function with no arguments, and returns a 64 bit float.
+     *
+     * @param function The address of the function context structure from {@link #newFunction}.
+     * @return A 64 bit float value.
+     */
+    final native double invokeVrD(long function);
+
+    /**
      * Invokes a function with one 64 bit integer argument, and returns a 64 bit integer.
      *
      * @param function The address of the function context structure from {@link #newFunction}.
@@ -464,6 +510,15 @@ final class Foreign {
      * @return A 64 bit integer value.
      */
     final native long invokeLrL(long function, long arg1);
+
+    /**
+     * Invokes a function with one 64 bit integer argument, and returns a 64 bit float.
+     *
+     * @param function The address of the function context structure from {@link #newFunction}.
+     * @param arg1 The 64 bit integer argument.
+     * @return A 64 bit float value.
+     */
+    final native double invokeLrD(long function, long arg1);
 
     /**
      * Invokes a function with two 64 bit integer arguments, and returns a 64 bit integer.
@@ -476,6 +531,16 @@ final class Foreign {
     final native long invokeLLrL(long function, long arg1, long arg2);
 
     /**
+     * Invokes a function with two 64 bit integer arguments, and returns a 64 bit float.
+     *
+     * @param function The address of the function context structure from {@link #newFunction}.
+     * @param arg1 The first 64 bit integer argument.
+     * @param arg2 The second 64 bit integer argument.
+     * @return A 64 bit float value.
+     */
+    final native double invokeLLrD(long function, long arg1, long arg2);
+
+    /**
      * Invokes a function with three 64 bit integer arguments, and returns a 64 bit integer.
      *
      * @param function The address of the function context structure from {@link #newFunction}.
@@ -485,6 +550,18 @@ final class Foreign {
      * @return A 64 bit integer value.
      */
     final native long invokeLLLrL(long function, long arg1, long arg2, long arg3);
+
+
+    /**
+     * Invokes a function with three 64 bit integer arguments, and returns a 64 bit float.
+     *
+     * @param function The address of the function context structure from {@link #newFunction}.
+     * @param arg1 The first 64 bit integer argument.
+     * @param arg2 The second 64 bit integer argument.
+     * @param arg3 The third 64 bit integer argument.
+     * @return A 64 bit float value.
+     */
+    final native double invokeLLLrD(long function, long arg1, long arg2, long arg3);
 
     /**
      * Invokes a function that returns a 32 bit integer.

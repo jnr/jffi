@@ -268,26 +268,50 @@ public class UnitHelper {
         private final Function function;
         private final Class returnType;
         private final Class[] parameterTypes;
+
         public FastIntMethodInvoker(Library library, Function function, Class returnType, Class[] parameterTypes) {
             this.library = library;
             this.function = function;
             this.returnType = returnType;
             this.parameterTypes = parameterTypes;
         }
+
+        private static final boolean isFloat(Class c) {
+            return Float.class.isAssignableFrom(c) || float.class == c;
+        }
+
+        private static final int i(Object value) {
+            return value instanceof Float
+                ? Float.floatToIntBits(((Float) value).floatValue())
+                : ((Number) value).intValue();
+        }
+
         public Object invoke(Object[] args) {
             final int result;
             switch (args.length) {
                 case 0:
+                    if (isFloat(returnType)) {
+                        return Invoker.getInstance().invokeVrF(function);
+                    }
                     result = Invoker.getInstance().invokeVrI(function);
                     break;
                 case 1:
-                    result = Invoker.getInstance().invokeIrI(function, ((Number) args[0]).intValue());
+                    if (isFloat(returnType)) {
+                        return Invoker.getInstance().invokeIrF(function, i(args[0]));
+                    }
+                    result = Invoker.getInstance().invokeIrI(function, i(args[0]));
                     break;
                 case 2:
+                    if (isFloat(returnType)) {
+                        return Invoker.getInstance().invokeIIrF(function, i(args[0]), i(args[1]));
+                    }
                     result = Invoker.getInstance().invokeIIrI(function,
                             ((Number) args[0]).intValue(), ((Number) args[1]).intValue());
                     break;
                 case 3:
+                    if (isFloat(returnType)) {
+                        return Invoker.getInstance().invokeIIIrF(function, i(args[0]), i(args[1]), i(args[2]));
+                    }
                     result = Invoker.getInstance().invokeIIIrI(function,
                             ((Number) args[0]).intValue(), ((Number) args[1]).intValue(), ((Number) args[2]).intValue());
                     break;
