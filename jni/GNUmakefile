@@ -67,10 +67,12 @@ ifeq ($(OS),cross-mingw32)
   STRIP = i386-mingw32-strip --strip-debug
   CONFIGURE_HOST = i386-mingw32
 endif
+
 ifneq ($(findstring cygwin,$(BUILD_OS)),)
   OS = win32
   JAVA_HOME := $(shell cygpath -u $(JAVA_HOME))
 endif
+
 ifeq ($(OS), win32)
   ifneq ($(findstring cygwin, $(BUILD_OS)),)
     CC += -mno-cygwin
@@ -83,6 +85,7 @@ ifeq ($(OS), win32)
   PREFIX =
   JNIEXT=dll
 endif
+
 ifeq ($(OS), darwin)
   PLATFORM = darwin
   ARCHES = i386 x86_64 ppc
@@ -100,6 +103,7 @@ ifeq ($(OS), linux)
   SOFLAGS = -shared -mimpure-text -static-libgcc -Wl,-soname,$(@F) -Wl,-O1
   CFLAGS += -pthread
 endif
+
 ifeq ($(OS), solaris)
   CC = gcc
   CFLAGS += -D__EXTENSIONS__ -std=c99
@@ -123,6 +127,11 @@ endif
 
 ifeq ($(CPU), sparcv9)
   MODEL = 64
+endif
+
+ifeq ($(CPU), i386)
+  MODEL = 32
+  CFLAGS += -march=i586 -mtune=generic
 endif
 
 ifeq ($(CPU), amd64)
