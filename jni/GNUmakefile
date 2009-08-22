@@ -131,7 +131,9 @@ endif
 
 ifeq ($(CPU), i386)
   MODEL = 32
-  CFLAGS += -march=i586 -mtune=generic
+  ifneq ($(OS),darwin)
+    CFLAGS += -march=i586 -mtune=generic
+  endif
 endif
 
 ifeq ($(CPU), amd64)
