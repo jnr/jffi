@@ -11,6 +11,8 @@ public abstract class Aggregate extends Type {
     protected void finalize() throws Throwable {
         try {
             Foreign.getInstance().freeStruct(handle);
+        } catch (Throwable t) {
+            t.printStackTrace(System.err);
         } finally {
             super.finalize();
         }
