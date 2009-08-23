@@ -4,7 +4,7 @@ package com.kenai.jffi;
 /**
  * Describes the layout of a C array
  */
-public final class Array extends Type {
+public final class Array extends Aggregate {
     /* Keep a strong reference to the element types so it is not GCed */
     private final Type elementType;
 
@@ -52,14 +52,5 @@ public final class Array extends Type {
      */
     public final int length() {
         return length;
-    }
-
-    @Override
-    protected void finalize() throws Throwable {
-        try {
-            Foreign.getInstance().freeStruct(handle);
-        } finally {
-            super.finalize();
-        }
     }
 }
