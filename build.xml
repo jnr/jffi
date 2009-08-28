@@ -87,6 +87,9 @@
             <os arch="sparc"/>
           </or>
         </condition>
+        <condition property="run.jvm.model" value="">
+            <not><isset property="run.jvm.model"/></not>
+        </condition>
         <property name="run.jvmargs" value="${run.jvm.model} -Djffi.library.path=build/jni -Djffi.boot.library.path=build/jni"/>
     </target>
 

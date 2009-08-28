@@ -117,6 +117,7 @@ ifeq ($(OS), aix)
   CFLAGS += -pthread
   LDFLAGS += -pthread
   JNIEXT = a
+  STRIP = strip
 endif
 
 ifneq ($(findstring bsd, $(OS)),)
