@@ -4,7 +4,7 @@ package com.kenai.jffi;
 /**
  * Describes the layout of a C union
  */
-public final class Union extends Type {
+public final class Union extends Aggregate {
     /* Keep a strong reference to the field types so they do not GCed */
     private final Type[] fields;
 
@@ -16,14 +16,5 @@ public final class Union extends Type {
     public Union(Type[] fields) {
         super(Foreign.getInstance().newStruct(Type.nativeHandles(fields), true));
         this.fields = (Type[]) fields.clone();
-    }
-
-    @Override
-    protected void finalize() throws Throwable {
-        try {
-            Foreign.getInstance().freeStruct(handle);
-        } finally {
-            super.finalize();
-        }
     }
 }

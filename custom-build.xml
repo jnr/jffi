@@ -9,7 +9,7 @@
         <property name="src.native.dir" location="jni"/>
         <property name="complete.jar" value="${dist.dir}/jffi-complete.jar"/>
         <property name="jffi.version.major" value="0"/>
-        <property name="jffi.version.minor" value="6"/>
+        <property name="jffi.version.minor" value="7"/>
         <property name="jffi.version.micro" value="0"/>
         <property name="ant.build.javac.target" value="1.5"/>
         <mkdir dir="${build.native.dir}"/>

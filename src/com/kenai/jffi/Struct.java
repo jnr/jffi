@@ -4,7 +4,7 @@ package com.kenai.jffi;
 /**
  * Describes the layout of a C struct
  */
-public final class Struct extends Type {
+public final class Struct extends Aggregate {
     /* Keep a strong reference to the field types so they do not GCed */
     private final Type[] fields;
 
@@ -16,14 +16,5 @@ public final class Struct extends Type {
     public Struct(Type... fields) {
         super(Foreign.getInstance().newStruct(Type.nativeHandles(fields), false));
         this.fields = (Type[]) fields.clone();
-    }
-
-    @Override
-    protected void finalize() throws Throwable {
-        try {
-            Foreign.getInstance().freeStruct(handle);
-        } finally {
-            super.finalize();
-        }
     }
 }
