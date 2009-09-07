@@ -11,6 +11,9 @@ public final class Function {
     /** The native address of the context */
     private final long contextAddress;
 
+    /** Whether the native context has been freed yet */
+    private volatile boolean released = false;
+
     /** The address of the function */
     private final long functionAddress;
 
@@ -142,10 +145,18 @@ public final class Function {
         return paramTypes[index];
     }
 
+    public synchronized final void free() {
+        if (released) {
+            throw new RuntimeException("function already freed");
+        }
+        Foreign.getInstance().freeFunction(contextAddress);
+        released = true;
+    }
+
     @Override
     protected void finalize() throws Throwable {
         try {
-            if (contextAddress != 0) {
+            if (contextAddress != 0 && !released) {
                 Foreign.getInstance().freeFunction(contextAddress);
             }
         } catch (Throwable t) {
