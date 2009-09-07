@@ -148,6 +148,8 @@ public final class Function {
             if (contextAddress != 0) {
                 Foreign.getInstance().freeFunction(contextAddress);
             }
+        } catch (Throwable t) {
+            t.printStackTrace(System.err);
         } finally {
             super.finalize();
         }
