@@ -12,7 +12,7 @@ public final class Function implements CallInfo {
     private final long contextAddress;
 
     /** Whether the native context has been freed yet */
-    private volatile boolean released = false;
+    private volatile boolean disposed = false;
 
     /** The address of the function */
     private final long functionAddress;
@@ -145,18 +145,18 @@ public final class Function implements CallInfo {
         return paramTypes[index];
     }
 
-    public synchronized final void free() {
-        if (released) {
+    public synchronized final void dispose() {
+        if (disposed) {
             throw new RuntimeException("function already freed");
         }
         Foreign.getInstance().freeFunction(contextAddress);
-        released = true;
+        disposed = true;
     }
 
     @Override
     protected void finalize() throws Throwable {
         try {
-            if (contextAddress != 0 && !released) {
+            if (contextAddress != 0 && !disposed) {
                 Foreign.getInstance().freeFunction(contextAddress);
             }
         } catch (Throwable t) {

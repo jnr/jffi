@@ -12,7 +12,7 @@ public final class CallContext implements CallInfo {
     private final long contextAddress;
 
     /** Whether the native context has been freed yet */
-    private volatile boolean released = false;
+    private volatile boolean disposed = false;
 
     /** The number of parameters this function takes */
     private final int parameterCount;
@@ -131,18 +131,18 @@ public final class CallContext implements CallInfo {
         return parameterTypes[index];
     }
 
-    public synchronized final void free() {
-        if (released) {
+    public synchronized final void dispose() {
+        if (disposed) {
             throw new RuntimeException("context already freed");
         }
         Foreign.getInstance().freeCallContext(contextAddress);
-        released = true;
+        disposed = true;
     }
 
     @Override
     protected void finalize() throws Throwable {
         try {
-            if (contextAddress != 0 && !released) {
+            if (contextAddress != 0 && !disposed) {
                 Foreign.getInstance().freeCallContext(contextAddress);
             }
         } catch (Throwable t) {

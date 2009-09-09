@@ -2,7 +2,6 @@
 package com.kenai.jffi;
 
 import java.lang.reflect.Method;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Allocates and manages the lifecycle of native closures (aka callbacks).rm hs
@@ -62,7 +61,7 @@ public class ClosureManager {
         /** Store a reference to the MemoryIO accessor here for easy access */
         private static final com.kenai.jffi.MemoryIO IO = com.kenai.jffi.MemoryIO.getInstance();
 
-        private final AtomicBoolean released = new AtomicBoolean(false);
+        private volatile boolean disposed = false;
         private volatile boolean autorelease = true;
 
         /**
@@ -103,9 +102,14 @@ public class ClosureManager {
             this.autorelease = autorelease;
         }
 
+        @Deprecated
         public void free() {
-            if (released.getAndSet(true)) {
-                throw new IllegalStateException("Closure already released");
+            dispose();
+        }
+
+        public synchronized void dispose() {
+            if (disposed) {
+                throw new IllegalStateException("closure already freed");
             }
             synchronized (lock) {
                 Foreign.getInstance().freeClosure(handle);
@@ -115,7 +119,7 @@ public class ClosureManager {
         @Override
         protected void finalize() throws Throwable {
             try {
-                if (autorelease && !released.getAndSet(true)) {
+                if (autorelease && !disposed) {
                     synchronized (lock) {
                         Foreign.getInstance().freeClosure(handle);
                     }
