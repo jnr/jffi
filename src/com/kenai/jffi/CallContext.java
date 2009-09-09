@@ -2,20 +2,17 @@
 package com.kenai.jffi;
 
 /**
- * Native function invocation context
+ * Native function call context
  *
  * This class holds all the information that JFFI needs to correctly call a
- * native function.
+ * native function, or to implement a callback from native code to java.
  */
-public final class Function implements CallInfo {
+public final class CallContext implements CallInfo {
     /** The native address of the context */
     private final long contextAddress;
 
     /** Whether the native context has been freed yet */
     private volatile boolean released = false;
-
-    /** The address of the function */
-    private final long functionAddress;
 
     /** The number of parameters this function takes */
     private final int parameterCount;
@@ -24,20 +21,20 @@ public final class Function implements CallInfo {
     private final int rawParameterSize;
 
     /** The return type of this function */
-    final Type returnType;
+    private final Type returnType;
 
     /** The parameter types of this function */
-    final Type[] paramTypes;
+    private final Type[] parameterTypes;
 
     /**
      * Creates a new instance of <tt>Function</tt> with default calling convention.
      *
      * @param address The native address of the function to invoke.
      * @param returnType The return type of the native function.
-     * @param paramTypes The parameter types the function accepts.
+     * @param parameterTypes The parameter types the function accepts.
      */
-    public Function(long address, Type returnType, Type... paramTypes) {
-        this(address, returnType, paramTypes, CallingConvention.DEFAULT, true);
+    public CallContext(Type returnType, Type... paramTypes) {
+        this(returnType, paramTypes, CallingConvention.DEFAULT, true);
     }
 
     /**
@@ -48,11 +45,11 @@ public final class Function implements CallInfo {
      *
      * @param address The native address of the function to invoke.
      * @param returnType The return type of the native function.
-     * @param paramTypes The parameter types the function accepts.
+     * @param parameterTypes The parameter types the function accepts.
      * @param convention The calling convention of the function.
      */
-    public Function(long address, Type returnType, Type[] paramTypes, CallingConvention convention) {
-        this(address, returnType, paramTypes, convention, true);
+    public CallContext(Type returnType, Type[] paramTypes, CallingConvention convention) {
+        this(returnType, paramTypes, convention, true);
     }
 
     /**
@@ -60,19 +57,17 @@ public final class Function implements CallInfo {
      *
      * @param address The native address of the function to invoke.
      * @param returnType The return type of the native function.
-     * @param paramTypes The parameter types the function accepts.
+     * @param parameterTypes The parameter types the function accepts.
      * @param convention The calling convention of the function.
      * @param saveErrno Whether the errno should be saved or not
      */
-    public Function(long address, Type returnType, Type[] paramTypes, CallingConvention convention, boolean saveErrno) {
+    public CallContext(Type returnType, Type[] paramTypes, CallingConvention convention, boolean saveErrno) {
 
-        this.functionAddress = address;
         final int flags = (!saveErrno ? Foreign.F_NOERRNO : 0)
                 | (convention == CallingConvention.STDCALL ? Foreign.F_STDCALL : Foreign.F_DEFAULT);
 
-        final long h = Foreign.getInstance().newFunction(address,
-                returnType.handle(), Type.nativeHandles(paramTypes),
-                flags);
+        final long h = Foreign.getInstance().newCallContext(returnType.handle(),
+                Type.nativeHandles(paramTypes), flags);
         if (h == 0) {
             throw new RuntimeException("Failed to create native function");
         }
@@ -83,11 +78,11 @@ public final class Function implements CallInfo {
         // garbage collected
         //
         this.returnType = returnType;
-        this.paramTypes = (Type[]) paramTypes.clone();
+        this.parameterTypes = (Type[]) paramTypes.clone();
 
         this.parameterCount = paramTypes.length;
-        this.rawParameterSize = Foreign.getInstance().getFunctionRawParameterSize(h);        
-    }    
+        this.rawParameterSize = Foreign.getInstance().getFunctionRawParameterSize(h);
+    }
 
     /**
      * Gets the number of parameters the native function accepts.
@@ -113,17 +108,8 @@ public final class Function implements CallInfo {
      *
      * @return The address of the native function context struct.
      */
-    final long getContextAddress() {
+    final long getAddress() {
         return contextAddress;
-    }
-
-    /**
-     * Gets the address of the function.
-     *
-     * @return The address of the native function.
-     */
-    public final long getFunctionAddress() {
-        return functionAddress;
     }
 
     /**
@@ -134,22 +120,22 @@ public final class Function implements CallInfo {
     public final Type getReturnType() {
         return returnType;
     }
-    
+
     /**
      * Gets the type of a parameter.
-     * 
+     *
      * @param index The index of the parameter in the function signature
      * @return The <tt>Type</tt> of the parameter.
      */
     public final Type getParameterType(int index) {
-        return paramTypes[index];
+        return parameterTypes[index];
     }
 
     public synchronized final void free() {
         if (released) {
-            throw new RuntimeException("function already freed");
+            throw new RuntimeException("context already freed");
         }
-        Foreign.getInstance().freeFunction(contextAddress);
+        Foreign.getInstance().freeCallContext(contextAddress);
         released = true;
     }
 
@@ -157,7 +143,7 @@ public final class Function implements CallInfo {
     protected void finalize() throws Throwable {
         try {
             if (contextAddress != 0 && !released) {
-                Foreign.getInstance().freeFunction(contextAddress);
+                Foreign.getInstance().freeCallContext(contextAddress);
             }
         } catch (Throwable t) {
             t.printStackTrace(System.err);

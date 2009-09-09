@@ -11,7 +11,7 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
     private static final int FFI_SIZEOF_ARG = Platform.getPlatform().addressSize() / 8;
     private static final int PARAM_SIZE = 8;
     private static final Encoder encoder = getEncoder();
-    private final Function function;
+    private final CallInfo info;
     private final byte[] buffer;
     private ObjectBuffer objectBuffer = null;
     private int paramOffset = 0;
@@ -22,9 +22,9 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
      *
      * @param function The function that this buffer is going to be used with.
      */
-    public HeapInvocationBuffer(Function function) {
-        this.function = function;
-        buffer = new byte[encoder.getBufferSize(function)];
+    public HeapInvocationBuffer(CallInfo info) {
+        this.info = info;
+        buffer = new byte[encoder.getBufferSize(info)];
     }
     
     /**
@@ -124,7 +124,7 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
     }
 
     public final void putStruct(final byte[] struct, int offset) {
-        final Type type = function.getParameterType(paramIndex);
+        final Type type = info.getParameterType(paramIndex);
 
         if (encoder.isRaw()) {
             paramOffset = FFI_ALIGN(paramOffset, type.align);
@@ -138,7 +138,7 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
     }
 
     public final void putStruct(final long struct) {
-        final Type type = function.getParameterType(paramIndex);
+        final Type type = info.getParameterType(paramIndex);
 
         if (encoder.isRaw()) {
             paramOffset = FFI_ALIGN(paramOffset, type.align);
@@ -192,7 +192,7 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
         public abstract boolean isRaw();
 
         /** Gets the size in bytes of the buffer required for the function */
-        public abstract int getBufferSize(Function function);
+        public abstract int getBufferSize(CallInfo info);
 
         /**
          * Encodes a byte value into the byte array.
@@ -277,8 +277,8 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
             return true;
         }
 
-        public final int getBufferSize(Function function) {
-            return function.getRawParameterSize();
+        public final int getBufferSize(CallInfo info) {
+            return info.getRawParameterSize();
         }
         public final int putByte(byte[] buffer, int offset, int value) {
             IO.putByte(buffer, offset, value); return offset + 4;
@@ -313,8 +313,8 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
             return false;
         }
         
-        public final int getBufferSize(Function function) {
-            return function.getParameterCount() * PARAM_SIZE;
+        public final int getBufferSize(CallInfo info) {
+            return info.getParameterCount() * PARAM_SIZE;
         }
         public final int putByte(byte[] buffer, int offset, int value) {
             io.putByte(buffer, offset, value); return offset + PARAM_SIZE;

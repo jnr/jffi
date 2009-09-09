@@ -295,6 +295,31 @@ final class Foreign {
      */
     final native int getFunctionRawParameterSize(long functionContext);
 
+    /**
+     * Creates a new native call context.
+     *
+     * @param returnType The return type of the function
+     * @param paramTypes The types of the parameters
+     * @param flags A bitmask of F_DEFAULT, F_STDCALL or F_NOERRNO
+     *
+     * @return The native address of a new function context
+     */
+    final native long newCallContext(long returnType, long[] paramTypes, int flags);
+    
+    /**
+     * Frees a call context created by {@link #newCallContext}
+     *
+     * @param handle The native function context to free
+     */
+    final native void freeCallContext(long callContext);
+
+    /**
+     * Gets the size required to pack parameters for the function in libffi raw format.
+     *
+     * @param functionContext The function context
+     * @return The size in bytes required to pack parameters in raw format
+     */
+    final native int getCallContextRawParameterSize(long callContext);
     
     final native boolean isRawParameterPackingEnabled();
 

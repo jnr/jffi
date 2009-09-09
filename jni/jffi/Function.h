@@ -5,11 +5,11 @@
 
 typedef struct Function {
     ffi_cif cif;
-    void* function;
     int rawParameterSize;
     ffi_type** ffiParamTypes;
     int* rawParamOffsets;
     bool saveErrno;
+    void* function;
 } Function;
 
 #define SAVE_ERRNO(ctx) do { \
