@@ -112,11 +112,29 @@ Java_com_kenai_jffi_Foreign_copyMemory(JNIEnv* env, jobject self, jlong src, jlo
 JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_memchr(JNIEnv* env, jobject self, jlong address, jint c, jlong maxlen)
 {
-    void* ptr = memchr(j2p(address), c, maxlen);
-    if (ptr == NULL) {
-        return -1;
-    }
-    return (int) (p2j(ptr) - address);
+    return p2j(memchr(j2p(address), c, maxlen));
+}
+
+/*
+ * Class:     com_kenai_jffi_Foreign
+ * Method:    memmove
+ * Signature: (JJJ)V
+ */
+JNIEXPORT void JNICALL
+Java_com_kenai_jffi_Foreign_memmove(JNIEnv* env, jobject self, jlong src, jlong dst, jlong size)
+{
+      memmove(j2p(dst), j2p(src), size);
+}
+
+/*
+ * Class:     com_kenai_jffi_Foreign
+ * Method:    memcpy
+ * Signature: (JJJ)V
+ */
+JNIEXPORT void JNICALL
+Java_com_kenai_jffi_Foreign_memcpy(JNIEnv* env, jobject self, jlong src, jlong dst, jlong size)
+{
+      memcpy(j2p(dst), j2p(src), size);
 }
 
 /*

@@ -949,6 +949,25 @@ final class Foreign {
     final native long memchr(long address, int value, long len);
 
     /**
+     * Copies potentially overlapping memory areas.
+     *
+     * @param dst The destination memory address.
+     * @param src The source memory address.
+     * @param size The number of bytes to copy.
+     */
+    final native void memmove(long dst, long src, long len);
+
+    /**
+     * Copies non-overlapping memory areas.
+     *
+     * @param dst The destination memory address.
+     * @param src The source memory address.
+     * @param size The number of bytes to copy.
+     */
+    final native void memcpy(long dst, long src, long len);
+
+
+    /**
      * Gets the length of a native ascii or utf-8 string.
      *
      * @param address The native address of the string.

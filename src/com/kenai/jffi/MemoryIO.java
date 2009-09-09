@@ -214,7 +214,23 @@ public abstract class MemoryIO {
      * @param dst The destination memory address.
      * @param size The number of bytes to copy.
      */
-    public abstract void copyMemory(long src, long dst, long size);
+    public final void copyMemory(long src, long dst, long size) {
+        if (dst + size < src || src + size < dst) {
+            // Use intrinsic copyMemory if regions do not overlap
+            _copyMemory(src, dst, size);
+        } else {
+            foreign.memmove(dst, src, size);
+        }
+    }
+
+    /**
+     * Copies contents of a native memory location to another native memory location.
+     *
+     * @param src The source memory address.
+     * @param dst The destination memory address.
+     * @param size The number of bytes to copy.
+     */
+    abstract void _copyMemory(long src, long dst, long size);
 
     /**
      * Sets a region of native memory to a specific byte value.
@@ -224,6 +240,42 @@ public abstract class MemoryIO {
      * @param value The value to set the native memory to.
      */
     public abstract void setMemory(long address, long size, byte value);
+
+
+    /**
+     * Copies bytes from one memory location to another.
+     *
+     * The memory areas
+     *
+     * @param dst The destination memory address.
+     * @param src The source memory address.
+     * @param size The number of bytes to copy.
+     */
+    public final void memcpy(long dst, long src, long size) {
+        _copyMemory(src, dst, size);
+    }
+
+    /**
+     * Copies potentially overlapping memory areas.
+     *
+     * @param dst The destination memory address.
+     * @param src The source memory address.
+     * @param size The number of bytes to copy.
+     */
+    public final void memmove(long dst, long src, long size) {
+        foreign.memmove(dst, src, size);
+    }
+
+    /**
+     * Sets a region of native memory to a specific byte value.
+     *
+     * @param address The address of start of the native memory.
+     * @param value The value to set the native memory to.
+     * @param size The number of bytes to set.
+     */
+    public final void memset(long address, int value, long size) {
+        setMemory(address, size, (byte) value);
+    }
 
     /**
      * Writes a java byte array to native memory.
@@ -475,10 +527,11 @@ public abstract class MemoryIO {
      *
      * @param address The native memory address to start searching from.
      * @param value The value to search for.
-     * @return The memory location of the value, if found, else -1 (minus one).
+     * @return The offset from the memory address of the value, if found, else -1 (minus one).
      */
     public final long indexOf(long address, byte value) {
-        return foreign.memchr(address, value, Integer.MAX_VALUE);
+        final long location = foreign.memchr(address, value, Integer.MAX_VALUE);
+        return location != 0 ? location - address : -1;
     }
 
     /**
@@ -487,10 +540,11 @@ public abstract class MemoryIO {
      * @param address The native memory address to start searching from.
      * @param value The value to search for.
      * @param maxlen The maximum number of bytes to search.
-     * @return The memory location of the value, if found, else -1 (minus one).
+     * @return The offset from the memory address of the value, if found, else -1 (minus one).
      */
     public final long indexOf(long address, byte value, int maxlen) {
-        return foreign.memchr(address, value, maxlen);
+        final long location = foreign.memchr(address, value, maxlen);
+        return location != 0 ? location - address : -1;
     }
 
     /**
@@ -559,7 +613,7 @@ public abstract class MemoryIO {
         public final void setMemory(long address, long size, byte value) {
             foreign.setMemory(address, size, value);
         }
-        public final void copyMemory(long src, long dst, long size) {
+        public final void _copyMemory(long src, long dst, long size) {
             foreign.copyMemory(src, dst, size);
         }
     }
@@ -640,7 +694,7 @@ public abstract class MemoryIO {
         public final void putDouble(long address, double value) {
             unsafe.putDouble(address, value);
         }
-        public final void copyMemory(long src, long dst, long size) {
+        public final void _copyMemory(long src, long dst, long size) {
             unsafe.copyMemory(src, dst, size);
         }
         public final void setMemory(long src, long size, byte value) {
