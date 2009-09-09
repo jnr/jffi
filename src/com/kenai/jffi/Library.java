@@ -37,7 +37,7 @@ public final class Library {
 
     /** A handle to the current process */
     private static final class DefaultLibrary {
-        private static final Library INSTANCE = new Library(null, dlopen(null, LAZY));
+        private static final Library INSTANCE = new Library(null, dlopen(null, LAZY | GLOBAL));
     }
 
     /** Perform  lazy  binding. Only resolve symbols as needed */
@@ -129,7 +129,7 @@ public final class Library {
     public static final Library openLibrary(String name, int flags) {
         // dlopen on some OS does not like flags=0, so set to sensible defaults
         if (flags == 0) {
-            flags = LAZY;
+            flags = LAZY | LOCAL;
         }
 
         final long address = dlopen(name, flags);
