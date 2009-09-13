@@ -113,6 +113,20 @@ typedef unsigned int u32;
 
 #endif
 
+#ifdef BYPASS_FFI
+// Doing the test before the call produces slightly better i386 asm
+# define CALL(ctx, stmt) \
+    if (likely(!ctx->saveErrno)) { \
+        stmt; \
+    } else { \
+        stmt; \
+        jffi_save_errno(); \
+    }
+#else
+// This version produces smaller code for ffi_call paths
+# define CALL(ctx, stmt) do { stmt; SAVE_ERRNO(ctx); } while(0)
+#endif
+
 /*
  * Class:     com_kenai_jffi_Foreign
  * Method:    invokeVrI
@@ -124,18 +138,7 @@ Java_com_kenai_jffi_Foreign_invokeVrI(JNIEnv* env, jclass self, jlong ctxAddress
     Function* ctx = (Function *) j2p(ctxAddress);
     ffi_sarg retval;
 
-#ifdef BYPASS_FFI
-    // Doing the test before the call produces slightly better i386 asm
-    if (likely(!ctx->saveErrno)) {
-        invokeVrI(ctx, ctx->function, &retval);
-    } else {
-        invokeVrI(ctx, ctx->function, &retval);
-        jffi_save_errno();
-    }
-#else
-    invokeVrI(ctx, &retval);
-    SAVE_ERRNO(ctx);
-#endif
+    CALL(ctx, invokeVrI(ctx, ctx->function, &retval));
 
     return (jint) retval;
 }
@@ -150,7 +153,7 @@ Java_com_kenai_jffi_Foreign_invokeNoErrnoVrI(JNIEnv* env, jclass self, jlong ctx
 {
     Function* ctx = (Function *) j2p(ctxAddress);
     ffi_sarg retval;
-        invokeVrI(ctx, ctx->function, &retval);
+    invokeVrI(ctx, ctx->function, &retval);
 
     return (jint) retval;
 }
@@ -162,18 +165,7 @@ Java_com_kenai_jffi_Foreign_invokeIrI(JNIEnv* env, jclass self, jlong ctxAddress
     Function* ctx = (Function *) j2p(ctxAddress);
     ffi_sarg retval;
 
-#ifdef BYPASS_FFI
-    // Doing the test before the call produces slightly better i386 asm
-    if (likely(!ctx->saveErrno)) {
-        invokeIrI(ctx, ctx->function, &retval, arg1);
-    } else {
-        invokeIrI(ctx, ctx->function, &retval, arg1);
-        jffi_save_errno();
-    }
-#else
-    invokeIrI(ctx, &retval, arg1);
-    SAVE_ERRNO(ctx);
-#endif
+    CALL(ctx, invokeIrI(ctx, ctx->function, &retval, arg1));
 
     return (jint) retval;
 }
@@ -197,18 +189,7 @@ Java_com_kenai_jffi_Foreign_invokeIIrI(JNIEnv*env, jobject self, jlong ctxAddres
     Function* ctx = (Function *) j2p(ctxAddress);
     ffi_sarg retval;
 
-#ifdef BYPASS_FFI
-    // Doing the test before the call produces slightly better i386 asm
-    if (likely(!ctx->saveErrno)) {
-        invokeIIrI(ctx, ctx->function, &retval, arg1, arg2);
-    } else {
-        invokeIIrI(ctx, ctx->function, &retval, arg1, arg2);
-        jffi_save_errno();
-    }
-#else
-    invokeIIrI(ctx, &retval, arg1, arg2);
-    SAVE_ERRNO(ctx);
-#endif
+    CALL(ctx, invokeIIrI(ctx, ctx->function, &retval, arg1, arg2));
 
     return (jint) retval;
 }
@@ -232,18 +213,7 @@ Java_com_kenai_jffi_Foreign_invokeIIIrI(JNIEnv*env, jobject self, jlong ctxAddre
     Function* ctx = (Function *) j2p(ctxAddress);
     ffi_sarg retval;
 
-#ifdef BYPASS_FFI
-    // Doing the test before the call produces slightly better i386 asm
-    if (likely(!ctx->saveErrno)) {
-        invokeIIIrI(ctx, ctx->function, &retval, arg1, arg2, arg3);
-    } else {
-        invokeIIIrI(ctx, ctx->function, &retval, arg1, arg2, arg3);
-        jffi_save_errno();
-    }
-#else
-    invokeIIIrI(ctx, &retval, arg1, arg2, arg3);
-    SAVE_ERRNO(ctx);
-#endif
+    CALL(ctx, invokeIIIrI(ctx, ctx->function, &retval, arg1, arg2, arg3));
 
     return (jint) retval;
 }
@@ -266,19 +236,7 @@ Java_com_kenai_jffi_Foreign_invokeVrF(JNIEnv* env, jclass self, jlong ctxAddress
     Function* ctx = (Function *) j2p(ctxAddress);
     float retval;
 
-#ifdef BYPASS_FFI
-    // Doing the test before the call produces slightly better i386 asm
-    if (likely(!ctx->saveErrno)) {
-        invokeVrF(ctx, ctx->function, &retval);
-    } else {
-        invokeVrF(ctx, ctx->function, &retval);
-        jffi_save_errno();
-    }
-#else
-    invokeVrF(ctx, &retval);
-    SAVE_ERRNO(ctx);
-#endif
-
+    CALL(ctx, invokeVrF(ctx, ctx->function, &retval));
 
     return retval;
 }
@@ -290,18 +248,7 @@ Java_com_kenai_jffi_Foreign_invokeIrF(JNIEnv* env, jclass self, jlong ctxAddress
     Function* ctx = (Function *) j2p(ctxAddress);
     float retval;
 
-#ifdef BYPASS_FFI
-    // Doing the test before the call produces slightly better i386 asm
-    if (likely(!ctx->saveErrno)) {
-        invokeIrF(ctx, ctx->function, &retval, arg1);
-    } else {
-        invokeIrF(ctx, ctx->function, &retval, arg1);
-        jffi_save_errno();
-    }
-#else
-    invokeIrF(ctx, &retval, arg1);
-    SAVE_ERRNO(ctx);
-#endif
+    CALL(ctx, invokeIrF(ctx, ctx->function, &retval, arg1));
 
     return retval;
 }
@@ -313,18 +260,7 @@ Java_com_kenai_jffi_Foreign_invokeIIrF(JNIEnv*env, jobject self, jlong ctxAddres
     Function* ctx = (Function *) j2p(ctxAddress);
     float retval;
 
-#ifdef BYPASS_FFI
-    // Doing the test before the call produces slightly better i386 asm
-    if (likely(!ctx->saveErrno)) {
-        invokeIIrF(ctx, ctx->function, &retval, arg1, arg2);
-    } else {
-        invokeIIrF(ctx, ctx->function, &retval, arg1, arg2);
-        jffi_save_errno();
-    }
-#else
-    invokeIIrF(ctx, &retval, arg1, arg2);
-    SAVE_ERRNO(ctx);
-#endif
+    CALL(ctx, invokeIIrF(ctx, ctx->function, &retval, arg1, arg2));
 
     return retval;
 }
@@ -338,18 +274,7 @@ Java_com_kenai_jffi_Foreign_invokeIIIrF(JNIEnv*env, jobject self, jlong ctxAddre
     Function* ctx = (Function *) j2p(ctxAddress);
     float retval;
 
-#ifdef BYPASS_FFI
-    // Doing the test before the call produces slightly better i386 asm
-    if (likely(!ctx->saveErrno)) {
-        invokeIIIrF(ctx, ctx->function, &retval, arg1, arg2, arg3);
-    } else {
-        invokeIIIrF(ctx, ctx->function, &retval, arg1, arg2, arg3);
-        jffi_save_errno();
-    }
-#else
-    invokeIIIrF(ctx, &retval, arg1, arg2, arg3);
-    SAVE_ERRNO(ctx);
-#endif
+    CALL(ctx, invokeIIIrF(ctx, ctx->function, &retval, arg1, arg2, arg3));
 
     return retval;
 }
