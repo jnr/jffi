@@ -126,7 +126,6 @@ thread_data_get()
 
 #if defined(__i386__)
 #  define USE_RAW 1
-#  define BYPASS_FFI 1
 #endif
 
 #if BYTE_ORDER == LITTLE_ENDIAN
