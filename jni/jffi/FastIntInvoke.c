@@ -23,8 +23,42 @@ typedef unsigned int u32;
 #else
 #  error "Unsupported BYTE_ORDER"
 #endif
+#if defined(__i386__)
+# define INT_BYPASS_FFI
+# define FLOAT_BYPASS_FFI
+#elif defined(__x86_64__)
+# define INT_BYPASS_FFI
+#endif
 
-#if defined(BYPASS_FFI)
+# define ffi_call0(ctx, fn, retval) do { \
+        FFIValue arg0; \
+        void* ffiValues[] = { &arg0 }; \
+        ffi_call(&(ctx)->cif, FFI_FN((fn)), (retval), ffiValues); \
+    } while (0)
+
+# define ffi_call1(ctx, fn, retval, arg1) do { \
+        void* ffiValues[] = {  ARGPTR(&(arg1), (ctx)->cif.arg_types[0]) }; \
+        ffi_call(&(ctx)->cif, FFI_FN((fn)), (retval), ffiValues); \
+    } while (0)
+
+# define ffi_call2(ctx, fn, retval, arg1, arg2) do {\
+        void* ffiValues[] = { \
+            ARGPTR(&arg1, (ctx)->cif.arg_types[0]), \
+            ARGPTR(&arg2, (ctx)->cif.arg_types[1]) \
+        }; \
+        ffi_call(&(ctx)->cif, FFI_FN((fn)), (retval), ffiValues); \
+    } while (0)
+
+# define ffi_call3(ctx, fn, retval, arg1, arg2, arg3) do { \
+        void* ffiValues[] = { \
+            ARGPTR(&arg1, (ctx)->cif.arg_types[0]), \
+            ARGPTR(&arg2, (ctx)->cif.arg_types[1]), \
+            ARGPTR(&arg3, (ctx)->cif.arg_types[2]) \
+        }; \
+        ffi_call(&(ctx)->cif, FFI_FN((fn)), (retval), ffiValues); \
+    } while (0)
+
+#if defined(INT_BYPASS_FFI)
 # define invokeVrI(ctx, fn, retval) do { \
             *(int *)(retval) = ((jint (*)()) (fn))(); \
     } while (0)
@@ -41,58 +75,16 @@ typedef unsigned int u32;
             *(int *)(retval) = ((jint (*)(jint, jint, jint)) (fn))(arg1, arg2, arg3); \
     } while (0)
 
-#elif defined(USE_RAW) && defined(__i386__)
+#else /* non-i386, non-x86_64 */
 
-# define invokeVrI(ctx, fn, retval) do { \
-        FFIValue arg0; \
-        void* ffiValues[] = { &arg0 }; \
-        ffi_call(&(ctx)->cif, FFI_FN((fn)), (retval), ffiValues); \
-    } while (0)
+# define invokeVrI ffi_call0
+# define invokeIrI ffi_call1
+# define invokeIIrI ffi_call2
+# define invokeIIIrI ffi_call3
 
-# define invokeIrI(ctx, fn, retval, arg1) do { \
-        ffi_raw_call(&(ctx)->cif, FFI_FN((fn)), (retval), (ffi_raw *) &arg1); \
-    } while (0)
-
-# define invokeIIrI(ctx, fn, retval, arg1, arg2) do { \
-        ffi_raw_call(&(ctx)->cif, FFI_FN((fn)), (retval), (ffi_raw *) &arg1); \
-    } while (0)
-
-# define invokeIIIrI(ctx, fn, retval, arg1, arg2, arg3) do {
-        ffi_raw_call(&(ctx)->cif, FFI_FN((fn)), (retval), (ffi_raw *) &arg1); \
-    } while (0)
-
-#else /* Anything that is BIG endian or non-i386 little endian */
-
-# define invokeVrI(ctx, fn, retval) do { \
-        FFIValue arg0; \
-        void* ffiValues[] = { &arg0 }; \
-        ffi_call(&(ctx)->cif, FFI_FN((fn)), (retval), ffiValues); \
-    } while (0)
-
-# define invokeIrI(ctx, fn, retval, arg1) do { \
-        void* ffiValues[] = {  ARGPTR(&(arg1), (ctx)->cif.arg_types[0]) }; \
-        ffi_call(&(ctx)->cif, FFI_FN((fn)), (retval), ffiValues); \
-    } while (0)
-
-# define invokeIIrI(ctx, fn, retval, arg1, arg2) do {\
-        void* ffiValues[] = { \
-            ARGPTR(&arg1, (ctx)->cif.arg_types[0]), \
-            ARGPTR(&arg2, (ctx)->cif.arg_types[1]) \
-        }; \
-        ffi_call(&(ctx)->cif, FFI_FN((fn)), (retval), ffiValues); \
-    } while (0)
-
-# define invokeIIIrI(ctx, fn, retval, arg1, arg2, arg3) do { \
-        void* ffiValues[] = { \
-            ARGPTR(&arg1, (ctx)->cif.arg_types[0]), \
-            ARGPTR(&arg2, (ctx)->cif.arg_types[1]), \
-            ARGPTR(&arg3, (ctx)->cif.arg_types[2]) \
-        }; \
-        ffi_call(&(ctx)->cif, FFI_FN((fn)), (retval), ffiValues); \
-    } while (0)
 #endif
 
-#if defined(BYPASS_FFI)
+#if defined(FLOAT_BYPASS_FFI)
 # define invokeVrF(ctx, fn, rvp) \
     *(float *) (rvp) = ((float (*)(void)) (fn))()
 
@@ -106,22 +98,23 @@ typedef unsigned int u32;
     *(float *) (rvp) = ((float (*)(int, int, int)) (fn))(arg1, arg2, arg3)
 #else
 
-# define invokeVrF invokeVrI
-# define invokeIrF invokeIrI
-# define invokeIIrF invokeIIrI
-# define invokeIIIrF invokeIIIrI
+# define invokeVrF ffi_call0
+# define invokeIrF ffi_call1
+# define invokeIIrF ffi_call2
+# define invokeIIIrF ffi_call3
 
 #endif
 
-#ifdef BYPASS_FFI
-// Doing the test before the call produces slightly better i386 asm
-# define CALL(ctx, stmt) \
+#if defined(FLOAT_BYPASS_FFI) && defined(__i386__)
+// Doing the test before the call produces slightly better i386 asm for float calls
+# define CALL(ctx, stmt) do { \
     if (likely(!ctx->saveErrno)) { \
         stmt; \
     } else { \
         stmt; \
         jffi_save_errno(); \
-    }
+    } \
+   } while (0)
 #else
 // This version produces smaller code for ffi_call paths
 # define CALL(ctx, stmt) do { stmt; SAVE_ERRNO(ctx); } while(0)
