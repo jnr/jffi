@@ -20,13 +20,23 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
     /**
      * Creates a new instance of <tt>HeapInvocationBuffer</tt>.
      *
-     * @param function The function that this buffer is going to be used with.
+     * @param info The call info that describes the function parameters
      */
     public HeapInvocationBuffer(CallInfo info) {
         this.info = info;
         buffer = new byte[encoder.getBufferSize(info)];
     }
-    
+
+    /**
+     * Creates a new instance of <tt>HeapInvocationBuffer</tt>.
+     *
+     * @param function The function that this buffer is going to be used with.
+     */
+    public HeapInvocationBuffer(Function function) {
+        this.info = function;
+        buffer = new byte[encoder.getBufferSize(function)];
+    }
+
     /**
      * Gets the backing array of this <tt>InvocationBuffer</tt>
      *
