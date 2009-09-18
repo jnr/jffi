@@ -32,9 +32,11 @@
 #include "jffi.h"
 #include "Exception.h"
 #include "Type.h"
+#include "CallContext.h"
+#include "ClosurePool.h"
 #include "com_kenai_jffi_Foreign.h"
 
-typedef struct Closure {
+typedef struct JClosure {
     void* code;
     ffi_closure* ffi_closure;
     ffi_cif ffi_cif;
@@ -43,13 +45,21 @@ typedef struct Closure {
     JavaVM* jvm;
     ffi_type** ffiParamTypes;
     int flags;
-} Closure;
+} JClosure;
+
+typedef struct JClosurePool {
+    ClosurePool* pool;
+    CallContext* callContext;
+    jmethodID methodID;
+    JavaVM* jvm;
+} JClosurePool;
 
 #ifndef MAX
 #  define MAX(a,b) ((a) > (b) ? (a) : (b))
 #endif
 
 static void closure_invoke(ffi_cif* cif, void* retval, void** parameters, void* user_data);
+static bool closure_prep(void* ctx, void* code, Closure* closure, char* errbuf, size_t errbufsize);
 
 /*
  * Class:     com_googlecode_jffi_ClosureManager
@@ -60,7 +70,7 @@ JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_newClosure(JNIEnv* env, jclass clazz,
         jobject closureObject, jobject closureMethod, jlong returnType, jlongArray paramTypeArray, jint flags)
 {
-    Closure* closure = NULL;
+    JClosure* closure = NULL;
     int argCount;
     ffi_type* ffiReturnType;
     ffi_status status;
@@ -173,11 +183,7 @@ cleanup:
     return 0;
 }
 
-/*
- * Class:     com_googlecode_jffi_ClosureManager
- * Method:    freeClosure
- * Signature: (J)V
- */
+
 /*
  * Class:     com_kenai_jffi_Foreign
  * Method:    freeClosure
@@ -185,7 +191,7 @@ cleanup:
  */
 JNIEXPORT void JNICALL Java_com_kenai_jffi_Foreign_freeClosure(JNIEnv* env, jobject self, jlong address)
 {
-    Closure* closure = j2p(address);
+    JClosure* closure = j2p(address);
 
     if (closure == NULL) {
         throwException(env, NullPointer, "closure == null");
@@ -199,8 +205,72 @@ JNIEXPORT void JNICALL Java_com_kenai_jffi_Foreign_freeClosure(JNIEnv* env, jobj
     free(closure);
 }
 
+/*
+ * Class:     com_kenai_jffi_Foreign
+ * Method:    newClosurePool
+ * Signature: (JLjava/lang/reflect/Method;)J
+ */
+JNIEXPORT jlong JNICALL
+Java_com_kenai_jffi_Foreign_newClosurePool(JNIEnv* env, jobject self, jlong ctxAddress, jobject closureMethod)
+{
+    JClosurePool* pool = NULL;
+
+    pool = calloc(1, sizeof(*pool));
+    if (pool == NULL) {
+        throwException(env, OutOfMemory, "calloc failed");
+        return 0L;
+    }
+
+    pool->pool = jffi_ClosurePool_New(sizeof(ffi_closure), closure_prep, pool);
+    if (pool->pool == NULL) {
+        throwException(env, OutOfMemory, "could not allocate closure pool");
+        goto error;
+    }
+
+    pool->methodID = (*env)->FromReflectedMethod(env, closureMethod);
+    if (pool->methodID == NULL) {
+        throwException(env, IllegalArgument, "could not obtain reference to closure method");
+        goto error;
+    }
+
+    if (ctxAddress == 0L) {
+        throwException(env, NullPointer, "NULL CallContext");
+        goto error;
+    }
+
+    (*env)->GetJavaVM(env, &pool->jvm);
+    pool->callContext = j2p(ctxAddress);
+
+    return p2j(pool);
+
+error:
+    if (pool != NULL) {
+        if (pool->pool != NULL) {
+            jffi_ClosurePool_Free(pool->pool);
+        }
+        free(pool);
+    }
+    return 0L;
+}
+
+/*
+ * Class:     com_kenai_jffi_Foreign
+ * Method:    freeClosurePool
+ * Signature: (J)J
+ */
+JNIEXPORT void JNICALL
+Java_com_kenai_jffi_Foreign_freeClosurePool(JNIEnv* env, jobject self, jlong address)
+{
+    JClosurePool* pool = (JClosurePool *) j2p(address);
+    if (pool != NULL) {
+        jffi_ClosurePool_Free(pool->pool);
+        free(pool);
+    }
+}
+
+
 static void
-closure_begin(Closure* closure, JNIEnv** penv, bool* detach)
+closure_begin(JClosure* closure, JNIEnv** penv, bool* detach)
 {
     JavaVM* jvm = closure->jvm;
     *detach = (*jvm)->GetEnv(jvm, (void **)penv, JNI_VERSION_1_4) != JNI_OK
@@ -211,7 +281,7 @@ closure_begin(Closure* closure, JNIEnv** penv, bool* detach)
 }
 
 static void
-closure_end(Closure* closure, JNIEnv* env, bool detach)
+closure_end(JClosure* closure, JNIEnv* env, bool detach)
 {
     JavaVM* jvm = closure->jvm;
     if (detach && env != NULL) {
@@ -225,7 +295,7 @@ closure_end(Closure* closure, JNIEnv* env, bool detach)
 static void
 closure_invoke(ffi_cif* cif, void* retval, void** parameters, void* user_data)
 {
-    Closure* closure = (Closure *) user_data;
+    JClosure* closure = (JClosure *) user_data;
     JNIEnv* env;
     jvalue javaParams[3];
     bool detach;
@@ -243,3 +313,27 @@ closure_invoke(ffi_cif* cif, void* retval, void** parameters, void* user_data)
     closure_end(closure, env, detach);
 }
 
+static bool
+closure_prep(void* ctx, void* code, Closure* closure, char* errbuf, size_t errbufsize)
+{
+    JClosurePool* pool = ctx;
+    ffi_status status;
+
+    status = ffi_prep_closure(code, &pool->callContext->cif, closure_invoke, closure);
+    switch (status) {
+        case FFI_OK:
+            return true;
+
+        case FFI_BAD_ABI:
+            //throwException(env, IllegalArgument, "Invalid ABI specified");
+            return false;
+
+        case FFI_BAD_TYPEDEF:
+            //throwException(env, IllegalArgument, "Invalid argument type specified");
+            return false;
+
+        default:
+            //throwException(env, IllegalArgument, "Unknown FFI error");
+            return false;
+    }
+}

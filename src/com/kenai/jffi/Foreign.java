@@ -340,6 +340,9 @@ final class Foreign {
     final native long newClosure(Object proxy, Method closureMethod, long returnType, long[] paramTypes, int convention);
     final native void freeClosure(long handle);
 
+    final native long newClosurePool(long contextAddress, Method closureMethod);
+    final native void freeClosurePool(long closurePool);
+
     /**
      * Gets the address of the ffi_type structure for the builtin type
      *

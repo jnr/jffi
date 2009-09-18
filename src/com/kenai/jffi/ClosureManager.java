@@ -2,6 +2,10 @@
 package com.kenai.jffi;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.WeakHashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Allocates and manages the lifecycle of native closures (aka callbacks).rm hs
@@ -9,6 +13,11 @@ import java.lang.reflect.Method;
 public class ClosureManager {
     private static final long ADDRESS_MASK = Platform.getPlatform().addressMask();
     private static final Object lock = new Object();
+
+    private final Map<Signature, CallContext> contextMap
+            = new ConcurrentHashMap<Signature, CallContext>();
+    private final Map<CallContext, ClosurePool> poolMap
+            = new WeakHashMap<CallContext, ClosurePool>();
 
     /** Holder class to do lazy allocation of the ClosureManager instance */
     private static final class SingletonHolder {
@@ -38,18 +47,139 @@ public class ClosureManager {
      * @return A new {@link Closure.Handle} instance.
      */
     public final Closure.Handle newClosure(Closure closure, Type returnType, Type[] parameterTypes, CallingConvention convention) {
-        Proxy proxy = new Proxy(closure, returnType, parameterTypes);
+        return newClosure(closure, getCallContext(returnType, parameterTypes, convention));
+    }
+
+    /**
+     * Wraps a java object that implements the {@link Closure} interface in a
+     * native closure.
+     *
+     * @param closure The java object to be called when the native closure is invoked.
+     * @param returnType The return type of the closure.
+     * @param parameterTypes The parameter types of the closure.
+     * @param convention The calling convention of the closure.
+     * @return A new {@link Closure.Handle} instance.
+     */
+    public final Closure.Handle newClosure(Closure closure, CallContext callContext) {
+        Proxy proxy = new Proxy(closure, callContext);
+        ClosurePool pool = getClosurePool(callContext);
 
         long handle = 0;
         synchronized (lock) {
             handle = Foreign.getInstance().newClosure(proxy, Proxy.METHOD,
-                returnType.handle(), Type.nativeHandles(parameterTypes), 0);
+                callContext.getReturnType().handle(), nativeParameterHandles(callContext), 0);
         }
+
         if (handle == 0) {
             throw new RuntimeException("Failed to create native closure");
         }
 
-        return new Handle(handle, returnType, parameterTypes);
+        return new Handle(handle, callContext);
+    }
+
+    private final long[] nativeParameterHandles(CallContext ctx) {
+        long[] handles = new long[ctx.getParameterCount()];
+        for (int i = 0; i < ctx.getParameterCount(); ++i) {
+            handles[i] = ctx.getParameterType(i).handle();
+        }
+
+        return handles;
+    }
+
+    private final CallContext getCallContext(Type returnType, Type[] parameterTypes, CallingConvention convention) {
+        Signature signature = new Signature(returnType, parameterTypes, convention);
+        CallContext ctx = contextMap.get(signature);
+        if (ctx != null) {
+            return ctx;
+        }
+
+        ctx = new CallContext(returnType, (Type[]) parameterTypes.clone(), convention);
+        contextMap.put(signature, ctx);
+
+        return ctx;
+    }
+
+    private final synchronized ClosurePool getClosurePool(CallContext callContext) {
+        ClosurePool pool = poolMap.get(callContext);
+        if (pool != null) {
+            return pool;
+        }
+
+        synchronized (lock) {
+            pool = new ClosurePool(Foreign.getInstance().newClosurePool(callContext.getAddress(), Proxy.METHOD));
+        }
+
+        poolMap.put(callContext, pool);
+
+        return pool;
+    }
+
+    private static final class Signature {
+        /**
+         * Keep references to the return and parameter types so they do not get
+         * garbage collected until the closure does.
+         */
+        private final Type returnType;
+        private final Type[] parameterTypes;
+        private final CallingConvention convention;
+
+        public Signature(Type returnType, Type[] parameterTypes, CallingConvention convention) {
+            this.returnType = returnType;
+            this.parameterTypes = parameterTypes;
+            this.convention = convention;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            final Signature other = (Signature) obj;
+            if (this.returnType != other.returnType && (this.returnType == null || !this.returnType.equals(other.returnType))) {
+                return false;
+            }
+            if (!Arrays.deepEquals(this.parameterTypes, other.parameterTypes)) {
+                return false;
+            }
+            if (this.convention != other.convention) {
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            int hash = 7;
+            hash = 53 * hash + (this.returnType != null ? this.returnType.hashCode() : 0);
+            hash = 53 * hash + Arrays.deepHashCode(this.parameterTypes);
+            hash = 53 * hash + this.convention.hashCode();
+            return hash;
+        }
+
+    }
+
+    private static final class ClosurePool {
+        private final long handle;
+
+        public ClosurePool(long handle) {
+            this.handle = handle;
+        }
+
+        @Override
+        protected void finalize() throws Throwable {
+            try {
+                synchronized (lock) {
+                    Foreign.getInstance().freeClosurePool(handle);
+                }
+            } catch (Throwable t) {
+                t.printStackTrace(System.err);
+            } finally {
+                super.finalize();
+            }
+        }
     }
 
     /**
@@ -79,19 +209,17 @@ public class ClosureManager {
          * Keep references to the return and parameter types so they do not get
          * garbage collected until the closure does.
          */
-        private final Type returnType;
-        private final Type[] parameterTypes;
+        private final CallContext callContext;
 
         /**
          * Creates a new Handle to lifecycle manager the native closure.
          *
          * @param handle The address of the native closure structure.
          */
-        Handle(long handle, Type returnType, Type[] parameterTypes) {
+        Handle(long handle, CallContext callContext) {
             this.handle = handle;
             cbAddress = IO.getAddress(handle);
-            this.returnType = returnType;
-            this.parameterTypes = (Type[]) parameterTypes.clone();
+            this.callContext = callContext;
         }
 
         public long getAddress() {
@@ -144,8 +272,7 @@ public class ClosureManager {
          * Keep references to the return and parameter types so they do not get
          * garbage collected until the closure does.
          */
-        final Type returnType;
-        final Type[] parameterTypes;
+        final CallContext callContext;
 
         /**
          * Gets the
@@ -166,10 +293,9 @@ public class ClosureManager {
          * @param returnType The native return type of the closure
          * @param parameterTypes The parameterTypes of the closure
          */
-        Proxy(Closure closure, Type returnType, Type[] parameterTypes) {
+        Proxy(Closure closure, CallContext callContext) {
             this.closure = closure;
-            this.returnType = returnType;
-            this.parameterTypes = (Type[]) parameterTypes.clone();
+            this.callContext = callContext;
         }
 
         /**
@@ -180,7 +306,7 @@ public class ClosureManager {
          * @param paramAddress The address of the native parameter buffer.
          */
         void invoke(long retvalAddress, long paramAddress) {
-            closure.invoke(new DirectBuffer(returnType, parameterTypes, retvalAddress, paramAddress));
+            closure.invoke(new DirectBuffer(callContext, retvalAddress, paramAddress));
         }
     }
 
@@ -195,12 +321,10 @@ public class ClosureManager {
         private final long retval, parameters;
 
         /* Keep references to the return and parameter types to prevent garbage collection */
-        private final Type returnType;
-        private final Type[] parameterTypes;
+        private final CallContext callContext;
 
-        public DirectBuffer(Type returnType, Type[] parameterTypes, long retval, long parameters) {
-            this.returnType = returnType;
-            this.parameterTypes = parameterTypes;
+        public DirectBuffer(CallContext callContext, long retval, long parameters) {
+            this.callContext = callContext;
             this.retval = retval;
             this.parameters = parameters;
         }
@@ -266,11 +390,11 @@ public class ClosureManager {
         }
 
         public void setStructReturn(long value) {
-            IO.copyMemory(value, retval, returnType.size());
+            IO.copyMemory(value, retval, callContext.getReturnType().size());
         }
 
         public void setStructReturn(byte[] data, int offset) {
-            IO.putByteArray(retval, data, offset, returnType.size());
+            IO.putByteArray(retval, data, offset, callContext.getReturnType().size());
         }
     }
 
