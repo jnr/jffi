@@ -33,6 +33,12 @@
 #ifndef roundup
 #  define roundup(x, y)   ((((x)+((y)-1))/(y))*(y))
 #endif
+
+#ifdef _WIN32
+  typedef char* caddr_t;
+#endif
+
+
 #ifdef __GNUC__
 #  define likely(x) __builtin_expect((x), 1)
 #  define unlikely(x) __builtin_expect((x), 0)
