@@ -381,6 +381,12 @@ public class UnitHelper {
             }
 
         }
+
+        private long getNativeLongReturnValue(long address) {
+            return Platform.getPlatform().longSize() == 32
+                    ? Memory.getInt(address) : Memory.getLong(address);
+        }
+
         public Object invoke(Object[] args) {
             MemoryHolder[] memoryHolders = new MemoryHolder[function.getParameterCount()];
             long[] parameterAddresses = new long[function.getParameterCount()];
@@ -416,11 +422,11 @@ public class UnitHelper {
             if (returnType == void.class || returnType == Void.class) {
                 return null;
             } else if (returnType == byte.class || returnType == Byte.class) {
-                return Memory.getInt(returnBuffer);
+                return (byte) getNativeLongReturnValue(returnBuffer);
             } else if (returnType == short.class || returnType == Short.class) {
-                return Memory.getInt(returnBuffer);
+                return (short) getNativeLongReturnValue(returnBuffer);
             } else if (returnType == int.class || returnType == Integer.class) {
-                return Memory.getInt(returnBuffer);
+                return (int) getNativeLongReturnValue(returnBuffer);
             } else if (returnType == long.class || returnType == Long.class) {
                 return Memory.getLong(returnBuffer);
             } else if (returnType == float.class || returnType == Float.class) {
