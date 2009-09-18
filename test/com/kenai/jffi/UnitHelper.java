@@ -416,9 +416,9 @@ public class UnitHelper {
             if (returnType == void.class || returnType == Void.class) {
                 return null;
             } else if (returnType == byte.class || returnType == Byte.class) {
-                return Memory.getByte(returnBuffer);
+                return Memory.getInt(returnBuffer);
             } else if (returnType == short.class || returnType == Short.class) {
-                return Memory.getShort(returnBuffer);
+                return Memory.getInt(returnBuffer);
             } else if (returnType == int.class || returnType == Integer.class) {
                 return Memory.getInt(returnBuffer);
             } else if (returnType == long.class || returnType == Long.class) {
