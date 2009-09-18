@@ -27,14 +27,13 @@
 JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_invokeVrL(JNIEnv* env, jobject self, jlong ctxAddress)
 {
-    Function* ctx = (Function *) (uintptr_t) ctxAddress;
-    ffi_cif *cif = &ctx->cif;
-    FFIValue retval, arg0;
-    void* ffiValues[] = { &arg0 };
-    ffi_call(cif, FFI_FN(ctx->function), &retval, ffiValues);
+    Function* ctx = (Function *) j2p(ctxAddress);
+    FFIValue retval;
+    
+    ffi_call0(ctx, ctx->function, &retval);
     SAVE_ERRNO(ctx);
 
-    return RETVAL(retval, cif->rtype);
+    return RETVAL(retval, ctx->cif.rtype);
 }
 
 /*
@@ -45,16 +44,13 @@ Java_com_kenai_jffi_Foreign_invokeVrL(JNIEnv* env, jobject self, jlong ctxAddres
 JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_invokeLrL(JNIEnv* env, jobject self, jlong ctxAddress, jlong arg1)
 {
-    Function* ctx = (Function *) (uintptr_t) ctxAddress;
-    ffi_cif *cif = &ctx->cif;
+    Function* ctx = (Function *) j2p(ctxAddress);
     FFIValue retval;
-    void* ffiValues[] = { 
-        ARGPTR(&arg1, cif->arg_types[0])
-    };
-    ffi_call(cif, FFI_FN(ctx->function), &retval, ffiValues);
+
+    ffi_call1(ctx, ctx->function, &retval, arg1);
     SAVE_ERRNO(ctx);
 
-    return RETVAL(retval, cif->rtype);
+    return RETVAL(retval, ctx->cif.rtype);
 }
 
 /*
@@ -65,17 +61,13 @@ Java_com_kenai_jffi_Foreign_invokeLrL(JNIEnv* env, jobject self, jlong ctxAddres
 JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_invokeLLrL(JNIEnv* env, jobject self, jlong ctxAddress, jlong arg1, jlong arg2)
 {
-    Function* ctx = (Function *) (uintptr_t) ctxAddress;
-    ffi_cif *cif = &ctx->cif;
+    Function* ctx = (Function *) j2p(ctxAddress);
     FFIValue retval;
-    void* ffiValues[] = {
-        ARGPTR(&arg1, cif->arg_types[0]),
-        ARGPTR(&arg2, cif->arg_types[1])
-    };
-    ffi_call(cif, FFI_FN(ctx->function), &retval, ffiValues);
+
+    ffi_call2(ctx, ctx->function, &retval, arg1, arg2);
     SAVE_ERRNO(ctx);
 
-    return RETVAL(retval, cif->rtype);
+    return RETVAL(retval, ctx->cif.rtype);
 }
 
 /*
@@ -87,16 +79,11 @@ JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_invokeLLLrL(JNIEnv* env, jobject self, jlong ctxAddress,
         jlong arg1, jlong arg2, jlong arg3)
 {
-    Function* ctx = (Function *) (uintptr_t) ctxAddress;
-    ffi_cif *cif = &ctx->cif;
+    Function* ctx = (Function *) j2p(ctxAddress);
     FFIValue retval;
-    void* ffiValues[] = {
-        ARGPTR(&arg1, cif->arg_types[0]),
-        ARGPTR(&arg2, cif->arg_types[1]),
-        ARGPTR(&arg3, cif->arg_types[2])
-    };
-    ffi_call(cif, FFI_FN(ctx->function), &retval, ffiValues);
+
+    ffi_call3(ctx, ctx->function, &retval, arg1, arg2, arg3);
     SAVE_ERRNO(ctx);
 
-    return RETVAL(retval, cif->rtype);
+    return RETVAL(retval, ctx->cif.rtype);
 }

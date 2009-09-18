@@ -134,6 +134,34 @@ thread_data_get()
 # define return_int(retval) return ((retval).l & 0xFFFFFFFFL)
 #endif
 
+# define ffi_call0(ctx, fn, retval) do { \
+        FFIValue arg0; \
+        void* ffiValues[] = { &arg0 }; \
+        ffi_call(&(ctx)->cif, FFI_FN((fn)), (retval), ffiValues); \
+    } while (0)
+
+# define ffi_call1(ctx, fn, retval, arg1) do { \
+        void* ffiValues[] = {  ARGPTR(&(arg1), (ctx)->cif.arg_types[0]) }; \
+        ffi_call(&(ctx)->cif, FFI_FN((fn)), (retval), ffiValues); \
+    } while (0)
+
+# define ffi_call2(ctx, fn, retval, arg1, arg2) do {\
+        void* ffiValues[] = { \
+            ARGPTR(&arg1, (ctx)->cif.arg_types[0]), \
+            ARGPTR(&arg2, (ctx)->cif.arg_types[1]) \
+        }; \
+        ffi_call(&(ctx)->cif, FFI_FN((fn)), (retval), ffiValues); \
+    } while (0)
+
+# define ffi_call3(ctx, fn, retval, arg1, arg2, arg3) do { \
+        void* ffiValues[] = { \
+            ARGPTR(&arg1, (ctx)->cif.arg_types[0]), \
+            ARGPTR(&arg2, (ctx)->cif.arg_types[1]), \
+            ARGPTR(&arg3, (ctx)->cif.arg_types[2]) \
+        }; \
+        ffi_call(&(ctx)->cif, FFI_FN((fn)), (retval), ffiValues); \
+    } while (0)
+
 #endif /* jffi_jffi_h */
 
 

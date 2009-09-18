@@ -30,49 +30,22 @@ typedef unsigned int u32;
 # define INT_BYPASS_FFI
 #endif
 
-# define ffi_call0(ctx, fn, retval) do { \
-        FFIValue arg0; \
-        void* ffiValues[] = { &arg0 }; \
-        ffi_call(&(ctx)->cif, FFI_FN((fn)), (retval), ffiValues); \
-    } while (0)
-
-# define ffi_call1(ctx, fn, retval, arg1) do { \
-        void* ffiValues[] = {  ARGPTR(&(arg1), (ctx)->cif.arg_types[0]) }; \
-        ffi_call(&(ctx)->cif, FFI_FN((fn)), (retval), ffiValues); \
-    } while (0)
-
-# define ffi_call2(ctx, fn, retval, arg1, arg2) do {\
-        void* ffiValues[] = { \
-            ARGPTR(&arg1, (ctx)->cif.arg_types[0]), \
-            ARGPTR(&arg2, (ctx)->cif.arg_types[1]) \
-        }; \
-        ffi_call(&(ctx)->cif, FFI_FN((fn)), (retval), ffiValues); \
-    } while (0)
-
-# define ffi_call3(ctx, fn, retval, arg1, arg2, arg3) do { \
-        void* ffiValues[] = { \
-            ARGPTR(&arg1, (ctx)->cif.arg_types[0]), \
-            ARGPTR(&arg2, (ctx)->cif.arg_types[1]), \
-            ARGPTR(&arg3, (ctx)->cif.arg_types[2]) \
-        }; \
-        ffi_call(&(ctx)->cif, FFI_FN((fn)), (retval), ffiValues); \
-    } while (0)
 
 #if defined(INT_BYPASS_FFI)
 # define invokeVrI(ctx, fn, retval) do { \
-            *(int *)(retval) = ((jint (*)()) (fn))(); \
+            *(retval) = ((jint (*)()) (fn))(); \
     } while (0)
 
 # define invokeIrI(ctx, fn, retval, arg1) do { \
-            *(int *)(retval) = ((jint (*)(jint)) (fn))(arg1); \
+            *(retval) = ((jint (*)(jint)) (fn))(arg1); \
     } while (0)
 
 # define invokeIIrI(ctx, fn, retval, arg1, arg2) do { \
-            *(int *)(retval) = ((jint (*)(jint, jint)) (fn))((arg1), (arg2)); \
+            *(retval) = ((jint (*)(jint, jint)) (fn))((arg1), (arg2)); \
     } while (0)
 
 # define invokeIIIrI(ctx, fn, retval, arg1, arg2, arg3) do { \
-            *(int *)(retval) = ((jint (*)(jint, jint, jint)) (fn))(arg1, arg2, arg3); \
+            *(retval) = ((jint (*)(jint, jint, jint)) (fn))(arg1, arg2, arg3); \
     } while (0)
 
 #else /* non-i386, non-x86_64 */
