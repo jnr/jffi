@@ -70,8 +70,8 @@ struct ClosurePool_ {
 #  define pool_unlock(p)
 #endif
 
-static int pageSize;
 
+static int getPageSize(void);
 static void* allocatePage(void);
 static bool freePage(void *);
 static bool protectPage(void *);
@@ -151,7 +151,7 @@ jffi_Closure_Alloc(ClosurePool* pool)
     }
 
     trampolineSize = roundup(pool->closureSize, 8);
-    nclosures = pageSize / trampolineSize;
+    nclosures = getPageSize() / trampolineSize;
     block = calloc(1, sizeof(*block));
     list = calloc(nclosures, sizeof(*list));
     code = allocatePage();
@@ -200,7 +200,7 @@ error:
     if (code != NULL) {
         freePage(code);
     }
-
+    printf("failed with errmsg=%s\n", errmsg); fflush(stdout);
     return NULL;
 }
 
@@ -231,7 +231,7 @@ jffi_Closure_CodeAddress(Closure* handle)
 
 
 static int
-getPageSize()
+getPageSize(void)
 {
 #ifdef _WIN32
     SYSTEM_INFO si;
@@ -248,7 +248,7 @@ allocatePage(void)
 #ifdef _WIN32
     return VirtualAlloc(NULL, pageSize, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
 #else
-    caddr_t page = mmap(NULL, pageSize, PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
+    caddr_t page = mmap(NULL, getPageSize(), PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
     return (page != (caddr_t) -1) ? page : NULL;
 #endif
 }
@@ -259,7 +259,7 @@ freePage(void *addr)
 #ifdef _WIN32
     return VirtualFree(addr, 0, MEM_RELEASE);
 #else
-    return munmap(addr, pageSize) == 0;
+    return munmap(addr, getPageSize()) == 0;
 #endif
 }
 
@@ -270,13 +270,6 @@ protectPage(void* page)
     DWORD oldProtect;
     return VirtualProtect(page, pageSize, PAGE_EXECUTE_READ, &oldProtect);
 #else
-    return mprotect(page, pageSize, PROT_READ | PROT_EXEC) == 0;
+    return mprotect(page, getPageSize(), PROT_READ | PROT_EXEC) == 0;
 #endif
 }
-
-void
-jffi_ClosurePool_Init(void)
-{
-    pageSize = getPageSize();
-}
-

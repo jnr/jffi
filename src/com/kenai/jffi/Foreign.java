@@ -337,11 +337,12 @@ final class Foreign {
      */
     final native void setLastError(int error);
     
-    final native long newClosure(Object proxy, Method closureMethod, long returnType, long[] paramTypes, int convention);
-    final native void freeClosure(long handle);
-
+    
     final native long newClosurePool(long contextAddress, Method closureMethod);
     final native void freeClosurePool(long closurePool);
+
+    final native long allocateClosure(long closurePool, Object proxy);
+    final native void releaseClosure(long handle);
 
     /**
      * Gets the address of the ffi_type structure for the builtin type

@@ -66,8 +66,7 @@ public class ClosureManager {
 
         long handle = 0;
         synchronized (lock) {
-            handle = Foreign.getInstance().newClosure(proxy, Proxy.METHOD,
-                callContext.getReturnType().handle(), nativeParameterHandles(callContext), 0);
+            handle = Foreign.getInstance().allocateClosure(pool.handle, proxy);
         }
 
         if (handle == 0) {
@@ -240,7 +239,7 @@ public class ClosureManager {
                 throw new IllegalStateException("closure already freed");
             }
             synchronized (lock) {
-                Foreign.getInstance().freeClosure(handle);
+                Foreign.getInstance().releaseClosure(handle);
             }
         }
 
@@ -249,7 +248,7 @@ public class ClosureManager {
             try {
                 if (autorelease && !disposed) {
                     synchronized (lock) {
-                        Foreign.getInstance().freeClosure(handle);
+                        Foreign.getInstance().releaseClosure(handle);
                     }
                 }
             } catch (Throwable t) {
