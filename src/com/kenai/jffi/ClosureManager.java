@@ -1,6 +1,8 @@
 
 package com.kenai.jffi;
 
+import java.lang.ref.ReferenceQueue;
+import java.lang.ref.SoftReference;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Map;
@@ -14,14 +16,26 @@ public class ClosureManager {
     private static final long ADDRESS_MASK = Platform.getPlatform().addressMask();
     private static final Object lock = new Object();
 
-    private final Map<Signature, CallContext> contextMap
-            = new ConcurrentHashMap<Signature, CallContext>();
+    private final Map<Signature, CallContextRef> contextCache
+            = new ConcurrentHashMap<Signature, CallContextRef>();
     private final Map<CallContext, ClosurePool> poolMap
             = new WeakHashMap<CallContext, ClosurePool>();
+
+    private final ReferenceQueue<CallContext> contextReferenceQueue
+            = new ReferenceQueue<CallContext>();
 
     /** Holder class to do lazy allocation of the ClosureManager instance */
     private static final class SingletonHolder {
         static final ClosureManager INSTANCE = new ClosureManager();
+    }
+
+    private static final class CallContextRef extends SoftReference<CallContext> {
+        final Signature signature;
+
+        public CallContextRef(Signature signature, CallContext ctx, ReferenceQueue<CallContext> queue) {
+            super(ctx, queue);
+            this.signature = signature;
+        }
     }
 
     /**
@@ -76,25 +90,23 @@ public class ClosureManager {
         return new Handle(handle, callContext);
     }
 
-    private final long[] nativeParameterHandles(CallContext ctx) {
-        long[] handles = new long[ctx.getParameterCount()];
-        for (int i = 0; i < ctx.getParameterCount(); ++i) {
-            handles[i] = ctx.getParameterType(i).handle();
-        }
-
-        return handles;
-    }
-
     private final CallContext getCallContext(Type returnType, Type[] parameterTypes, CallingConvention convention) {
         Signature signature = new Signature(returnType, parameterTypes, convention);
-        CallContext ctx = contextMap.get(signature);
-        if (ctx != null) {
+        CallContextRef ref = contextCache.get(signature);
+        CallContext ctx;
+
+        if (ref != null && (ctx = ref.get()) != null) {
             return ctx;
         }
 
-        ctx = new CallContext(returnType, (Type[]) parameterTypes.clone(), convention);
-        contextMap.put(signature, ctx);
+        // Cull any dead references
+        while ((ref = (CallContextRef) contextReferenceQueue.poll()) != null) {
+            contextCache.remove(ref.signature);
+        }
 
+        ctx = new CallContext(returnType, (Type[]) parameterTypes.clone(), convention);
+        contextCache.put(signature, new CallContextRef(signature, ctx, contextReferenceQueue));
+        
         return ctx;
     }
 
@@ -121,8 +133,12 @@ public class ClosureManager {
         private final Type returnType;
         private final Type[] parameterTypes;
         private final CallingConvention convention;
+        private int hashCode = 0;
 
         public Signature(Type returnType, Type[] parameterTypes, CallingConvention convention) {
+            if (returnType == null || parameterTypes == null) {
+                throw new NullPointerException("null return type or parameter types array");
+            }
             this.returnType = returnType;
             this.parameterTypes = parameterTypes;
             this.convention = convention;
@@ -130,27 +146,35 @@ public class ClosureManager {
 
         @Override
         public boolean equals(Object obj) {
-            if (obj == null) {
+            if (obj == null || getClass() != obj.getClass()) {
                 return false;
             }
-            if (getClass() != obj.getClass()) {
-                return false;
-            }
+
             final Signature other = (Signature) obj;
-            if (this.returnType != other.returnType && (this.returnType == null || !this.returnType.equals(other.returnType))) {
-                return false;
-            }
-            if (!Arrays.deepEquals(this.parameterTypes, other.parameterTypes)) {
-                return false;
-            }
+
             if (this.convention != other.convention) {
                 return false;
             }
-            return true;
+
+            if (this.returnType != other.returnType && !this.returnType.equals(other.returnType)) {
+                return false;
+            }
+
+            if (this.parameterTypes.length == other.parameterTypes.length) {
+                for (int i = 0; i < this.parameterTypes.length; ++i) {
+                    if (this.parameterTypes[i] != other.parameterTypes[i]
+                            && (this.parameterTypes[i] == null || !this.parameterTypes[i].equals(other.parameterTypes[i]))) {
+                        return false;
+                    }
+                }
+                // All param types are same, return type is same, convention is same, so this is the same signature
+                return true;
+            }
+            
+            return false;
         }
 
-        @Override
-        public int hashCode() {
+        private final int calculateHashCode() {
             int hash = 7;
             hash = 53 * hash + (this.returnType != null ? this.returnType.hashCode() : 0);
             hash = 53 * hash + Arrays.deepHashCode(this.parameterTypes);
@@ -158,6 +182,10 @@ public class ClosureManager {
             return hash;
         }
 
+        @Override
+        public int hashCode() {
+            return hashCode != 0 ? hashCode : (hashCode = calculateHashCode());
+        }
     }
 
     private static final class ClosurePool {
