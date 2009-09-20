@@ -185,7 +185,7 @@
     
     <target name="-build-platform-jar" depends="-init-vars, -build-native-library">
         <echo message="platform=${platform}"/>
-        <jar jarfile="${dist.dir}/${platform}.jar">
+        <jar jarfile="${dist.dir}/jffi-${platform}.jar">
             <zipfileset prefix="jni/${platform}" dir="${build.native.dir}">
                 <include name="jffi*.dll"/>
                 <include name="libjffi*.so"/>
@@ -206,14 +206,14 @@
     <target name="-assemble-native-jar" depends="-init-vars, -build-platform-jar">
         <jar jarfile="${native.jar}" index="true" update="true" duplicate="preserve"
             filesetmanifest="skip">
-            <zipfileset src="${dist.dir}/${platform}.jar"/>
-            <zipfileset src="archive/i386-Linux.jar"/>
-            <zipfileset src="archive/Darwin.jar"/>
-            <zipfileset src="archive/i386-SunOS.jar"/>
-            <zipfileset src="archive/x86_64-SunOS.jar"/>
-            <zipfileset src="archive/sparc-SunOS.jar"/>
-            <zipfileset src="archive/sparcv9-SunOS.jar"/>
-            <zipfileset src="archive/ppc-AIX.jar"/>
+            <zipfileset src="${dist.dir}/jffi-${platform}.jar"/>
+            <zipfileset src="archive/jffi-i386-Linux.jar"/>
+            <zipfileset src="archive/jffi-Darwin.jar"/>
+            <zipfileset src="archive/jffi-i386-SunOS.jar"/>
+            <zipfileset src="archive/jffi-x86_64-SunOS.jar"/>
+            <zipfileset src="archive/jffi-sparc-SunOS.jar"/>
+            <zipfileset src="archive/jffi-sparcv9-SunOS.jar"/>
+            <zipfileset src="archive/jffi-ppc-AIX.jar"/>
         </jar>
     </target>
     <target name="-archive-platform-jar" depends="-build-platform-jar">
