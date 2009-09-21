@@ -1,19 +1,25 @@
 
 package com.kenai.jffi;
 
+import java.lang.ref.Reference;
+import java.lang.ref.SoftReference;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.WeakHashMap;
 
 /**
- * Allocates and manages the lifecycle of native closures (aka callbacks).rm hs
+ * Allocates and manages the lifecycle of native closures (aka callbacks)
  */
 public class ClosureManager {
-    private static final long ADDRESS_MASK = Platform.getPlatform().addressMask();
-    private static final Object lock = new Object();
 
-    private final Map<CallContext, ClosurePool> poolMap
-            = new WeakHashMap<CallContext, ClosurePool>();
+    /**
+     * ClosurePool instances are linked via a SoftReference in the lookup map, so
+     * when all closure instances that that were allocated from the ClosurePool have been
+     * reclaimed, and there is memory pressure, the native closure pool can be freed.
+     * This will allow the CallContext instance to also be collected if it is not
+     * strongly referenced elsewhere, and ejected from the {@link CallContextCache}
+     */
+    private final Map<CallContext, Reference<ClosurePool>> poolMap = new WeakHashMap<CallContext, Reference<ClosurePool>>();
 
     /** Holder class to do lazy allocation of the ClosureManager instance */
     private static final class SingletonHolder {
@@ -57,49 +63,73 @@ public class ClosureManager {
      * @return A new {@link Closure.Handle} instance.
      */
     public final Closure.Handle newClosure(Closure closure, CallContext callContext) {
-        Proxy proxy = new Proxy(closure, callContext);
         ClosurePool pool = getClosurePool(callContext);
 
-        long handle = 0;
-        synchronized (lock) {
-            handle = Foreign.getInstance().allocateClosure(pool.handle, proxy);
-        }
-
+        long handle = pool.newClosure(new Proxy(closure, callContext));
         if (handle == 0) {
             throw new RuntimeException("Failed to create native closure");
         }
-
-        return new Handle(handle, callContext);
+        try {
+            return new Handle(handle, pool);
+        } catch (Throwable t) {
+            pool.releaseClosure(handle);
+            throw new RuntimeException(t);
+        }
     }
 
     private final synchronized ClosurePool getClosurePool(CallContext callContext) {
-        ClosurePool pool = poolMap.get(callContext);
-        if (pool != null) {
+        Reference<ClosurePool> ref = poolMap.get(callContext);
+        ClosurePool pool;
+        if (ref != null && (pool = ref.get()) != null) {
             return pool;
         }
 
-        synchronized (lock) {
-            pool = new ClosurePool(Foreign.getInstance().newClosurePool(callContext.getAddress(), Proxy.METHOD));
-        }
-
-        poolMap.put(callContext, pool);
+        poolMap.put(callContext, new SoftReference<ClosurePool>(pool = newClosurePool(callContext)));
 
         return pool;
+    }
+
+    private final ClosurePool newClosurePool(CallContext callContext) {
+        return ClosurePool.newInstance(callContext, Proxy.METHOD);
     }
 
     private static final class ClosurePool {
         private final long handle;
 
-        public ClosurePool(long handle) {
-            this.handle = handle;
+        //
+        // Since the CallContext native handle is used by the native pool code
+        // a strong reference to the call context needs to be kept.
+        //
+        private final CallContext callContext; 
+
+        static ClosurePool newInstance(CallContext callContext, Method m) {
+            long h = Foreign.getInstance().newClosurePool(callContext.getAddress(), m);
+            try {
+                return new ClosurePool(h, callContext);
+            } catch (Throwable t) {
+                Foreign.getInstance().freeClosurePool(h);
+                throw new RuntimeException(t);
+            }
         }
 
+        private ClosurePool(long handle, CallContext callContext) {
+            this.handle = handle;
+            this.callContext = callContext;
+        }
+
+        synchronized long newClosure(Object proxy) {
+            return Foreign.getInstance().allocateClosure(handle, proxy);
+        }
+        
+        synchronized void releaseClosure(long handle) {
+            Foreign.getInstance().releaseClosure(handle);
+        }
+
+        
         @Override
         protected void finalize() throws Throwable {
             try {
-                synchronized (lock) {
-                    Foreign.getInstance().freeClosurePool(handle);
-                }
+                Foreign.getInstance().freeClosurePool(handle);
             } catch (Throwable t) {
                 t.printStackTrace(System.err);
             } finally {
@@ -132,20 +162,21 @@ public class ClosureManager {
         final long cbAddress;
 
         /** 
-         * Keep references to the return and parameter types so they do not get
-         * garbage collected until the closure does.
+         * Keep references to the closure pool so it does not get garbage collected
+         * until all closures using it do.
          */
-        private final CallContext callContext;
-
+        private final ClosurePool pool;
+        
         /**
          * Creates a new Handle to lifecycle manager the native closure.
          *
          * @param handle The address of the native closure structure.
+         * @param pool The native pool the closure was allocated from.
          */
-        Handle(long handle, CallContext callContext) {
+        Handle(long handle, ClosurePool pool) {
             this.handle = handle;
+            this.pool = pool;
             cbAddress = IO.getAddress(handle);
-            this.callContext = callContext;
         }
 
         public long getAddress() {
@@ -165,19 +196,15 @@ public class ClosureManager {
             if (disposed) {
                 throw new IllegalStateException("closure already freed");
             }
-            synchronized (lock) {
-                Foreign.getInstance().releaseClosure(handle);
-            }
             disposed = true;
+            pool.releaseClosure(handle);
         }
 
         @Override
         protected void finalize() throws Throwable {
             try {
                 if (autorelease && !disposed) {
-                    synchronized (lock) {
-                        Foreign.getInstance().releaseClosure(handle);
-                    }
+                    pool.releaseClosure(handle);
                 }
             } catch (Throwable t) {
                 t.printStackTrace(System.err);
@@ -243,6 +270,7 @@ public class ClosureManager {
      */
     private static final class DirectBuffer implements Closure.Buffer {
         private static final com.kenai.jffi.MemoryIO IO = com.kenai.jffi.MemoryIO.getInstance();
+        private static final long ADDRESS_MASK = Platform.getPlatform().addressMask();
         private static final NativeWordIO WordIO = NativeWordIO.getInstance();
         private static final int PARAM_SIZE = Platform.getPlatform().addressSize() / 8;
         private final long retval, parameters;
