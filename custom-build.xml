@@ -136,7 +136,7 @@
             <arg value="SRC_DIR=${jni.src.dir}"/>
             <arg value="JNI_DIR=${jni.src.dir}"/>
             <arg value="BUILD_DIR=${jni.build.dir}"/>
-            <arg value="CPU=${os.arch}"/>
+            <arg value="CPU=${platform.cpu}"/>
             <arg value="VERSION=${jffi.version.major}.${jffi.version.minor}"/>
             <arg value="-f"/>
             <arg value="${jni.GNUmakefile}"/>
@@ -154,7 +154,7 @@
             <arg value="JNI_DIR=${src.native.dir}"/>
             <arg value="BUILD_DIR=${build.native.dir}"/>
             <arg value="VERSION=${jffi.version.major}.${jffi.version.minor}"/>
-            <arg value="CPU=${os.arch}"/>
+            <arg value="CPU=i386"/>
             <arg value="-f"/>
             <arg value="jni/GNUmakefile"/>
         </exec>
