@@ -80,7 +80,7 @@
                 public static final int MICRO = ${jffi.version.micro};
             }
         </echo>
-        <javac destdir="${build.classes.dir}" srcdir="${build.dir}/java"/>
+        <javac target="1.5" destdir="${build.classes.dir}" srcdir="${build.dir}/java"/>
     </target>
     <target name="-generate-native-headers" depends="-init-vars,-generate-version,-compile-java">
         <mkdir dir="${build.native.dir}"/>
