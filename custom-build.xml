@@ -208,6 +208,7 @@
             filesetmanifest="skip">
             <zipfileset src="${dist.dir}/jffi-${platform}.jar"/>
             <zipfileset src="archive/jffi-i386-Linux.jar"/>
+            <zipfileset src="archive/jffi-s390x-Linux.jar"/>
             <zipfileset src="archive/jffi-Darwin.jar"/>
             <zipfileset src="archive/jffi-i386-SunOS.jar"/>
             <zipfileset src="archive/jffi-x86_64-SunOS.jar"/>
