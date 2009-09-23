@@ -207,6 +207,7 @@
             filesetmanifest="skip">
             <zipfileset src="${dist.dir}/${platform}.jar"/>
             <zipfileset src="archive/i386-Linux.jar"/>
+            <zipfileset src="archive/s390x-Linux.jar"/>
             <zipfileset src="archive/Darwin.jar"/>
             <zipfileset src="archive/i386-SunOS.jar"/>
             <zipfileset src="archive/x86_64-SunOS.jar"/>

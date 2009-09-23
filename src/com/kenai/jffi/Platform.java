@@ -51,6 +51,9 @@ public abstract class Platform {
         WINDOWS,
         /** IBM AIX */
         AIX,
+        /** IBM zOS **/
+        ZLINUX,
+
         /** No idea what the operating system is */
         UNKNOWN;
 
@@ -77,6 +80,8 @@ public abstract class Platform {
         SPARC,
         /** Sun sparc 64 bit */
         SPARCV9,
+        /** IBM zSeries S/390 64 bit */
+        S390X,
         /** Unknown CPU */
         UNKNOWN;
 
@@ -152,13 +157,11 @@ public abstract class Platform {
             return CPU.X86_64;
         } else if ("ppc".equals(archString) || "powerpc".equals(archString)) {
             return CPU.PPC;
-        } else if ("ppc64".equals(archString)) {
-            return CPU.PPC64;
-        } else if ("sparc".equals(archString)) {
-            return CPU.SPARC;
-        } else if ("sparcv9".equals(archString)) {
-            return CPU.SPARCV9;
-        } else {
+        }
+        // Try to find by lookup up in the CPU list
+        try {
+            return CPU.valueOf(archString.toUpperCase());
+        } catch (IllegalArgumentException ex) {
             throw new ExceptionInInitializerError("Unsupported CPU architecture: " + archString);
         }
     }
@@ -189,6 +192,7 @@ public abstract class Platform {
                 case X86_64:
                 case PPC64:
                 case SPARCV9:
+                case S390X:
                     dataModel = 64;
                     break;
                 default:
