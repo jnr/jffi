@@ -51,6 +51,9 @@ public abstract class Platform {
         WINDOWS,
         /** IBM AIX */
         AIX,
+        /** IBM zOS **/
+        ZLINUX,
+
         /** No idea what the operating system is */
         UNKNOWN;
 
