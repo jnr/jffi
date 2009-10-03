@@ -580,7 +580,6 @@ final class Foreign {
      */
     final native long invokeLLLrL(long function, long arg1, long arg2, long arg3);
 
-
     /**
      * Invokes a function with three 64 bit integer arguments, and returns a 64 bit float.
      *
@@ -591,6 +590,44 @@ final class Foreign {
      * @return A 64 bit float value.
      */
     final native double invokeLLLrD(long function, long arg1, long arg2, long arg3);
+
+    /**
+     * Invokes a function with zero numeric arguments, and returns a numeric value.
+     *
+     * @param function The address of the function context structure from {@link #newFunction}.
+     * @return A numeric value.
+     */
+    final native long invokeVrN(long function);
+
+    /**
+     * Invokes a function with one numeric arguments, and returns a numeric value.
+     *
+     * @param function The address of the function context structure from {@link #newFunction}.
+     * @param arg1 The first numeric argument.
+     * @return A numeric value.
+     */
+    final native long invokeNrN(long function, long arg1);
+
+    /**
+     * Invokes a function with two numeric arguments, and returns a numeric value.
+     *
+     * @param function The address of the function context structure from {@link #newFunction}.
+     * @param arg1 The first numeric argument.
+     * @param arg2 The second numeric argument.
+     * @return A numeric value.
+     */
+    final native long invokeNNrN(long function, long arg1, long arg2);
+
+    /**
+     * Invokes a function with three numeric arguments, and returns a numeric value.
+     *
+     * @param function The address of the function context structure from {@link #newFunction}.
+     * @param arg1 The first numeric argument.
+     * @param arg2 The second numeric argument.
+     * @param arg3 The third numeric argument.
+     * @return A numeric value.
+     */
+    final native long invokeNNNrN(long function, long arg1, long arg2, long arg3);
 
     /**
      * Invokes a function that returns a 32 bit integer.

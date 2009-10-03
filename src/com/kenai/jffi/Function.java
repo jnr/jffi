@@ -11,9 +11,6 @@ public final class Function implements CallInfo {
     /** The native address of the context */
     private final long contextAddress;
 
-    /** Whether the native context has been freed yet */
-    private volatile boolean disposed = false;
-
     /** The address of the function */
     private final long functionAddress;
 
@@ -24,10 +21,13 @@ public final class Function implements CallInfo {
     private final int rawParameterSize;
 
     /** The return type of this function */
-    final Type returnType;
+    private final Type returnType;
 
     /** The parameter types of this function */
-    final Type[] paramTypes;
+    private final Type[] paramTypes;
+
+    /** Whether the native context has been freed yet */
+    private volatile boolean disposed = false;
 
     /**
      * Creates a new instance of <tt>Function</tt> with default calling convention.

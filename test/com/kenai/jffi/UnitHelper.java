@@ -13,6 +13,7 @@ public class UnitHelper {
         Default,
         FastInt,
         FastLong,
+        FastNumeric,
         PointerArray
     }
     public static final class Address extends java.lang.Number {
@@ -156,6 +157,8 @@ public class UnitHelper {
                 return new FastIntMethodInvoker(library, function, returnType, parameterTypes);
             case FastLong:
                 return new FastLongMethodInvoker(library, function, returnType, parameterTypes);
+            case FastNumeric:
+                return new FastNumericMethodInvoker(library, function, returnType, parameterTypes);
             case PointerArray:
                 return new PointerArrayMethodInvoker(library, function, returnType, parameterTypes);
             case Default:
@@ -282,7 +285,7 @@ public class UnitHelper {
 
         private static final int i(Object value) {
             return value instanceof Float
-                ? Float.floatToIntBits(((Float) value).floatValue())
+                ? Float.floatToRawIntBits(((Float) value).floatValue())
                 : ((Number) value).intValue();
         }
 
@@ -355,6 +358,53 @@ public class UnitHelper {
             return convertResult(returnType, result);
         }
     }
+
+    private static final class FastNumericMethodInvoker implements MethodInvoker {
+        private final Library library;
+        private final Function function;
+        private final Class returnType;
+        private final Class[] parameterTypes;
+
+        public FastNumericMethodInvoker(Library library, Function function, Class returnType, Class[] parameterTypes) {
+            this.library = library;
+            this.function = function;
+            this.returnType = returnType;
+            this.parameterTypes = parameterTypes;
+        }
+
+
+        public Object invoke(Object[] args) {
+            final long result;
+            switch (args.length) {
+                case 0:
+                    result = Invoker.getInstance().invokeVrN(function);
+                    break;
+                case 1:
+                    result = Invoker.getInstance().invokeNrN(function, l(args[0]));
+                    break;
+                case 2:
+                    result = Invoker.getInstance().invokeNNrN(function, l(args[0]), l(args[1]));
+                    break;
+                case 3:
+                    result = Invoker.getInstance().invokeNNNrN(function, l(args[0]), l(args[1]), l(args[1]));
+                    break;
+                default:
+                    throw new IndexOutOfBoundsException("fast-numeric invoker limited to 3 parameters");
+            }
+            return convertResult(returnType, result);
+        }
+
+        private static final long l(Object arg) {
+            if (arg instanceof Float) {
+                return Float.floatToRawIntBits(((Float) arg).floatValue());
+            } else if (arg instanceof Double) {
+                return Double.doubleToRawLongBits(((Double) arg).doubleValue());
+            } else {
+                return ((Number) arg).longValue();
+            }
+        }
+    }
+
 
     private static final class PointerArrayMethodInvoker implements MethodInvoker {
         private static final MemoryIO Memory = MemoryIO.getInstance();

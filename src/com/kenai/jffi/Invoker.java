@@ -225,6 +225,52 @@ public abstract class Invoker {
     }
 
     /**
+     * Invokes a function with no arguments, and returns a numeric value.
+     *
+     * @param function The <tt>Function</tt> to invoke.
+     * @return A numeric value.
+     */
+    public final long invokeVrN(Function function) {
+        return foreign.invokeVrN(function.getContextAddress());
+    }
+
+    /**
+     * Invokes a function with one numberic argument, and returns a numeric value.
+     *
+     * @param function The <tt>Function</tt> to invoke.
+     * @param arg1 The numeric argument.
+     * @return A numeric value.
+     */
+    public final long invokeNrN(Function function, long arg1) {
+        return foreign.invokeNrN(function.getContextAddress(), arg1);
+    }
+
+    /**
+     * Invokes a function with two numeric arguments, and returns a numeric value.
+     *
+     * @param function The <tt>Function</tt> to invoke.
+     * @param arg1 The first numeric argument.
+     * @param arg2 The second numeric argument.
+     * @return A numeric value.
+     */
+    public final long invokeNNrN(Function function, long arg1, long arg2) {
+        return foreign.invokeNNrN(function.getContextAddress(), arg1, arg2);
+    }
+
+    /**
+     * Invokes a function with three numeric arguments, and returns a numeric value.
+     *
+     * @param function The <tt>Function</tt> to invoke.
+     * @param arg1 The first numeric argument.
+     * @param arg2 The second numeric argument.
+     * @param arg3 The third numeric argument.
+     * @return A numeric value.
+     */
+    public final long invokeNNNrN(Function function, long arg1, long arg2, long arg3) {
+        return foreign.invokeNNNrN(function.getContextAddress(), arg1, arg2, arg3);
+    }
+
+    /**
      * Invokes a function and returns a native memory address.
      *
      * @param function The <tt>Function</tt> to invoke.

@@ -74,6 +74,12 @@ public class NumberTest {
     @Test public void returnFastLongU8() {
         returnU8(InvokerType.FastLong);
     }
+    @Test public void returnFastNumericS8() {
+        returnS8(InvokerType.FastNumeric);
+    }
+    @Test public void returnFastNumericU8() {
+        returnU8(InvokerType.FastNumeric);
+    }
     @Test public void returnPointerArrayS8() {
         returnS8(InvokerType.PointerArray);
     }
@@ -102,6 +108,9 @@ public class NumberTest {
     @Test public void returnFastLongS16() {
         returnS16(InvokerType.FastLong);
     }
+    @Test public void returnFastNumericS16() {
+        returnS16(InvokerType.FastNumeric);
+    }
     @Test public void returnPointerArrayS16() {
         returnS16(InvokerType.PointerArray);
     }
@@ -119,6 +128,9 @@ public class NumberTest {
     }
     @Test public void returnFastLongU16() {
         returnU16(InvokerType.FastLong);
+    }
+    @Test public void returnFastNumericU16() {
+        returnU16(InvokerType.FastNumeric);
     }
     @Test public void returnPointerArrayU16() {
         returnU16(InvokerType.PointerArray);
@@ -138,6 +150,9 @@ public class NumberTest {
     @Test public void returnFastLongS32() {
         returnS32(InvokerType.FastLong);
     }
+    @Test public void returnFastNumericS32() {
+        returnS32(InvokerType.FastNumeric);
+    }
     @Test public void returnPointerArrayS32() {
         returnS32(InvokerType.PointerArray);
     }
@@ -156,6 +171,9 @@ public class NumberTest {
     @Test public void returnFastLongU32() {
         returnU32(InvokerType.FastLong);
     }
+    @Test public void returnFastNumericU32() {
+        returnU32(InvokerType.FastNumeric);
+    }
     @Test public void returnPointerArrayU32() {
         returnU32(InvokerType.PointerArray);
     }
@@ -171,6 +189,9 @@ public class NumberTest {
     @Test public void returnFastLongS64() {
         returnS64(InvokerType.FastLong);
     }
+    @Test public void returnFastNumericS64() {
+        returnS64(InvokerType.FastNumeric);
+    }
     @Test public void returnPointerArrayS64() {
         returnS64(InvokerType.PointerArray);
     }
@@ -185,6 +206,9 @@ public class NumberTest {
     }
     @Test public void returnFastLongU64() {
         returnU64(InvokerType.FastLong);
+    }
+    @Test public void returnFastNumericU64() {
+        returnU64(InvokerType.FastNumeric);
     }
     @Test public void returnPointerArrayU64() {
         returnU64(InvokerType.PointerArray);
@@ -202,6 +226,9 @@ public class NumberTest {
     @Test public void returnFastIntF32() {
         returnF32(InvokerType.FastInt);
     }
+    @Test public void returnFastNumericF32() {
+        returnF32(InvokerType.FastNumeric);
+    }
     @Test public void returnPointerArrayF32() {
         returnF32(InvokerType.PointerArray);
     }
@@ -211,6 +238,24 @@ public class NumberTest {
         float[] values = { 0f, 1.0f, -2.0f };
         for (int i = 0; i < values.length; ++i) {
             assertEquals("Value not returned correctly", values[i], lib.ret_float(values[i]), 0.1f);
+        }
+    }
+
+    @Test public void returnDefaultF64() {
+        returnF64(InvokerType.Default);
+    }
+    @Test public void returnFastNumericF64() {
+        returnF64(InvokerType.FastNumeric);
+    }
+    @Test public void returnPointerArrayF64() {
+        returnF64(InvokerType.PointerArray);
+    }
+
+    private void returnF64(InvokerType type) {
+        LibNumberTest lib = UnitHelper.loadTestLibrary(LibNumberTest.class, type);
+        double[] values = { 0d, 1.0d, -2.0d };
+        for (int i = 0; i < values.length; ++i) {
+            assertEquals("Value not returned correctly", values[i], lib.ret_double(values[i]), 0.1f);
         }
     }
 }
