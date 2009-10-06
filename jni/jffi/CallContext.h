@@ -13,3 +13,4 @@ typedef struct CallContext {
 } CallContext;
 
 #endif /* JFFI_CALLCONTEXT_H */
+

@@ -26,3 +26,4 @@ void jffi_Closure_Free(Closure *);
 void* jffi_Closure_CodeAddress(Closure *);
 
 #endif /* JFFI_CLOSUREPOOL_H */
+
