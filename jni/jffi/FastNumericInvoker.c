@@ -11,11 +11,6 @@
 #include "com_kenai_jffi_Foreign.h"
 
 
-#if BYTE_ORDER == BIG_ENDIAN
-#  define ARGPTR(argp, type) (((caddr_t) (argp)) + sizeof(*argp) - (type)->size)
-#else
-#  define ARGPTR(argp, type) (argp)
-#endif
 /* for return values <= sizeof(long), need to use an ffi_sarg sized return value */
 #define RETVAL(retval, rtype) ((rtype)->size > sizeof(ffi_sarg) ? (retval).j : (retval).sarg)
 
@@ -83,6 +78,45 @@ Java_com_kenai_jffi_Foreign_invokeNNNrN(JNIEnv* env, jobject self, jlong ctxAddr
     FFIValue retval;
 
     ffi_call3(ctx, ctx->function, &retval, arg1, arg2, arg3);
+    SAVE_ERRNO(ctx);
+
+    return RETVAL(retval, ctx->cif.rtype);
+}
+
+JNIEXPORT jlong JNICALL
+Java_com_kenai_jffi_Foreign_invokeNNNNrN(JNIEnv* env, jobject self, jlong ctxAddress,
+        jlong arg1, jlong arg2, jlong arg3, jlong arg4)
+{
+    Function* ctx = (Function *) j2p(ctxAddress);
+    FFIValue retval;
+
+    ffi_call4(ctx, ctx->function, &retval, arg1, arg2, arg3, arg4);
+    SAVE_ERRNO(ctx);
+
+    return RETVAL(retval, ctx->cif.rtype);
+}
+
+JNIEXPORT jlong JNICALL
+Java_com_kenai_jffi_Foreign_invokeNNNNNrN(JNIEnv* env, jobject self, jlong ctxAddress,
+        jlong arg1, jlong arg2, jlong arg3, jlong arg4, jlong arg5)
+{
+    Function* ctx = (Function *) j2p(ctxAddress);
+    FFIValue retval;
+
+    ffi_call5(ctx, ctx->function, &retval, arg1, arg2, arg3, arg4, arg5);
+    SAVE_ERRNO(ctx);
+
+    return RETVAL(retval, ctx->cif.rtype);
+}
+
+JNIEXPORT jlong JNICALL
+Java_com_kenai_jffi_Foreign_invokeNNNNNNrN(JNIEnv* env, jobject self, jlong ctxAddress,
+        jlong arg1, jlong arg2, jlong arg3, jlong arg4, jlong arg5, jlong arg6)
+{
+    Function* ctx = (Function *) j2p(ctxAddress);
+    FFIValue retval;
+
+    ffi_call6(ctx, ctx->function, &retval, arg1, arg2, arg3, arg4, arg5, arg6);
     SAVE_ERRNO(ctx);
 
     return RETVAL(retval, ctx->cif.rtype);

@@ -31,7 +31,7 @@ public class ClosureTest {
         void testClosureDrV(Address closure, double value);
         
     }
-    private LibClosureTest lib, fastint, fastlong;
+    private LibClosureTest lib, fastint, fastlong, fastnum;
     public ClosureTest() {
     }
 
@@ -47,6 +47,7 @@ public class ClosureTest {
     public void setUp() {
         lib = UnitHelper.loadTestLibrary(LibClosureTest.class, InvokerType.Default);
         fastlong = UnitHelper.loadTestLibrary(LibClosureTest.class, InvokerType.FastLong);
+        fastnum = UnitHelper.loadTestLibrary(LibClosureTest.class, InvokerType.FastNumeric);
         fastint = Platform.getPlatform().addressSize() == 32
                 ? UnitHelper.loadTestLibrary(LibClosureTest.class, InvokerType.FastInt)
                 : fastlong;
@@ -199,8 +200,8 @@ public class ClosureTest {
     @Test public void defaultClosureVrF() throws Throwable {
         testClosureVrF(lib);
     }
-    @Test public void fastLongClosureVrF() throws Throwable {
-        testClosureVrF(fastlong);
+    @Test public void fastNumericClosureVrF() throws Throwable {
+        testClosureVrF(fastnum);
     }
 
     private void testClosureVrD(LibClosureTest lib) {
@@ -221,8 +222,8 @@ public class ClosureTest {
     @Test public void defaultClosureVrD() throws Throwable {
         testClosureVrD(lib);
     }
-    @Test public void fastLongClosureVrD() throws Throwable {
-        testClosureVrD(fastlong);
+    @Test public void fastNumericClosureVrD() throws Throwable {
+        testClosureVrD(fastnum);
     }
 
     @Test public void testClosureTrV() throws Throwable {

@@ -12,17 +12,6 @@
 
 typedef unsigned int u32;
 
-#ifndef BYTE_ORDER
-# error "BYTE_ORDER not defined"
-#endif
-
-#if BYTE_ORDER == LITTLE_ENDIAN
-#  define ARGPTR(argp, type) (argp)
-#elif BYTE_ORDER == BIG_ENDIAN
-#  define ARGPTR(argp, type) (((caddr_t) (argp)) + sizeof(*argp) - (type)->size)
-#else
-#  error "Unsupported BYTE_ORDER"
-#endif
 #if defined(__i386__)
 # define INT_BYPASS_FFI
 # define FLOAT_BYPASS_FFI

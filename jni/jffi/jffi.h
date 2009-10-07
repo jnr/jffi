@@ -136,8 +136,12 @@ thread_data_get()
 
 #if BYTE_ORDER == LITTLE_ENDIAN
 # define return_int(retval) return ((retval).i)
-#else
+# define ARGPTR(argp, type) (argp)
+#elif BYTE_ORDER == BIG_ENDIAN
 # define return_int(retval) return ((retval).l & 0xFFFFFFFFL)
+# define ARGPTR(argp, type) (((caddr_t) (argp)) + sizeof(*argp) - (type)->size)
+#else
+# error "Unsupported BYTE_ORDER"
 #endif
 
 # define ffi_call0(ctx, fn, retval) do { \
@@ -172,7 +176,7 @@ thread_data_get()
         void* ffiValues[] = { \
             ARGPTR(&arg1, (ctx)->cif.arg_types[0]), \
             ARGPTR(&arg2, (ctx)->cif.arg_types[1]), \
-            ARGPTR(&arg3, (ctx)->cif.arg_types[2]) \
+            ARGPTR(&arg3, (ctx)->cif.arg_types[2]), \
             ARGPTR(&arg4, (ctx)->cif.arg_types[3]) \
         }; \
         ffi_call(&(ctx)->cif, FFI_FN((fn)), (retval), ffiValues); \
@@ -182,8 +186,8 @@ thread_data_get()
         void* ffiValues[] = { \
             ARGPTR(&arg1, (ctx)->cif.arg_types[0]), \
             ARGPTR(&arg2, (ctx)->cif.arg_types[1]), \
-            ARGPTR(&arg3, (ctx)->cif.arg_types[2]) \
-            ARGPTR(&arg4, (ctx)->cif.arg_types[3]) \
+            ARGPTR(&arg3, (ctx)->cif.arg_types[2]), \
+            ARGPTR(&arg4, (ctx)->cif.arg_types[3]), \
             ARGPTR(&arg5, (ctx)->cif.arg_types[4]) \
         }; \
         ffi_call(&(ctx)->cif, FFI_FN((fn)), (retval), ffiValues); \
@@ -193,9 +197,9 @@ thread_data_get()
         void* ffiValues[] = { \
             ARGPTR(&arg1, (ctx)->cif.arg_types[0]), \
             ARGPTR(&arg2, (ctx)->cif.arg_types[1]), \
-            ARGPTR(&arg3, (ctx)->cif.arg_types[2]) \
-            ARGPTR(&arg4, (ctx)->cif.arg_types[3]) \
-            ARGPTR(&arg5, (ctx)->cif.arg_types[4]) \
+            ARGPTR(&arg3, (ctx)->cif.arg_types[2]), \
+            ARGPTR(&arg4, (ctx)->cif.arg_types[3]), \
+            ARGPTR(&arg5, (ctx)->cif.arg_types[4]), \
             ARGPTR(&arg6, (ctx)->cif.arg_types[5]) \
         }; \
         ffi_call(&(ctx)->cif, FFI_FN((fn)), (retval), ffiValues); \

@@ -225,6 +225,51 @@ public abstract class Invoker {
     }
 
     /**
+     * Invokes a function with four 64 bit integer arguments, and returns a 64 bit integer.
+     *
+     * @param function The <tt>Function</tt> to invoke.
+     * @param arg1 The first 64 bit integer argument.
+     * @param arg2 The second 64 bit integer argument.
+     * @param arg3 The third 64 bit integer argument.
+     * @param arg4 The fourth 64 bit integer argument.
+     * @return A 64 bit integer value.
+     */
+    public final long invokeLLLLrL(Function function, long arg1, long arg2, long arg3, long arg4, long arg5) {
+        return foreign.invokeLLLLrL(function.getContextAddress(), arg1, arg2, arg3, arg4);
+    }
+
+    /**
+     * Invokes a function with five 64 bit integer arguments, and returns a 64 bit integer.
+     *
+     * @param function The <tt>Function</tt> to invoke.
+     * @param arg1 The first 64 bit integer argument.
+     * @param arg2 The second 64 bit integer argument.
+     * @param arg3 The third 64 bit integer argument.
+     * @param arg4 The fourth 64 bit integer argument.
+     * @param arg5 The fifth 64 bit integer argument.
+     * @return A 64 bit integer value.
+     */
+    public final long invokeLLLLLrL(Function function, long arg1, long arg2, long arg3, long arg4, long arg5) {
+        return foreign.invokeLLLLLrL(function.getContextAddress(), arg1, arg2, arg3, arg4, arg5);
+    }
+
+    /**
+     * Invokes a function with six 64 bit integer arguments, and returns a 64 bit integer.
+     *
+     * @param function The <tt>Function</tt> to invoke.
+     * @param arg1 The first 64 bit integer argument.
+     * @param arg2 The second 64 bit integer argument.
+     * @param arg3 The third 64 bit integer argument.
+     * @param arg4 The fourth 64 bit integer argument.
+     * @param arg5 The fifth 64 bit integer argument.
+     * @param arg6 The sixth 64 bit integer argument.
+     * @return A 64 bit integer value.
+     */
+    public final long invokeLLLLLLrL(Function function, long arg1, long arg2, long arg3, long arg4, long arg5, long arg6) {
+        return foreign.invokeLLLLLLrL(function.getContextAddress(), arg1, arg2, arg3, arg4, arg5, arg6);
+    }
+
+    /**
      * Invokes a function with no arguments, and returns a numeric value.
      *
      * @param function The <tt>Function</tt> to invoke.
@@ -268,6 +313,51 @@ public abstract class Invoker {
      */
     public final long invokeNNNrN(Function function, long arg1, long arg2, long arg3) {
         return foreign.invokeNNNrN(function.getContextAddress(), arg1, arg2, arg3);
+    }
+
+    /**
+     * Invokes a function with four numeric arguments, and returns a numeric value.
+     *
+     * @param function The <tt>Function</tt> to invoke.
+     * @param arg1 The first numeric argument.
+     * @param arg2 The second numeric argument.
+     * @param arg3 The third numeric argument.
+     * @param arg3 The fourth numeric argument.
+     * @return A numeric value.
+     */
+    public final long invokeNNNNrN(Function function, long arg1, long arg2, long arg3, long arg4) {
+        return foreign.invokeNNNNrN(function.getContextAddress(), arg1, arg2, arg3, arg4);
+    }
+
+    /**
+     * Invokes a function with five numeric arguments, and returns a numeric value.
+     *
+     * @param function The <tt>Function</tt> to invoke.
+     * @param arg1 The first numeric argument.
+     * @param arg2 The second numeric argument.
+     * @param arg3 The third numeric argument.
+     * @param arg4 The fourth numeric argument.
+     * @param arg5 The fifth numeric argument.
+     * @return A numeric value.
+     */
+    public final long invokeNNNNNrN(Function function, long arg1, long arg2, long arg3, long arg4, long arg5) {
+        return foreign.invokeNNNNNrN(function.getContextAddress(), arg1, arg2, arg3, arg4, arg5);
+    }
+
+    /**
+     * Invokes a function with six numeric arguments, and returns a numeric value.
+     *
+     * @param function The <tt>Function</tt> to invoke.
+     * @param arg1 The first numeric argument.
+     * @param arg2 The second numeric argument.
+     * @param arg3 The third numeric argument.
+     * @param arg4 The fourth numeric argument.
+     * @param arg5 The fifth numeric argument.
+     * @param arg6 The sixth numeric argument.
+     * @return A numeric value.
+     */
+    public final long invokeNNNNNNrN(Function function, long arg1, long arg2, long arg3, long arg4, long arg5, long arg6) {
+        return foreign.invokeNNNNNNrN(function.getContextAddress(), arg1, arg2, arg3, arg4, arg5, arg6);
     }
 
     /**

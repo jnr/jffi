@@ -581,6 +581,45 @@ final class Foreign {
     final native long invokeLLLrL(long function, long arg1, long arg2, long arg3);
 
     /**
+     * Invokes a function with four 64 bit integer arguments, and returns a 64 bit integer.
+     *
+     * @param function The address of the function context structure from {@link #newFunction}.
+     * @param arg1 The first 64 bit integer argument.
+     * @param arg2 The second 64 bit integer argument.
+     * @param arg3 The third 64 bit integer argument.
+     * @param arg4 The fourth 64 bit integer argument.
+     * @return A 64 bit integer value.
+     */
+    final native long invokeLLLLrL(long function, long arg1, long arg2, long arg3, long arg4);
+
+    /**
+     * Invokes a function with five 64 bit integer arguments, and returns a 64 bit integer.
+     *
+     * @param function The address of the function context structure from {@link #newFunction}.
+     * @param arg1 The first 64 bit integer argument.
+     * @param arg2 The second 64 bit integer argument.
+     * @param arg3 The third 64 bit integer argument.
+     * @param arg4 The fourth 64 bit integer argument.
+     * @param arg5 The fifth 64 bit integer argument.
+     * @return A 64 bit integer value.
+     */
+    final native long invokeLLLLLrL(long function, long arg1, long arg2, long arg3, long arg4, long arg5);
+
+    /**
+     * Invokes a function with six 64 bit integer arguments, and returns a 64 bit integer.
+     *
+     * @param function The address of the function context structure from {@link #newFunction}.
+     * @param arg1 The first 64 bit integer argument.
+     * @param arg2 The second 64 bit integer argument.
+     * @param arg3 The third 64 bit integer argument.
+     * @param arg4 The fourth 64 bit integer argument.
+     * @param arg5 The fifth 64 bit integer argument.
+     * @param arg6 The sixth 64 bit integer argument.
+     * @return A 64 bit integer value.
+     */
+    final native long invokeLLLLLLrL(long function, long arg1, long arg2, long arg3, long arg4, long arg5, long arg6);
+
+    /**
      * Invokes a function with three 64 bit integer arguments, and returns a 64 bit float.
      *
      * @param function The address of the function context structure from {@link #newFunction}.
@@ -628,6 +667,45 @@ final class Foreign {
      * @return A numeric value.
      */
     final native long invokeNNNrN(long function, long arg1, long arg2, long arg3);
+
+    /**
+     * Invokes a function with four numeric arguments, and returns a numeric value.
+     *
+     * @param function The address of the function context structure from {@link #newFunction}.
+     * @param arg1 The first numeric argument.
+     * @param arg2 The second numeric argument.
+     * @param arg3 The third numeric argument.
+     * @param arg4 The fourth numeric argument.
+     * @return A numeric value.
+     */
+    final native long invokeNNNNrN(long function, long arg1, long arg2, long arg3, long arg4);
+
+    /**
+     * Invokes a function with five numeric arguments, and returns a numeric value.
+     *
+     * @param function The address of the function context structure from {@link #newFunction}.
+     * @param arg1 The first numeric argument.
+     * @param arg2 The second numeric argument.
+     * @param arg3 The third numeric argument.
+     * @param arg4 The fourth numeric argument.
+     * @param arg5 The fifth numeric argument.
+     * @return A numeric value.
+     */
+    final native long invokeNNNNNrN(long function, long arg1, long arg2, long arg3, long arg4, long arg5);
+
+    /**
+     * Invokes a function with six numeric arguments, and returns a numeric value.
+     *
+     * @param function The address of the function context structure from {@link #newFunction}.
+     * @param arg1 The first numeric argument.
+     * @param arg2 The second numeric argument.
+     * @param arg3 The third numeric argument.
+     * @param arg4 The fourth numeric argument.
+     * @param arg5 The fifth numeric argument.
+     * @param arg6 The sixth numeric argument.
+     * @return A numeric value.
+     */
+    final native long invokeNNNNNNrN(long function, long arg1, long arg2, long arg3, long arg4, long arg5, long arg6);
 
     /**
      * Invokes a function that returns a 32 bit integer.
