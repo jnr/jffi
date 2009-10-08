@@ -36,6 +36,8 @@
 #include <stdbool.h>
 #ifndef _WIN32
 #  include <unistd.h>
+#else
+#  include <windows.h>
 #endif
 #include <errno.h>
 
@@ -246,7 +248,7 @@ static void*
 allocatePage(void)
 {
 #ifdef _WIN32
-    return VirtualAlloc(NULL, pageSize, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+    return VirtualAlloc(NULL, getPageSize(), MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
 #else
     caddr_t page = mmap(NULL, getPageSize(), PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
     return (page != (caddr_t) -1) ? page : NULL;
@@ -268,7 +270,7 @@ protectPage(void* page)
 {
 #ifdef _WIN32
     DWORD oldProtect;
-    return VirtualProtect(page, pageSize, PAGE_EXECUTE_READ, &oldProtect);
+    return VirtualProtect(page, getPageSize(), PAGE_EXECUTE_READ, &oldProtect);
 #else
     return mprotect(page, getPageSize(), PROT_READ | PROT_EXEC) == 0;
 #endif
