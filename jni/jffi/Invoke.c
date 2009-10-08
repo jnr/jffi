@@ -19,10 +19,6 @@
 #define PARAM_SIZE (8)
 #define MAX_STACK_ARGS (8)
 
-#ifdef _WIN32
-typedef char* caddr_t;
-#endif
-
 /*
  * Always align memory on a 8 byte boundary
  */
