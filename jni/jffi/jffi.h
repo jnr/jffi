@@ -30,6 +30,10 @@
 #include <jni.h>
 #include <ffi.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifndef roundup
 #  define roundup(x, y)   ((((x)+((y)-1))/(y))*(y))
 #endif
@@ -83,6 +87,7 @@ j2p(jlong j)
     return (void *)(uintptr_t) j;
 }
 
+#ifndef __cplusplus
 static inline
 jboolean loadClass(JNIEnv* env, const char *name, jclass *classp)
 {
@@ -93,6 +98,7 @@ jboolean loadClass(JNIEnv* env, const char *name, jclass *classp)
     *classp = (jclass)(*env)->NewGlobalRef(env, tmp);
     return JNI_TRUE;
 }
+#endif
 
 typedef union FFIValue {
     
@@ -125,7 +131,7 @@ extern ThreadData* jffi_thread_data_init();
 static inline ThreadData*
 thread_data_get()
 {
-    ThreadData* td = pthread_getspecific(jffi_threadDataKey);
+    ThreadData* td = (ThreadData *) pthread_getspecific(jffi_threadDataKey);
     return likely(td != NULL) ? td : jffi_thread_data_init();
 }
 #endif /* !_WIN32 */
@@ -204,6 +210,10 @@ thread_data_get()
         }; \
         ffi_call(&(ctx)->cif, FFI_FN((fn)), (retval), ffiValues); \
     } while (0)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* jffi_jffi_h */
 

@@ -19,6 +19,10 @@
 #ifndef jffi_Exception_h
 #define jffi_Exception_h
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define throwException(env, name, fmt, a...) \
     jffi_throwExceptionByName((env), jffi_##name##Exception, fmt, ##a)
 
@@ -30,6 +34,10 @@ extern const char* jffi_RuntimeException;
 
 
 extern void jffi_throwExceptionByName(JNIEnv* env, const char* exceptionName, const char* fmt, ...);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* jffi_Exception_h */
 

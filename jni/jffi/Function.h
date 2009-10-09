@@ -2,6 +2,7 @@
 #define FUNCTION_H
 
 #include <stdbool.h>
+#include <ffi.h>
 
 typedef struct Function {
     ffi_cif cif;
