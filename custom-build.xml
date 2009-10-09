@@ -206,12 +206,13 @@
         <jar jarfile="${native.jar}" index="true" update="true" duplicate="preserve"
             filesetmanifest="skip">
             <zipfileset src="${dist.dir}/${platform}.jar"/>
-            <zipfileset src="archive/i386-Linux.jar"/>
-            <zipfileset src="archive/x86_64-Linux.jar"/>
-            <zipfileset src="archive/s390x-Linux.jar"/>
             <zipfileset src="archive/Darwin.jar"/>
+            <zipfileset src="archive/i386-Windows.jar"/>
+            <zipfileset src="archive/i386-Linux.jar"/>
             <zipfileset src="archive/i386-SunOS.jar"/>
+            <zipfileset src="archive/x86_64-Linux.jar"/>
             <zipfileset src="archive/x86_64-SunOS.jar"/>
+            <zipfileset src="archive/s390x-Linux.jar"/>
             <zipfileset src="archive/sparc-SunOS.jar"/>
             <zipfileset src="archive/sparcv9-SunOS.jar"/>
             <zipfileset src="archive/ppc-AIX.jar"/>
