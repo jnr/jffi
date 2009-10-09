@@ -30,6 +30,8 @@ LIBFFI = $(LIBFFI_BUILD_DIR)/.libs/libffi_convenience.a
 
 SRCS = $(wildcard $(JFFI_SRC_DIR)/*.c)
 OBJS = $(patsubst %.c, $(JFFI_BUILD_DIR)/%.o, $(notdir $(SRCS)))
+CXXOBJS = $(patsubst %.cpp, $(BUILD_DIR)/AsmJit/%.o, $(notdir $(wildcard $(SRC_DIR)/AsmJit/*.cpp)))
+CXXOBJS += $(patsubst %.cpp, $(JFFI_BUILD_DIR)/%.o, $(notdir $(wildcard $(JFFI_SRC_DIR)/*.cpp)))
 
 vpath %.h $(JFFI_SRC_DIR)
 
@@ -54,15 +56,17 @@ FFI_CFLAGS = $(FFI_MMAP_EXEC) $(OFLAGS)
 STRIP = strip -S
 
 JDK_INCLUDES = -I"$(JDK_HOME)/include" -I"$(JDK_HOME)/include/$(OS)"
-IFLAGS = -I"$(BUILD_DIR)" -I"$(BUILD_DIR)"/jni -I"$(JFFI_SRC_DIR)" -I"$(LIBFFI_BUILD_DIR)"/include
+IFLAGS = -I"$(BUILD_DIR)" -I"$(BUILD_DIR)"/jni -I$(SRC_DIR) -I"$(JFFI_SRC_DIR)" -I"$(LIBFFI_BUILD_DIR)"/include
 CFLAGS = $(OFLAGS) $(WFLAGS) $(IFLAGS) $(PICFLAGS) $(JDK_INCLUDES)
 CFLAGS += -D_REENTRANT -D_LARGEFILE64_SOURCE -D_GNU_SOURCE
+CXXFLAGS = $(OFLAGS) $(IFLAGS) $(PICFLAGS) $(JDK_INCLUDES)
 
 ifeq ($(OS),cross-mingw32)
   override OS = win32
   override CPU = i386
   JDK_INCLUDES=-I$(JNI_DIR)/win32/include -I$(JNI_DIR)/win32/include/win32
   CC = i386-mingw32-gcc
+  CXX = i386-mingw32-g++
   LD = i386-mingw32-ld
   STRIP = i386-mingw32-strip --strip-debug
   CONFIGURE_HOST = i386-mingw32
@@ -137,7 +141,7 @@ endif
 
 ifeq ($(CPU), i386)
   MODEL = 32
-  ifneq ($(OS),darwin)
+  ifeq ($(findstring $(OS), darwin, mingw32, win32),)
     CFLAGS += -march=i586 -mtune=generic
   endif
 endif
@@ -159,6 +163,7 @@ ifneq ($(strip $(findstring $(OS), linux solaris)),)
   # Change the CC/LD instead of CFLAGS/LDFLAGS, incase other things in the flags
   # makes the libffi build choke
   CC += -m$(MODEL)
+  CXX += -m$(MODEL)
   LD += -m$(MODEL)
 endif
 
@@ -168,6 +173,7 @@ FFI_CONFIGURE = $(LIBFFI_SRC_DIR)/configure --disable-static \
 ifdef CONFIGURE_HOST
 	FFI_CONFIGURE += --host=$(CONFIGURE_HOST)
 endif
+
 all:	$(LIBJFFI)
 
 debug:
@@ -177,8 +183,8 @@ debug:
 	@echo JDK_HOME="$(JDK_HOME)"
 	@echo "OBJS=$(OBJS) JFFI_BUILD_DIR=$(JFFI_BUILD_DIR) PLATFORM=$(PLATFORM)"
 
-$(LIBJFFI):  $(LIBFFI) $(OBJS)
-	$(CC) -o $@ $(LDFLAGS) $(SOFLAGS) $(OBJS) $(LIBFFI) $(LIBS)
+$(LIBJFFI):  $(LIBFFI) $(OBJS) $(CXXOBJS)
+	$(CXX) -o $@ $(LDFLAGS) $(SOFLAGS) $(OBJS) $(CXXOBJS) $(LIBFFI) $(LIBS)
 	$(STRIP) $@
 
 # For the primitive int interface, don't do frame pointer save/restore
@@ -190,6 +196,11 @@ $(JFFI_BUILD_DIR)/FastIntInvoke.o : $(JFFI_SRC_DIR)/FastIntInvoke.c $(wildcard $
 $(BUILD_DIR)/%.o : $(SRC_DIR)/%.c $(wildcard $(JFFI_SRC_DIR)/*.h)
 	@mkdir -p $(@D)
 	$(CCACHE) $(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/%.o : $(SRC_DIR)/%.cpp $(wildcard $(JFFI_SRC_DIR)/*.h)
+	@mkdir -p $(@D)
+	$(CCACHE) $(CXX) $(CXXFLAGS) -c $< -o $@
+
 
 ifeq ($(OS), darwin)
 build_ffi = \
