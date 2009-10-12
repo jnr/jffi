@@ -487,6 +487,18 @@ public class ClosureTest {
             };
             handles.add(m.newClosure(c, Type.FLOAT, new Type[0], CallingConvention.DEFAULT));
         }
+        for (Closure.Handle h : handles) {
+            h.dispose();
+        }
+        handles.clear();
+        for (int i = 0; i < 1000; ++i) {
+            Closure c = new Closure() {
 
+                public void invoke(Buffer buffer) {
+                    throw new UnsupportedOperationException("Not supported yet.");
+                }
+            };
+            handles.add(m.newClosure(c, Type.FLOAT, new Type[0], CallingConvention.DEFAULT));
+        }
     }
 }
