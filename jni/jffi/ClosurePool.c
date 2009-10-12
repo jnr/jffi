@@ -193,7 +193,7 @@ jffi_Closure_Free(Closure* closure)
         pool_lock(pool);
 
         // If this slab was previously fully used, move it to the active list
-        if (slab->list == NULL) {  
+        if (unlikely(slab->list == NULL)) {
             TAILQ_REMOVE(&pool->full, slab, entry);
             TAILQ_INSERT_TAIL(&pool->active, slab, entry);
         }
@@ -203,7 +203,7 @@ jffi_Closure_Free(Closure* closure)
         slab->refcnt--;
         
         // This slab is now unused, put it on the empty list, ready for draining
-        if (slab->refcnt == 0) {
+        if (unlikely(slab->refcnt < 1)) {
             TAILQ_REMOVE(&pool->active, slab, entry);
             TAILQ_INSERT_TAIL(&pool->empty, slab, entry);
         }
@@ -263,6 +263,7 @@ new_slab(ClosurePool* pool)
     slab->data = list;
     slab->code = code;
     slab->list = list;
+    slab->pool = pool;
 
     return slab;
 
