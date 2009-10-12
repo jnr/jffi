@@ -37,12 +37,27 @@ typedef unsigned int u32;
             *(retval) = ((jint (*)(jint, jint, jint)) (fn))(arg1, arg2, arg3); \
     } while (0)
 
+# define invokeIIIIrI(ctx, fn, retval, arg1, arg2, arg3, arg4) do { \
+            *(retval) = ((jint (*)(jint, jint, jint, jint)) (fn))(arg1, arg2, arg3, arg4); \
+    } while (0)
+
+# define invokeIIIIIrI(ctx, fn, retval, arg1, arg2, arg3, arg4, arg5) do { \
+            *(retval) = ((jint (*)(jint, jint, jint, jint, jint)) (fn))(arg1, arg2, arg3, arg4, arg5); \
+    } while (0)
+
+# define invokeIIIIIIrI(ctx, fn, retval, arg1, arg2, arg3, arg4, arg5, arg6) do { \
+            *(retval) = ((jint (*)(jint, jint, jint, jint, jint, jint)) (fn))(arg1, arg2, arg3, arg4, arg5, arg6); \
+    } while (0)
+
 #else /* non-i386, non-x86_64 */
 
 # define invokeVrI ffi_call0
 # define invokeIrI ffi_call1
 # define invokeIIrI ffi_call2
 # define invokeIIIrI ffi_call3
+# define invokeIIIIrI ffi_call4
+# define invokeIIIIIrI ffi_call5
+# define invokeIIIIIIrI ffi_call6
 
 #endif
 
@@ -169,6 +184,42 @@ Java_com_kenai_jffi_Foreign_invokeIIIrI(JNIEnv*env, jobject self, jlong ctxAddre
     ffi_sarg retval;
 
     CALL(ctx, invokeIIIrI(ctx, ctx->function, &retval, arg1, arg2, arg3));
+
+    return (jint) retval;
+}
+
+JNIEXPORT jint JNICALL
+Java_com_kenai_jffi_Foreign_invokeIIIIrI(JNIEnv*env, jobject self, jlong ctxAddress,
+        jint arg1, jint arg2, jint arg3, jint arg4)
+{
+    Function* ctx = (Function *) j2p(ctxAddress);
+    ffi_sarg retval;
+
+    CALL(ctx, invokeIIIIrI(ctx, ctx->function, &retval, arg1, arg2, arg3, arg4));
+
+    return (jint) retval;
+}
+
+JNIEXPORT jint JNICALL
+Java_com_kenai_jffi_Foreign_invokeIIIIIrI(JNIEnv*env, jobject self, jlong ctxAddress,
+        jint arg1, jint arg2, jint arg3, jint arg4, jint arg5)
+{
+    Function* ctx = (Function *) j2p(ctxAddress);
+    ffi_sarg retval;
+
+    CALL(ctx, invokeIIIIIrI(ctx, ctx->function, &retval, arg1, arg2, arg3, arg4, arg5));
+
+    return (jint) retval;
+}
+
+JNIEXPORT jint JNICALL
+Java_com_kenai_jffi_Foreign_invokeIIIIIIrI(JNIEnv*env, jobject self, jlong ctxAddress,
+        jint arg1, jint arg2, jint arg3, jint arg4, jint arg5, jint arg6)
+{
+    Function* ctx = (Function *) j2p(ctxAddress);
+    ffi_sarg retval;
+
+    CALL(ctx, invokeIIIIIIrI(ctx, ctx->function, &retval, arg1, arg2, arg3, arg4, arg5, arg6));
 
     return (jint) retval;
 }

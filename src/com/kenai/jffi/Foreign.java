@@ -492,6 +492,45 @@ final class Foreign {
     final native int invokeIIIrI(long functionContext, int arg1, int arg2, int arg3);
 
     /**
+     * Invokes a function with four integer arguments, and returns a 32 bit integer.
+     *
+     * @param function The address of the function context structure from {@link #newFunction}.
+     * @param arg1 The first 32 bit integer argument.
+     * @param arg2 The second 32 bit integer argument.
+     * @param arg3 The third 32 bit integer argument.
+     * @param arg4 The third 32 bit integer argument.
+     * @return A 32 bit integer value.
+     */
+    final native int invokeIIIIrI(long functionContext, int arg1, int arg2, int arg3, int arg4);
+
+    /**
+     * Invokes a function with five integer arguments, and returns a 32 bit integer.
+     *
+     * @param function The address of the function context structure from {@link #newFunction}.
+     * @param arg1 The first 32 bit integer argument.
+     * @param arg2 The second 32 bit integer argument.
+     * @param arg3 The third 32 bit integer argument.
+     * @param arg4 The fourth 32 bit integer argument.
+     * @param arg5 The fifth 32 bit integer argument.
+     * @return A 32 bit integer value.
+     */
+    final native int invokeIIIIIrI(long functionContext, int arg1, int arg2, int arg3, int arg4, int arg5);
+
+    /**
+     * Invokes a function with six integer arguments, and returns a 32 bit integer.
+     *
+     * @param function The address of the function context structure from {@link #newFunction}.
+     * @param arg1 The first 32 bit integer argument.
+     * @param arg2 The second 32 bit integer argument.
+     * @param arg3 The third 32 bit integer argument.
+     * @param arg4 The fourth 32 bit integer argument.
+     * @param arg5 The fifth 32 bit integer argument.
+     * @param arg6 The sixth 32 bit integer argument.
+     * @return A 32 bit integer value.
+     */
+    final native int invokeIIIIIIrI(long functionContext, int arg1, int arg2, int arg3, int arg4, int arg5, int arg6);
+
+    /**
      * Invokes a function with three integer arguments, and returns a 32 bit float.
      *
      * @param function The address of the function context structure from {@link #newFunction}.
@@ -1147,6 +1186,20 @@ final class Foreign {
      * @return The native memory address of the buffer contents, or null if not a direct buffer.
      */
     final native long getDirectBufferAddress(Buffer buffer);
+
+    final native long newNativeMethod(String name, String signature, long functionContext);
+    final native void freeNativeMethod(long handle);
+    final native long compileNativeMethods(long[] methods);
+    final native void freeCompiledMethods(long handle);
+    /**
+     * 
+     * @param clazz The java class to register the native methods on
+     * @param handle The handle returned from compileNativeMethods
+     * @return true if successful
+     */
+    final native boolean registerNativeMethods(Class clazz, long handle);
+    final native void unregisterNativeMethods(Class clazz);
+
 
     final native int getJNIVersion();
     final native long getJavaVM();
