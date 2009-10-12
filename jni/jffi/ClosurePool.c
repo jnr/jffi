@@ -67,7 +67,7 @@ struct ClosurePool_ {
 #if defined (HAVE_NATIVETHREAD) && !defined(_WIN32)
     pthread_mutex_t mutex;
 #endif
-    TAILQ_HEAD(,ClosureSlab_) active;
+    TAILQ_HEAD(,ClosureSlab_) partial;
     TAILQ_HEAD(,ClosureSlab_) full;
     TAILQ_HEAD(,ClosureSlab_) empty;
     long refcnt;
@@ -101,7 +101,7 @@ jffi_ClosurePool_New(int closureSize,
     pool->refcnt = 1;
     pool->trampolineSize = roundup(pool->closureSize, 8);
     pool->closuresPerPage = jffi_getPageSize() / pool->trampolineSize;
-    TAILQ_INIT(&pool->active);
+    TAILQ_INIT(&pool->partial);
     TAILQ_INIT(&pool->full);
     TAILQ_INIT(&pool->empty);
     
@@ -119,7 +119,7 @@ jffi_ClosurePool_Free(ClosurePool* pool)
         bool empty = false;
         pool_lock(pool);
         pool->refcnt = 0;
-        empty = TAILQ_EMPTY(&pool->full) && TAILQ_EMPTY(&pool->active);
+        empty = TAILQ_EMPTY(&pool->full) && TAILQ_EMPTY(&pool->partial);
         pool_unlock(pool);
 
         jffi_ClosurePool_Drain(pool);
@@ -152,7 +152,7 @@ jffi_Closure_Alloc(ClosurePool* pool)
 
     pool_lock(pool);
 
-    if (unlikely(TAILQ_EMPTY(&pool->active))) {
+    if (unlikely(TAILQ_EMPTY(&pool->partial))) {
         if (TAILQ_EMPTY(&pool->empty)) {
             slab = new_slab(pool);
             if (slab == NULL) {
@@ -163,9 +163,9 @@ jffi_Closure_Alloc(ClosurePool* pool)
             slab = TAILQ_FIRST(&pool->empty);
             TAILQ_REMOVE(&pool->empty, slab, entry);
         }
-        TAILQ_INSERT_TAIL(&pool->active, slab, entry);
+        TAILQ_INSERT_TAIL(&pool->partial, slab, entry);
     } else {
-        slab = TAILQ_FIRST(&pool->active);
+        slab = TAILQ_FIRST(&pool->partial);
     }
 
     closure = slab->list;
@@ -174,7 +174,7 @@ jffi_Closure_Alloc(ClosurePool* pool)
 
     // If this slab is completely used up, put it on the full list until a closure is freed
     if (unlikely(slab->list == NULL)) {
-        TAILQ_REMOVE(&pool->active, slab, entry);
+        TAILQ_REMOVE(&pool->partial, slab, entry);
         TAILQ_INSERT_TAIL(&pool->full, slab, entry);
     }
 
@@ -192,10 +192,10 @@ jffi_Closure_Free(Closure* closure)
         ClosurePool* pool = slab->pool;
         pool_lock(pool);
 
-        // If this slab was previously fully used, move it to the active list
+        // If this slab was previously fully used, move it to end of the partial list
         if (unlikely(slab->list == NULL)) {
             TAILQ_REMOVE(&pool->full, slab, entry);
-            TAILQ_INSERT_TAIL(&pool->active, slab, entry);
+            TAILQ_INSERT_TAIL(&pool->partial, slab, entry);
         }
 
         closure->next = slab->list;
@@ -204,11 +204,11 @@ jffi_Closure_Free(Closure* closure)
         
         // This slab is now unused, put it on the empty list, ready for draining
         if (unlikely(slab->refcnt < 1)) {
-            TAILQ_REMOVE(&pool->active, slab, entry);
+            TAILQ_REMOVE(&pool->partial, slab, entry);
             TAILQ_INSERT_TAIL(&pool->empty, slab, entry);
         }
 
-        cleanup = pool->refcnt < 1 && TAILQ_EMPTY(&pool->full) && TAILQ_EMPTY(&pool->active);
+        cleanup = pool->refcnt < 1 && TAILQ_EMPTY(&pool->full) && TAILQ_EMPTY(&pool->partial);
         pool_unlock(pool);
         if (cleanup) {
             jffi_ClosurePool_Drain(pool);
