@@ -5,6 +5,8 @@ import com.kenai.jffi.UnitHelper.InvokerType;
 import com.kenai.jffi.UnitHelper.Address;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -469,5 +471,22 @@ public class ClosureTest {
 
     @Test public void defaultClosureDrV() throws Throwable {
         testClosureDrV(lib);
+    }
+
+    @Test public void allocateLots() throws Throwable {
+        ClosureManager m = ClosureManager.getInstance();
+        CallContext ctx = new CallContext(Type.FLOAT, new Type[0], CallingConvention.DEFAULT);
+        List<Closure.Handle> handles = new ArrayList<Closure.Handle>();
+
+        for (int i = 0; i < 1000; ++i) {
+            Closure c = new Closure() {
+
+                public void invoke(Buffer buffer) {
+                    throw new UnsupportedOperationException("Not supported yet.");
+                }
+            };
+            handles.add(m.newClosure(c, Type.FLOAT, new Type[0], CallingConvention.DEFAULT));
+        }
+
     }
 }
