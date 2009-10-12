@@ -43,25 +43,33 @@
 
 #include <ffi.h>
 
+#include "queue.h"
 #include "jffi.h"
 #include "memory.h"
 #include "ClosurePool.h"
 
-typedef struct Memory {
+typedef struct ClosureSlab_ {
     void* code;
     void* data;
-    struct Memory* next;
-} Memory;
+    long refcnt;
+    Closure* list;
+    ClosurePool* pool;
+    TAILQ_ENTRY(ClosureSlab_) entry;
+} Slab;
 
 struct ClosurePool_ {
     void* ctx;
     int closureSize;
+    int trampolineSize;
+    int pageSize;
+    int closuresPerPage;
     bool (*prep)(void* ctx, void *code, Closure* closure, char* errbuf, size_t errbufsize);
 #if defined (HAVE_NATIVETHREAD) && !defined(_WIN32)
     pthread_mutex_t mutex;
 #endif
-    struct Memory* blocks; /* Keeps track of all the allocated memory for this pool */
-    Closure* list;
+    TAILQ_HEAD(,ClosureSlab_) active;
+    TAILQ_HEAD(,ClosureSlab_) full;
+    TAILQ_HEAD(,ClosureSlab_) empty;
     long refcnt;
 };
 
@@ -72,6 +80,8 @@ struct ClosurePool_ {
 #  define pool_lock(p)
 #  define pool_unlock(p)
 #endif
+
+static Slab* new_slab(ClosurePool* pool);
 
 ClosurePool*
 jffi_ClosurePool_New(int closureSize,
@@ -89,6 +99,11 @@ jffi_ClosurePool_New(int closureSize,
     pool->ctx = ctx;
     pool->prep = prep;
     pool->refcnt = 1;
+    pool->trampolineSize = roundup(pool->closureSize, 8);
+    pool->closuresPerPage = jffi_getPageSize() / pool->trampolineSize;
+    TAILQ_INIT(&pool->active);
+    TAILQ_INIT(&pool->full);
+    TAILQ_INIT(&pool->empty);
     
 #if defined(HAVE_NATIVETHREAD) && !defined(_WIN32) && !defined(__WIN32__)
     pthread_mutex_init(&pool->mutex, NULL);
@@ -98,124 +113,106 @@ jffi_ClosurePool_New(int closureSize,
 }
 
 void
-cleanup_closure_pool(ClosurePool* pool)
-{
-    Memory* memory;
-    
-    for (memory = pool->blocks; memory != NULL; ) {
-        Memory* next = memory->next;
-        jffi_freePages(memory->code, 1);
-        free(memory->data);
-        free(memory);
-        memory = next;
-    }
-    free(pool);
-}
-
-void
 jffi_ClosurePool_Free(ClosurePool* pool)
 {
     if (pool != NULL) {
-        int refcnt;
+        bool empty = false;
         pool_lock(pool);
-        refcnt = --(pool->refcnt);
+        pool->refcnt = 0;
+        empty = TAILQ_EMPTY(&pool->full) && TAILQ_EMPTY(&pool->active);
         pool_unlock(pool);
 
-        if (refcnt == 0) {
-            cleanup_closure_pool(pool);
+        jffi_ClosurePool_Drain(pool);
+        if (empty) {
+            free(pool);
         }
     }
+}
+
+void
+jffi_ClosurePool_Drain(ClosurePool* pool)
+{
+    Slab* slab;
+
+    pool_lock(pool);
+    while ((slab = TAILQ_FIRST(&pool->empty))) {
+        jffi_freePages(slab->code, 1);
+        free(slab->data);
+        TAILQ_REMOVE(&pool->empty, slab, entry);
+        free(slab);
+    }
+    pool_unlock(pool);
 }
 
 Closure*
 jffi_Closure_Alloc(ClosurePool* pool)
 {
-    Closure *list = NULL;
-    Memory* block = NULL;
-    caddr_t code = NULL;
-    char errmsg[256];
-    int nclosures, trampolineSize;
-    int i;
+    Slab* slab = NULL;
+    Closure* closure;
 
     pool_lock(pool);
-    if (pool->list != NULL) {
-        Closure* closure = pool->list;
-        pool->list = pool->list->next;
-        pool->refcnt++;
-        pool_unlock(pool);
 
-        return closure;
-    }
-
-    trampolineSize = roundup(pool->closureSize, 8);
-    nclosures = jffi_getPageSize() / trampolineSize;
-    block = calloc(1, sizeof(*block));
-    list = calloc(nclosures, sizeof(*list));
-    code = jffi_allocatePages(1);
-    
-    if (block == NULL || list == NULL || code == NULL) {
-        pool_unlock(pool);
-        snprintf(errmsg, sizeof(errmsg), "failed to allocate a page. errno=%d (%s)", errno, strerror(errno));
-        goto error;
-    }
-    
-    for (i = 0; i < nclosures; ++i) {
-        Closure* closure = &list[i];
-        closure->next = &list[i + 1];
-        closure->pool = pool;
-        closure->code = (code + (i * trampolineSize));
-
-        if (!(*pool->prep)(pool->ctx, closure->code, closure, errmsg, sizeof(errmsg))) {
-            goto error;
+    if (unlikely(TAILQ_EMPTY(&pool->active))) {
+        if (TAILQ_EMPTY(&pool->empty)) {
+            slab = new_slab(pool);
+            if (slab == NULL) {
+                pool_unlock(pool);
+                return NULL;
+            }
+        } else {
+            slab = TAILQ_FIRST(&pool->empty);
+            TAILQ_REMOVE(&pool->empty, slab, entry);
         }
+        TAILQ_INSERT_TAIL(&pool->active, slab, entry);
+    } else {
+        slab = TAILQ_FIRST(&pool->active);
     }
 
-    if (!jffi_makePagesExecutable(code, 1)) {
-        goto error;
+    closure = slab->list;
+    slab->list = closure->next;
+    slab->refcnt++;
+
+    // If this slab is completely used up, put it on the full list until a closure is freed
+    if (unlikely(slab->list == NULL)) {
+        TAILQ_REMOVE(&pool->active, slab, entry);
+        TAILQ_INSERT_TAIL(&pool->full, slab, entry);
     }
-
-    /* Track the allocated page + Closure memory area */
-    block->data = list;
-    block->code = code;
-    block->next = pool->blocks;
-    pool->blocks = block;
-
-    /* Thread the new block onto the free list, apart from the first one. */
-    list[nclosures - 1].next = pool->list;
-    pool->list = list->next;
-    pool->refcnt++;
 
     pool_unlock(pool);
 
-    /* Use the first one as the new handle */
-    return list;
-
-error:
-    pool_unlock(pool);
-    free(block);
-    free(list);
-    if (code != NULL) {
-        jffi_freePages(code, 1);
-    }
-    printf("failed with errmsg=%s\n", errmsg); fflush(stdout);
-    return NULL;
+    return closure;
 }
 
 void
 jffi_Closure_Free(Closure* closure)
 {
-    if (closure != NULL) {
-        ClosurePool* pool = closure->pool;
-        int refcnt;
+    if (likely(closure != NULL)) {
+        bool cleanup = false;
+        Slab* slab = closure->slab;
+        ClosurePool* pool = slab->pool;
         pool_lock(pool);
-        // Just push it on the front of the free list
-        closure->next = pool->list;
-        pool->list = closure;
-        refcnt = --(pool->refcnt);
-        pool_unlock(pool);
 
-        if (refcnt == 0) {
-            cleanup_closure_pool(pool);
+        // If this slab was previously fully used, move it to the active list
+        if (slab->list == NULL) {  
+            TAILQ_REMOVE(&pool->full, slab, entry);
+            TAILQ_INSERT_TAIL(&pool->active, slab, entry);
+        }
+
+        closure->next = slab->list;
+        slab->list = closure;
+        slab->refcnt--;
+        
+        // This slab is now unused, put it on the empty list, ready for draining
+        if (slab->refcnt == 0) {
+            TAILQ_REMOVE(&pool->active, slab, entry);
+            TAILQ_INSERT_TAIL(&pool->empty, slab, entry);
+        }
+
+        cleanup = pool->refcnt < 1 && TAILQ_EMPTY(&pool->full) && TAILQ_EMPTY(&pool->active);
+        pool_unlock(pool);
+        if (cleanup) {
+            jffi_ClosurePool_Drain(pool);
+            free(pool);
         }
     }
 }
@@ -224,4 +221,57 @@ void*
 jffi_Closure_CodeAddress(Closure* handle)
 {
     return handle->code;
+}
+
+
+static Slab*
+new_slab(ClosurePool* pool)
+{
+    Closure* list = NULL;
+    Slab* slab = NULL;
+    caddr_t code = NULL;
+    char errmsg[256];
+    int i;
+
+    slab = calloc(1, sizeof(*slab));
+    list = calloc(pool->closuresPerPage, sizeof(*list));
+    code = jffi_allocatePages(1);
+
+    if (slab == NULL || list == NULL || code == NULL) {
+        snprintf(errmsg, sizeof(errmsg), "failed to allocate a page. errno=%d (%s)", errno, strerror(errno));
+        goto error;
+    }
+
+    // Thread all the closure handles onto a list, and init each one
+    for (i = 0; i < pool->closuresPerPage; ++i) {
+        Closure* closure = &list[i];
+        closure->next = &list[i + 1];
+        closure->slab = slab;
+        closure->code = (code + (i * pool->trampolineSize));
+
+        if (!(*pool->prep)(pool->ctx, closure->code, closure, errmsg, sizeof(errmsg))) {
+            goto error;
+        }
+    }
+    list[pool->closuresPerPage - 1].next = NULL;
+
+    if (!jffi_makePagesExecutable(code, 1)) {
+        goto error;
+    }
+
+    /* Track the allocated page + Closure memory area */
+    slab->data = list;
+    slab->code = code;
+    slab->list = list;
+
+    return slab;
+
+error:
+    free(list);
+    free(slab);
+    if (code != NULL) {
+        jffi_freePages(code, 1);
+    }
+
+    return NULL;
 }
