@@ -89,4 +89,8 @@ public class ForeignTest {
 //        long cl = Foreign.getInstance().newClosure(new ClosureProxy(), m, Type.VOID.handle, new long[0], 0);
 //        Foreign.getInstance().freeClosure(cl);
 //    }
+
+//    @Test public void newNativeMethod() throws Throwable {
+//        Foreign.getInstance().newNativeMethod("test", "()V", 0);
+//    }
 }

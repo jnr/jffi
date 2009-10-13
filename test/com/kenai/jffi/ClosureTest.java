@@ -3,6 +3,7 @@ package com.kenai.jffi;
 
 import com.kenai.jffi.UnitHelper.InvokerType;
 import com.kenai.jffi.UnitHelper.Address;
+import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
@@ -499,6 +500,24 @@ public class ClosureTest {
                 }
             };
             handles.add(m.newClosure(c, Type.FLOAT, new Type[0], CallingConvention.DEFAULT));
+        }
+    }
+
+    static class Proxy {
+        public void invoke(long retval, long args) {
+
+        }
+    }
+
+    @Test public void closureMagazine() throws Throwable {
+        CallContext ctx = new CallContext(Type.SINT32, new Type[0], CallingConvention.DEFAULT);
+        Method m = Proxy.class.getDeclaredMethod("invoke", long.class, long.class);
+        ClosureMagazine mag = new ClosureMagazine(ctx, m);
+        for (int i = 0; i < 1000; ++i) {
+            long cl = mag.get(new Proxy());
+            if (cl == 0) {
+                break;
+            }
         }
     }
 }
