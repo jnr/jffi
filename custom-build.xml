@@ -10,7 +10,7 @@
         <property name="complete.jar" value="${dist.dir}/jffi-complete.jar"/>
         <property name="jffi.version.major" value="0"/>
         <property name="jffi.version.minor" value="6"/>
-        <property name="jffi.version.micro" value="0"/>
+        <property name="jffi.version.micro" value="1"/>
         <mkdir dir="${build.native.dir}"/>
         
         <!-- normalize the various os.arch naming conventions -->

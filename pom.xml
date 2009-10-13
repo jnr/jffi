@@ -4,7 +4,7 @@
   <groupId>org.jruby.extras</groupId>
   <artifactId>jffi</artifactId>
   <packaging>jar</packaging>
-  <version>0.6</version>
+  <version>0.6.1</version>
   <name>jffi</name>
   <description>Java wrapper around libffi</description>
   <url>http://jffi.kenai.com</url>
@@ -64,11 +64,6 @@
     </developer>
   </developers>
 
-  <properties>
-    <maven.test.skip>true</maven.test.skip>
-    <maven.test.failure.ignore>true</maven.test.failure.ignore>
-  </properties>
-
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
@@ -78,6 +73,8 @@
     </dependency>
   </dependencies>
   <properties>
+      <maven.test.skip>true</maven.test.skip>
+      <maven.test.failure.ignore>true</maven.test.failure.ignore>
       <make.exe>make</make.exe>
   </properties>
   <profiles>
