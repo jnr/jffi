@@ -176,7 +176,7 @@ public interface Closure {
          */
         void dispose();
 
-        @Deprecated
+        //@Deprecated
         void free();
     }
 }
