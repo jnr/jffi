@@ -336,13 +336,6 @@ final class Foreign {
      * @param error The value to set errno to.
      */
     final native void setLastError(int error);
-    
-    
-    final native long newClosurePool(long contextAddress, Method closureMethod);
-    final native void freeClosurePool(long closurePool);
-
-    final native long allocateClosure(long closurePool, Object proxy);
-    final native void releaseClosure(long handle);
 
     final native long newClosureMagazine(long contextAddress, Method closureMethod);
     final native void freeClosureMagazine(long closurePool);
