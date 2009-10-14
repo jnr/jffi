@@ -252,7 +252,14 @@ public abstract class Invoker {
      */
     public final byte[] invokeStruct(Function function, HeapInvocationBuffer buffer) {
         byte[] returnBuffer = new byte[function.getReturnType().size()];
-        foreign.invokeArrayReturnStruct(function.getContextAddress(), buffer.array(), returnBuffer, 0);
+        ObjectBuffer objectBuffer = buffer.objectBuffer();
+        if (objectBuffer != null) {
+            foreign.invokeArrayWithObjectsReturnStruct(function.getContextAddress(),
+                    buffer.array(), objectBuffer.objectCount(), objectBuffer.info(), objectBuffer.objects(),
+                    returnBuffer, 0);
+        } else {
+            foreign.invokeArrayReturnStruct(function.getContextAddress(), buffer.array(), returnBuffer, 0);
+        }
 
         return returnBuffer;
     }
