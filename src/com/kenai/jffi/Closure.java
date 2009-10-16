@@ -174,9 +174,6 @@ public interface Closure {
          * time, and is non-deterministic.  This allows explicit control over
          * memory reclamation.
          */
-        void dispose();
-
-        //@Deprecated
         void free();
     }
 }
