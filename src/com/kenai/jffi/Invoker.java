@@ -252,14 +252,8 @@ public abstract class Invoker {
      */
     public final byte[] invokeStruct(Function function, HeapInvocationBuffer buffer) {
         byte[] returnBuffer = new byte[function.getReturnType().size()];
-        ObjectBuffer objectBuffer = buffer.objectBuffer();
-        if (objectBuffer != null) {
-            foreign.invokeArrayWithObjectsReturnStruct(function.getContextAddress(),
-                    buffer.array(), objectBuffer.objectCount(), objectBuffer.info(), objectBuffer.objects(),
-                    returnBuffer, 0);
-        } else {
-            foreign.invokeArrayReturnStruct(function.getContextAddress(), buffer.array(), returnBuffer, 0);
-        }
+
+        invokeStruct(function, buffer, returnBuffer, 0);
 
         return returnBuffer;
     }
@@ -273,7 +267,14 @@ public abstract class Invoker {
      * @param offset The offset within returnBuffer to place the return value.
      */
     public final void invokeStruct(Function function, HeapInvocationBuffer buffer, byte[] returnBuffer, int offset) {
-        foreign.invokeArrayReturnStruct(function.getContextAddress(), buffer.array(), returnBuffer, offset);
+        ObjectBuffer objectBuffer = buffer.objectBuffer();
+        if (objectBuffer != null) {
+            foreign.invokeArrayWithObjectsReturnStruct(function.getContextAddress(),
+                    buffer.array(), objectBuffer.objectCount(), objectBuffer.info(), objectBuffer.objects(),
+                    returnBuffer, offset);
+        } else {
+            foreign.invokeArrayReturnStruct(function.getContextAddress(), buffer.array(), returnBuffer, offset);
+        }
     }
 
     public final Object invokeObject(Function function, HeapInvocationBuffer buffer) {
