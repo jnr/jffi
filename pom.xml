@@ -4,7 +4,7 @@
   <groupId>org.jruby.extras</groupId>
   <artifactId>jffi</artifactId>
   <packaging>jar</packaging>
-  <version>0.6.1</version>
+  <version>0.6.2</version>
   <name>jffi</name>
   <description>Java wrapper around libffi</description>
   <url>http://jffi.kenai.com</url>
