@@ -1,0 +1,19 @@
+<project name="version" default="default" basedir=".">
+    <property name="jffi.version.major" value="0"/>
+    <property name="jffi.version.minor" value="7"/>
+    <property name="jffi.version.micro" value="0"/>
+    <target name="-generate-version-source" depends="">
+        <echo message="Generating Version.java"/>
+        <mkdir dir="${build.classes.dir}"/>
+        <mkdir dir="${build.dir}/java/com/kenai/jffi"/>
+        <echo file="${build.dir}/java/com/kenai/jffi/Version.java" append="false">
+            package com.kenai.jffi;
+            public final class Version {
+                private Version() {}
+                public static final int MAJOR = ${jffi.version.major};
+                public static final int MINOR = ${jffi.version.minor};
+                public static final int MICRO = ${jffi.version.micro};
+            }
+        </echo>
+    </target>
+</project>
