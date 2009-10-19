@@ -95,6 +95,7 @@
     </target>
 
     <import file="custom-build.xml"/>
+    <import file="version.xml"/>
     <target name="-post-init" depends="-init-vars"/>
     <target name="-post-compile" depends="-build-native-library"/>
     <target name="-post-compile-test" depends="-build-native-testlib"/>
