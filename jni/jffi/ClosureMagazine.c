@@ -34,7 +34,7 @@
 #include "Exception.h"
 #include "Type.h"
 #include "CallContext.h"
-#include "memory.h"
+#include "MemoryUtil.h"
 #include "com_kenai_jffi_Foreign.h"
 
 struct Closure;

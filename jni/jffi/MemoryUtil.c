@@ -32,6 +32,7 @@
 #endif
 #include <errno.h>
 
+#include "MemoryUtil.h"
 
 int
 jffi_getPageSize(void)
