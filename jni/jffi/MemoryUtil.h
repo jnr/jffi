@@ -15,3 +15,4 @@ bool jffi_makePagesExecutable(void* memory, int npages);
 #endif
 
 #endif
+

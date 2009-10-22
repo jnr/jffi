@@ -77,3 +77,4 @@ jffi_makePagesExecutable(void* memory, int npages)
     return mprotect(memory, npages * jffi_getPageSize(), PROT_READ | PROT_EXEC) == 0;
 #endif
 }
+
