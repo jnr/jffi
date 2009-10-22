@@ -30,8 +30,8 @@ LIBFFI = $(LIBFFI_BUILD_DIR)/.libs/libffi_convenience.a
 
 SRCS = $(wildcard $(JFFI_SRC_DIR)/*.c)
 OBJS = $(patsubst %.c, $(JFFI_BUILD_DIR)/%.o, $(notdir $(SRCS)))
-CXXOBJS = $(patsubst %.cpp, $(BUILD_DIR)/AsmJit/%.o, $(notdir $(wildcard $(SRC_DIR)/AsmJit/*.cpp)))
-CXXOBJS += $(patsubst %.cpp, $(JFFI_BUILD_DIR)/%.o, $(notdir $(wildcard $(JFFI_SRC_DIR)/*.cpp)))
+#CXXOBJS = $(patsubst %.cpp, $(BUILD_DIR)/AsmJit/%.o, $(notdir $(wildcard $(SRC_DIR)/AsmJit/*.cpp)))
+#CXXOBJS += $(patsubst %.cpp, $(JFFI_BUILD_DIR)/%.o, $(notdir $(wildcard $(JFFI_SRC_DIR)/*.cpp)))
 
 vpath %.h $(JFFI_SRC_DIR)
 
@@ -141,7 +141,7 @@ endif
 
 ifeq ($(CPU), i386)
   MODEL = 32
-  ifeq ($(findstring $(OS), darwin, mingw32, win32),)
+  ifeq ($(findstring $(OS), openbsd darwin mingw32 win32),)
     CFLAGS += -march=i586 -mtune=generic
   endif
 endif
