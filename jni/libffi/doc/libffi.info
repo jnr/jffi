@@ -1,8 +1,7 @@
-This is /cygdrive/c/src/jffi~core/jni/libffi/doc/libffi.info, produced
-by makeinfo version 4.13 from
-/cygdrive/c/src/jffi~core/jni/libffi/doc/libffi.texi.
+This is ../libffi/doc/libffi.info, produced by makeinfo version 4.8
+from ../libffi/doc/libffi.texi.
 
-This manual is for Libffi, a portable foreign-function interface
+   This manual is for Libffi, a portable foreign-function interface
 library.
 
    Copyright (C) 2008 Red Hat, Inc.
@@ -14,7 +13,7 @@ library.
      included in the section entitled "GNU General Public License".
 
 
-INFO-DIR-SECTION
+INFO-DIR-SECTION Development
 START-INFO-DIR-ENTRY
 * libffi: (libffi).             Portable foreign-function interface library.
 END-INFO-DIR-ENTRY
@@ -112,10 +111,10 @@ To prepare a call interface object, use the function `ffi_prep_cif'.
      This initializes CIF according to the given parameters.
 
      ABI is the ABI to use; normally `FFI_DEFAULT_ABI' is what you
-     want.  *note Multiple ABIs:: for more information.
+     want.  *Note Multiple ABIs:: for more information.
 
      NARGS is the number of arguments that this function accepts.
-     `libffi' does not yet handle varargs functions; see *note Missing
+     `libffi' does not yet handle varargs functions; see *Note Missing
      Features:: for more information.
 
      RTYPE is a pointer to an `ffi_type' structure that describes the
@@ -511,24 +510,24 @@ Index
 * ffi_type_ushort:                       Primitive Types.      (line 53)
 * ffi_type_void:                         Primitive Types.      (line 10)
 * Foreign Function Interface:            Introduction.         (line 31)
-* void <1>:                              The Basics.           (line 43)
-* void:                                  The Closure API.      (line 27)
+* void <1>:                              The Closure API.      (line 20)
+* void:                                  The Basics.           (line 43)
 
 
 
 Tag Table:
-Node: Top742
-Node: Introduction1478
-Node: Using libffi3114
-Node: The Basics3549
-Node: Simple Example6156
-Node: Types7183
-Node: Primitive Types7466
-Node: Structures9286
-Node: Type Example10146
-Node: Multiple ABIs11369
-Node: The Closure API11740
-Node: Missing Features14660
-Node: Index15153
+Node: Top702
+Node: Introduction1438
+Node: Using libffi3074
+Node: The Basics3509
+Node: Simple Example6116
+Node: Types7143
+Node: Primitive Types7426
+Node: Structures9246
+Node: Type Example10106
+Node: Multiple ABIs11329
+Node: The Closure API11700
+Node: Missing Features14620
+Node: Index15113
 
 End Tag Table
