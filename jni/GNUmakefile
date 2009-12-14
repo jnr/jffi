@@ -5,6 +5,21 @@ ifeq ($(OS),sunos)
   OS = solaris
 endif
 
+# Default value of $OS on Windows is Windows_NT
+ifeq ($(OS), Windows_NT)
+    # that's how we detect x64...
+    ifneq ($(findstring 64, $(BUILD_OS)),)
+      OS = win64
+    else
+      OS = win32
+    endif
+endif
+
+ifneq ($(findstring cygwin, $(BUILD_OS)),)
+  # cygwin is always x32
+  OS = win32
+endif
+
 CPU ?= $(shell uname -m | sed -e 's/i[345678]86/i386/')
 MODEL = 32 # Default to 32bit compiles
 PLATFORM = $(CPU)-$(OS)
@@ -57,6 +72,28 @@ JDK_INCLUDES = -I"$(JDK_HOME)/include" -I"$(JDK_HOME)/include/$(OS)"
 IFLAGS = -I"$(BUILD_DIR)" -I"$(BUILD_DIR)"/jni -I"$(JFFI_SRC_DIR)" -I"$(LIBFFI_BUILD_DIR)"/include
 CFLAGS = $(OFLAGS) $(WFLAGS) $(IFLAGS) $(PICFLAGS) $(JDK_INCLUDES)
 CFLAGS += -D_REENTRANT -D_LARGEFILE64_SOURCE -D_GNU_SOURCE
+
+ifeq ($(OS), win64)
+  override CPU = x86_64
+  JDK_INCLUDES=-I$(JNI_DIR)/win32/include -I$(JNI_DIR)/win32/include/win32
+  CC = x86_64-w64-mingw32-gcc -m64
+  PICFLAGS =
+  ifneq ($(findstring cygwin, $(BUILD_OS)),)
+    CC += -mno-cygwin
+    LDFLAGS += -mno-cygwin
+  endif
+  CFLAGS += -mwin32 -D_JNI_IMPLEMENTATION_
+  LDFLAGS += -Wl,--add-stdcall-alias
+  PICFLAGS=
+  SOFLAGS += -shared -mimpure-text -static-libgcc
+  PREFIX =
+  JNIEXT=dll
+  CXX = x86_64-w64-mingw32-g++ -m64
+  AR = x86_64-w64-mingw32-ar
+  LD = x86_64-w64-mingw32-ld
+  STRIP = x86_64-w64-mingw32-strip --strip-debug
+  CONFIGURE_BUILD = x86_64-w64-mingw32
+endif
 
 ifeq ($(OS),cross-mingw32)
   override OS = win32
@@ -152,14 +189,22 @@ FFI_CONFIGURE = $(LIBFFI_SRC_DIR)/configure --disable-static \
 ifdef CONFIGURE_HOST
 	FFI_CONFIGURE += --host=$(CONFIGURE_HOST)
 endif
+
+ifdef CONFIGURE_BUILD
+	FFI_CONFIGURE += --build=$(CONFIGURE_BUILD)
+endif
+
 all:	$(LIBJFFI)
 
 debug:
 	@echo OS="$(OS)"
 	@echo BUILD_OS="$(BUILD_OS)"
+	@echo CPU="$(CPU)"
 	@echo JAVA_HOME="$(JAVA_HOME)"
 	@echo JDK_HOME="$(JDK_HOME)"
-	@echo "OBJS=$(OBJS) JFFI_BUILD_DIR=$(JFFI_BUILD_DIR) PLATFORM=$(PLATFORM)"
+	@echo "PLATFORM=$(PLATFORM)"
+	@echo "JFFI_BUILD_DIR=$(JFFI_BUILD_DIR)"
+	@echo "OBJS=$(OBJS)"
 
 $(LIBJFFI):  $(LIBFFI) $(OBJS)
 	$(CC) -o $@ $(LDFLAGS) $(SOFLAGS) $(OBJS) $(LIBFFI) $(LIBS)
