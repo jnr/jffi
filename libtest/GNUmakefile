@@ -1,12 +1,27 @@
 # -*- makefile -*-
-OS = $(shell uname -s | tr '[:upper:]' '[:lower:]')
+BUILD_OS := $(strip $(shell uname -s | tr '[:upper:]' '[:lower:]'))
+OS ?= $(BUILD_OS)
+
+# Default value of $OS on Windows is Windows_NT
+ifeq ($(OS), Windows_NT)
+    # that's how we detect x64...
+    ifneq ($(findstring 64, $(BUILD_OS)),)
+      OS = win64
+    else
+      OS = win32
+    endif
+endif
+
 CPU = $(shell uname -m | sed -e 's/i[345678]86/i386/')
 MODEL = 32 # Default to 32bit compiles
 PLATFORM = $(CPU)-$(OS)
+
 ifeq ($(OS), sunos)
   OS = solaris
 endif
+
 ifneq ($(findstring cygwin,$(BUILD_OS)),)
+  # cygwin is always x32 for now
   OS = win32
 endif
 
@@ -38,10 +53,26 @@ LDFLAGS += $(SOFLAGS)
 IFLAGS = -I"$(BUILD_DIR)"
 CFLAGS = $(OFLAGS) $(WFLAGS) $(IFLAGS) $(PICFLAGS) -D_REENTRANT
 
-ifeq ($(OS), win32)
-  CC += -mno-cygwin
-  LDFLAGS += -mno-cygwin -Wl,--add-stdcall-alias
+ifeq ($(OS), win64)
+  override CPU = x86_64
+  JDK_INCLUDES=-I$(JNI_DIR)/win32/include -I$(JNI_DIR)/win32/include/win32
+  CC = gcc -m64
+  CXX = g++
+  PICFLAGS =
+  LDFLAGS += -Wl,--add-stdcall-alias
+  PICFLAGS =
+  PREFIX =
+  LIBEXT = dll
 endif
+
+ifeq ($(OS), win32)
+  CC += -mno-cygwin -mwin32
+  LDFLAGS += -mno-cygwin -Wl,--add-stdcall-alias
+  PREFIX =
+  PICFLAGS =
+  LIBEXT = dll
+endif
+
 ifeq ($(OS), darwin)
   ARCHFLAGS = -arch ppc
   ifneq ($(findstring $(CPU), i386 x86_64),)
@@ -132,4 +163,8 @@ clean::
 	# nothing to do - ant will delete the build dir
 
 debug::
+	@echo OS="$(OS)"
+	@echo BUILD_OS="$(BUILD_OS)"
+	@echo JAVA_HOME="$(JAVA_HOME)"
+	@echo JDK_HOME="$(JDK_HOME)"
 	@echo "SRCS=$(TEST_SRCS)"

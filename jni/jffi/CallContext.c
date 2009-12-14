@@ -71,7 +71,12 @@ Java_com_kenai_jffi_Foreign_newCallContext(JNIEnv* env, jobject self,
         rawOffset += FFI_ALIGN(type->size, FFI_SIZEOF_ARG);
     }
 #ifdef _WIN32
-    abi = (flags & com_kenai_jffi_Foreign_F_STDCALL) != 0 ? FFI_STDCALL : FFI_DEFAULT_ABI;
+    #ifdef _WIN64
+      // Win64 doesn't have STDCALL calling convention
+      abi = FFI_DEFAULT_ABI;
+    # else
+      abi = (flags & com_kenai_jffi_Foreign_F_STDCALL) != 0 ? FFI_STDCALL : FFI_DEFAULT_ABI;
+    #endif
 #else
     abi = FFI_DEFAULT_ABI;
 #endif
