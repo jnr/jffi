@@ -116,8 +116,9 @@ Java_com_kenai_jffi_Foreign_newClosure(JNIEnv* env, jclass clazz,
         goto cleanup;
     }
 
-#ifdef _WIN32
-    abi = (flags & com_kenai_jffi_Foreign_F_STDCALL) ? FFI_STDCALL : FFI_DEFAULT_ABI;
+// Win64 doesn't have STDCALL calling convention
+#if defined(_WIN32) && !defined(_WIN64)
+    abi = (flags & com_kenai_jffi_Foreign_F_STDCALL) != 0 ? FFI_STDCALL : FFI_DEFAULT_ABI;
 #else
     abi = FFI_DEFAULT_ABI;
 #endif
