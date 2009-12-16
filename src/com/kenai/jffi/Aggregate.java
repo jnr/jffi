@@ -12,14 +12,17 @@ public abstract class Aggregate extends Type {
         if (disposed) {
             throw new RuntimeException("native handle already freed");
         }
-        Foreign.getInstance().freeStruct(handle);
+
         disposed = true;
+        Foreign.getInstance().freeStruct(handle);        
     }
 
     @Override
     protected void finalize() throws Throwable {
         try {
-            Foreign.getInstance().freeStruct(handle);
+            if (!disposed) {
+                Foreign.getInstance().freeStruct(handle);
+            }
         } catch (Throwable t) {
             t.printStackTrace(System.err);
         } finally {

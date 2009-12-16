@@ -26,17 +26,59 @@ import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
 final class Foreign {
-    private static final class SingletonHolder {
-        private static final Foreign INSTANCE = new Foreign();
+
+    private static abstract class InstanceHolder {
+        static final InstanceHolder INSTANCE = getInstanceHolder();
+
+        private static final InstanceHolder getInstanceHolder() {
+            try {
+                Init.load();
+                
+                Foreign foreign = new Foreign();
+
+                if ((foreign.getVersion() & 0xffff00) != (VERSION_MAJOR << 16 | VERSION_MINOR << 8)) {
+                    throw new UnsatisfiedLinkError("Incorrect native library version");
+                }
+                
+                return new ValidInstanceHolder(foreign);
+
+            } catch (UnsatisfiedLinkError ex) {
+                return new InValidInstanceHolder(ex);
+            }
+        }
+
+        abstract Foreign getForeign();
     }
 
-    public static final Foreign getInstance() {
-        return SingletonHolder.INSTANCE;
+    private static final class ValidInstanceHolder extends InstanceHolder {
+        final Foreign foreign;
+
+        public ValidInstanceHolder(Foreign foreign) {
+            this.foreign = foreign;
+        }
+
+        final Foreign getForeign() {
+            return foreign;
+        }
+    }
+
+    private static final class InValidInstanceHolder extends InstanceHolder {
+        private final Error cause;
+
+        public InValidInstanceHolder(Error cause) {
+            this.cause = cause;
+        }
+
+        final Foreign getForeign() {
+            throw cause;
+        }
     }
     
-    private Foreign() {
-        Init.init();
+    public static final Foreign getInstance() {
+        return InstanceHolder.INSTANCE.getForeign();
     }
+    
+    private Foreign() { }
 
     private final static int getVersionField(String name) {
         try {
