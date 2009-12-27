@@ -7,3 +7,6 @@
 ^build/.*$
 ^dist
 ^lib/nblibraries-private.properties
+^build.eclipse/
+^.classpath
+^.project
