@@ -77,7 +77,11 @@ ifeq ($(OS), win32)
     LDFLAGS += -mno-cygwin
   endif
   CFLAGS += -mwin32 -D_JNI_IMPLEMENTATION_
-  LDFLAGS += -Wl,--add-stdcall-alias
+  # Linking against CRTMT.O is a workaround for GCC 4.4 bug
+  # that ignores __thread (which we really need for errno handling).
+  # See: http://n2.nabble.com/gcc-4-4-multi-threaded-exception-handling-thread-specifier-not-working-td3440749.html
+  CRTMT.O = $(shell $(CC) -print-file-name=crtmt.o)
+  LDFLAGS += -Wl,--add-stdcall-alias $(CRTMT.O)
   PICFLAGS=
   SOFLAGS += -shared -mimpure-text -static-libgcc
   PREFIX =
