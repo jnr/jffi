@@ -438,11 +438,21 @@ final class Foreign {
     final native long newStruct(long[] fields, boolean isUnion);
 
     /**
-     * Frees a FFI struct handle allocated via {@linkl #newStruct}.
+     * Allocates a new FFI array type
+     *
+     * @param fields An array of ffi_type pointers desccribing the fields of the struct
+     * @param isUnion If true, then fields are all positioned at offset=0, else
+     * fiels are sequentially positioned.
+     * @return The native address of the ffi_type structure for the new struct layout
+     */
+    final native long newArray(long elementType, int length);
+
+    /**
+     * Frees a FFI struct or array handle allocated via {@link #newStruct} or {@link #newArray}.
      *
      * @param handle The FFI struct handle
      */
-    final native void freeStruct(long handle);
+    final native void freeAggregate(long handle);
 
     /**
      * Invokes a function with no arguments, and returns a 32 bit integer.

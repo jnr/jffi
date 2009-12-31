@@ -19,7 +19,7 @@
 package com.kenai.jffi;
 
 public abstract class Aggregate extends Type {
-    private volatile boolean disposed;
+    private volatile boolean disposed = false;
 
     public Aggregate(long handle) {
         super(handle);
@@ -31,14 +31,14 @@ public abstract class Aggregate extends Type {
         }
 
         disposed = true;
-        Foreign.getInstance().freeStruct(handle);        
+        Foreign.getInstance().freeAggregate(handle);
     }
 
     @Override
     protected void finalize() throws Throwable {
         try {
             if (!disposed) {
-                Foreign.getInstance().freeStruct(handle);
+                dispose();
             }
         } catch (Throwable t) {
             t.printStackTrace(System.err);

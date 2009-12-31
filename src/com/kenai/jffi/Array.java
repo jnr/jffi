@@ -33,26 +33,11 @@ public final class Array extends Aggregate {
      * @param fields The fields contained in the struct.
      */
     public Array(Type elementType, int length) {
-        super(newArray(elementType, length));
+        super(Foreign.getInstance().newArray(elementType.handle(), length));
         this.elementType = elementType;
         this.length = length;
     }
-
-    /**
-     * Creates a libffi ffi_type* handle for the array.
-     *
-     * Since libffi doesn't know about arrays, we fake them by defining an
-     * aggregate (struct) with <tt>length</tt> fields of type <tt>elementType</tt>
-     */
-    private static final long newArray(Type elementType, int length) {
-        long[] handles = new long[length];
-        for (int i = 0; i < handles.length; i++) {
-            handles[i] = elementType.handle();
-        }
-
-        return Foreign.getInstance().newStruct(handles, false);
-    }
-
+    
     /**
      * Returns the type of elements in the array
      *
