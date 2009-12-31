@@ -14,7 +14,7 @@
 /* for return values <= sizeof(long), need to use an ffi_sarg sized return value */
 #define RETVAL(retval, rtype) ((rtype)->size > sizeof(ffi_sarg) ? (retval).j : (retval).sarg)
 
-#if defined(__x86_64__) && 0
+#if defined(__x86_64__)
 # define LONG_BYPASS_FFI
 #endif
 
@@ -76,7 +76,6 @@ Java_com_kenai_jffi_Foreign_invokeLLrL(JNIEnv* env, jobject self, jlong ctxAddre
 {
     Function* ctx = (Function *) j2p(ctxAddress);
 #ifdef LONG_BYPASS_FFI
-    printf("values=(%lld, %lld)\n", arg1, arg2); fflush(stdout);
     jlong retval = ((jlong (*)(jlong, jlong)) (ctx->function))(arg1, arg2); \
     SAVE_ERRNO(ctx);
     return retval;
@@ -102,7 +101,7 @@ Java_com_kenai_jffi_Foreign_invokeLLLrL(JNIEnv* env, jobject self, jlong ctxAddr
     Function* ctx = (Function *) j2p(ctxAddress);
 
 #ifdef LONG_BYPASS_FFI
-    jlong retval = ((jlong (*)(jlong, jlong, jlong)) (ctx->function))(arg1, arg2, arg3); \
+    jlong retval = ((jlong (*)(jlong, jlong, jlong)) (ctx->function))(arg1, arg2, arg3);
     SAVE_ERRNO(ctx);
     return retval;
 #else
@@ -122,7 +121,7 @@ Java_com_kenai_jffi_Foreign_invokeLLLLrL(JNIEnv* env, jobject self, jlong ctxAdd
     Function* ctx = (Function *) j2p(ctxAddress);
 
 #ifdef LONG_BYPASS_FFI
-    jlong retval = ((jlong (*)(jlong, jlong, jlong, jlong)) (ctx->function))(arg1, arg2, arg3, arg4); \
+    jlong retval = ((jlong (*)(jlong, jlong, jlong, jlong)) (ctx->function))(arg1, arg2, arg3, arg4);
     SAVE_ERRNO(ctx);
     return retval;
 #else
@@ -142,7 +141,7 @@ Java_com_kenai_jffi_Foreign_invokeLLLLLrL(JNIEnv* env, jobject self, jlong ctxAd
     Function* ctx = (Function *) j2p(ctxAddress);
 
 #ifdef LONG_BYPASS_FFI
-    jlong retval = ((jlong (*)(jlong, jlong, jlong, jlong, jlong)) (ctx->function))(arg1, arg2, arg3, arg4, arg5); \
+    jlong retval = ((jlong (*)(jlong, jlong, jlong, jlong, jlong)) (ctx->function))(arg1, arg2, arg3, arg4, arg5);
     SAVE_ERRNO(ctx);
     return retval;
 #else
@@ -162,7 +161,7 @@ Java_com_kenai_jffi_Foreign_invokeLLLLLLrL(JNIEnv* env, jobject self, jlong ctxA
     Function* ctx = (Function *) j2p(ctxAddress);
 
 #ifdef LONG_BYPASS_FFI
-    jlong retval = ((jlong (*)(jlong, jlong, jlong, jlong, jlong, jlong)) (ctx->function))(arg1, arg2, arg3, arg4, arg5, arg6); \
+    jlong retval = ((jlong (*)(jlong, jlong, jlong, jlong, jlong, jlong)) (ctx->function))(arg1, arg2, arg3, arg4, arg5, arg6);
     SAVE_ERRNO(ctx);
     return retval;
 #else
