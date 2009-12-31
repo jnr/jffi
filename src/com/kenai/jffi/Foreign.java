@@ -137,6 +137,18 @@ final class Foreign {
     public static final int MEM_4MB_PAGES =  0x80000000;
 
     /*
+     * possible return values for JNI functions.
+     */
+
+    public static final int  JNI_OK =          0;                 /* success */
+    public static final int  JNI_ERR =         (-1);              /* unknown error */
+    public static final int  JNI_EDETACHED =   (-2);              /* thread detached from the VM */
+    public static final int  JNI_EVERSION =    (-3);              /* JNI version error */
+    public static final int  JNI_ENOMEM =      (-4);              /* not enough memory */
+    public static final int  JNI_EEXIST =      (-5);              /* VM already created */
+    public static final int  JNI_EINVAL =       (-6);              /* invalid arguments */
+
+    /*
      * Function flags
      */
     /**
