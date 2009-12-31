@@ -18,6 +18,8 @@
 
 package com.kenai.jffi;
 
+import java.util.List;
+
 /**
  * Native parameter and return types.
  */
@@ -178,6 +180,24 @@ public abstract class Type {
 
         return nativeTypes;
     }
+
+    /**
+     * Converts a list of <tt>Type</tt> objects into an array of pointers to
+     * ffi_type structures.
+     *
+     * @param types A list of <tt>Type</tt> objects
+     * @return An array of native ffi_type handles.
+     */
+    final static long[] nativeHandles(List<Type> types) {
+
+        long[] nativeTypes = new long[types.size()];
+        for (int i = 0; i < nativeTypes.length; ++i) {
+            nativeTypes[i] = types.get(i).handle();
+        }
+
+        return nativeTypes;
+    }
+
 
     /**
      * Creates a <tt>Type</tt> instance for builtin types.
