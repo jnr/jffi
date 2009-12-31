@@ -227,7 +227,7 @@ debug:
 	@echo "OBJS=$(OBJS)"
 
 $(LIBJFFI):  $(LIBFFI) $(OBJS) $(CXXOBJS)
-	$(CXX) -o $@ $(LDFLAGS) $(SOFLAGS) $(OBJS) $(CXXOBJS) $(LIBFFI) $(LIBS)
+	$(CC) -o $@ $(LDFLAGS) $(SOFLAGS) $(OBJS) $(LIBFFI) $(LIBS)
 	$(STRIP) $@
 
 # For the primitive int interface, don't do frame pointer save/restore
