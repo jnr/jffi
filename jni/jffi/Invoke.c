@@ -19,6 +19,8 @@
 #define PARAM_SIZE (8)
 #define MAX_STACK_ARGS (8)
 
+#define MAX_STACK_ARRAY (1024)
+
 /*
  * Always align memory on a 8 byte boundary
  */
@@ -199,7 +201,6 @@ invokeArrayWithObjects_(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer,
     jbyte *tmpBuffer = (jbyte *) &tmpStackBuffer[0];
     void* ffiStackArgs[MAX_STACK_ARGS], **ffiArgs = &ffiStackArgs[0];
     Array stackArrays[MAX_STACK_OBJECTS], *arrays = &stackArrays[0];
-    StackAllocator alloc;
     unsigned int i, arrayCount = 0;
 
 #if defined(USE_RAW)
@@ -221,7 +222,7 @@ invokeArrayWithObjects_(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer,
     if (unlikely(objectCount > MAX_STACK_OBJECTS)) {
         arrays = alloca_aligned(objectCount * sizeof(Array), MIN_ALIGN);
     }
-    initStackAllocator(&alloc);
+
     for (i = 0; i < (unsigned int) objectCount; ++i) {
         int type = infoBuffer[i * 3];
         jsize offset = infoBuffer[(i * 3) + 1];
@@ -232,13 +233,32 @@ invokeArrayWithObjects_(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer,
 
         switch (type & com_kenai_jffi_ObjectBuffer_TYPE_MASK & ~com_kenai_jffi_ObjectBuffer_PRIM_MASK) {
             case com_kenai_jffi_ObjectBuffer_ARRAY:
-                ptr = jffi_getArray(env, object, offset, length, type, &alloc, &arrays[arrayCount]);
+                if (unlikely(object == NULL)) {
+                    throwException(env, NullPointer, "null object for parameter %d", idx);
+                    goto cleanup;
+                
+                } else if (unlikely((type & com_kenai_jffi_ObjectBuffer_PINNED) != 0)) {
+
+                    ptr = jffi_getArrayCritical(env, object, offset, length, type, &arrays[arrayCount]);
+
+                } else if (likely(length < MAX_STACK_ARRAY)) {
+
+                    ptr = jffi_getArrayBuffer(env, object, offset, length, type, 
+                        &arrays[arrayCount], alloca(jffi_arraySize(length + 1, type)));
+
+                } else {
+                    ptr = jffi_getArrayHeap(env, object, offset, length, type, &arrays[arrayCount]);
+                    
+                }
+                
                 if (unlikely(ptr == NULL)) {
-                    throwException(env, NullPointer, "Could not allocate array");
+                    throwException(env, NullPointer, "could not access array");
                     goto cleanup;
                 }
+
                 ++arrayCount;
                 break;
+
             case com_kenai_jffi_ObjectBuffer_BUFFER:
                 ptr = (*env)->GetDirectBufferAddress(env, object);
                 if (unlikely(ptr == NULL)) {
@@ -300,8 +320,8 @@ invokeArrayWithObjects_(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer,
 cleanup:
     /* Release any array backing memory */
     for (i = 0; i < arrayCount; ++i) {
-        if (!arrays[i].stack || arrays[i].mode != JNI_ABORT) {
-            //printf("releasing array=%p\n", arrays[i].result);
+        if (arrays[i].release != NULL) {
+            //printf("releasing array=%p\n", arrays[i].elems);
             (*arrays[i].release)(env, &arrays[i]);
         }
     }

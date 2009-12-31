@@ -19,18 +19,21 @@
 #ifndef jffi_Array_h
 #define jffi_Array_h
 
+//
+// WARNING! Do not change the layout of this struct, it may be used from assembler
+//
 typedef struct Array {
-    jobject array;
-    void* elems;
-    jsize offset;
-    jsize length;
-    int mode;
-    int stack;
     void (*release)(JNIEnv *env, struct Array *);
+    jobject array;
+    void* elems;    
+    int offset;
+    int length;
 } Array;
 
-extern void* jffi_getArray(JNIEnv* env, jobject buf, jint offset, jint length, int type, StackAllocator* alloc, struct Array* array);
+extern void* jffi_getArrayBuffer(JNIEnv* env, jobject buf, jint offset, jint length, int type, struct Array* array, void* buffer);
+extern void* jffi_getArrayHeap(JNIEnv* env, jobject buf, jint offset, jint length, int type, struct Array* array);
 extern void* jffi_getArrayCritical(JNIEnv* env, jobject buf, jint offset, jint length, int type, struct Array* array);
+extern int jffi_arraySize(int length, int type);
 
 #include "com_kenai_jffi_ObjectBuffer.h"
 
