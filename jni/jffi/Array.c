@@ -38,8 +38,6 @@
 #define ARGTYPE_SHIFT com_kenai_jffi_ObjectBuffer_TYPE_SHIFT
 #define ARGFLAGS_MASK com_kenai_jffi_ObjectBuffer_FLAGS_MASK
 
-static JavaVM* jffi_vm;
-
 #define RELEASE(JTYPE, NTYPE) \
 static void release##JTYPE##Array(JNIEnv *env, Array *array) \
 { \
@@ -88,11 +86,10 @@ jffi_getArray(JNIEnv* env, jobject buf, jsize offset, jsize length, int paramTyp
         return NULL;
     }
 
-#ifdef notyet
     if (unlikely((paramType & ARRAY_PINNED) != 0)) {
         return jffi_getArrayCritical(env, buf, offset, length, paramType, array);
     }
-#endif
+
     /*
      * Byte arrays are used for struct backing in both jaffl and jruby ffi, so
      * are the most likely path.
