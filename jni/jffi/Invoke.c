@@ -240,7 +240,9 @@ invokeArrayWithObjects_(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer,
                 } else if (unlikely((type & com_kenai_jffi_ObjectBuffer_PINNED) != 0)) {
 
                     ptr = jffi_getArrayCritical(env, object, offset, length, type, &arrays[arrayCount]);
-
+                    if (unlikely(ptr == NULL)) {
+                        goto cleanup;
+                    }
                 } else if (likely(length < MAX_STACK_ARRAY)) {
 
                     ptr = jffi_getArrayBuffer(env, object, offset, length, type, 
@@ -248,14 +250,11 @@ invokeArrayWithObjects_(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer,
 
                 } else {
                     ptr = jffi_getArrayHeap(env, object, offset, length, type, &arrays[arrayCount]);
-                    
+                    if (unlikely(ptr == NULL)) {
+                        goto cleanup;
+                    }
                 }
                 
-                if (unlikely(ptr == NULL)) {
-                    throwException(env, NullPointer, "could not access array");
-                    goto cleanup;
-                }
-
                 ++arrayCount;
                 break;
 

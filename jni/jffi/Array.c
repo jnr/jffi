@@ -62,28 +62,31 @@ RELEASE(Long, jlong);
 RELEASE(Float, jfloat);
 RELEASE(Double, jdouble);
 
-#define GET_ARRAY_BUFFER(JTYPE, NTYPE, flags, obj, offset, length, array) do { \
-    if ((flags & (ARRAY_IN | ARRAY_OUT)) != ARRAY_OUT) { \
+#define isOut(flags) (((flags) & (ARRAY_IN | ARRAY_OUT)) != ARRAY_IN)
+#define isIn(flags) (((flags) & (ARRAY_IN | ARRAY_OUT)) != ARRAY_OUT)
+
+#define COPY_DATA(JTYPE, NTYPE, flags, obj, offset, length, array) do { \
+    if (isIn(flags)) { \
         (*env)->Get##JTYPE##ArrayRegion(env, obj, offset, length, (NTYPE *) array->elems); \
     } else if (unlikely((flags & ARRAY_CLEAR) != 0)) { \
         memset(array->elems, 0, length * sizeof(NTYPE)); \
     } \
-    (array)->release = ((flags & (ARRAY_IN | ARRAY_OUT)) != ARRAY_IN) ? release##JTYPE##ArrayBuffer : NULL; \
+} while (0)
+
+#define GET_ARRAY_BUFFER(JTYPE, NTYPE, flags, obj, offset, length, array) do { \
+    COPY_DATA(JTYPE, NTYPE, flags, obj, offset, length, array); \
+    (array)->release = isOut(flags) ? release##JTYPE##ArrayBuffer : NULL; \
 } while (0)
 
 #define GET_ARRAY_HEAP(JTYPE, NTYPE, flags, obj, offset, length, array) do { \
     int allocSize = sizeof(NTYPE) * (length + 1); \
     (array)->elems = malloc(allocSize); \
     if (unlikely((array)->elems == NULL)) { \
-        throwException(env, OutOfMemory, "failed to allocate %d bytes", allocSize); \
+        throwException(env, OutOfMemory, "failed to allocate native array of %d bytes", allocSize); \
         return NULL; \
     } \
-    if ((flags & (ARRAY_IN | ARRAY_OUT)) != ARRAY_OUT) { \
-        (*env)->Get##JTYPE##ArrayRegion(env, obj, offset, length, (NTYPE *) array->elems); \
-    } else if (unlikely((flags & ARRAY_CLEAR) != 0)) { \
-        memset(array->elems, 0, length * sizeof(NTYPE)); \
-    } \
-    (array)->release = ((flags & (ARRAY_IN | ARRAY_OUT)) != ARRAY_IN) ? release##JTYPE##ArrayHeap : free##JTYPE##Array; \
+    COPY_DATA(JTYPE, NTYPE, flags, obj, offset, length, array); \
+    (array)->release = isOut(flags) ? release##JTYPE##ArrayHeap : free##JTYPE##Array; \
 } while(0)
 
 void*
@@ -174,26 +177,26 @@ jffi_getArrayBuffer(JNIEnv* env, jobject buf, jint offset, jint length, int type
 }
 
 int
-jffi_arraySize(int elementCount, int type)
+jffi_arraySize(int length, int type)
 {
     switch (type & ARGPRIM_MASK) {
         case com_kenai_jffi_ObjectBuffer_BYTE:
-            return 1;
+            return length * sizeof(jbyte);
 
         case com_kenai_jffi_ObjectBuffer_SHORT:
-            return 2;
+            return length * sizeof(jshort);
 
         case com_kenai_jffi_ObjectBuffer_INT:
-            return 4;
+            return length * sizeof(jint);
 
         case com_kenai_jffi_ObjectBuffer_LONG:
-            return 8;
+            return length * sizeof(jlong);
 
         case com_kenai_jffi_ObjectBuffer_FLOAT:
-            return 4;
+            return length * sizeof(jfloat);
 
         case com_kenai_jffi_ObjectBuffer_DOUBLE:
-            return 8;
+            return length * sizeof(jdouble);
         default:
             return 0;
     }
@@ -213,8 +216,13 @@ jffi_getArrayCritical(JNIEnv* env, jobject buf, jsize offset, jsize length, int 
     array->offset = offset;
     array->length = length;
     array->elems = (*env)->GetPrimitiveArrayCritical(env, array->array, NULL);
+
+    if (unlikely(array->elems == NULL)) {
+        throwException(env, NullPointer, "could not access array");
+        return NULL;
+    }
     array->release = jffi_releaseCriticalArray;
 
-    return array->elems != NULL ? (char *) array->elems + offset : NULL;
+    return (char *) array->elems + offset;
 }
 
