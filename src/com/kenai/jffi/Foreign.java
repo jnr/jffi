@@ -1261,6 +1261,8 @@ final class Foreign {
     final native boolean registerNativeMethods(Class clazz, long handle);
     final native void unregisterNativeMethods(Class clazz);
 
+    final native long getSaveErrnoFunction();
+
 
     final native int getJNIVersion();
     final native long getJavaVM();
