@@ -243,10 +243,13 @@ invokeArrayWithObjects_(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer,
                     if (unlikely(ptr == NULL)) {
                         goto cleanup;
                     }
-                } else if (likely(length < MAX_STACK_ARRAY)) {
+                } else if (true && likely(length < MAX_STACK_ARRAY)) {
 
                     ptr = jffi_getArrayBuffer(env, object, offset, length, type, 
                         &arrays[arrayCount], alloca(jffi_arraySize(length + 1, type)));
+                    if (unlikely(ptr == NULL)) {
+                        goto cleanup;
+                    }
 
                 } else {
                     ptr = jffi_getArrayHeap(env, object, offset, length, type, &arrays[arrayCount]);

@@ -136,6 +136,7 @@ jffi_getArrayHeap(JNIEnv* env, jobject buf, jsize offset, jsize length, int para
 void*
 jffi_getArrayBuffer(JNIEnv* env, jobject buf, jint offset, jint length, int type, struct Array* array, void* buffer)
 {
+    array->array = buf;
     array->elems = buffer;
     array->offset = offset;
     array->length = length;
