@@ -266,6 +266,8 @@ final class Foreign {
      */
     final native int mprotect(long addr, long len, int prot);
 
+    final native long getSaveErrnoFunction();
+
 
     final native long VirtualAlloc(long addr, int size, int flags, int prot);
 
