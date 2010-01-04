@@ -18,6 +18,8 @@
 
 package com.kenai.jffi;
 
+import java.util.List;
+
 /**
  * Native parameter and return types.
  */
@@ -61,10 +63,10 @@ public abstract class Type {
     public static final Type POINTER = builtin(Foreign.TYPE_POINTER);
 
     /** The native unsigned char type */
-    public static final Type UCHAR = alias(Foreign.TYPE_UCHAR, UINT8);
+    public static final Type UCHAR = UINT8;
 
     /** The native signed char type */
-    public static final Type SCHAR = alias(Foreign.TYPE_SCHAR, SINT8);
+    public static final Type SCHAR = SINT8;
 
     /** The native unsigned short integer type */
     public static final Type USHORT = alias(Foreign.TYPE_USHORT, UINT16, UINT32);
@@ -83,6 +85,12 @@ public abstract class Type {
 
     /** The native signed long integer type */
     public static final Type SLONG = alias(Foreign.TYPE_SLONG, SINT32, SINT64);
+
+    /** The native unsigned long long integer type */
+    public static final Type ULONG_LONG = UINT64;
+
+    /** The native signed long long integer type */
+    public static final Type SLONG_LONG = SINT64;
 
 
     /*========================================================================*/
@@ -180,13 +188,35 @@ public abstract class Type {
     }
 
     /**
+     * Converts a list of <tt>Type</tt> objects into an array of pointers to
+     * ffi_type structures.
+     *
+     * @param types A list of <tt>Type</tt> objects
+     * @return An array of native ffi_type handles.
+     */
+    final static long[] nativeHandles(List<Type> types) {
+
+        long[] nativeTypes = new long[types.size()];
+        for (int i = 0; i < nativeTypes.length; ++i) {
+            nativeTypes[i] = types.get(i).handle();
+        }
+
+        return nativeTypes;
+    }
+
+
+    /**
      * Creates a <tt>Type</tt> instance for builtin types.
      *
      * @param type The builtin type enum.
      * @return A <tt>Type</tt> instance.
      */
     private static final Type builtin(int type) {
-        return new Builtin(type);
+        long h = Foreign.getInstance().lookupBuiltinType(type);
+        if (h == 0) {
+            throw new IllegalArgumentException("bad type " + type);
+        }
+        return new Builtin(h);
     }
 
     /**
@@ -196,23 +226,17 @@ public abstract class Type {
      * @param existing The existing types that this type may alias to.
      * @return A Type instance representing the native type.
      */
-    private static final Type alias(int type, Type... existing) {
+    private static final Type alias(int type, Type t1, Type t2) {
         final long h = Foreign.getInstance().lookupBuiltinType(type);
-        for (Type t : existing) {
-            if (t.handle == h) {
-                return t;
-            }
-        }
-        
-        return new Builtin(type);
+        return t1.handle == h ? t1 : t2;
     }
 
     /**
      * Types that are built-in to libffi.
      */
     static final class Builtin extends Type {
-        private Builtin(int type) {
-            super(Foreign.getInstance().lookupBuiltinType(type));
+        private Builtin(long handle) {
+            super(handle);
         }
     }
 }

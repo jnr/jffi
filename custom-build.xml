@@ -148,7 +148,7 @@
             <arg value="${build.native.dir}/jffi-${jffi.version.major}.${jffi.version.minor}.dll"/>
         </exec>
         <mkdir dir="${dist.dir}"/>
-        <jar jarfile="${dist.dir}/i386-Windows.jar">
+        <jar jarfile="${dist.dir}/jffi-i386-Windows.jar">
             <zipfileset prefix="jni/i386-Windows" dir="${build.native.dir}">
                 <include name="jffi*.dll"/>
             </zipfileset>

@@ -38,19 +38,23 @@
 #define ARGTYPE_SHIFT com_kenai_jffi_ObjectBuffer_TYPE_SHIFT
 #define ARGFLAGS_MASK com_kenai_jffi_ObjectBuffer_FLAGS_MASK
 
-static JavaVM* jffi_vm;
-
 #define RELEASE(JTYPE, NTYPE) \
-static void release##JTYPE##Array(JNIEnv *env, Array *array) \
+static void release##JTYPE##ArrayHeap(JNIEnv *env, Array *array) \
 { \
-    if (array->mode == JNI_COMMIT || array->mode == 0) { \
-        (*env)->Set##JTYPE##ArrayRegion(env, array->array, array->offset, array->length, \
+    (*env)->Set##JTYPE##ArrayRegion(env, array->array, array->offset, array->length, \
             (NTYPE *) array->elems); \
-    } \
-    if ((array->mode == JNI_ABORT || array->mode == 0) && !array->stack) { \
-        free(array->elems); \
-    } \
+    free(array->elems); \
+} \
+static void free##JTYPE##Array(JNIEnv *env, Array *array) \
+{ \
+    free(array->elems); \
+} \
+static void release##JTYPE##ArrayBuffer(JNIEnv *env, Array *array) \
+{ \
+    (*env)->Set##JTYPE##ArrayRegion(env, array->array, array->offset, array->length, \
+            (NTYPE *) array->elems); \
 }
+
 RELEASE(Byte, jbyte);
 RELEASE(Short, jshort);
 RELEASE(Int, jint);
@@ -58,47 +62,47 @@ RELEASE(Long, jlong);
 RELEASE(Float, jfloat);
 RELEASE(Double, jdouble);
 
-#define ARRAY(JTYPE, NTYPE, flags, obj, offset, length, array) do { \
-  if (likely(((array)->array = buf) != NULL)) { \
-    int allocSize = sizeof(NTYPE) * (length + ((flags & ARRAY_NULTERMINATE) != 0 ? 1 : 0)); \
-    if (likely(((array)->elems = allocStack(stackAllocator, allocSize)) != NULL)) { \
-        (array)->stack = 1; \
-    } else { \
-        (array)->elems = malloc(allocSize); \
-        (array)->stack = 0; \
-        if (unlikely((array)->elems == NULL)) { \
-            throwException(env, OutOfMemory, "failed to allocate %d bytes", allocSize); \
-            return NULL; \
-        }\
-    } \
-    if ((flags & (ARRAY_IN | ARRAY_OUT)) != ARRAY_OUT) { \
+#define isOut(flags) (((flags) & (ARRAY_IN | ARRAY_OUT)) != ARRAY_IN)
+#define isIn(flags) (((flags) & (ARRAY_IN | ARRAY_OUT)) != ARRAY_OUT)
+
+#define COPY_DATA(JTYPE, NTYPE, flags, obj, offset, length, array) do { \
+    if (isIn(flags)) { \
         (*env)->Get##JTYPE##ArrayRegion(env, obj, offset, length, (NTYPE *) array->elems); \
     } else if (unlikely((flags & ARRAY_CLEAR) != 0)) { \
         memset(array->elems, 0, length * sizeof(NTYPE)); \
     } \
-    (array)->release = release##JTYPE##Array; \
-  } \
+} while (0)
+
+#define GET_ARRAY_BUFFER(JTYPE, NTYPE, flags, obj, offset, length, array) do { \
+    COPY_DATA(JTYPE, NTYPE, flags, obj, offset, length, array); \
+    (array)->release = isOut(flags) ? release##JTYPE##ArrayBuffer : NULL; \
+} while (0)
+
+#define GET_ARRAY_HEAP(JTYPE, NTYPE, flags, obj, offset, length, array) do { \
+    int allocSize = sizeof(NTYPE) * (length + 1); \
+    (array)->elems = malloc(allocSize); \
+    if (unlikely((array)->elems == NULL)) { \
+        throwException(env, OutOfMemory, "failed to allocate native array of %d bytes", allocSize); \
+        return NULL; \
+    } \
+    COPY_DATA(JTYPE, NTYPE, flags, obj, offset, length, array); \
+    (array)->release = isOut(flags) ? release##JTYPE##ArrayHeap : free##JTYPE##Array; \
 } while(0)
 
 void*
-jffi_getArray(JNIEnv* env, jobject buf, jsize offset, jsize length, int paramType,
-        StackAllocator* stackAllocator, Array* array) 
+jffi_getArrayHeap(JNIEnv* env, jobject buf, jsize offset, jsize length, int paramType,
+        Array* array) 
 {
-    if (unlikely(buf == NULL)) {
-        return NULL;
-    }
-
-#ifdef notyet
-    if (unlikely((paramType & ARRAY_PINNED) != 0)) {
-        return jffi_getArrayCritical(env, buf, offset, length, paramType, array);
-    }
-#endif
+    array->array = buf;
+    array->offset = offset;
+    array->length = length;
+    
     /*
      * Byte arrays are used for struct backing in both jaffl and jruby ffi, so
      * are the most likely path.
      */
     if (likely((paramType & ARGPRIM_MASK) == com_kenai_jffi_ObjectBuffer_BYTE)) {
-        ARRAY(Byte, jbyte, paramType, buf, offset, length, array);
+        GET_ARRAY_HEAP(Byte, jbyte, paramType, buf, offset, length, array);
         // If the array was really a string, nul terminate it
         if ((paramType & (ARRAY_NULTERMINATE | ARRAY_IN | ARRAY_OUT)) != ARRAY_OUT) {
             *(((char *) array->elems) + length) = '\0';
@@ -106,51 +110,120 @@ jffi_getArray(JNIEnv* env, jobject buf, jsize offset, jsize length, int paramTyp
     } else {
         switch (paramType & ARGPRIM_MASK) {
             case com_kenai_jffi_ObjectBuffer_SHORT:
-                ARRAY(Short, jshort, paramType, buf, offset, length, array);
+                GET_ARRAY_HEAP(Short, jshort, paramType, buf, offset, length, array);
                 break;
             case com_kenai_jffi_ObjectBuffer_INT:
-                ARRAY(Int, jint, paramType, buf, offset, length, array);
+                GET_ARRAY_HEAP(Int, jint, paramType, buf, offset, length, array);
                 break;
             case com_kenai_jffi_ObjectBuffer_LONG:
-                ARRAY(Long, jlong, paramType, buf, offset, length, array);
+                GET_ARRAY_HEAP(Long, jlong, paramType, buf, offset, length, array);
                 break;
             case com_kenai_jffi_ObjectBuffer_FLOAT:
-                ARRAY(Float, jfloat, paramType, buf, offset, length, array);
+                GET_ARRAY_HEAP(Float, jfloat, paramType, buf, offset, length, array);
                 break;
             case com_kenai_jffi_ObjectBuffer_DOUBLE:
-                ARRAY(Double, jdouble, paramType, buf, offset, length, array);
+                GET_ARRAY_HEAP(Double, jdouble, paramType, buf, offset, length, array);
                 break;
             default:
                 throwException(env, IllegalArgument, "Invalid array type: %#x\n", paramType);
                 return NULL;
         }
     }
+
+    return array->elems;
+}
+
+void*
+jffi_getArrayBuffer(JNIEnv* env, jobject buf, jint offset, jint length, int type, struct Array* array, void* buffer)
+{
     array->array = buf;
+    array->elems = buffer;
     array->offset = offset;
     array->length = length;
-    
-    /* If its an IN-only array, don't bother copying the native data back. */
-    array->mode = ((paramType & (ARRAY_IN | ARRAY_OUT)) == ARRAY_IN) ? JNI_ABORT : 0;
+
+    switch (type & ARGPRIM_MASK) {
+        case com_kenai_jffi_ObjectBuffer_BYTE:
+            GET_ARRAY_BUFFER(Byte, jbyte, type, buf, offset, length, array);
+            // If the array was really a string, nul terminate it
+            if ((type & (ARRAY_NULTERMINATE | ARRAY_IN | ARRAY_OUT)) != ARRAY_OUT) {
+                *(((char *) array->elems) + length) = '\0';
+            }
+            break;
+
+        case com_kenai_jffi_ObjectBuffer_SHORT:
+            GET_ARRAY_BUFFER(Short, jshort, type, buf, offset, length, array);
+            break;
+
+        case com_kenai_jffi_ObjectBuffer_INT:
+            GET_ARRAY_BUFFER(Int, jint, type, buf, offset, length, array);
+            break;
+
+        case com_kenai_jffi_ObjectBuffer_LONG:
+            GET_ARRAY_BUFFER(Long, jlong, type, buf, offset, length, array);
+            break;
+
+        case com_kenai_jffi_ObjectBuffer_FLOAT:
+            GET_ARRAY_BUFFER(Float, jfloat, type, buf, offset, length, array);
+            break;
+
+        case com_kenai_jffi_ObjectBuffer_DOUBLE:
+            GET_ARRAY_BUFFER(Double, jdouble, type, buf, offset, length, array);
+            break;
+        default:
+            throwException(env, IllegalArgument, "Invalid array type: %#x\n", type);
+            return NULL;
+    }
+
     return array->elems;
+}
+
+int
+jffi_arraySize(int length, int type)
+{
+    switch (type & ARGPRIM_MASK) {
+        case com_kenai_jffi_ObjectBuffer_BYTE:
+            return length * sizeof(jbyte);
+
+        case com_kenai_jffi_ObjectBuffer_SHORT:
+            return length * sizeof(jshort);
+
+        case com_kenai_jffi_ObjectBuffer_INT:
+            return length * sizeof(jint);
+
+        case com_kenai_jffi_ObjectBuffer_LONG:
+            return length * sizeof(jlong);
+
+        case com_kenai_jffi_ObjectBuffer_FLOAT:
+            return length * sizeof(jfloat);
+
+        case com_kenai_jffi_ObjectBuffer_DOUBLE:
+            return length * sizeof(jdouble);
+        default:
+            return 0;
+    }
 }
 
 static void 
 jffi_releaseCriticalArray(JNIEnv* env, Array *array)
 {
-    (*env)->ReleasePrimitiveArrayCritical(env, array->array, array->elems, array->mode);
+    (*env)->ReleasePrimitiveArrayCritical(env, array->array, array->elems, 0);
 }
+
 
 void*
 jffi_getArrayCritical(JNIEnv* env, jobject buf, jsize offset, jsize length, int paramType, struct Array* array)
 {
-    if (buf == NULL) {
+    array->array = buf;
+    array->offset = offset;
+    array->length = length;
+    array->elems = (*env)->GetPrimitiveArrayCritical(env, array->array, NULL);
+
+    if (unlikely(array->elems == NULL)) {
+        throwException(env, NullPointer, "could not access array");
         return NULL;
     }
-    array->array = buf;
-    array->elems = (*env)->GetPrimitiveArrayCritical(env, array->array, NULL);
     array->release = jffi_releaseCriticalArray;
-    /* If its an IN-only array, don't bother copying the native data back. */
-    array->mode = ((paramType & (ARRAY_IN | ARRAY_OUT)) == ARRAY_IN) ? JNI_ABORT : 0;
-    return array->elems != NULL ? (char *) array->elems + offset : NULL;
+
+    return (char *) array->elems + offset;
 }
 

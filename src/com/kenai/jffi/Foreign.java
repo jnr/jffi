@@ -26,17 +26,59 @@ import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
 final class Foreign {
-    private static final class SingletonHolder {
-        private static final Foreign INSTANCE = new Foreign();
+
+    private static abstract class InstanceHolder {
+        static final InstanceHolder INSTANCE = getInstanceHolder();
+
+        private static final InstanceHolder getInstanceHolder() {
+            try {
+                Init.load();
+                
+                Foreign foreign = new Foreign();
+
+                if ((foreign.getVersion() & 0xffff00) != (VERSION_MAJOR << 16 | VERSION_MINOR << 8)) {
+                    throw new UnsatisfiedLinkError("Incorrect native library version");
+                }
+                
+                return new ValidInstanceHolder(foreign);
+
+            } catch (UnsatisfiedLinkError ex) {
+                return new InValidInstanceHolder(ex);
+            }
+        }
+
+        abstract Foreign getForeign();
     }
 
-    public static final Foreign getInstance() {
-        return SingletonHolder.INSTANCE;
+    private static final class ValidInstanceHolder extends InstanceHolder {
+        final Foreign foreign;
+
+        public ValidInstanceHolder(Foreign foreign) {
+            this.foreign = foreign;
+        }
+
+        final Foreign getForeign() {
+            return foreign;
+        }
+    }
+
+    private static final class InValidInstanceHolder extends InstanceHolder {
+        private final Error cause;
+
+        public InValidInstanceHolder(Error cause) {
+            this.cause = cause;
+        }
+
+        final Foreign getForeign() {
+            throw cause;
+        }
     }
     
-    private Foreign() {
-        Init.init();
+    public static final Foreign getInstance() {
+        return InstanceHolder.INSTANCE.getForeign();
     }
+    
+    private Foreign() { }
 
     private final static int getVersionField(String name) {
         try {
@@ -135,6 +177,18 @@ final class Foreign {
     public static final int MEM_TOP_DOWN  =    0x100000;
     public static final int MEM_PHYSICAL  =    0x400000;
     public static final int MEM_4MB_PAGES =  0x80000000;
+
+    /*
+     * possible return values for JNI functions.
+     */
+
+    public static final int  JNI_OK =          0;                 /* success */
+    public static final int  JNI_ERR =         (-1);              /* unknown error */
+    public static final int  JNI_EDETACHED =   (-2);              /* thread detached from the VM */
+    public static final int  JNI_EVERSION =    (-3);              /* JNI version error */
+    public static final int  JNI_ENOMEM =      (-4);              /* not enough memory */
+    public static final int  JNI_EEXIST =      (-5);              /* VM already created */
+    public static final int  JNI_EINVAL =       (-6);              /* invalid arguments */
 
     /*
      * Function flags
@@ -384,11 +438,21 @@ final class Foreign {
     final native long newStruct(long[] fields, boolean isUnion);
 
     /**
-     * Frees a FFI struct handle allocated via {@linkl #newStruct}.
+     * Allocates a new FFI array type
+     *
+     * @param fields An array of ffi_type pointers desccribing the fields of the struct
+     * @param isUnion If true, then fields are all positioned at offset=0, else
+     * fiels are sequentially positioned.
+     * @return The native address of the ffi_type structure for the new struct layout
+     */
+    final native long newArray(long elementType, int length);
+
+    /**
+     * Frees a FFI struct or array handle allocated via {@link #newStruct} or {@link #newArray}.
      *
      * @param handle The FFI struct handle
      */
-    final native void freeStruct(long handle);
+    final native void freeAggregate(long handle);
 
     /**
      * Invokes a function with no arguments, and returns a 32 bit integer.
@@ -1196,6 +1260,8 @@ final class Foreign {
      */
     final native boolean registerNativeMethods(Class clazz, long handle);
     final native void unregisterNativeMethods(Class clazz);
+
+    final native long getSaveErrnoFunction();
 
 
     final native int getJNIVersion();

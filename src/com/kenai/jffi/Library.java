@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 Wayne Meissner
+ * Copyright (C) 2008, 2009 Wayne Meissner
  *
  * This file is part of jffi.
  *

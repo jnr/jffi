@@ -45,6 +45,7 @@ Java_com_kenai_jffi_Foreign_newStruct(JNIEnv* env, jobject self, jlongArray type
 
     s = calloc(1, sizeof(*s));
     if (s == NULL) {
+        throwException(env, OutOfMemory, "failed to allocate memory");
         return 0L;
     }
 
@@ -53,6 +54,7 @@ Java_com_kenai_jffi_Foreign_newStruct(JNIEnv* env, jobject self, jlongArray type
     //
     s->elements = calloc(fieldCount + 1, sizeof(ffi_type *));
     if (s->elements == NULL) {
+        throwException(env, OutOfMemory, "failed to allocate memory");
         goto error;
     }
 
@@ -68,11 +70,11 @@ Java_com_kenai_jffi_Foreign_newStruct(JNIEnv* env, jobject self, jlongArray type
         ffi_type* elem = (ffi_type *) j2p(fieldTypes[i]);
 
         if (elem == NULL) {
-            throwException(env, IllegalArgument, "Type for field %d is NULL", i);
+            throwException(env, IllegalArgument, "type for field %d is NULL", i);
             goto error;
         }
         if (elem->size == 0) {
-            throwException(env, IllegalArgument, "Type for field %d has size 0", i);
+            throwException(env, IllegalArgument, "type for field %d has size 0", i);
             goto error;
         }
 
@@ -83,10 +85,9 @@ Java_com_kenai_jffi_Foreign_newStruct(JNIEnv* env, jobject self, jlongArray type
             s->size = MAX(s->size, elem->size);
         }
         s->alignment = MAX(s->alignment, elem->alignment);
-        //printf("s->size=%d s->alignment=%d\n", s->size, s->alignment);
     }
     if (s->size == 0) {
-        throwException(env, Runtime, "Struct size is zero");
+        throwException(env, Runtime, "struct size is zero");
         goto error;
     }
     
@@ -101,7 +102,55 @@ error:
         }
         free(s);
     }
+
     return 0L;
+}
+
+JNIEXPORT jlong JNICALL
+Java_com_kenai_jffi_Foreign_newArray(JNIEnv* env, jobject self, jlong type, jint length)
+{
+    ffi_type* elem = (ffi_type *) j2p(type);
+    ffi_type* s = NULL;
+    int i;
+
+    if (elem == NULL) {
+        throwException(env, NullPointer, "element type cannot be null");
+        return 0L;
+    }
+
+    if (elem->size == 0) {
+        throwException(env, IllegalArgument, "element type size 0");
+        return 0L;
+    }
+
+    if (length < 1) {
+        throwException(env, IllegalArgument, "array length == 0");
+        return 0L;
+    }
+
+    s = calloc(1, sizeof(*s));
+    if (s == NULL) {
+        throwException(env, OutOfMemory, "failed to allocate memory");
+        return 0L;
+    }
+
+    s->type = FFI_TYPE_STRUCT;
+    s->alignment = elem->alignment;
+    s->size = length * elem->size;
+
+    // Need to terminate the list of field types with a NULL, so allocate 1 extra
+    s->elements = calloc(length + 1, sizeof(ffi_type *));
+    if (s->elements == NULL) {
+        throwException(env, OutOfMemory, "failed to allocate memory");
+        free(s);
+        return 0L;
+    }
+
+    for (i = 0; i < length; ++i) {
+        s->elements[i] = elem;
+    }
+    
+    return p2j(s);
 }
 
 /*
@@ -110,14 +159,12 @@ error:
  * Signature: (J)V
  */
 JNIEXPORT void JNICALL
-Java_com_kenai_jffi_Foreign_freeStruct(JNIEnv* env, jobject self, jlong handle)
+Java_com_kenai_jffi_Foreign_freeAggregate(JNIEnv* env, jobject self, jlong handle)
 {
     ffi_type* s = (ffi_type *) j2p(handle);
     
     if (s != NULL) {
-        if (s->elements != NULL) {
-            free(s->elements);
-        }
+        free(s->elements);
         free(s);
     }
 }

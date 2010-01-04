@@ -51,24 +51,6 @@ extern "C" {
 #  define unlikely(x) (x)
 #endif
 
-typedef struct StackAllocator {
-    size_t used;
-    char data[256];
-} StackAllocator;
-
-#define initStackAllocator(alloc) ((alloc)->used = 0)
-
-static inline void*
-allocStack(StackAllocator* alloc, size_t size) 
-{
-    if (likely((alloc->used + size + 7) < sizeof(alloc->data))) {
-        uintptr_t data = roundup((uintptr_t) &alloc->data[alloc->used], 8);
-        alloc->used = (data + size) - (uintptr_t) &alloc->data[0];
-        return (void *) data;
-    }
-    return NULL;
-}
-
 /**
  * Convert a C pointer into a java long
  */

@@ -18,32 +18,15 @@
 
 package com.kenai.jffi;
 
-public abstract class Aggregate extends Type {
-    private volatile boolean disposed = false;
+/**
+ * Retrieves metadata about jffi C internals
+ */
+public final class Internals {
 
-    public Aggregate(long handle) {
-        super(handle);
+    private Internals() {
     }
 
-    public synchronized final void dispose() {
-        if (disposed) {
-            throw new RuntimeException("native handle already freed");
-        }
-
-        disposed = true;
-        Foreign.getInstance().freeAggregate(handle);
-    }
-
-    @Override
-    protected void finalize() throws Throwable {
-        try {
-            if (!disposed) {
-                dispose();
-            }
-        } catch (Throwable t) {
-            t.printStackTrace(System.err);
-        } finally {
-            super.finalize();
-        }
+    public static final long getErrnoSaveFunction() {
+        return Foreign.getInstance().getSaveErrnoFunction();
     }
 }

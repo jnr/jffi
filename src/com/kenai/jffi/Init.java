@@ -33,20 +33,20 @@ import java.nio.channels.ReadableByteChannel;
 final class Init {
     private static final String stubLibraryName
             = String.format("jffi-%d.%d", Foreign.VERSION_MAJOR, Foreign.VERSION_MINOR);
-    /**
-     * This is a dummy function which when called, makes the <code>static{}</code>
-     * section load, and the library gets loaded.
-     */
-    static final void init() {}
 
-    static {
-        load();
-    }
+    private static volatile boolean loaded = false;
 
+    // prevent instantiation
+    private Init() {}
+    
     /**
      * Loads the stub library
      */
-    private static final void load() {
+    static final void load() {
+        if (loaded) {
+            return;
+        }
+
         final String libName = getStubLibraryName();
         String bootPath = System.getProperty("jffi.boot.library.path");
         if (bootPath != null && loadFromBootPath(libName, bootPath)) {
