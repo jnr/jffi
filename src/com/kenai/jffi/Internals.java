@@ -27,6 +27,11 @@ public final class Internals {
     }
 
     public static final long getErrnoSaveFunction() {
-        return Foreign.getInstance().getSaveErrnoFunction();
+        try {
+            return com.kenai.jffi.Library.getDefault().getSymbolAddress("jffi_save_errno");
+
+        } catch (Throwable t) {
+            return 0;
+        }
     }
 }
