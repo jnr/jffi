@@ -231,16 +231,16 @@ $(LIBJFFI):  $(LIBFFI) $(OBJS) $(CXXOBJS)
 	$(STRIP) $@
 
 # For the primitive int interface, don't do frame pointer save/restore
-$(JFFI_BUILD_DIR)/Fast%Invoke.o : $(JFFI_SRC_DIR)/Fast%Invoke.c $(wildcard $(JFFI_SRC_DIR)/*.h)
+$(JFFI_BUILD_DIR)/Fast%Invoke.o : $(JFFI_SRC_DIR)/Fast%Invoke.c $(wildcard $(JFFI_SRC_DIR)/*.h) $(LIBFFI)
 	@mkdir -p $(@D)
 	$(CCACHE) $(CC) $(CFLAGS) -fomit-frame-pointer -c $< -o $@
 
 
-$(BUILD_DIR)/%.o : $(SRC_DIR)/%.c $(wildcard $(JFFI_SRC_DIR)/*.h)
+$(BUILD_DIR)/%.o : $(SRC_DIR)/%.c $(wildcard $(JFFI_SRC_DIR)/*.h) $(LIBFFI)
 	@mkdir -p $(@D)
 	$(CCACHE) $(CC) $(CFLAGS) -c $< -o $@
 
-$(BUILD_DIR)/%.o : $(SRC_DIR)/%.cpp $(wildcard $(JFFI_SRC_DIR)/*.h)
+$(BUILD_DIR)/%.o : $(SRC_DIR)/%.cpp $(wildcard $(JFFI_SRC_DIR)/*.h) $(LIBFFI)
 	@mkdir -p $(@D)
 	$(CCACHE) $(CXX) $(CXXFLAGS) -c $< -o $@
 
