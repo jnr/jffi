@@ -31,6 +31,7 @@ extern const char* jffi_NullPointerException;
 extern const char* jffi_OutOfBoundsException;
 extern const char* jffi_OutOfMemoryException;
 extern const char* jffi_RuntimeException;
+extern const char* jffi_UnsatisfiedLinkException;
 
 
 extern void jffi_throwExceptionByName(JNIEnv* env, const char* exceptionName, const char* fmt, ...);

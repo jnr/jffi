@@ -43,4 +43,5 @@ const char* jffi_NullPointerException = "java/lang/NullPointerException";
 const char* jffi_OutOfBoundsException = "java/lang/IndexOutOfBoundsException";
 const char* jffi_OutOfMemoryException = "java/lang/OutOfMemoryError";
 const char* jffi_RuntimeException = "java/lang/RuntimeError";
+const char* jffi_UnsatisfiedLinkException = "java/lang/UnsatisfiedLinkError";
 

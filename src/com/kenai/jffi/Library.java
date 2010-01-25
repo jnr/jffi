@@ -70,12 +70,12 @@ public final class Library {
      */
     private static final long dlopen(String name, int flags) {
         final Foreign foreign = Foreign.getInstance();
-        synchronized (lock) {
-            final long address = foreign.dlopen(name, flags);
-            if (address == 0L) {
-                lastError.set(foreign.dlerror());
-            }
-            return address;
+        try {
+            return foreign.dlopen(name, flags);
+
+        } catch (UnsatisfiedLinkError ex) {
+            lastError.set(ex.getMessage());
+            return 0L;
         }
     }
 
@@ -150,12 +150,12 @@ public final class Library {
      */
     public final long getSymbolAddress(String name) {
         final Foreign foreign = Foreign.getInstance();
-        synchronized (lock) {
-            final long address = foreign.dlsym(handle, name);
-            if (address == 0L) {
-                lastError.set(foreign.dlerror());
-            }
-            return address;
+        try {
+            return foreign.dlsym(handle, name);
+
+        } catch (UnsatisfiedLinkError ex) {
+            lastError.set(foreign.dlerror());
+            return 0;
         }
     }
     

@@ -17,6 +17,7 @@
 #include <jni.h>
 #include "jffi.h"
 
+#include "Exception.h"
 #include "com_kenai_jffi_Foreign.h"
 
 #if defined(_WIN32) || defined(__WIN32__)
@@ -26,7 +27,7 @@ static void dl_error(char* buf, int size);
 #define dl_close(handle) FreeLibrary(handle)
 enum { RTLD_LAZY=1, RTLD_NOW, RTLD_GLOBAL, RTLD_LOCAL };
 #else
-# define dl_open(name, flags) dlopen(name, flags != 0 ? flags : RTLD_LAZY)
+# define dl_open(name, flags) dlopen(name, flags != 0 ? flags : (RTLD_LAZY | RTLD_LOCAL))
 # define dl_error(buf, size) do { \
     const char *e = dlerror(); snprintf(buf, size, "%s", e ? e : "unknown"); \
 } while(0)
@@ -59,6 +60,7 @@ Java_com_kenai_jffi_Foreign_dlopen(JNIEnv* env, jobject self, jstring jPath, jin
 #else
     char path_[PATH_MAX];
     const char* path = NULL; // Handle dlopen(NULL, flags);
+    void* handle = NULL;
     int flags = 0;
 #define F(x) (jFlags & com_kenai_jffi_Foreign_RTLD_##x) != 0 ? RTLD_##x : 0;
     flags |= F(LAZY);
@@ -75,7 +77,15 @@ Java_com_kenai_jffi_Foreign_dlopen(JNIEnv* env, jobject self, jstring jPath, jin
         path = path_;
         getMultibyteString(env, path_, jPath, sizeof(path_));
     }
-    return p2j(dl_open(path, flags));
+
+    handle = dl_open(path, flags);
+    if (handle == NULL) {
+        char errbuf[1024] = { 0 };
+        dl_error(errbuf, sizeof(errbuf) - 1);
+        throwException(env, UnsatisfiedLink, "%s", errbuf);
+    }
+    
+    return p2j(handle);
 #endif
 }
 
@@ -94,11 +104,20 @@ JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_dlsym(JNIEnv* env, jclass cls, jlong handle, jstring jstr)
 {
     char sym[1024];
+    void* addr;
+
     getMultibyteString(env, sym, jstr, sizeof(sym));
 #ifndef _WIN32
     dlerror(); // clear any errors
 #endif
-    return p2j(dl_sym(j2p(handle), sym));
+    addr = dl_sym(j2p(handle), sym);
+    if (addr == NULL) {
+        char errbuf[1024] = { 0 };
+        dl_error(errbuf, sizeof(errbuf) - 1);
+        throwException(env, UnsatisfiedLink, "%s", errbuf);
+    }
+
+    return p2j(addr);
 }
 
 /*
