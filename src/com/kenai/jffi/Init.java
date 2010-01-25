@@ -26,11 +26,14 @@ import java.io.InputStream;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
+import java.util.Properties;
 
 /**
  * Utility class to load the jffi stub library
  */
 final class Init {
+    private static final String bootPropertyFilename = "boot.properties";
+    private static final String bootLibraryPropertyName = "jffi.boot.library.path";
     private static final String stubLibraryName
             = String.format("jffi-%d.%d", Foreign.VERSION_MAJOR, Foreign.VERSION_MINOR);
     /**
@@ -48,7 +51,7 @@ final class Init {
      */
     private static final void load() {
         final String libName = getStubLibraryName();
-        String bootPath = System.getProperty("jffi.boot.library.path");
+        String bootPath = getBootPath();
         if (bootPath != null && loadFromBootPath(libName, bootPath)) {
             return;
         }
@@ -59,6 +62,25 @@ final class Init {
         } catch (UnsatisfiedLinkError ex) {}
 
         loadFromJar();
+    }
+
+    private static final String getBootPath() {
+        
+        String bootPath = System.getProperty(bootLibraryPropertyName);
+        if (bootPath != null) {
+            return bootPath;
+        }
+
+        InputStream is = Init.class.getResourceAsStream(bootPropertyFilename);
+        if (is != null) {
+            Properties p = new Properties();
+            try {
+                p.load(is);
+                return p.getProperty(bootLibraryPropertyName);
+            } catch (IOException ex) { }
+        }
+
+        return null;
     }
 
     private static final boolean loadFromBootPath(String libName, String bootPath) {
