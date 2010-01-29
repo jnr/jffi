@@ -1,0 +1,7 @@
+*.orig$
+*.rej$
+nbproject/private
+build
+dist
+lib/nblibraries-private.properties
+jni/libffi/doc/libffi.info$
