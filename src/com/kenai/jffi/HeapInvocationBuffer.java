@@ -154,12 +154,12 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
         final Type type = info.getParameterType(paramIndex);
 
         if (encoder.isRaw()) {
-            paramOffset = FFI_ALIGN(paramOffset, type.align);
-            System.arraycopy(struct, offset, buffer, paramOffset, type.size);
-            paramOffset = FFI_ALIGN(paramOffset + type.size, FFI_SIZEOF_ARG);
+            paramOffset = FFI_ALIGN(paramOffset, type.alignment());
+            System.arraycopy(struct, offset, buffer, paramOffset, type.size());
+            paramOffset = FFI_ALIGN(paramOffset + type.size(), FFI_SIZEOF_ARG);
         } else {
             paramOffset = encoder.putAddress(buffer, paramOffset, 0L);
-            getObjectBuffer().putArray(paramIndex, struct, offset, type.size, ObjectBuffer.IN);
+            getObjectBuffer().putArray(paramIndex, struct, offset, type.size(), ObjectBuffer.IN);
         }
         ++paramIndex;
     }
@@ -168,9 +168,9 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
         final Type type = info.getParameterType(paramIndex);
 
         if (encoder.isRaw()) {
-            paramOffset = FFI_ALIGN(paramOffset, type.align);
-            MemoryIO.getInstance().getByteArray(struct, buffer, paramOffset, type.size);
-            paramOffset = FFI_ALIGN(paramOffset + type.size, FFI_SIZEOF_ARG);
+            paramOffset = FFI_ALIGN(paramOffset, type.alignment());
+            MemoryIO.getInstance().getByteArray(struct, buffer, paramOffset, type.size());
+            paramOffset = FFI_ALIGN(paramOffset + type.size(), FFI_SIZEOF_ARG);
         } else {
             paramOffset = encoder.putAddress(buffer, paramOffset, struct);
         }

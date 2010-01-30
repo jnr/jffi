@@ -25,42 +25,42 @@ import java.util.List;
  */
 public abstract class Type {
     /** The native void type */
-    public static final Type VOID = builtin(Foreign.TYPE_VOID);
+    public static final Type VOID = builtin(NativeType.VOID);
 
     /** The native float type */
-    public static final Type FLOAT = builtin(Foreign.TYPE_FLOAT);
+    public static final Type FLOAT = builtin(NativeType.FLOAT);
 
     /** The native double type */
-    public static final Type DOUBLE = builtin(Foreign.TYPE_DOUBLE);
+    public static final Type DOUBLE = builtin(NativeType.DOUBLE);
 
     /** The native long double type */
-    public static final Type LONGDOUBLE = builtin(Foreign.TYPE_LONGDOUBLE);
+    public static final Type LONGDOUBLE = builtin(NativeType.LONGDOUBLE);
 
     /** The native unsigned 8 bit integer type */
-    public static final Type UINT8 = builtin(Foreign.TYPE_UINT8);
+    public static final Type UINT8 = builtin(NativeType.UINT8);
 
     /** The native signed 8 bit integer type */
-    public static final Type SINT8 = builtin(Foreign.TYPE_SINT8);
+    public static final Type SINT8 = builtin(NativeType.SINT8);
 
     /** The native unsigned 16 bit integer type */
-    public static final Type UINT16 = builtin(Foreign.TYPE_UINT16);
+    public static final Type UINT16 = builtin(NativeType.UINT16);
 
     /** The native signed 16 bit integer type */
-    public static final Type SINT16 = builtin(Foreign.TYPE_SINT16);
+    public static final Type SINT16 = builtin(NativeType.SINT16);
 
     /** The native unsigned 32 bit integer type */
-    public static final Type UINT32 = builtin(Foreign.TYPE_UINT32);
+    public static final Type UINT32 = builtin(NativeType.UINT32);
 
     /** The native signed 32 bit integer type */
-    public static final Type SINT32 = builtin(Foreign.TYPE_SINT32);
+    public static final Type SINT32 = builtin(NativeType.SINT32);
     /** The native unsigned 64 bit integer type */
-    public static final Type UINT64 = builtin(Foreign.TYPE_UINT64);
+    public static final Type UINT64 = builtin(NativeType.UINT64);
 
     /** The native signed 64 bit integer type */
-    public static final Type SINT64 = builtin(Foreign.TYPE_SINT64);
+    public static final Type SINT64 = builtin(NativeType.SINT64);
 
     /** The native memory address type */
-    public static final Type POINTER = builtin(Foreign.TYPE_POINTER);
+    public static final Type POINTER = builtin(NativeType.POINTER);
 
     /** The native unsigned char type */
     public static final Type UCHAR = UINT8;
@@ -69,104 +69,65 @@ public abstract class Type {
     public static final Type SCHAR = SINT8;
 
     /** The native unsigned short integer type */
-    public static final Type USHORT = alias(Foreign.TYPE_USHORT, UINT16, UINT32);
+    public static final Type USHORT = UINT16;
 
     /** The native signed short integer type */
-    public static final Type SSHORT = alias(Foreign.TYPE_SSHORT, SINT16, SINT32);
+    public static final Type SSHORT = SINT16;
 
     /** The native unsigned integer type */
-    public static final Type UINT = alias(Foreign.TYPE_UINT, UINT32, UINT64);
+    public static final Type UINT = UINT32;
 
     /** The native signed integer type */
-    public static final Type SINT = alias(Foreign.TYPE_SINT, SINT32, SINT64);
+    public static final Type SINT = SINT32;
 
     /** The native unsigned long integer type */
-    public static final Type ULONG = alias(Foreign.TYPE_ULONG, UINT32, UINT64);
+    public static final Type ULONG = builtin(NativeType.ULONG);
 
     /** The native signed long integer type */
-    public static final Type SLONG = alias(Foreign.TYPE_SLONG, SINT32, SINT64);
+    public static final Type SLONG = builtin(NativeType.SLONG);
 
     /** The native unsigned long long integer type */
     public static final Type ULONG_LONG = UINT64;
 
     /** The native signed long long integer type */
     public static final Type SLONG_LONG = SINT64;
-
-
-    /*========================================================================*/
-    /** The FFI type of this type */
-    protected final int type;
-
-    /** The size in bytes of this type */
-    protected final int size;
-
-    /** The minimum alignment of this type */
-    protected final int align;
-
-    /** The address of this type's ffi_type structure */
-    protected final long handle;
-
-    /*========================================================================*/
-    /**
-     * Creates a new <tt>Type</tt> object for the ffi_type structure address.
-     *
-     * @param handle The address of the ffi_type structure.
-     */
-    Type(long handle) {
-        if (handle == 0L) {
-            throw new NullPointerException("Invalid ffi_type handle");
-        }
-        this.handle = handle;
-        this.type = Foreign.getInstance().getTypeType(handle);
-        this.size = Foreign.getInstance().getTypeSize(handle);
-        this.align = Foreign.getInstance().getTypeAlign(handle);
-    }
     
     /**
      * Gets the FFI type enum value for this <tt>Type</tt>
      *
      * @return An integer representing the FFI type.
      */
-    public int type() {
-        return type;
-    }
-
+    public abstract int type();
     /**
      * Gets the native address of the ffi_type struct for this <tt>Type</tt>
      *
      * @return  The address of the ffi_type structure
      */
-    final long handle() {
-        return handle;
-    }
+    abstract long handle();
 
     /**
      * Gets the size of this type.
      *
      * @return The size of this type, in bytes.
      */
-    public final int size() {
-        return size;
-    }
+    public abstract int size();
 
     /**
      * Gets the alignment of this type.
      *
      * @return The alignment of this type, in bytes.
      */
-    public final int alignment() {
-        return align;
-    }
+    public abstract int alignment();
 
     @Override
     public boolean equals(Object obj) {
-        return (obj instanceof Type) && ((Type) obj).handle == handle;
+        return (obj instanceof Type) && ((Type) obj).handle() == handle();
     }
 
     @Override
     public int hashCode() {
         int hash = 3;
-        hash = 67 * hash + (int) (this.handle ^ (this.handle >>> 32));
+        hash = 67 * hash + (int) (this.handle() ^ (this.handle() >>> 32));
         return hash;
     }
 
@@ -211,32 +172,79 @@ public abstract class Type {
      * @param type The builtin type enum.
      * @return A <tt>Type</tt> instance.
      */
-    private static final Type builtin(int type) {
-        long h = Foreign.getInstance().lookupBuiltinType(type);
-        if (h == 0) {
-            throw new IllegalArgumentException("bad type " + type);
-        }
-        return new Builtin(h);
-    }
-
-    /**
-     * Creates an alias for a native type.
-     * 
-     * @param type The native type enum
-     * @param existing The existing types that this type may alias to.
-     * @return A Type instance representing the native type.
-     */
-    private static final Type alias(int type, Type t1, Type t2) {
-        final long h = Foreign.getInstance().lookupBuiltinType(type);
-        return t1.handle == h ? t1 : t2;
+    private static final Type builtin(NativeType nativeType) {
+        return new Builtin(nativeType);
     }
 
     /**
      * Types that are built-in to libffi.
      */
     static final class Builtin extends Type {
-        private Builtin(long handle) {
-            super(handle);
+        private final NativeType nativeType;
+
+        private Builtin(NativeType nativeType) {
+            this.nativeType = nativeType;
+        }
+        
+        public final int type() {
+            return BuiltinTypeInfo.find(nativeType).type;
+        }
+        
+        public final long handle() {
+            return BuiltinTypeInfo.find(nativeType).handle;
+        }
+        
+        public final int size() {
+            return BuiltinTypeInfo.find(nativeType).size;
+        }
+
+        public final int alignment() {
+            return BuiltinTypeInfo.find(nativeType).alignment;
+        }
+    }
+
+    /**
+     * This is a lazy loaded cache of builtin type info, so we can still have
+     * Type.VOID as a public static variable without it causing the
+     * native library to load.
+     */
+    private static final class BuiltinTypeInfo {
+        public static final BuiltinTypeInfo[] typeMap;
+
+        /** The FFI type of this type */
+        final int type;
+        /** The size in bytes of this type */
+        final int size;
+        /** The minimum alignment of this type */
+        final int alignment;
+        /** The address of this type's ffi_type structure */
+        final long handle;
+
+        static {
+            NativeType[] nativeTypes = NativeType.values();
+            typeMap = new BuiltinTypeInfo[nativeTypes.length];
+            for (int i = 0; i < typeMap.length; ++i) {
+                long h = Foreign.getInstance().lookupBuiltinType(nativeTypes[i].ffiType);
+                if (h == 0L) {
+                    throw new RuntimeException("invalid native type " + nativeTypes[i]);
+                }
+                
+                typeMap[i] = new BuiltinTypeInfo(h);
+            }
+        }
+
+        static final BuiltinTypeInfo find(NativeType t) {
+            return typeMap[t.ordinal()];
+        }
+
+        private BuiltinTypeInfo(long handle) {
+            if (handle == 0L) {
+                throw new NullPointerException("null ffi_type handle");
+            }
+            this.handle = handle;
+            this.type = Foreign.getInstance().getTypeType(handle);
+            this.size = Foreign.getInstance().getTypeSize(handle);
+            this.alignment = Foreign.getInstance().getTypeAlign(handle);
         }
     }
 }
