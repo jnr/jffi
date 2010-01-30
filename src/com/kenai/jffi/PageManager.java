@@ -91,7 +91,7 @@ abstract public class PageManager {
         public long allocatePages(int npages, int protection) {
             long sz = npages * pageSize();
             return Foreign.getInstance().mmap(0, sz, protection,
-                    Foreign.MAP_ANON | Foreign.MAP_PRIVATE, 0, 0);
+                    Foreign.MAP_ANON | Foreign.MAP_PRIVATE, -1, 0);
 
         }
 
