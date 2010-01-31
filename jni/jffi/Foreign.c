@@ -46,6 +46,20 @@ Java_com_kenai_jffi_Foreign_getVersion(JNIEnv* env, jobject self)
         | (com_kenai_jffi_Version_MICRO);
 }
 
+/*
+ * Class:     com_kenai_jffi_Foreign
+ * Method:    init
+ * Signature: ()V
+ *
+ * Initialize any class/method/field ids
+ */
+
+JNIEXPORT void JNICALL
+Java_com_kenai_jffi_Foreign_init(JNIEnv* env, jobject self)
+{
+    
+}
+
 JNIEXPORT jint JNICALL
 Java_com_kenai_jffi_Foreign_getJNIVersion(JNIEnv* env, jobject self)
 {

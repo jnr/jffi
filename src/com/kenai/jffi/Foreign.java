@@ -33,12 +33,15 @@ final class Foreign {
         private static final InstanceHolder getInstanceHolder() {
             try {
                 Init.load();
-                
+
+
                 Foreign foreign = new Foreign();
 
                 if ((foreign.getVersion() & 0xffff00) != (VERSION_MAJOR << 16 | VERSION_MINOR << 8)) {
                     throw new UnsatisfiedLinkError("Incorrect native library version");
                 }
+                
+                foreign.init();
                 
                 return new ValidInstanceHolder(foreign);
 
@@ -214,6 +217,11 @@ final class Foreign {
      * @return The version in the form of (VERSION_MAJOR << 16 | VERSION_MINOR << 8 | VERSION_MICRO)
      */
     final native int getVersion();
+
+    /**
+     * Initializes any native method/field/class ids
+     */
+    private final native void init();
 
     /**
      * Opens a dynamic library.
