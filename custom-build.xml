@@ -123,6 +123,8 @@
             <arg value="BUILD_DIR=${jni.build.dir}"/>
             <arg value="CPU=${platform.cpu}"/>
             <arg value="VERSION=${jffi.version.major}.${jffi.version.minor}"/>
+            <arg value="USE_SYSTEM_LIBFFI=${use.system.libffi}"/>
+            <!-- <arg value="USE_SYSTEM_LIBFFI=0"/> -->
             <arg value="-f"/>
             <arg value="${jni.GNUmakefile}"/>
         </exec>
