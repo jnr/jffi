@@ -38,10 +38,16 @@ BUILD_DIR ?= $(shell pwd)/build
 
 JFFI_SRC_DIR = $(SRC_DIR)/jffi
 JFFI_BUILD_DIR = $(BUILD_DIR)/jffi
-LIBFFI_SRC_DIR = $(SRC_DIR)/libffi
-LIBFFI_BUILD_DIR = $(BUILD_DIR)/libffi-$(PLATFORM)
 
-LIBFFI = $(LIBFFI_BUILD_DIR)/.libs/libffi_convenience.a
+ifeq ($(USE_SYSTEM_LIBFFI),1)
+  LIBFFI = $(shell pkg-config --libs libffi)
+  LIBFFI_CFLAGS = $(shell pkg-config --cflags libffi)
+else
+  LIBFFI_SRC_DIR = $(SRC_DIR)/libffi
+  LIBFFI_BUILD_DIR = $(BUILD_DIR)/libffi-$(PLATFORM)
+  LIBFFI = $(LIBFFI_BUILD_DIR)/.libs/libffi_convenience.a
+  LIBFFI_CFLAGS = -I"$(LIBFFI_BUILD_DIR)"/include
+endif
 
 SRCS = $(wildcard $(JFFI_SRC_DIR)/*.c)
 OBJS = $(patsubst %.c, $(JFFI_BUILD_DIR)/%.o, $(notdir $(SRCS)))
@@ -69,8 +75,9 @@ FFI_CFLAGS = $(FFI_MMAP_EXEC) $(OFLAGS)
 STRIP = strip -S
 
 JDK_INCLUDES = -I"$(JDK_HOME)/include" -I"$(JDK_HOME)/include/$(OS)"
-IFLAGS = -I"$(BUILD_DIR)" -I"$(BUILD_DIR)"/jni -I"$(JFFI_SRC_DIR)" -I"$(LIBFFI_BUILD_DIR)"/include
-CFLAGS = $(OFLAGS) $(WFLAGS) $(IFLAGS) $(PICFLAGS) $(JDK_INCLUDES)
+
+IFLAGS = -I"$(BUILD_DIR)" -I"$(BUILD_DIR)"/jni -I$(SRC_DIR) -I"$(JFFI_SRC_DIR)"
+CFLAGS = $(OFLAGS) $(WFLAGS) $(IFLAGS) $(PICFLAGS) $(JDK_INCLUDES) $(LIBFFI_CFLAGS)
 CFLAGS += -D_REENTRANT -D_LARGEFILE64_SOURCE -D_GNU_SOURCE
 
 ifeq ($(OS), win64)
@@ -188,14 +195,15 @@ ifneq ($(strip $(findstring $(OS), linux solaris)),)
 endif
 
 LIBJFFI = $(BUILD_DIR)/$(PREFIX)$(LIBNAME)-$(VERSION).$(JNIEXT)
-FFI_CONFIGURE = $(LIBFFI_SRC_DIR)/configure --disable-static \
+
+LIBFFI_CONFIGURE = $(LIBFFI_SRC_DIR)/configure --disable-static \
 	--with-pic=yes --disable-dependency-tracking
 ifdef CONFIGURE_HOST
-	FFI_CONFIGURE += --host=$(CONFIGURE_HOST)
+	LIBFFI_CONFIGURE += --host=$(CONFIGURE_HOST)
 endif
 
 ifdef CONFIGURE_BUILD
-	FFI_CONFIGURE += --build=$(CONFIGURE_BUILD)
+	LIBFFI_CONFIGURE += --build=$(CONFIGURE_BUILD)
 endif
 
 all:	$(LIBJFFI)
@@ -218,6 +226,9 @@ $(BUILD_DIR)/%.o : $(SRC_DIR)/%.c jffi.h
 	@mkdir -p $(@D)
 	$(CCACHE) $(CC) $(CFLAGS) -c $< -o $@
 
+$(BUILD_DIR)/%.o : $(LIBFFI)
+
+
 ifeq ($(OS), darwin)
 build_ffi = \
 	mkdir -p $(BUILD_DIR)/libffi-darwin-$(1); \
@@ -225,7 +236,7 @@ build_ffi = \
 	    echo "Configuring libffi for $(1)"; \
 	    cd $(BUILD_DIR)/libffi-darwin-$(1) && \
 	      env CC="$(CCACHE) $(CC)" CFLAGS="-arch $(1) $(FFI_CFLAGS)" LDFLAGS="-arch $(1)" \
-		$(FFI_CONFIGURE) --host=$(1)-apple-darwin > /dev/null; \
+		$(LIBFFI_CONFIGURE) --host=$(1)-apple-darwin > /dev/null; \
 	fi); \
 	env MACOSX_DEPLOYMENT_TARGET=10.4 $(MAKE) -C $(BUILD_DIR)/libffi-darwin-$(1)
 	
@@ -235,7 +246,7 @@ $(LIBFFI):
 	
 	# Assemble into a FAT (i386, x86_64, ppc) library
 	@mkdir -p $(BUILD_DIR)/libffi/.libs
-	@env MACOSX_DEPLOYMENT_TARGET=10.4 /usr/bin/libtool -static -o $@ \
+	@env MACOSX_DEPLOYMENT_TARGET=10.5 /usr/bin/libtool -static -o $@ \
 	    $(foreach arch, $(ARCHES),$(BUILD_DIR)/libffi-darwin-$(arch)/.libs/libffi_convenience.a)
 	@mkdir -p $(LIBFFI_BUILD_DIR)/include
 	$(RM) $(LIBFFI_BUILD_DIR)/include/ffi.h
@@ -263,10 +274,12 @@ $(LIBFFI):
 	@if [ ! -f $(LIBFFI_BUILD_DIR)/Makefile ]; then \
 	    echo "Configuring libffi for $(PLATFORM)"; \
 	    cd $(LIBFFI_BUILD_DIR) && env CC="$(FFI_CC)" LD="$(FFI_LD)" CFLAGS="$(FFI_CFLAGS)" \
-		$(FFI_CONFIGURE) > /dev/null; \
+		$(LIBFFI_CONFIGURE) > /dev/null; \
 	fi
 	$(MAKE) -C $(LIBFFI_BUILD_DIR)
 endif
+
+
 clean::
 	# nothing to do - ant will delete the build dir
 
