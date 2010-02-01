@@ -40,12 +40,13 @@ JFFI_SRC_DIR = $(SRC_DIR)/jffi
 JFFI_BUILD_DIR = $(BUILD_DIR)/jffi
 
 ifeq ($(USE_SYSTEM_LIBFFI),1)
-  LIBFFI = $(shell pkg-config --libs libffi)
-  LIBFFI_CFLAGS = $(shell pkg-config --cflags libffi)
+  LIBFFI_LIBS ?= $(shell pkg-config --libs libffi)
+  LIBFFI_CFLAGS ?= $(shell pkg-config --cflags libffi)
 else
   LIBFFI_SRC_DIR = $(SRC_DIR)/libffi
   LIBFFI_BUILD_DIR = $(BUILD_DIR)/libffi-$(PLATFORM)
   LIBFFI = $(LIBFFI_BUILD_DIR)/.libs/libffi_convenience.a
+  LIBFFI_LIBS=$(LIBFFI)
   LIBFFI_CFLAGS = -I"$(LIBFFI_BUILD_DIR)"/include
 endif
 
@@ -233,8 +234,8 @@ debug:
 	@echo "JFFI_BUILD_DIR=$(JFFI_BUILD_DIR)"
 	@echo "OBJS=$(OBJS)"
 
-$(LIBJFFI):  $(LIBFFI) $(OBJS) $(CXXOBJS)
-	$(CC) -o $@ $(LDFLAGS) $(SOFLAGS) $(OBJS) $(LIBFFI) $(LIBS)
+$(LIBJFFI):  $(OBJS) $(CXXOBJS) $(LIBFFI_LIBS)
+	$(CC) -o $@ $(LDFLAGS) $(SOFLAGS) $(OBJS) $(LIBFFI_LIBS) $(LIBS)
 	$(STRIP) $@
 
 # For the primitive int interface, don't do frame pointer save/restore
@@ -247,7 +248,7 @@ $(BUILD_DIR)/%.o : $(SRC_DIR)/%.c $(wildcard $(JFFI_SRC_DIR)/*.h)
 	@mkdir -p $(@D)
 	$(CCACHE) $(CC) $(CFLAGS) -c $< -o $@
 
-$(BUILD_DIR)/%.o : $(LIBFFI)
+$(OBJS) : $(LIBFFI_LIBS)
 
 $(BUILD_DIR)/%.o : $(SRC_DIR)/%.cpp $(wildcard $(JFFI_SRC_DIR)/*.h)
 	@mkdir -p $(@D)
