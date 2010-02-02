@@ -1,5 +1,6 @@
 *.orig$
 *.rej$
+*~$
 nbproject/private
 build
 dist
