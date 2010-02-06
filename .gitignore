@@ -3,6 +3,7 @@
 *~
 nbproject/private
 build
+build.eclipse
 dist
 lib/nblibraries-private.properties
 jni/libffi/doc/libffi.info$
