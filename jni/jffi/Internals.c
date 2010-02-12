@@ -15,3 +15,4 @@ Java_com_kenai_jffi_Foreign_getSaveErrnoFunction(JNIEnv *env, jobject self)
 {
     return p2j(jffi_save_errno);
 }
+
