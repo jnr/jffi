@@ -157,6 +157,8 @@ public abstract class Platform {
             return CPU.X86_64;
         } else if ("ppc".equals(archString) || "powerpc".equals(archString)) {
             return CPU.PPC;
+        } else if ("powerpc64".equals(archString)) {
+            return CPU.PPC64;
         }
         // Try to find by lookup up in the CPU list
         try {
