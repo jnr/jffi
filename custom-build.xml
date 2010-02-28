@@ -30,6 +30,12 @@
                 <os arch="powerpc"/>
             </or>
         </condition>
+        <condition property="platform.cpu" value="ppc64">
+            <or>
+                <os arch="ppc64"/>
+                <os arch="powerpc64"/>
+            </or>
+        </condition>
         <condition property="platform.os" value="Windows">
             <os family="Windows"/>
         </condition>
@@ -203,6 +209,7 @@
             <zipfileset src="archive/jffi-sparc-SunOS.jar"/>
             <zipfileset src="archive/jffi-sparcv9-SunOS.jar"/>
             <zipfileset src="archive/jffi-ppc-AIX.jar"/>
+            <zipfileset src="archive/jffi-ppc-Linux.jar"/>
         </jar>
     </target>
     <target name="-archive-platform-jar" depends="-build-platform-jar">
