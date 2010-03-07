@@ -188,7 +188,7 @@ endif
 
 ifeq ($(CPU), i386)
   MODEL = 32
-  ifeq ($(findstring $(OS), openbsd darwin mingw32 win32),)
+  ifeq ($(findstring $(OS), freebsd openbsd darwin mingw32 win32),)
     CFLAGS += -march=i586 -mtune=generic
   endif
 endif
