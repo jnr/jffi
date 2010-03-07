@@ -26,6 +26,7 @@ public abstract class Platform {
     private final CPU cpu;
     private final int addressSize;
     private final long addressMask;
+    private final int longSize;
     private final int javaVersionMajor;
 
     /**
@@ -204,6 +205,8 @@ public abstract class Platform {
 
         addressSize = dataModel;
         addressMask = addressSize == 32 ? 0xffffffffL : 0xffffffffffffffffL;
+        longSize = os == OS.WINDOWS ? 32 : addressSize;
+
         int version = 5;
         try {
             String versionString = System.getProperty("java.version");
@@ -259,7 +262,7 @@ public abstract class Platform {
      * @return the size of a long in bits
      */
     public final int longSize() {
-        return addressSize;
+        return longSize;
     }
 
     /**
