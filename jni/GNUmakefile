@@ -168,6 +168,7 @@ ifeq ($(OS), solaris)
   LD = /usr/ccs/bin/ld
   SOFLAGS = -shared -static-libgcc -mimpure-text
   LIBS += -ldl
+  STRIP = strip
 endif
 
 ifeq ($(OS), aix)
