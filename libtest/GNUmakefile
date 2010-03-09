@@ -78,10 +78,11 @@ ifeq ($(OS), darwin)
   ifneq ($(findstring $(CPU), i386 x86_64),)
     ARCHFLAGS += -arch i386 -arch x86_64
   endif
-  MACSDK = /Developer/SDKs/MacOSX10.5.sdk
+  CC = gcc-4.0
+  MACSDK = /Developer/SDKs/MacOSX10.4u.sdk
   CFLAGS += $(ARCHFLAGS) -isysroot $(MACSDK) -DTARGET_RT_MAC_CFM=0
   CFLAGS += -fno-common
-  LDFLAGS = $(ARCHFLAGS) -dynamiclib -Wl,-syslibroot,$(MACSDK) -mmacosx-version-min=10.5
+  LDFLAGS = $(ARCHFLAGS) -dynamiclib -Wl,-syslibroot,$(MACSDK) -mmacosx-version-min=10.4
   # link against the universal libraries on ppc machines
   LDFLAGS += -L$(MACSDK)/usr/lib
   LIBEXT = dylib

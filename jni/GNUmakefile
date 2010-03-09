@@ -141,13 +141,15 @@ ifeq ($(OS), darwin)
   PLATFORM = darwin
   ARCHES = ppc
   ifneq ($(findstring $(CPU), i386 x86_64),)
-    ARCHES= i386 x86_64
+    ARCHES = i386 x86_64
   endif
-  MACSDK = /Developer/SDKs/MacOSX10.5.sdk
+  CC = gcc-4.0
+
+  MACSDK = /Developer/SDKs/MacOSX10.4u.sdk
   CFLAGS += -isysroot $(MACSDK) -DTARGET_RT_MAC_CFM=0
   CFLAGS += $(foreach arch, $(ARCHES),-arch $(arch))
   LDFLAGS = $(foreach arch, $(ARCHES),-arch $(arch)) -dynamiclib -framework JavaVM \
-	-Wl,-syslibroot,$(MACSDK) -mmacosx-version-min=10.5
+	-Wl,-syslibroot,$(MACSDK) -mmacosx-version-min=10.4
   JNIEXT = jnilib
   #CFLAGS += -I$(MACSDK)/System/Library/Frameworks/Kernel.framework/Versions/A/Headers
   FFI_CFLAGS += -isysroot $(MACSDK)
@@ -276,7 +278,7 @@ build_ffi = \
 	      env CC="$(CCACHE) $(CC)" CFLAGS="-arch $(1) $(FFI_CFLAGS)" LDFLAGS="-arch $(1)" \
 		$(LIBFFI_CONFIGURE) --host=$(1)-apple-darwin > /dev/null; \
 	fi); \
-	env MACOSX_DEPLOYMENT_TARGET=10.5 $(MAKE) -C $(BUILD_DIR)/libffi-darwin-$(1)
+	env MACOSX_DEPLOYMENT_TARGET=10.4 $(MAKE) -C $(BUILD_DIR)/libffi-darwin-$(1)
 	
 $(LIBFFI):
 	@mkdir -p $(@D)
@@ -284,7 +286,7 @@ $(LIBFFI):
 	
 	# Assemble into a FAT (i386, x86_64, ppc) library
 	@mkdir -p $(BUILD_DIR)/libffi/.libs
-	@env MACOSX_DEPLOYMENT_TARGET=10.5 /usr/bin/libtool -static -o $@ \
+	@env MACOSX_DEPLOYMENT_TARGET=10.4 /usr/bin/libtool -static -o $@ \
 	    $(foreach arch, $(ARCHES),$(BUILD_DIR)/libffi-darwin-$(arch)/.libs/libffi_convenience.a)
 	@mkdir -p $(LIBFFI_BUILD_DIR)/include
 	$(RM) $(LIBFFI_BUILD_DIR)/include/ffi.h
