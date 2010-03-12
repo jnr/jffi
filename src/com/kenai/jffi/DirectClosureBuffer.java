@@ -27,7 +27,7 @@ final class DirectClosureBuffer implements Closure.Buffer {
     private static final MemoryIO IO = MemoryIO.getInstance();
     private static final long ADDRESS_MASK = Platform.getPlatform().addressMask();
     private static final NativeWordIO WordIO = NativeWordIO.getInstance();
-    private static final int PARAM_SIZE = Platform.getPlatform().addressSize() / 8;
+    private static final long PARAM_SIZE = Platform.getPlatform().addressSize() / 8;
     private final long retval;
     private final long parameters;
     /* Keep references to the return and parameter types to prevent garbage collection */

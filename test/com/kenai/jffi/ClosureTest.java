@@ -475,7 +475,6 @@ public class ClosureTest {
 
     @Test public void allocateLots() throws Throwable {
         ClosureManager m = ClosureManager.getInstance();
-        CallContext ctx = new CallContext(Type.FLOAT, new Type[0], CallingConvention.DEFAULT);
         List<Closure.Handle> handles = new ArrayList<Closure.Handle>();
 
         for (int i = 0; i < 1000; ++i) {

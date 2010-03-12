@@ -238,7 +238,7 @@ public class UnitHelper {
                 return Long.valueOf(invoker.invokeLong(function, buffer));
             } else if (returnType == float.class || returnType == Float.class) {
                 return Float.valueOf(invoker.invokeFloat(function, buffer));
-            } else if (returnType == double.class || returnType == double.class) {
+            } else if (returnType == double.class || returnType == Double.class) {
                 return Double.valueOf(invoker.invokeDouble(function, buffer));
             } else if (Address.class.isAssignableFrom(returnType)) {
                 return new Address(invoker.invokeAddress(function, buffer));
@@ -259,7 +259,7 @@ public class UnitHelper {
             return result.longValue();
         } else if (returnType == float.class || returnType == Float.class) {
             return Float.intBitsToFloat(result.intValue());
-        } else if (returnType == double.class || returnType == double.class) {
+        } else if (returnType == double.class || returnType == Double.class) {
             return Double.longBitsToDouble(result.longValue());
         } else if (Address.class.isAssignableFrom(returnType)) {
             return new Address(result.longValue());
@@ -466,27 +466,30 @@ public class UnitHelper {
                 }
             }
             long returnBuffer = Memory.allocateMemory(8, true);
-            MemoryHolder resultHolder = new MemoryHolder(returnBuffer);
-            Invoker.getInstance().invoke(function, returnBuffer, parameterAddresses);
+            try {
+                Invoker.getInstance().invoke(function, returnBuffer, parameterAddresses);
 
-            if (returnType == void.class || returnType == Void.class) {
-                return null;
-            } else if (returnType == byte.class || returnType == Byte.class) {
-                return (byte) getNativeLongReturnValue(returnBuffer);
-            } else if (returnType == short.class || returnType == Short.class) {
-                return (short) getNativeLongReturnValue(returnBuffer);
-            } else if (returnType == int.class || returnType == Integer.class) {
-                return (int) getNativeLongReturnValue(returnBuffer);
-            } else if (returnType == long.class || returnType == Long.class) {
-                return Memory.getLong(returnBuffer);
-            } else if (returnType == float.class || returnType == Float.class) {
-                return Memory.getFloat(returnBuffer);
-            } else if (returnType == double.class || returnType == double.class) {
-                return Memory.getDouble(returnBuffer);
-            } else if (Address.class.isAssignableFrom(returnType)) {
-                return new Address(Memory.getAddress(returnBuffer));
+                if (returnType == void.class || returnType == Void.class) {
+                    return null;
+                } else if (returnType == byte.class || returnType == Byte.class) {
+                    return (byte) getNativeLongReturnValue(returnBuffer);
+                } else if (returnType == short.class || returnType == Short.class) {
+                    return (short) getNativeLongReturnValue(returnBuffer);
+                } else if (returnType == int.class || returnType == Integer.class) {
+                    return (int) getNativeLongReturnValue(returnBuffer);
+                } else if (returnType == long.class || returnType == Long.class) {
+                    return Memory.getLong(returnBuffer);
+                } else if (returnType == float.class || returnType == Float.class) {
+                    return Memory.getFloat(returnBuffer);
+                } else if (returnType == double.class || returnType == Double.class) {
+                    return Memory.getDouble(returnBuffer);
+                } else if (Address.class.isAssignableFrom(returnType)) {
+                    return new Address(Memory.getAddress(returnBuffer));
+                }
+                throw new RuntimeException("Unknown return type: " + returnType);
+            } finally {
+                Memory.freeMemory(returnBuffer);
             }
-            throw new RuntimeException("Unknown return type: " + returnType);
         }
     }
 }

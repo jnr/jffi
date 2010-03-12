@@ -77,7 +77,14 @@ final class Init {
             try {
                 p.load(is);
                 return p.getProperty(bootLibraryPropertyName);
-            } catch (IOException ex) { }
+            } catch (IOException ex) { 
+            } finally {
+                try {
+                    is.close();
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
         }
 
         return null;
@@ -114,20 +121,32 @@ final class Init {
     private static final void loadFromJar() {
         InputStream is = getStubLibraryStream();
         File dstFile = null;
+        FileOutputStream os = null;
 
         try {
             dstFile = File.createTempFile("jffi", null);
             dstFile.deleteOnExit();
-            FileChannel dstChannel = new FileOutputStream(dstFile).getChannel();
+            os = new FileOutputStream(dstFile);
             ReadableByteChannel srcChannel = Channels.newChannel(is);
+
             for (long pos = 0; is.available() > 0; ) {
-                pos += dstChannel.transferFrom(srcChannel, pos, Math.max(4096, is.available()));
+                pos += os.getChannel().transferFrom(srcChannel, pos, Math.max(4096, is.available()));
             }
-            dstChannel.close();
+
             System.load(dstFile.getAbsolutePath());
+
         } catch (IOException ex) {
             throw new UnsatisfiedLinkError(ex.getMessage());
+
         } finally {
+            try {
+                if (os != null) {
+                    os.close();
+                }
+                is.close();
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
         }
     }
 

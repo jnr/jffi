@@ -81,7 +81,7 @@ public class ForeignTest {
             assertTrue("Failed to free memory", Foreign.getInstance().munmap(addr, SIZE) == 0);
         }
     }
-    class ClosureProxy {
+    static class ClosureProxy {
         void invoke(Closure.Buffer buf) {}
     }
 //    @Test public void freeClosure() throws Throwable {
