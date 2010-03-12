@@ -1,4 +1,5 @@
 # -*- makefile -*-
+
 BUILD_OS := $(strip $(shell uname -s | tr '[:upper:]' '[:lower:]'))
 OS ?= $(BUILD_OS)
 ifeq ($(OS),sunos)
@@ -46,13 +47,12 @@ else
   LIBFFI_SRC_DIR = $(SRC_DIR)/libffi
   LIBFFI_BUILD_DIR = $(BUILD_DIR)/libffi-$(PLATFORM)
   LIBFFI = $(LIBFFI_BUILD_DIR)/.libs/libffi_convenience.a
-  LIBFFI_LIBS=$(LIBFFI)
+  LIBFFI_LIBS = $(LIBFFI)
   LIBFFI_CFLAGS = -I"$(LIBFFI_BUILD_DIR)"/include
 endif
 
 SRCS = $(wildcard $(JFFI_SRC_DIR)/*.c)
 OBJS = $(patsubst %.c, $(JFFI_BUILD_DIR)/%.o, $(notdir $(SRCS)))
-#CXXOBJS += $(patsubst %.cpp, $(JFFI_BUILD_DIR)/%.o, $(notdir $(wildcard $(JFFI_SRC_DIR)/*.cpp)))
 
 vpath %.h $(JFFI_SRC_DIR)
 
@@ -65,22 +65,22 @@ OFLAGS = -O2 $(JFLAGS)
 
 # MacOS headers aren't completely warning free, so turn them off
 ifneq ($(OS),darwin)
-  WFLAGS = -W -Werror -Wall -Wno-unused -Wno-parentheses -Wundef
+  WFLAGS += -Wundef -Werror
 endif
+WFLAGS += -W -Wall -Wno-unused -Wno-parentheses
 PICFLAGS = -fPIC
 SOFLAGS = # Filled in for each OS specifically
 FFI_MMAP_EXEC = -DFFI_MMAP_EXEC_WRIT
 
-FFI_CC=$(CCACHE) $(CC)
-FFI_LD=$(LD)
+FFI_CC = $(CCACHE) $(CC)
+FFI_LD = $(LD)
 FFI_CFLAGS = $(FFI_MMAP_EXEC) $(OFLAGS)
-STRIP = strip -S
+STRIP ?= strip -S
 
 JDK_INCLUDES = -I"$(JDK_HOME)/include" -I"$(JDK_HOME)/include/$(OS)"
 IFLAGS = -I"$(BUILD_DIR)" -I"$(BUILD_DIR)"/jni -I$(SRC_DIR) -I"$(JFFI_SRC_DIR)"
 CFLAGS = $(OFLAGS) $(WFLAGS) $(IFLAGS) $(PICFLAGS) $(JDK_INCLUDES) $(LIBFFI_CFLAGS)
 CFLAGS += -D_REENTRANT -D_LARGEFILE64_SOURCE -D_GNU_SOURCE
-CXXFLAGS = $(OFLAGS) $(IFLAGS) $(PICFLAGS) $(JDK_INCLUDES) $(LIBFFI_CFLAGS)
 
 ifeq ($(OS), win64)
   override CPU = x86_64
@@ -96,8 +96,7 @@ ifeq ($(OS), win64)
   PICFLAGS=
   SOFLAGS += -shared -mimpure-text -static-libgcc
   PREFIX =
-  JNIEXT=dll
-  CXX = x86_64-w64-mingw32-g++ -m64
+  JNIEXT=dll  
   AR = x86_64-w64-mingw32-ar
   LD = x86_64-w64-mingw32-ld
   STRIP = x86_64-w64-mingw32-strip --strip-debug
@@ -109,7 +108,6 @@ ifeq ($(OS),cross-mingw32)
   override CPU = i386
   JDK_INCLUDES=-I$(JNI_DIR)/win32/include -I$(JNI_DIR)/win32/include/win32
   CC = i386-mingw32-gcc
-  CXX = i386-mingw32-g++
   LD = i386-mingw32-ld
   STRIP = i386-mingw32-strip --strip-debug
   CONFIGURE_HOST = i386-mingw32
@@ -185,34 +183,14 @@ ifneq ($(findstring bsd, $(OS)),)
   LDFLAGS += -pthread
 endif
 
-ifeq ($(CPU), sparcv9)
-  MODEL = 64
-endif
-
 ifeq ($(CPU), i386)
-  MODEL = 32
-  ifeq ($(findstring $(OS), freebsd openbsd darwin mingw32 win32),)
+  ifneq ($(findstring $(OS), linux),)
     CFLAGS += -march=i586 -mtune=generic
   endif
 endif
 
-ifeq ($(CPU), amd64)
-  MODEL = 64
-endif
 
-ifeq ($(CPU), x86_64)
-  MODEL = 64
-endif
-
-ifeq ($(CPU), s390x)
-  MODEL = 64
-endif
-
-ifeq ($(CPU), ppc64)
-  MODEL = 64
-endif
-
-ifeq ($(CPU), powerpc64)
+ifneq ($(findstring $(CPU), x86_64 amd64 sparcv9 ppc64 powerpc64 s390x),)
   MODEL = 64
 endif
 
@@ -221,7 +199,6 @@ ifneq ($(strip $(findstring $(OS), linux solaris)),)
   # Change the CC/LD instead of CFLAGS/LDFLAGS, incase other things in the flags
   # makes the libffi build choke
   CC += -m$(MODEL)
-  CXX += -m$(MODEL)
   LD += -m$(MODEL)
 endif
 
@@ -249,26 +226,21 @@ debug:
 	@echo "JFFI_BUILD_DIR=$(JFFI_BUILD_DIR)"
 	@echo "OBJS=$(OBJS)"
 
-$(LIBJFFI):  $(OBJS) $(CXXOBJS) $(LIBFFI_LIBS)
+$(LIBJFFI):  $(OBJS) $(LIBFFI_LIBS)
 	$(CC) -o $@ $(LDFLAGS) $(SOFLAGS) $(OBJS) $(LIBFFI_LIBS) $(LIBS)
 	$(STRIP) $@
 
 # For the primitive int interface, don't do frame pointer save/restore
 $(JFFI_BUILD_DIR)/Fast%Invoke.o : $(JFFI_SRC_DIR)/Fast%Invoke.c $(wildcard $(JFFI_SRC_DIR)/*.h) $(LIBFFI)
 	@mkdir -p $(@D)
-	$(CCACHE) $(CC) $(CFLAGS) -fomit-frame-pointer -c $< -o $@
+	@$(CCACHE) $(CC) $(CFLAGS) -fomit-frame-pointer -c $< -o $@
 
 
 $(BUILD_DIR)/%.o : $(SRC_DIR)/%.c $(wildcard $(JFFI_SRC_DIR)/*.h)
 	@mkdir -p $(@D)
-	$(CCACHE) $(CC) $(CFLAGS) -c $< -o $@
+	@$(CCACHE) $(CC) $(CFLAGS) -c $< -o $@
 
 $(OBJS) : $(LIBFFI_LIBS)
-
-$(BUILD_DIR)/%.o : $(SRC_DIR)/%.cpp $(wildcard $(JFFI_SRC_DIR)/*.h)
-	@mkdir -p $(@D)
-	$(CCACHE) $(CXX) $(CXXFLAGS) -c $< -o $@
-
 
 ifeq ($(OS), darwin)
 build_ffi = \
