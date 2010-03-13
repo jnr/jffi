@@ -28,9 +28,6 @@ public abstract class MemoryIO {
     /** A handle to the JNI accessor */
     private final Foreign foreign = Foreign.getInstance();
 
-    /** The address mask used to truncate 32bit addresses contained in long values */
-    private static final long ADDRESS_MASK = Platform.getPlatform().addressMask();
-
     /** Holds a single instance of <tt>MemoryIO</tt> */
     private static final class SingletonHolder {
         private static final MemoryIO INSTANCE = newMemoryIO();
@@ -640,11 +637,11 @@ public abstract class MemoryIO {
      */
     private static final class NativeImpl32 extends NativeImpl {
         public final long getAddress(long address) {
-            // Mask with ADDRESS_MASK to cancel out any sign extension
-            return foreign.getAddress(address) & ADDRESS_MASK;
+            return foreign.getInt(address);
         }
+
         public final void putAddress(long address, long value) {
-            foreign.putAddress(address, value & ADDRESS_MASK);
+            foreign.putInt(address, (int) value);
         }
     }
 
@@ -724,10 +721,10 @@ public abstract class MemoryIO {
      */
     private static final class UnsafeImpl32 extends UnsafeImpl {
         public final long getAddress(long address) {
-            return unsafe.getAddress(address) & ADDRESS_MASK;
+            return unsafe.getInt(address);
         }
         public final void putAddress(long address, long value) {
-            unsafe.putAddress(address, value & ADDRESS_MASK);
+            unsafe.putInt(address, (int) value);
         }
     }
 

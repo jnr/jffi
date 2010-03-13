@@ -25,7 +25,6 @@ package com.kenai.jffi;
 final class DirectClosureBuffer implements Closure.Buffer {
 
     private static final MemoryIO IO = MemoryIO.getInstance();
-    private static final long ADDRESS_MASK = Platform.getPlatform().addressMask();
     private static final NativeWordIO WordIO = NativeWordIO.getInstance();
     private static final long PARAM_SIZE = Platform.getPlatform().addressSize() / 8;
     private final long retval;
@@ -65,7 +64,7 @@ final class DirectClosureBuffer implements Closure.Buffer {
     }
 
     public final long getAddress(int index) {
-        return IO.getAddress(IO.getAddress(parameters + (index * PARAM_SIZE))) & ADDRESS_MASK;
+        return IO.getAddress(IO.getAddress(parameters + (index * PARAM_SIZE)));
     }
 
     public final long getStruct(int index) {
