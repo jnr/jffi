@@ -25,6 +25,9 @@ public abstract class Invoker {
 
     /** The size in bits of a native memory address */
     private static final long ADDRESS_SIZE = Platform.getPlatform().addressSize();
+
+    /** A mask to apply to native memory addresses to cancel sign extension */
+    private static final long ADDRESS_MASK = Platform.getPlatform().addressMask();
     
     private final Foreign foreign = Foreign.getInstance();
 
@@ -529,7 +532,7 @@ public abstract class Invoker {
         private static final Invoker INSTANCE = new ILP32();
 
         public final long invokeAddress(Function function, HeapInvocationBuffer buffer) {
-            return (long) invokeInt(function, buffer);
+            return ((long)invokeInt(function, buffer)) & ADDRESS_MASK;
         }
     }
 

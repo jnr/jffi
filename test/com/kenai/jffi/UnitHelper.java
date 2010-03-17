@@ -19,11 +19,12 @@ public class UnitHelper {
     public static final class Address extends java.lang.Number {
 
         public final int SIZE = Platform.getPlatform().addressSize();
+        public final long MASK = Platform.getPlatform().addressMask();
 
         public final long address;
 
         public Address(long address) {
-            this.address = address;
+            this.address = address & MASK;
         }
 
         public Address(Closure.Handle closure) {
