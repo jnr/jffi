@@ -470,7 +470,7 @@ public abstract class MemoryIO {
      * @return The native address of the allocated memory.
      */
     public final long allocateMemory(long size, boolean clear) {
-        return foreign.allocateMemory(size, clear);
+        return foreign.allocateMemory(size, clear) & ADDRESS_MASK;
     }
 
     /**
@@ -641,10 +641,10 @@ public abstract class MemoryIO {
     private static final class NativeImpl32 extends NativeImpl {
         public final long getAddress(long address) {
             // Mask with ADDRESS_MASK to cancel out any sign extension
-            return foreign.getAddress(address) & ADDRESS_MASK;
+            return ((long) foreign.getInt(address)) & ADDRESS_MASK;
         }
         public final void putAddress(long address, long value) {
-            foreign.putAddress(address, value & ADDRESS_MASK);
+            foreign.putInt(address, (int) value);
         }
     }
 
@@ -653,10 +653,10 @@ public abstract class MemoryIO {
      */
     private static final class NativeImpl64 extends NativeImpl {
         public final long getAddress(long address) {
-            return foreign.getAddress(address);
+            return foreign.getLong(address);
         }
         public final void putAddress(long address, long value) {
-            foreign.putAddress(address, value);
+            foreign.putLong(address, value);
         }
     }
 
@@ -724,10 +724,10 @@ public abstract class MemoryIO {
      */
     private static final class UnsafeImpl32 extends UnsafeImpl {
         public final long getAddress(long address) {
-            return unsafe.getAddress(address) & ADDRESS_MASK;
+            return ((long) unsafe.getInt(address)) & ADDRESS_MASK;
         }
         public final void putAddress(long address, long value) {
-            unsafe.putAddress(address, value & ADDRESS_MASK);
+            unsafe.putInt(address, (int) value);
         }
     }
 
@@ -736,10 +736,10 @@ public abstract class MemoryIO {
      */
     private static final class UnsafeImpl64 extends UnsafeImpl {
         public final long getAddress(long address) {
-            return unsafe.getAddress(address);
+            return unsafe.getLong(address);
         }
         public final void putAddress(long address, long value) {
-            unsafe.putAddress(address, value);
+            unsafe.putLong(address, value);
         }
     }
 
