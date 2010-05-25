@@ -64,8 +64,9 @@ JFLAGS = -fno-omit-frame-pointer -fno-strict-aliasing -DNDEBUG
 OFLAGS = -O2 $(JFLAGS)
 
 # MacOS headers aren't completely warning free, so turn them off
+WERROR = -Werror
 ifneq ($(OS),darwin)
-  WFLAGS += -Wundef -Werror
+  WFLAGS += -Wundef $(WERROR)
 endif
 WFLAGS += -W -Wall -Wno-unused -Wno-parentheses
 PICFLAGS = -fPIC
