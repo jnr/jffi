@@ -253,7 +253,7 @@ build_ffi = \
 		$(LIBFFI_CONFIGURE) --host=$(1)-apple-darwin > /dev/null; \
 	fi); \
 	env MACOSX_DEPLOYMENT_TARGET=10.4 $(MAKE) -C $(BUILD_DIR)/libffi-darwin-$(1)
-	
+
 $(LIBFFI):
 	@mkdir -p $(@D)
 	@for arch in $(ARCHES); do $(call build_ffi,$$arch);done
