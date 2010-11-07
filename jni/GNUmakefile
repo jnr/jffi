@@ -146,6 +146,7 @@ ifeq ($(OS), darwin)
 
   MACSDK = /Developer/SDKs/MacOSX10.4u.sdk
   CFLAGS += -isysroot $(MACSDK) -DTARGET_RT_MAC_CFM=0
+  CFLAGS += -I$(MACSDK)/System/Library/Frameworks/JavaVM.framework/Headers
   CFLAGS += $(foreach arch, $(ARCHES),-arch $(arch))
   LDFLAGS = $(foreach arch, $(ARCHES),-arch $(arch)) -dynamiclib -framework JavaVM \
 	-Wl,-syslibroot,$(MACSDK) -mmacosx-version-min=10.4
