@@ -31,7 +31,7 @@ public final class Struct extends Aggregate {
      * @param fields The fields contained in the struct.
      */
     public Struct(Type... fields) {
-        super(Foreign.getInstance().newStruct(Type.nativeHandles(fields), false));
+        super(Foreign.getInstance(), Foreign.getInstance().newStruct(Type.nativeHandles(fields), false));
         this.fields = (Type[]) fields.clone();
     }
 }

@@ -26,7 +26,7 @@ import java.lang.reflect.Method;
  */
 public abstract class MemoryIO {
     /** A handle to the JNI accessor */
-    private final Foreign foreign = Foreign.getInstance();
+    final Foreign foreign = Foreign.getInstance();
 
     /** The address mask used to truncate 32bit addresses contained in long values */
     private static final long ADDRESS_MASK = Platform.getPlatform().addressMask();
@@ -590,7 +590,7 @@ public abstract class MemoryIO {
      * An implementation of MemoryIO using JNI methods.
      */
     private static abstract class NativeImpl extends MemoryIO {
-        protected static final Foreign foreign = Foreign.getInstance();
+
         public final byte getByte(long address) {
             return foreign.getByte(address);
         }

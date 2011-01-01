@@ -37,7 +37,7 @@ public final class Library {
 
     /** A handle to the current process */
     private static final class DefaultLibrary {
-        private static final Library INSTANCE = new Library(null, dlopen(null, LAZY | GLOBAL));
+        private static final Library INSTANCE = openLibrary(null, LAZY | GLOBAL);
     }
 
     /** Perform  lazy  binding. Only resolve symbols as needed */
@@ -46,7 +46,7 @@ public final class Library {
     /** Resolve all symbols when loading the library */
     public static final int NOW    = Foreign.RTLD_NOW;
 
-    /** Symbols in this library are not made availabl to other libraries */
+    /** Symbols in this library are not made available to other libraries */
     public static final int LOCAL  = Foreign.RTLD_LOCAL;
 
     /** All symbols in the library are made available to other libraries */
@@ -58,6 +58,9 @@ public final class Library {
     /** The name of this <tt>Library</tt> */
     private final String name;
 
+    /** A handle to the foreign interface to keep it alive as long as this object is alive */
+    private final Foreign foreign;
+
     /**
      * Internal wrapper around dlopen.
      *
@@ -68,8 +71,7 @@ public final class Library {
      * @param flags The flags to pass to dlopen
      * @return The native handle for the opened library, or 0 if it failed to open.
      */
-    private static final long dlopen(String name, int flags) {
-        final Foreign foreign = Foreign.getInstance();
+    private static long dlopen(Foreign foreign, String name, int flags) {
         try {
             return foreign.dlopen(name, flags);
 
@@ -132,12 +134,14 @@ public final class Library {
             flags = LAZY | LOCAL;
         }
 
-        final long address = dlopen(name, flags);
+        final Foreign foreign = Foreign.getInstance();
+        final long address = dlopen(foreign, name, flags);
 
-        return address != 0L ? new Library(name, address) : null;
+        return address != 0L ? new Library(foreign, name, address) : null;
     }
     
-    private Library(String name, long address) {
+    private Library(Foreign foreign, String name, long address) {
+        this.foreign = foreign;
         this.name = name;
         this.handle = address;
     }
@@ -149,7 +153,6 @@ public final class Library {
      * @return The address of the symbol within the current address space.
      */
     public final long getSymbolAddress(String name) {
-        final Foreign foreign = Foreign.getInstance();
         try {
             return foreign.dlsym(handle, name);
 
@@ -173,7 +176,7 @@ public final class Library {
     protected void finalize() throws Throwable {
         try {
             if (handle != 0L) {
-                Foreign.getInstance().dlclose(handle);
+                foreign.dlclose(handle);
             }
         } finally {
             super.finalize();

@@ -31,6 +31,12 @@ abstract public class PageManager {
     /** The memory should be writable */
     public static final int PROT_WRITE = Foreign.PROT_WRITE;
 
+    private final Foreign foreign = Foreign.getInstance();
+
+    final Foreign getForeign() {
+        return foreign;
+    }
+
     private static final class SingletonHolder {
         public static final PageManager INSTANCE = Platform.getPlatform().getOS() == Platform.OS.WINDOWS
                 ? new Windows() : new Unix();
@@ -51,7 +57,7 @@ abstract public class PageManager {
      * @return The size of a page on the current system, in bytes.
      */
     public final long pageSize() {
-        return Foreign.getInstance().pageSize();
+        return getForeign().pageSize();
     }
 
     /**
@@ -90,19 +96,19 @@ abstract public class PageManager {
         @Override
         public long allocatePages(int npages, int protection) {
             long sz = npages * pageSize();
-            return Foreign.getInstance().mmap(0, sz, protection,
+            return getForeign().mmap(0, sz, protection,
                     Foreign.MAP_ANON | Foreign.MAP_PRIVATE, -1, 0);
 
         }
 
         @Override
         public void freePages(long address, int npages) {
-            Foreign.getInstance().munmap(address, npages * pageSize());
+            getForeign().munmap(address, npages * pageSize());
         }
 
         @Override
         public void protectPages(long address, int npages, int protection) {
-            Foreign.getInstance().mprotect(address, npages * pageSize(), protection);
+            getForeign().mprotect(address, npages * pageSize(), protection);
         }
     }
 

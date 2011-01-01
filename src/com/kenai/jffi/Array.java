@@ -33,7 +33,7 @@ public final class Array extends Aggregate {
      * @param fields The fields contained in the struct.
      */
     public Array(Type elementType, int length) {
-        super(Foreign.getInstance().newArray(elementType.handle(), length));
+        super(Foreign.getInstance(), Foreign.getInstance().newArray(elementType.handle(), length));
         this.elementType = elementType;
         this.length = length;
     }

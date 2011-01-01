@@ -31,7 +31,7 @@ public final class Union extends Aggregate {
      * @param fields The fields contained in the struct.
      */
     public Union(Type... fields) {
-        super(Foreign.getInstance().newStruct(Type.nativeHandles(fields), true));
+        super(Foreign.getInstance(), Foreign.getInstance().newStruct(Type.nativeHandles(fields), true));
         this.fields = (Type[]) fields.clone();
     }
 }

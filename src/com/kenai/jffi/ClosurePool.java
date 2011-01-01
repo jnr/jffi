@@ -31,6 +31,7 @@ final class ClosurePool {
     private final List<MagazineHolder> partial = new LinkedList<MagazineHolder>();
     private final List<MagazineHolder> full = new LinkedList<MagazineHolder>();
     private final Set<Magazine> magazines = new HashSet<Magazine>();
+
     //
     // Since the CallContext native handle is used by the native pool code
     // a strong reference to the call context needs to be kept.
@@ -138,6 +139,8 @@ final class ClosurePool {
     private static final class Magazine {
         /** Store a reference to the MemoryIO accessor here for easy access */
         private static final com.kenai.jffi.MemoryIO IO = com.kenai.jffi.MemoryIO.getInstance();
+        /** A handle to the foreign interface to keep it alive as long as this object is alive */
+        private final Foreign foreign = Foreign.getInstance();
 
         private final CallContext ctx;
         private final long magazine;
@@ -148,7 +151,7 @@ final class ClosurePool {
 
         Magazine(CallContext ctx) {
             this.ctx = ctx;
-            this.magazine = Foreign.getInstance().newClosureMagazine(ctx.getAddress(), Proxy.METHOD);
+            this.magazine = foreign.newClosureMagazine(ctx.getAddress(), Proxy.METHOD);
         }
 
         Slot get() {
@@ -161,7 +164,7 @@ final class ClosurePool {
 
         private Slot newSlot() {
             Proxy proxy = new Proxy(ctx);
-            long h = Foreign.getInstance().closureMagazineGet(magazine, proxy);
+            long h = foreign.closureMagazineGet(magazine, proxy);
             if (h == 0) {
                 nativeEmpty = true;
                 return null;
@@ -205,7 +208,7 @@ final class ClosurePool {
                 }
 
                 if (magazine != 0 && release) {
-                    Foreign.getInstance().freeClosureMagazine(magazine);
+                    foreign.freeClosureMagazine(magazine);
                 }
             } finally {
                 super.finalize();

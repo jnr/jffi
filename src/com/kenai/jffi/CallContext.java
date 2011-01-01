@@ -18,6 +18,9 @@
 
 package com.kenai.jffi;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  * Native function call context
  *
@@ -43,6 +46,9 @@ public final class CallContext implements CallInfo {
     /** The parameter types of this function */
     private final Type[] parameterTypes;
 
+    /** A handle to the foreign interface to keep it alive as long as this object is alive */
+    private final Foreign foreign = Foreign.getInstance();
+    
     /**
      * Creates a new instance of <tt>Function</tt> with default calling convention.
      *
@@ -83,7 +89,7 @@ public final class CallContext implements CallInfo {
         final int flags = (!saveErrno ? Foreign.F_NOERRNO : 0)
                 | (convention == CallingConvention.STDCALL ? Foreign.F_STDCALL : Foreign.F_DEFAULT);
 
-        final long h = Foreign.getInstance().newCallContext(returnType.handle(),
+        final long h = foreign.newCallContext(returnType.handle(),
                 Type.nativeHandles(paramTypes), flags);
         if (h == 0) {
             throw new RuntimeException("Failed to create native function");
@@ -98,7 +104,7 @@ public final class CallContext implements CallInfo {
         this.parameterTypes = (Type[]) paramTypes.clone();
 
         this.parameterCount = paramTypes.length;
-        this.rawParameterSize = Foreign.getInstance().getFunctionRawParameterSize(h);
+        this.rawParameterSize = foreign.getFunctionRawParameterSize(h);
     }
 
     /**
@@ -152,7 +158,7 @@ public final class CallContext implements CallInfo {
         if (disposed) {
             throw new RuntimeException("context already freed");
         }
-        Foreign.getInstance().freeCallContext(contextAddress);
+        foreign.freeCallContext(contextAddress);
         disposed = true;
     }
 
@@ -160,10 +166,11 @@ public final class CallContext implements CallInfo {
     protected void finalize() throws Throwable {
         try {
             if (contextAddress != 0 && !disposed) {
-                Foreign.getInstance().freeCallContext(contextAddress);
+                foreign.freeCallContext(contextAddress);
             }
         } catch (Throwable t) {
-            t.printStackTrace(System.err);
+            Logger.getLogger(getClass().getName()).log(Level.WARNING, 
+                    "Exception when freeing CallContext: %s", t.getLocalizedMessage());
         } finally {
             super.finalize();
         }

@@ -18,6 +18,9 @@
 
 package com.kenai.jffi;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  * Native function invocation context
  *
@@ -45,6 +48,9 @@ public final class Function implements CallInfo {
 
     /** Whether the native context has been freed yet */
     private volatile boolean disposed = false;
+
+    /** A handle to the foreign interface to keep it alive as long as this object is alive */
+    private final Foreign foreign = Foreign.getInstance();
 
     /**
      * Creates a new instance of <tt>Function</tt> with default calling convention.
@@ -87,7 +93,7 @@ public final class Function implements CallInfo {
         final int flags = (!saveErrno ? Foreign.F_NOERRNO : 0)
                 | (convention == CallingConvention.STDCALL ? Foreign.F_STDCALL : Foreign.F_DEFAULT);
 
-        final long h = Foreign.getInstance().newFunction(address,
+        final long h = foreign.newFunction(address,
                 returnType.handle(), Type.nativeHandles(paramTypes),
                 flags);
         if (h == 0) {
@@ -103,7 +109,7 @@ public final class Function implements CallInfo {
         this.paramTypes = (Type[]) paramTypes.clone();
 
         this.parameterCount = paramTypes.length;
-        this.rawParameterSize = Foreign.getInstance().getFunctionRawParameterSize(h);        
+        this.rawParameterSize = foreign.getFunctionRawParameterSize(h);        
     }    
 
     /**
@@ -166,7 +172,7 @@ public final class Function implements CallInfo {
         if (disposed) {
             throw new RuntimeException("function already freed");
         }
-        Foreign.getInstance().freeFunction(contextAddress);
+        foreign.freeFunction(contextAddress);
         disposed = true;
     }
 
@@ -174,10 +180,11 @@ public final class Function implements CallInfo {
     protected void finalize() throws Throwable {
         try {
             if (contextAddress != 0 && !disposed) {
-                Foreign.getInstance().freeFunction(contextAddress);
+                foreign.freeFunction(contextAddress);
             }
         } catch (Throwable t) {
-            t.printStackTrace(System.err);
+            Logger.getLogger(getClass().getName()).log(Level.WARNING, 
+                    "Exception when freeing function context: %s", t.getLocalizedMessage());
         } finally {
             super.finalize();
         }

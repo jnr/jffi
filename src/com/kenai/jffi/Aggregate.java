@@ -18,6 +18,9 @@
 
 package com.kenai.jffi;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 public abstract class Aggregate extends Type {
     /** The FFI type of this type */
     private final int type;
@@ -32,14 +35,22 @@ public abstract class Aggregate extends Type {
 
     private volatile boolean disposed = false;
 
+    /** A handle to the foreign interface to keep it alive as long as this object is alive */
+    private final Foreign foreign;
+
     public Aggregate(long handle) {
+        this(Foreign.getInstance(), handle);
+    }
+    
+    Aggregate(Foreign foreign, long handle) {
         if (handle == 0L) {
             throw new NullPointerException("Invalid ffi_type handle");
         }
+        this.foreign = foreign;
         this.handle = handle;
-        this.type = Foreign.getInstance().getTypeType(handle);
-        this.size = Foreign.getInstance().getTypeSize(handle);
-        this.align = Foreign.getInstance().getTypeAlign(handle);
+        this.type = foreign.getTypeType(handle);
+        this.size = foreign.getTypeSize(handle);
+        this.align = foreign.getTypeAlign(handle);
     }
     
     final long handle() {
@@ -64,7 +75,7 @@ public abstract class Aggregate extends Type {
         }
 
         disposed = true;
-        Foreign.getInstance().freeAggregate(handle);
+        foreign.freeAggregate(handle);
     }
 
     @Override
@@ -74,7 +85,8 @@ public abstract class Aggregate extends Type {
                 dispose();
             }
         } catch (Throwable t) {
-            t.printStackTrace(System.err);
+            Logger.getLogger(getClass().getName()).log(Level.WARNING, 
+                    "Exception when freeing FFI aggregate: %s", t.getLocalizedMessage());
         } finally {
             super.finalize();
         }
