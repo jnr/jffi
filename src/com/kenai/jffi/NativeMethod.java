@@ -22,6 +22,7 @@ package com.kenai.jffi;
  * Represents a native implementation of a method for a class
  */
 public final class NativeMethod {
+    private final MemoryIO io = MemoryIO.getInstance();
     final long function;
     final long name;
     final long signature;
@@ -35,19 +36,20 @@ public final class NativeMethod {
      */
     public NativeMethod(long address, String name, String signature) {
         this.function = address;
-        this.name = nativeString(name);
-        this.signature = nativeString(signature);
+        this.name = nativeString(io, name);
+        this.signature = nativeString(io, signature);
     }
 
-    private static final long nativeString(String s) {
+    private static final long nativeString(MemoryIO io, String s) {
         byte[] bytes = s.getBytes();
 
-        long memory = MemoryIO.getInstance().allocateMemory(bytes.length + 1, false);
+        long memory = io.allocateMemory(bytes.length + 1, false);
         if (memory == 0L) {
             throw new OutOfMemoryError("failed to allocate memory for string");
         }
 
-        MemoryIO.getInstance().putZeroTerminatedByteArray(memory, bytes, 0, bytes.length);
+        io.putZeroTerminatedByteArray(memory, bytes, 0, bytes.length);
+
         return memory;
     }
 
@@ -55,10 +57,10 @@ public final class NativeMethod {
     protected void finalize() throws Throwable {
         try {
             if (name != 0L) {
-                MemoryIO.getInstance().freeMemory(name);
+                io.freeMemory(name);
             }
             if (signature != 0L) {
-                MemoryIO.getInstance().freeMemory(signature);
+                io.freeMemory(signature);
             }
         } finally {
             super.finalize();

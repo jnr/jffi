@@ -33,15 +33,17 @@ public final class NativeMethods {
      * hash map, so as long as the class remains alive, the native memory for the
      * structures remains alive.
      *
-     * This doesn't seem to be neccessary on sun's jvm, but best do it to be safe.
+     * This doesn't seem to be necessary on sun's jvm, but best do it to be safe.
      */
     private static final Map<Class, NativeMethods> registeredMethods
             = new WeakHashMap<Class, NativeMethods>();
 
     private final long memory;
     private final List<NativeMethod> methods;
+    private final MemoryIO mm;
 
-    private NativeMethods(long memory, List<NativeMethod> methods) {
+    private NativeMethods(MemoryIO mm, long memory, List<NativeMethod> methods) {
+        this.mm = mm;
         this.memory = memory;
         this.methods = new ArrayList<NativeMethod>(methods);
     }
@@ -70,7 +72,7 @@ public final class NativeMethods {
             throw new OutOfMemoryError("could not allocate native memory");
         }
 
-        NativeMethods nm = new NativeMethods(memory, methods);
+        NativeMethods nm = new NativeMethods(mm, memory, methods);
 
         long off = 0;
         for (NativeMethod m : methods) {
@@ -106,7 +108,7 @@ public final class NativeMethods {
     @Override
     protected void finalize() throws Throwable {
         try {
-            MemoryIO.getInstance().freeMemory(memory);
+            mm.freeMemory(memory);
         } finally {
             super.finalize();
         }
