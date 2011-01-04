@@ -22,6 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Utility class to register native methods on a class
@@ -38,14 +40,10 @@ public final class NativeMethods {
     private static final Map<Class, NativeMethods> registeredMethods
             = new WeakHashMap<Class, NativeMethods>();
 
-    private final long memory;
-    private final List<NativeMethod> methods;
-    private final MemoryIO mm;
+    private final ResourceHolder memory;
 
-    private NativeMethods(MemoryIO mm, long memory, List<NativeMethod> methods) {
-        this.mm = mm;
+    private NativeMethods(ResourceHolder memory) {
         this.memory = memory;
-        this.methods = new ArrayList<NativeMethod>(methods);
     }
 
     /**
@@ -55,7 +53,16 @@ public final class NativeMethods {
      * @param methods The list of methods to attach to the class.
      */
     public static synchronized final void register(Class clazz, List<NativeMethod> methods) {
-        final long ptrSize = Platform.getPlatform().addressSize() / 8;
+        //
+        // Calculate how much memory is needed for the function names + signatures
+        //
+        int stringSize = 0;
+        for (NativeMethod m : methods) {
+            stringSize += m.name.getBytes().length + 1;
+            stringSize += m.signature.getBytes().length + 1;
+        }
+
+        final int ptrSize = Platform.getPlatform().addressSize() / 8;
         final MemoryIO mm = MemoryIO.getInstance();
 
         //
@@ -66,18 +73,29 @@ public final class NativeMethods {
         //      char *signature;
         //      void *fnPtr;
         //   } JNINativeMethod;
-
-        long memory = mm.allocateMemory(methods.size() * 3 * ptrSize, true);
+        int structSize = methods.size() * 3 * ptrSize;
+        long memory = mm.allocateMemory(structSize + stringSize, true);
         if (memory == 0L) {
             throw new OutOfMemoryError("could not allocate native memory");
         }
 
-        NativeMethods nm = new NativeMethods(mm, memory, methods);
+        NativeMethods nm = new NativeMethods(new ResourceHolder(mm, memory));
 
-        long off = 0;
+        int off = 0;
+        int stringOff = structSize;
         for (NativeMethod m : methods) {
-            mm.putAddress(memory + off, m.name); off += ptrSize;
-            mm.putAddress(memory + off, m.signature); off += ptrSize;
+            byte[] name = m.name.getBytes();
+            long nameAddress = memory + stringOff;
+            stringOff += name.length + 1;
+            mm.putZeroTerminatedByteArray(nameAddress, name, 0, name.length);
+            
+            byte[] sig = m.signature.getBytes();
+            long sigAddress = memory + stringOff;
+            stringOff += sig.length + 1;
+            mm.putZeroTerminatedByteArray(sigAddress, sig, 0, sig.length);
+            
+            mm.putAddress(memory + off, nameAddress); off += ptrSize;
+            mm.putAddress(memory + off, sigAddress); off += ptrSize;
             mm.putAddress(memory + off, m.function); off += ptrSize;
         }
 
@@ -104,13 +122,26 @@ public final class NativeMethods {
         
         registeredMethods.remove(clazz);
     }
+    
+    private static final class ResourceHolder {
+        private final MemoryIO mm;
+        private final long memory;
 
-    @Override
-    protected void finalize() throws Throwable {
-        try {
-            mm.freeMemory(memory);
-        } finally {
-            super.finalize();
+        public ResourceHolder(MemoryIO mm, long memory) {
+            this.mm = mm;
+            this.memory = memory;
+        }
+        
+        @Override
+        protected void finalize() throws Throwable {
+            try {
+                mm.freeMemory(memory);
+            } catch (Throwable t) {
+                Logger.getLogger(getClass().getName()).log(Level.WARNING, 
+                    "Exception when freeing native method struct array: %s", t.getLocalizedMessage());
+            } finally {
+                super.finalize();
+            }
         }
     }
 }
