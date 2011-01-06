@@ -133,8 +133,6 @@ final class Init {
                 pos += os.getChannel().transferFrom(srcChannel, pos, Math.max(4096, is.available()));
             }
 
-            System.load(dstFile.getAbsolutePath());
-
         } catch (IOException ex) {
             throw new UnsatisfiedLinkError(ex.getMessage());
 
@@ -148,6 +146,8 @@ final class Init {
                 throw new RuntimeException(ex);
             }
         }
+        
+        System.load(dstFile.getAbsolutePath());
     }
 
     /**
