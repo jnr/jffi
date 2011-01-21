@@ -4,7 +4,7 @@
   <groupId>org.jruby.extras</groupId>
   <artifactId>jffi</artifactId>
   <packaging>jar</packaging>
-  <version>1.0.4</version>
+  <version>1.0.5-SNAPSHOT</version>
   <name>jffi</name>
   <description>Java wrapper around libffi</description>
   <url>http://github.com/wmeissner/jffi</url>
@@ -163,6 +163,59 @@
             </configuration>
             <goals>
               <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-antrun-plugin</artifactId>
+          <executions>
+            <execution>
+                <phase>process-test-resources</phase>
+                <goals>
+                    <goal>run</goal>
+                </goals>
+                <configuration>
+                    <tasks>
+                      <unzip dest="${project.build.directory}/" overwrite="true">
+                          <patternset>
+                            <include name="**/*.so"/>
+                            <include name="**/*.dylib"/>
+                            <include name="**/*.jnilib"/>
+                            <include name="**/*.dll"/>
+                            <include name="**/*.a"/>
+                          </patternset>
+                          <fileset dir="archive">
+                            <include name="**/*.jar"/>
+                          </fileset>
+                      </unzip>
+                    </tasks>
+                </configuration>
+            </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>2.2</version>
+        <configuration>
+          <descriptors>
+            <descriptor>native-assemble.xml</descriptor>
+          </descriptors>
+          <archive>
+            <index>true</index>
+            <manifest>
+              <addClasspath>true</addClasspath>
+            </manifest>
+          </archive>
+        </configuration>
+        <executions>
+          <execution>
+            <id>native-assemble</id> <!-- this is used for inheritance merges -->
+            <phase>package</phase> <!-- append to the packaging phase. -->
+            <goals>
+              <goal>single</goal> <!-- goals == mojos -->
             </goals>
           </execution>
         </executions>

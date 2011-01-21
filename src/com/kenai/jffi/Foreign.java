@@ -26,7 +26,7 @@ import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
 final class Foreign {
-
+    
     private static abstract class InstanceHolder {
         static final InstanceHolder INSTANCE = getInstanceHolder();
 
@@ -38,7 +38,7 @@ final class Foreign {
                 Foreign foreign = new Foreign();
 
                 if ((foreign.getVersion() & 0xffff00) != (VERSION_MAJOR << 16 | VERSION_MINOR << 8)) {
-                    throw new UnsatisfiedLinkError("Incorrect native library version");
+                    return new InValidInstanceHolder(new UnsatisfiedLinkError("Incorrect native library version"));
                 }
                 
                 foreign.init();
@@ -73,7 +73,7 @@ final class Foreign {
         }
 
         final Foreign getForeign() {
-            throw cause;
+            throw new RuntimeException(cause);
         }
     }
     

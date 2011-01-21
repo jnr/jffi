@@ -24,7 +24,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.channels.Channels;
-import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.util.Properties;
 
@@ -149,7 +148,7 @@ final class Init {
         
         System.load(dstFile.getAbsolutePath());
     }
-
+    
     /**
      * Gets an <tt>InputStream</tt> representing the stub library image stored in
      * the jar file.
@@ -158,13 +157,14 @@ final class Init {
      */
     private static final InputStream getStubLibraryStream() {
         String path = getStubLibraryPath();
-
-        InputStream is = Init.class.getResourceAsStream(path);
+        ClassLoader cl = Init.class.getClassLoader();
+        InputStream is = cl.getResourceAsStream(path);
 
         // On MacOS, the stub might be named .dylib or .jnilib - cater for both
         if (is == null && Platform.getPlatform().getOS() == Platform.OS.DARWIN) {
-            is = Init.class.getResourceAsStream(path.replaceAll("dylib", "jnilib"));
+            is = cl.getResourceAsStream(path.replaceAll("dylib", "jnilib"));
         }
+
         if (is == null) {
             throw new UnsatisfiedLinkError("Could not locate stub library ("
                     + path + ") in jar file");
@@ -188,7 +188,7 @@ final class Init {
      * @return The path of the jar file.
      */
     private static final String getStubLibraryPath() {
-        return "/jni/" + Platform.getPlatform().getName() + "/"+ System.mapLibraryName(stubLibraryName);
+        return "jni/" + Platform.getPlatform().getName() + "/"+ System.mapLibraryName(stubLibraryName);
     }
 
 }
