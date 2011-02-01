@@ -10,8 +10,8 @@
   <url>http://github.com/wmeissner/jffi</url>
   <licenses>
     <license>
-      <name>GNU LGPLv3</name>
-      <url>http://www.gnu.org/licenses/lgpl-3.0.txt</url>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
       <distribution>repo</distribution>
     </license>
   </licenses>
