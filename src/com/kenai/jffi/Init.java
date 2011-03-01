@@ -170,18 +170,21 @@ final class Init {
      * @return A new <tt>InputStream</tt>
      */
     private static final InputStream getStubLibraryStream() {
-        String path = getStubLibraryPath();
+        String stubPath = getStubLibraryPath();
         ClassLoader cl = Init.class.getClassLoader();
-        InputStream is = cl.getResourceAsStream(path);
+        InputStream is = null;
 
-        // On MacOS, the stub might be named .dylib or .jnilib - cater for both
-        if (is == null && Platform.getPlatform().getOS() == Platform.OS.DARWIN) {
-            is = cl.getResourceAsStream(path.replaceAll("dylib", "jnilib"));
+        for (String path : new String[] { stubPath, "/" + stubPath }) {
+            is = cl.getResourceAsStream(path);
+
+            // On MacOS, the stub might be named .dylib or .jnilib - cater for both
+            if (is == null && Platform.getPlatform().getOS() == Platform.OS.DARWIN) {
+                is = cl.getResourceAsStream(path.replaceAll("dylib", "jnilib"));
+            }            
         }
-
         if (is == null) {
             throw new UnsatisfiedLinkError("Could not locate stub library ("
-                    + path + ") in jar file");
+                    + stubPath + ") in jar file");
         }
 
         return is;
