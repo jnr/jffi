@@ -55,10 +55,14 @@ public final class CallContext implements CallInfo {
     private final int rawParameterSize;
 
     /** The return type of this function */
-    private final Type returnType;
+    final Type returnType;
 
     /** The parameter types of this function */
-    private final Type[] parameterTypes;
+    final Type[] parameterTypes;
+    
+    final long[] parameterTypeHandles;
+    
+    final int flags;
 
     /** A handle to the foreign interface to keep it alive as long as this object is alive */
     private final Foreign foreign = Foreign.getInstance();
@@ -119,6 +123,8 @@ public final class CallContext implements CallInfo {
 
         this.parameterCount = paramTypes.length;
         this.rawParameterSize = foreign.getFunctionRawParameterSize(h);
+        this.parameterTypeHandles = Type.nativeHandles(paramTypes);
+        this.flags = flags;
     }
 
     /**

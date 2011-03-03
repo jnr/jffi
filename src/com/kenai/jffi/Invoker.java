@@ -72,7 +72,7 @@ public abstract class Invoker {
     public final int invokeVrI(Function function) {
         return foreign.invokeVrI(function.getContextAddress());
     }
-
+    
     /**
      * Invokes a function with no arguments, and returns a 32 bit float.
      *
@@ -82,7 +82,7 @@ public abstract class Invoker {
     public final float invokeVrF(Function function) {
         return foreign.invokeVrF(function.getContextAddress());
     }
-
+    
     /**
      * Invokes a function with no arguments, and returns a 32 bit integer.
      *
@@ -94,7 +94,7 @@ public abstract class Invoker {
     public final int invokeNoErrnoVrI(Function function) {
         return foreign.invokeNoErrnoVrI(function.getContextAddress());
     }
-
+    
     /**
      * Invokes a function with one integer argument, and returns a 32 bit integer.
      *
@@ -105,7 +105,7 @@ public abstract class Invoker {
     public final int invokeIrI(Function function, int arg1) {
         return foreign.invokeIrI(function.getContextAddress(), arg1);
     }
-
+    
     /**
      * Invokes a function with one integer argument, and returns a 32 bit integer.
      *
@@ -118,7 +118,7 @@ public abstract class Invoker {
     public final int invokeNoErrnoIrI(Function function, int arg1) {
         return foreign.invokeNoErrnoIrI(function.getContextAddress(), arg1);
     }
-
+    
     /**
      * Invokes a function with one integer argument, and returns a 32 bit float.
      *
@@ -129,7 +129,7 @@ public abstract class Invoker {
     public final float invokeIrF(Function function, int arg1) {
         return foreign.invokeIrF(function.getContextAddress(), arg1);
     }
-
+    
     /**
      * Invokes a function with two integer arguments, and returns a 32 bit integer.
      *
@@ -141,7 +141,7 @@ public abstract class Invoker {
     public final int invokeIIrI(Function function, int arg1, int arg2) {
         return foreign.invokeIIrI(function.getContextAddress(), arg1, arg2);
     }
-
+    
     /**
      * Invokes a function with two integer arguments, and returns a 32 bit integer.
      *
@@ -155,7 +155,7 @@ public abstract class Invoker {
     public final int invokeNoErrnoIIrI(Function function, int arg1, int arg2) {
         return foreign.invokeNoErrnoIIrI(function.getContextAddress(), arg1, arg2);
     }
-
+    
     /**
      * Invokes a function with two integer arguments, and returns a 32 bit float.
      *
@@ -399,6 +399,16 @@ public abstract class Invoker {
      * @return A native memory address.
      */
     public abstract long invokeAddress(Function function, HeapInvocationBuffer buffer);
+    
+    /**
+     * Invokes a function and returns a native memory address.
+     *
+     * @param ctx The call context which describes how to call the native function.
+     * @param function The address of the native function to invoke.
+     * @param buffer A buffer containing the arguments to the function.
+     * @return A native memory address.
+     */
+    public abstract long invokeAddress(CallContext ctx, long function, HeapInvocationBuffer buffer);
 
     /**
      * Invokes a function and returns a 32 bit integer value.
@@ -412,6 +422,26 @@ public abstract class Invoker {
         return objectBuffer != null
                 ? invokeArrayWithObjectsInt32(function, buffer, objectBuffer)
                 : foreign.invokeArrayReturnInt(function.getContextAddress(), buffer.array());
+    }
+    
+    /**
+     * Invokes a function and returns a 32 bit integer value.
+     *
+     * @param ctx The call context which describes how to call the native function.
+     * @param function The address of the native function to invoke.
+     * @param buffer A buffer containing the arguments to the function.
+     * @return A native memory address.
+     */
+    public final int invokeInt(CallContext ctx, long function, HeapInvocationBuffer buffer) {
+        ObjectBuffer objectBuffer = buffer.objectBuffer();
+        final long fnHandle = newFunction(ctx, function);
+        try {
+            return objectBuffer != null
+                ? invokeArrayWithObjectsInt32(fnHandle, buffer, objectBuffer)
+                : foreign.invokeArrayReturnInt(fnHandle, buffer.array());
+        } finally {
+            foreign.freeFunction(fnHandle);
+        }
     }
 
     /**
@@ -427,6 +457,26 @@ public abstract class Invoker {
                 ? foreign.invokeArrayWithObjectsInt64(function.getContextAddress(), buffer.array(), objectBuffer.objectCount(), objectBuffer.info(), objectBuffer.objects())
                 : foreign.invokeArrayReturnLong(function.getContextAddress(), buffer.array());
     }
+    
+    /**
+     * Invokes a function and returns a 64 bit integer value.
+     *
+     * @param ctx The call context which describes how to call the native function.
+     * @param function The address of the native function to invoke.
+     * @param buffer A buffer containing the arguments to the function.
+     * @return A native memory address.
+     */
+    public final long invokeLong(CallContext ctx, long function, HeapInvocationBuffer buffer) {
+        ObjectBuffer objectBuffer = buffer.objectBuffer();
+        final long fnHandle = newFunction(ctx, function);
+        try {
+            return objectBuffer != null
+                ? invokeArrayWithObjectsInt64(fnHandle, buffer, objectBuffer)
+                : foreign.invokeArrayReturnLong(fnHandle, buffer.array());
+        } finally {
+            foreign.freeFunction(fnHandle);
+        }
+    }
 
     /**
      * Invokes a function and returns a 32 bit floating point value.
@@ -441,6 +491,27 @@ public abstract class Invoker {
                 ? foreign.invokeArrayWithObjectsFloat(function.getContextAddress(), buffer.array(), objectBuffer.objectCount(), objectBuffer.info(), objectBuffer.objects())
                 : foreign.invokeArrayReturnFloat(function.getContextAddress(), buffer.array());
     }
+    
+    /**
+     * Invokes a function and returns a 32 bit floating point value.
+     *
+     * @param ctx The call context which describes how to call the native function.
+     * @param function The address of the native function to invoke.
+     * @param buffer A buffer containing the arguments to the function.
+     * @return A native memory address.
+     */
+    public final float invokeFloat(CallContext ctx, long function, HeapInvocationBuffer buffer) {
+        ObjectBuffer objectBuffer = buffer.objectBuffer();
+        final long fnHandle = newFunction(ctx, function);
+        try {
+            return objectBuffer != null
+                ? foreign.invokeArrayWithObjectsFloat(fnHandle, buffer.array(), objectBuffer.objectCount(), objectBuffer.info(), objectBuffer.objects())
+                : foreign.invokeArrayReturnFloat(fnHandle, buffer.array());
+        } finally {
+            foreign.freeFunction(fnHandle);
+        }
+    }
+    
 
     /**
      * Invokes a function and returns a 64 bit floating point value.
@@ -455,6 +526,26 @@ public abstract class Invoker {
                 ? foreign.invokeArrayWithObjectsDouble(function.getContextAddress(), buffer.array(), objectBuffer.objectCount(), objectBuffer.info(), objectBuffer.objects())
                 : foreign.invokeArrayReturnDouble(function.getContextAddress(), buffer.array());
     }
+    
+    /**
+     * Invokes a function and returns a 64 bit floating point value.
+     *
+     * @param ctx The call context describing how to call the native function.
+     * @param function The address of the native function to invoke.
+     * @param buffer A buffer containing the arguments to the function.
+     * @return A native memory address.
+     */
+    public final double invokeDouble(CallContext ctx, long function, HeapInvocationBuffer buffer) {
+        ObjectBuffer objectBuffer = buffer.objectBuffer();
+        final long fnHandle = newFunction(ctx, function);
+        try {
+            return objectBuffer != null
+                ? foreign.invokeArrayWithObjectsDouble(fnHandle, buffer.array(), objectBuffer.objectCount(), objectBuffer.info(), objectBuffer.objects())
+                : foreign.invokeArrayReturnDouble(fnHandle, buffer.array());
+        } finally {
+            foreign.freeFunction(fnHandle);
+        }
+    }
 
     /**
      * Invokes a function that returns a C struct by value.
@@ -467,6 +558,21 @@ public abstract class Invoker {
         byte[] returnBuffer = new byte[function.getReturnType().size()];
 
         invokeStruct(function, buffer, returnBuffer, 0);
+
+        return returnBuffer;
+    }
+    
+    /**
+     * Invokes a function that returns a C struct by value.
+     *
+     * @param ctx The call context which describes how to call the native function.
+     * @param function The address of the native function to invoke.
+     * @param buffer The parameter buffer.
+     * @return A byte array with the return value encoded in native byte order.
+     */
+    public final byte[] invokeStruct(CallContext ctx, long function, HeapInvocationBuffer buffer) {
+        byte[] returnBuffer = new byte[ctx.getReturnType().size()];
+        invokeStruct(ctx, function, buffer, returnBuffer, 0);
 
         return returnBuffer;
     }
@@ -489,6 +595,31 @@ public abstract class Invoker {
             foreign.invokeArrayReturnStruct(function.getContextAddress(), buffer.array(), returnBuffer, offset);
         }
     }
+    
+    /**
+     * Invokes a function that returns a C struct by value.
+     *
+     * @param ctx The call context which describes how to call the native function.
+     * @param function The address of the native function to invoke.
+     * @param buffer The parameter buffer.
+     * @param returnBuffer The output buffer to place the return value in.
+     * @param offset The offset within returnBuffer to place the return value.
+     */
+    public final void invokeStruct(CallContext ctx, long function, HeapInvocationBuffer buffer, byte[] returnBuffer, int offset) {
+        ObjectBuffer objectBuffer = buffer.objectBuffer();
+        final long fnHandle = newFunction(ctx, function);
+        try {
+            if (objectBuffer != null) {
+                foreign.invokeArrayWithObjectsReturnStruct(fnHandle,
+                        buffer.array(), objectBuffer.objectCount(), objectBuffer.info(), objectBuffer.objects(),
+                        returnBuffer, offset);
+            } else {
+                foreign.invokeArrayReturnStruct(fnHandle, buffer.array(), returnBuffer, offset);
+            }
+        } finally { 
+            foreign.freeFunction(fnHandle);
+        }
+    }
 
     public final Object invokeObject(Function function, HeapInvocationBuffer buffer) {
         ObjectBuffer objectBuffer = buffer.objectBuffer();
@@ -508,6 +639,25 @@ public abstract class Invoker {
     public final void invoke(Function function, long returnBuffer, long[] parameters) {
         foreign.invokePointerParameterArray(function.getContextAddress(), returnBuffer, parameters);
     }
+    
+    /**
+     * Invokes a function, with the parameters loaded into native memory buffers,
+     * and the function result is stored in a native memory buffer.
+     *
+     * @param ctx The call context which describes how to call the native function.
+     * @param function The address of the native function to invoke.
+     * @param returnBuffer The address of the native buffer to place the result
+     * of the function call in.
+     * @param parameters An array of addresses of the function parameters.
+     */
+    public final void invoke(CallContext ctx, long function, long returnBuffer, long[] parameters) {
+        final long fnHandle = newFunction(ctx, function);
+        try {
+            foreign.invokePointerParameterArray(fnHandle, returnBuffer, parameters);
+        } finally {
+            foreign.freeFunction(fnHandle);
+        }
+    }
 
     /**
      * Convenience method to pass the objects and object descriptor array down as
@@ -521,24 +671,97 @@ public abstract class Invoker {
      */
     private final int invokeArrayWithObjectsInt32(Function function, HeapInvocationBuffer buffer,
             ObjectBuffer objectBuffer) {
+        return invokeArrayWithObjectsInt32(function.getContextAddress(), buffer, objectBuffer);
+    }
+    
+    /**
+     * Convenience method to pass the objects and object descriptor array down as
+     * normal arguments, so hotspot can optimize it.  This is faster than the native
+     * code pulling the objects and descriptors out of arrays.
+     *
+     * @param ctx The call context which describes how to call the native function.
+     * @param function The address of the native function to invoke.
+     * @param buffer A buffer containing the arguments to the function.
+     * @param objectBuffer A buffer containing objects to be passed to the native function.
+     * @return A 32 bit integer value.
+     */
+    private final int invokeArrayWithObjectsInt32(CallContext ctx, long function, HeapInvocationBuffer buffer,
+            ObjectBuffer objectBuffer) {
+        final long fnHandle = newFunction(ctx, function);
+        try {
+            return invokeArrayWithObjectsInt32(fnHandle, buffer, objectBuffer);
+        } finally {
+            foreign.freeFunction(fnHandle);
+        }
+    }
+    
+    /**
+     * Convenience method to pass the objects and object descriptor array down as
+     * normal arguments, so hotspot can optimize it.  This is faster than the native
+     * code pulling the objects and descriptors out of arrays.
+     *
+     * @param fnHandle The native function handle to invoke.
+     * @param buffer A buffer containing the arguments to the function.
+     * @param objectBuffer A buffer containing objects to be passed to the native function.
+     * @return A 32 bit integer value.
+     */
+    private final int invokeArrayWithObjectsInt32(long fnHandle, HeapInvocationBuffer buffer,
+            ObjectBuffer objectBuffer) {
+
         Object[] objects = objectBuffer.objects();
         int[] info = objectBuffer.info();
         int objectCount = objectBuffer.objectCount();
 
         switch (objectCount) {
             case 1:
-                return foreign.invokeArrayO1Int32(function.getContextAddress(), buffer.array(),
+                return foreign.invokeArrayO1Int32(fnHandle, buffer.array(),
                         objects[0], info[0], info[1], info[2]);
             case 2:
-                return foreign.invokeArrayO2Int32(function.getContextAddress(), buffer.array(),
+                return foreign.invokeArrayO2Int32(fnHandle, buffer.array(),
                         objects[0], info[0], info[1], info[2],
                         objects[1], info[3], info[4], info[5]);
         }
 
-        return foreign.invokeArrayWithObjectsInt32(function.getContextAddress(), buffer.array(),
+        return foreign.invokeArrayWithObjectsInt32(fnHandle, buffer.array(),
             objectCount, info, objects);
     }
+    
+    /**
+     * Convenience method to pass the objects and object descriptor array down as
+     * normal arguments, so hotspot can optimize it.  This is faster than the native
+     * code pulling the objects and descriptors out of arrays.
+     *
+     * @param fnHandle The native function handle to invoke.
+     * @param buffer A buffer containing the arguments to the function.
+     * @param objectBuffer A buffer containing objects to be passed to the native function.
+     * @return A 64 bit integer value.
+     */
+    private final long invokeArrayWithObjectsInt64(long fnHandle, HeapInvocationBuffer buffer,
+            ObjectBuffer objectBuffer) {
 
+        Object[] objects = objectBuffer.objects();
+        int[] info = objectBuffer.info();
+        int objectCount = objectBuffer.objectCount();
+
+        switch (objectCount) {
+            case 1:
+                return foreign.invokeArrayO1Int64(fnHandle, buffer.array(),
+                        objects[0], info[0], info[1], info[2]);
+            case 2:
+                return foreign.invokeArrayO2Int64(fnHandle, buffer.array(),
+                        objects[0], info[0], info[1], info[2],
+                        objects[1], info[3], info[4], info[5]);
+        }
+
+        return foreign.invokeArrayWithObjectsInt64(fnHandle, buffer.array(),
+            objectCount, info, objects);
+    }
+    
+    private long newFunction(CallContext ctx, long function) {
+        return foreign.newFunction(function, ctx.getReturnType().handle(), 
+                ctx.parameterTypeHandles, ctx.flags);
+    }
+    
     /**
      * A 32 bit invoker implementation
      */
@@ -547,6 +770,10 @@ public abstract class Invoker {
 
         public final long invokeAddress(Function function, HeapInvocationBuffer buffer) {
             return ((long)invokeInt(function, buffer)) & ADDRESS_MASK;
+        }
+        
+        public final long invokeAddress(CallContext ctx, long function, HeapInvocationBuffer buffer) {
+            return ((long)invokeInt(ctx, function, buffer)) & ADDRESS_MASK;
         }
     }
 
@@ -559,6 +786,10 @@ public abstract class Invoker {
         
         public long invokeAddress(Function function, HeapInvocationBuffer buffer) {
             return invokeLong(function, buffer);
+        }
+        
+        public final long invokeAddress(CallContext ctx, long function, HeapInvocationBuffer buffer) {
+            return invokeLong(ctx, function, buffer);
         }
     }
 }
