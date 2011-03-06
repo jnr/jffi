@@ -39,6 +39,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
+import java.util.Arrays;
 import java.util.Properties;
 
 /**
@@ -173,18 +174,22 @@ final class Init {
         String stubPath = getStubLibraryPath();
         ClassLoader cl = Init.class.getClassLoader();
         InputStream is = null;
-
-        for (String path : new String[] { stubPath, "/" + stubPath }) {
+        String[] paths = { stubPath, "/" + stubPath };
+        
+        for (String path : paths) {
             is = cl.getResourceAsStream(path);
 
             // On MacOS, the stub might be named .dylib or .jnilib - cater for both
             if (is == null && Platform.getPlatform().getOS() == Platform.OS.DARWIN) {
                 is = cl.getResourceAsStream(path.replaceAll("dylib", "jnilib"));
-            }            
+            }
+            if (is != null) {
+                break;
+            }
         }
         if (is == null) {
-            throw new UnsatisfiedLinkError("Could not locate stub library ("
-                    + stubPath + ") in jar file");
+            throw new UnsatisfiedLinkError("Could not locate stub library"
+                + " in jar file.  Tried " + Arrays.deepToString(paths));
         }
 
         return is;
