@@ -172,24 +172,34 @@ final class Init {
      */
     private static final InputStream getStubLibraryStream() {
         String stubPath = getStubLibraryPath();
-        ClassLoader cl = Init.class.getClassLoader();
+        ClassLoader[] cls = new ClassLoader[]{
+            Init.class.getClassLoader(),
+            Thread.currentThread().getContextClassLoader()
+        };
         InputStream is = null;
-        String[] paths = { stubPath, "/" + stubPath };
-        
-        for (String path : paths) {
-            is = cl.getResourceAsStream(path);
+        String[] paths = {stubPath, "/" + stubPath};
 
-            // On MacOS, the stub might be named .dylib or .jnilib - cater for both
-            if (is == null && Platform.getPlatform().getOS() == Platform.OS.DARWIN) {
-                is = cl.getResourceAsStream(path.replaceAll("dylib", "jnilib"));
-            }
-            if (is != null) {
-                break;
+        // try both our classloader and context classloader
+        OUTER:
+        for (ClassLoader cl : cls) {
+            // skip null classloader (e.g. boot or null context loader)
+            if (cl == null) continue;
+            
+            for (String path : paths) {
+                is = cl.getResourceAsStream(path);
+
+                // On MacOS, the stub might be named .dylib or .jnilib - cater for both
+                if (is == null && Platform.getPlatform().getOS() == Platform.OS.DARWIN) {
+                    is = cl.getResourceAsStream(path.replaceAll("dylib", "jnilib"));
+                }
+                if (is != null) {
+                    break OUTER;
+                }
             }
         }
         if (is == null) {
             throw new UnsatisfiedLinkError("Could not locate stub library"
-                + " in jar file.  Tried " + Arrays.deepToString(paths));
+                    + " in jar file.  Tried " + Arrays.deepToString(paths));
         }
 
         return is;
