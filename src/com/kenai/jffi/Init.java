@@ -85,7 +85,7 @@ final class Init {
             return bootPath;
         }
 
-        InputStream is = Init.class.getResourceAsStream(bootPropertyFilename);
+        InputStream is = getResourceAsStream(bootPropertyFilename);
         if (is != null) {
             Properties p = new Properties();
             try {
@@ -172,37 +172,44 @@ final class Init {
      */
     private static final InputStream getStubLibraryStream() {
         String stubPath = getStubLibraryPath();
-        ClassLoader[] cls = new ClassLoader[]{
+        String[] paths = { stubPath, "/" + stubPath };
+
+        for (String path : paths) {
+            InputStream is = getResourceAsStream(path);
+
+            // On MacOS, the stub might be named .dylib or .jnilib - cater for both
+            if (is == null && Platform.getPlatform().getOS() == Platform.OS.DARWIN) {
+                is = getResourceAsStream(path.replaceAll("dylib", "jnilib"));
+            }
+            if (is != null) {
+                return is;
+            }
+        }
+
+        throw new UnsatisfiedLinkError("could not locate stub library"
+                + " in jar file.  Tried " + Arrays.deepToString(paths));
+    }
+
+    private static final InputStream getResourceAsStream(String resourceName) {
+        // try both our classloader and context classloader
+        ClassLoader[] cls = new ClassLoader[] {
             Init.class.getClassLoader(),
             Thread.currentThread().getContextClassLoader()
         };
-        InputStream is = null;
-        String[] paths = {stubPath, "/" + stubPath};
-
-        // try both our classloader and context classloader
-        OUTER:
+        
         for (ClassLoader cl : cls) {
             // skip null classloader (e.g. boot or null context loader)
-            if (cl == null) continue;
-            
-            for (String path : paths) {
-                is = cl.getResourceAsStream(path);
+            if (cl == null) { 
+                continue;
+            }
 
-                // On MacOS, the stub might be named .dylib or .jnilib - cater for both
-                if (is == null && Platform.getPlatform().getOS() == Platform.OS.DARWIN) {
-                    is = cl.getResourceAsStream(path.replaceAll("dylib", "jnilib"));
-                }
-                if (is != null) {
-                    break OUTER;
-                }
+            InputStream is;
+            if ((is = cl.getResourceAsStream(resourceName)) != null) {
+                return is;
             }
         }
-        if (is == null) {
-            throw new UnsatisfiedLinkError("Could not locate stub library"
-                    + " in jar file.  Tried " + Arrays.deepToString(paths));
-        }
-
-        return is;
+        
+        return null;
     }
 
     /**
