@@ -246,11 +246,11 @@ public abstract class MemoryIO {
      * @param size The number of bytes to copy.
      */
     public final void copyMemory(long src, long dst, long size) {
-        if (dst + size < src || src + size < dst) {
+        if (dst + size <= src || src + size <= dst) {
             // Use intrinsic copyMemory if regions do not overlap
             _copyMemory(src, dst, size);
         } else {
-            foreign.memmove(dst, src, size);
+            memmove(dst, src, size);
         }
     }
 
@@ -294,7 +294,8 @@ public abstract class MemoryIO {
      * @param size The number of bytes to copy.
      */
     public final void memmove(long dst, long src, long size) {
-        foreign.memmove(dst, src, size);
+        // FIXME: the order of the arguments in the native code is wrong
+        foreign.memmove(src, dst, size);
     }
 
     /**
