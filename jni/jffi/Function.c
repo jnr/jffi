@@ -92,6 +92,44 @@ Java_com_kenai_jffi_Foreign_newFunction(JNIEnv* env, jobject self,
     paramTypes = alloca(paramCount * sizeof(jlong));
     (*env)->GetLongArrayRegion(env, paramArray, 0, paramCount, paramTypes);
 
+#if defined(__i386__) || defined(__x86_64__) 
+    ctx->isFastInt = true;
+    ctx->isFastLong = true;
+    
+    switch (((ffi_type *) j2p(returnType))->type) {
+        case FFI_TYPE_INT:
+        case FFI_TYPE_SINT8:
+        case FFI_TYPE_UINT8:
+        case FFI_TYPE_SINT16:
+        case FFI_TYPE_UINT16:
+        case FFI_TYPE_SINT32:
+        case FFI_TYPE_UINT32:
+#if defined(__i386__)
+        case FFI_TYPE_POINTER:
+#endif
+#if !defined(__x86_64__)
+            ctx->isFastLong = false;
+#endif
+            break;
+
+        case FFI_TYPE_SINT64:
+        case FFI_TYPE_UINT64:
+#if defined(__x86_64__)
+        case FFI_TYPE_POINTER:
+#endif
+            ctx->isFastInt = false;
+            break;
+            
+        case FFI_TYPE_VOID:
+            break;
+            
+        default:
+            ctx->isFastInt = false;
+            ctx->isFastLong = false;
+            break;
+    }
+#endif
+
     for (i = 0; i < paramCount; ++i) {
         ffi_type* type = (ffi_type *) j2p(paramTypes[i]);
         if (type == NULL) {
@@ -101,6 +139,39 @@ Java_com_kenai_jffi_Foreign_newFunction(JNIEnv* env, jobject self,
         ctx->ffiParamTypes[i] = type;
         ctx->rawParamOffsets[i] = rawOffset;
         rawOffset += FFI_ALIGN(type->size, FFI_SIZEOF_ARG);
+        
+#if defined(__i386__) || defined(__x86_64__) 
+        switch (type->type) {
+            case FFI_TYPE_INT:
+            case FFI_TYPE_SINT8:
+            case FFI_TYPE_UINT8:
+            case FFI_TYPE_SINT16:
+            case FFI_TYPE_UINT16:
+            case FFI_TYPE_SINT32:
+            case FFI_TYPE_UINT32:
+#if defined(__i386__)
+            case FFI_TYPE_POINTER:
+#endif
+
+#if !defined(__x86_64__)
+                ctx->isFastLong = false;
+#endif
+                break;
+
+            case FFI_TYPE_SINT64:
+            case FFI_TYPE_UINT64:
+#if defined(__x86_64__)
+            case FFI_TYPE_POINTER:
+#endif
+                ctx->isFastInt = false;
+                break;
+
+            default:
+                ctx->isFastInt = false;
+                ctx->isFastLong = false;
+                break;
+        }
+#endif
     }
 
     // On win32, we might need to set the abi to stdcall - but win64 only supports cdecl/default

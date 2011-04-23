@@ -43,6 +43,8 @@ typedef struct Function {
     int* rawParamOffsets;
     bool saveErrno;
     void* function;
+    bool isFastInt;
+    bool isFastLong;
 } Function;
 
 #define SAVE_ERRNO(ctx) do { \

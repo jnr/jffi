@@ -42,6 +42,9 @@ typedef struct CallContext {
     ffi_type** ffiParamTypes;
     int* rawParamOffsets;
     bool saveErrno;
+    void* reserved0; // Function address - just used to pad this struct to match Function
+    bool isFastInt;
+    bool isFastLong;
 } CallContext;
 
 #endif /* JFFI_CALLCONTEXT_H */
