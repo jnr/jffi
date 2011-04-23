@@ -59,6 +59,9 @@ public final class Function implements CallInfo {
 
     /** The parameter types of this function */
     private final Type[] paramTypes;
+    
+    /* offset within encoding buffer of a parameter */
+    private final int[] parameterOffsets;
 
     /** Whether the native context has been freed yet */
     private volatile boolean disposed = false;
@@ -124,6 +127,12 @@ public final class Function implements CallInfo {
 
         this.parameterCount = paramTypes.length;
         this.rawParameterSize = foreign.getFunctionRawParameterSize(h);        
+        this.parameterOffsets = new int[parameterCount];
+        int rawOffset = 0;
+        for (int i = 0; i < parameterCount; i++) {
+            rawOffset += HeapInvocationBuffer.FFI_ALIGN(paramTypes[i].size(), HeapInvocationBuffer.FFI_SIZEOF_ARG);
+            parameterOffsets[i] = rawOffset;
+        }
     }    
 
     /**
@@ -180,6 +189,16 @@ public final class Function implements CallInfo {
      */
     public final Type getParameterType(int index) {
         return paramTypes[index];
+    }
+    
+    /**
+     * Gets the encoding buffer offset of a parameter.
+     * 
+     * @param index The index of the parameter in the function signature
+     * @return the offset of the parameter.
+     */
+    final int getParameterOffset(int index) {
+        return parameterOffsets[index];
     }
 
     public synchronized final void dispose() {

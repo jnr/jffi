@@ -39,9 +39,9 @@ import java.nio.ByteOrder;
  * a java heap allocated buffer.
  */
 public final class HeapInvocationBuffer implements InvocationBuffer {
-    private static final int FFI_SIZEOF_ARG = Platform.getPlatform().addressSize() / 8;
+    static final int FFI_SIZEOF_ARG = Platform.getPlatform().addressSize() / 8;
     private static final int PARAM_SIZE = 8;
-    private static final Encoder encoder = getEncoder();
+    static final Encoder encoder = getEncoder();
     private final CallInfo info;
     private final byte[] buffer;
     private ObjectBuffer objectBuffer = null;
@@ -196,7 +196,7 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
         getObjectBuffer().putJNI(paramIndex++, ObjectBuffer.JNIENV);
     }
 
-    private static final Encoder getEncoder() {
+    static final Encoder getEncoder() {
         if (Platform.getPlatform().getCPU() == Platform.CPU.I386) {
             return Foreign.getInstance().isRawParameterPackingEnabled()
                     ? newI386RawEncoder()
@@ -228,12 +228,15 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
     /**
      * Encodes java data types into native parameter frames
      */
-    private static abstract class Encoder {
+    static abstract class Encoder {
         /** Returns true if this <tt>Encoder</tt> is a raw encoder */
         public abstract boolean isRaw();
 
         /** Gets the size in bytes of the buffer required for the function */
         public abstract int getBufferSize(CallInfo info);
+
+        /* Gets the buffer offset of a parameter */
+        public abstract int getBufferOffset(Function function, int parameterIndex);
 
         /**
          * Encodes a byte value into the byte array.
@@ -321,6 +324,11 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
         public final int getBufferSize(CallInfo info) {
             return info.getRawParameterSize();
         }
+        
+        public final int getBufferOffset(Function function, int parameterIndex) {
+            return function.getParameterOffset(parameterIndex);
+        }
+        
         public final int putByte(byte[] buffer, int offset, int value) {
             IO.putByte(buffer, offset, value); return offset + 4;
         }
@@ -352,6 +360,10 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
 
         public final boolean isRaw() {
             return false;
+        }
+        
+        public final int getBufferOffset(Function function, int parameterIndex) {
+            return parameterIndex * PARAM_SIZE;
         }
         
         public final int getBufferSize(CallInfo info) {
@@ -511,7 +523,7 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
      * @param a The boundary to align to.
      * @return The aligned address.
      */
-    private static final int FFI_ALIGN(int v, int a) {
+    static final int FFI_ALIGN(int v, int a) {
         return ((v - 1) | (a - 1)) + 1;
     }
 
