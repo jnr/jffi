@@ -140,7 +140,7 @@ ifeq ($(OS), darwin)
   PLATFORM = darwin
   ARCHES = ppc
   ifneq ($(findstring $(CPU), i386 x86_64),)
-    ARCHES = i386 x86_64
+    ARCHES = ppc i386 x86_64
   endif
   CC = gcc-4.0
 
