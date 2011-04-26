@@ -52,6 +52,14 @@
 
 #define MAX_STACK_ARRAY (1024)
 
+
+typedef struct Pinned {
+    jobject object;
+    jsize offset;
+    jsize length;
+    int type;
+} Pinned;
+
 #ifdef USE_RAW
 static void
 invokeArray(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer, void* returnBuffer)
@@ -220,9 +228,11 @@ invokeArrayWithObjects_(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer,
     jbyte *tmpBuffer = NULL;
     void **ffiArgs = NULL;
     Array *arrays = NULL;
-    unsigned int i, arrayCount = 0, paramBytes = 0;
+    Pinned *pinned = NULL;
+    unsigned int i, arrayCount = 0, pinnedCount = 0, paramBytes = 0;
 
     arrays = alloca(objectCount * sizeof(Array));
+    pinned = alloca(objectCount * sizeof(Pinned));
 
 #if defined(USE_RAW)
     paramBytes = ctx->rawParameterSize;
@@ -255,32 +265,45 @@ invokeArrayWithObjects_(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer,
                 if (unlikely(object == NULL)) {
                     throwException(env, NullPointer, "null object for parameter %d", idx);
                     goto cleanup;
+                }
                 
-                } else if (unlikely((type & com_kenai_jffi_ObjectBuffer_PINNED) != 0)) {
+                if (unlikely((type & com_kenai_jffi_ObjectBuffer_PINNED) != 0)) {
 
-                    ptr = jffi_getArrayCritical(env, object, offset, length, type, &arrays[arrayCount]);
-                    if (unlikely(ptr == NULL)) {
-                        goto cleanup;
-                    }
-                } else if (true && likely(length < MAX_STACK_ARRAY)) {
+                    // Record the pinned array, but the actual pinning will be done just before the ffi_call
+                    Pinned* p = &pinned[pinnedCount++];
+                    p->object = object;
+                    p->offset = offset;
+                    p->length = length;
+                    p->type = type;
+                    ptr = NULL;
+                    
+                } else if (likely(length < MAX_STACK_ARRAY)) {
 
                     ptr = alloca(jffi_arraySize(length + 1, type));
                     if (unlikely(jffi_getArrayBuffer(env, object, offset, length, type,
                         &arrays[arrayCount], ptr) == NULL)) {
                         goto cleanup;
                     }
+                    ++arrayCount;
+                    
 
                 } else {
                     ptr = jffi_getArrayHeap(env, object, offset, length, type, &arrays[arrayCount]);
                     if (unlikely(ptr == NULL)) {
                         goto cleanup;
                     }
+                    ++arrayCount;
                 }
                 
-                ++arrayCount;
+                
                 break;
 
             case com_kenai_jffi_ObjectBuffer_BUFFER:
+                if (unlikely(object == NULL)) {
+                    throwException(env, NullPointer, "null object for parameter %d", idx);
+                    goto cleanup;
+                }
+                
                 ptr = (*env)->GetDirectBufferAddress(env, object);
                 if (unlikely(ptr == NULL)) {
                     throwException(env, NullPointer, "Could not get direct Buffer address");
@@ -320,6 +343,35 @@ invokeArrayWithObjects_(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer,
         }
 #endif
     }
+    
+    //
+    // Pin all the arrays just before calling the native function.
+    //
+    // Although hotspot allows it, other JVMs do not allow JNI operations
+    // once any array has been pinned, so pinning must be done last, just before 
+    // the native function is called.
+    // 
+    for (i = 0; i < pinnedCount; i++) {
+        Pinned* p = &pinned[i];
+        Array* ary = &arrays[arrayCount];    
+        int idx = (p->type & com_kenai_jffi_ObjectBuffer_INDEX_MASK) >> com_kenai_jffi_ObjectBuffer_INDEX_SHIFT;
+        
+        void* ptr = jffi_getArrayCritical(env, p->object, p->offset, p->length, p->type, &arrays[arrayCount]);
+        if (unlikely(ptr == NULL)) {
+            goto cleanup;
+        }
+#if defined(USE_RAW)
+        *((void **)(tmpBuffer + ctx->rawParamOffsets[idx])) = ptr;
+#else
+        if (unlikely(ctx->cif.arg_types[idx]->type == FFI_TYPE_STRUCT)) {
+            ffiArgs[idx] = ptr;
+        } else {
+            *((void **) ffiArgs[idx]) = ptr;
+        }
+#endif
+        ++arrayCount;
+    }
+                
 #if defined(USE_RAW)
     //
     // Special case for struct return values - unroll into a ptr array and
@@ -340,12 +392,7 @@ invokeArrayWithObjects_(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer,
     SAVE_ERRNO(ctx);
 cleanup:
     /* Release any array backing memory */
-    for (i = 0; i < arrayCount; ++i) {
-        if (arrays[i].release != NULL) {
-            //printf("releasing array=%p\n", arrays[i].elems);
-            (*arrays[i].release)(env, &arrays[i]);
-        }
-    }
+    RELEASE_ARRAYS(env, arrays, arrayCount);
 }
 
 static void

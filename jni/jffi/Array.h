@@ -37,22 +37,44 @@
 // WARNING! Do not change the layout of this struct, it may be used from assembler
 //
 typedef struct Array {
+    void (*copyin)(JNIEnv* env, jobject array, jsize start, jsize len, void *buf);
+    void (*copyout)(JNIEnv* env, jobject array, jsize start, jsize len, const void *buf);
     void (*release)(JNIEnv *env, struct Array *);
     jobject array;
     void* elems;    
     int offset;
     int length;
+    int type;
+    int bytesize; // total size of array in bytes
 } Array;
 
+extern bool jffi_getInitArray(JNIEnv* env, jobject buf, jint offset, jint length, int type, struct Array* array);
 extern void* jffi_getArrayBuffer(JNIEnv* env, jobject buf, jint offset, jint length, int type, struct Array* array, void* buffer);
 extern void* jffi_getArrayHeap(JNIEnv* env, jobject buf, jint offset, jint length, int type, struct Array* array);
 extern void* jffi_getArrayCritical(JNIEnv* env, jobject buf, jint offset, jint length, int type, struct Array* array);
 extern int jffi_arraySize(int length, int type);
+extern void jffi_releaseArrays(JNIEnv* env, Array* arrays, int arrayCount);
 
 #include "com_kenai_jffi_ObjectBuffer.h"
 
 #define OBJ_INDEX_MASK com_kenai_jffi_ObjectBuffer_INDEX_MASK
 #define OBJ_INDEX_SHIFT com_kenai_jffi_ObjectBuffer_INDEX_SHIFT
+#define ARRAY_NULTERMINATE com_kenai_jffi_ObjectBuffer_ZERO_TERMINATE
+#define ARRAY_IN com_kenai_jffi_ObjectBuffer_IN
+#define ARRAY_OUT com_kenai_jffi_ObjectBuffer_OUT
+#define ARRAY_PINNED com_kenai_jffi_ObjectBuffer_PINNED
+#define ARRAY_CLEAR com_kenai_jffi_ObjectBuffer_CLEAR
+
+#define IS_PINNED_ARRAY(flags) \
+        (((flags) & (com_kenai_jffi_ObjectBuffer_ARRAY | com_kenai_jffi_ObjectBuffer_PINNED)) == (com_kenai_jffi_ObjectBuffer_ARRAY | com_kenai_jffi_ObjectBuffer_PINNED))
+
+#define IS_UNPINNED_ARRAY(flags) \
+        (((flags) & (com_kenai_jffi_ObjectBuffer_ARRAY | com_kenai_jffi_ObjectBuffer_PINNED)) == com_kenai_jffi_ObjectBuffer_ARRAY)
+
+#define IS_OUT_ARRAY(flags) (((flags) & (com_kenai_jffi_ObjectBuffer_ARRAY | ARRAY_IN | ARRAY_OUT)) != (com_kenai_jffi_ObjectBuffer_ARRAY | ARRAY_IN))
+#define IS_IN_ARRAY(flags) (((flags) & (com_kenai_jffi_ObjectBuffer_ARRAY | ARRAY_IN | ARRAY_OUT)) != (com_kenai_jffi_ObjectBuffer_ARRAY | ARRAY_IN))
+
+#define RELEASE_ARRAYS(env, arrays, arrayCount) jffi_releaseArrays(env, arrays, arrayCount)
 
 #endif /* jffi_Array_h */
 
