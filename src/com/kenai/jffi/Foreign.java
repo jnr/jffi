@@ -830,9 +830,136 @@ final class Foreign {
     final native long invokeNNNNNNrN(long function, long arg1, long arg2, long arg3, long arg4, long arg5, long arg6);
 
     /**
+     * Invokes a function with one numeric argument, and returns a numeric value.
+     *
+     * @param callContext The FFI call context describing the function to invoke.
+     * @param functionAddress The native function to invoke.
+     * @param arg1 An array, to be passed as a pointer for the first numeric parameter.
+     * @param off1 The offset from the start of the array.
+     * @param len1 The length of the array to use.
+     * @param flags1 Array flags (direction, type).
+     */
+    final native long invokeN1O1rN(long callContext, long functionAddress,
+            long n1,
+            Object o1, int o1flags, int o1off, int o1len);
+    
+    /**
+     * Invokes a function with two numeric arguments, and returns a numeric value.
+     *
+     * @param callContext The FFI call context describing the function to invoke.
+     * @param functionAddress The native function to invoke.
+     * @param n1 The first numeric argument.
+     * @param idx1 The index of the first numeric argument;
+     * @param o1 An Object (array or buffer), to be passed as a pointer.
+     * @param o1off The offset from the start of the array or buffer.
+     * @param o1len The length of the array to use.
+     * @param o1flags Object flags (direction, type, idx).
+     * @return A numeric value.
+     */
+    final native long invokeN2O1rN(long callContext, long functionAddress, 
+            long n1, long n2, 
+            Object o1, int o1flags, int o1off, int o1len);
+    
+    /**
+     * Invokes a function with two numeric arguments, and returns a numeric value.
+     *
+     * @param callContext The FFI call context describing the function to invoke.
+     * @param functionAddress The native function to invoke.
+     * @param o1 An Object (array or buffer), to be passed as a pointer.
+     * @param o1off The offset from the start of the array or buffer.
+     * @param o1len The length of the array to use.
+     * @param o1flags Object flags (direction, type, idx).
+     * @param o2 An Object (array or buffer), to be passed as a pointer.
+     * @param o2off The offset from the start of the array or buffer.
+     * @param o2len The length of the array to use.
+     * @param o2flags Object flags (direction, type, idx).
+     * @return A numeric value.
+     */
+    final native long invokeN2O2rN(long callContext, long functionAddress,
+            long n1, long n2,
+            Object o1, int o1flags, int o1off, int o1len,
+            Object o2, int o2flags, int o2off, int o2len);
+    
+    /**
+     * Invokes a function with three numeric arguments, and returns a numeric value.
+     *
+     * @param callContext The FFI call context describing the function to invoke.
+     * @param functionAddress The native function to invoke.
+     * @param n1 a long.
+     * @param idx1 The parameter index of n1.
+     * @param n2 a long.
+     * @param idx2 The parameter index of n2.
+     * @param o1 An Object (array or buffer), to be passed as a pointer.
+     * @param o1off The offset from the start of the array or buffer.
+     * @param o1len The length of the array to use.
+     * @param o1flags Object flags (direction, type, parameter index).
+     * @return A numeric value.
+     */
+    final native long invokeN3O1rN(long callContext, long functionAddress, 
+            long n1, long n2, long n3,
+            Object o1, int o1flags, int o1off, int o1len);
+    
+    final native long invokeN3O2rN(long callContext, long functionAddress, 
+            long n1, long n2, long n3,
+            Object o1, int o1flags, int o1off, int o1len,
+            Object o2, int o2flags, int o2off, int o2len);
+    
+    final native long invokeN3O3rN(long callContext, long functionAddress, 
+            long n1, long n2, long n3,
+            Object o1, int o1flags, int o1off, int o1len,
+            Object o2, int o2flags, int o2off, int o2len,
+            Object o3, int o3flags, int o3off, int o3len);
+    
+    final native long invokeN4O1rN(long callContext, long functionAddress, 
+            long n1, long n2, long n3, long n4,
+            Object o1, int o1flags, int o1off, int o1len);
+    
+    final native long invokeN4O2rN(long callContext, long functionAddress, 
+            long n1, long n2, long n3, long n4,
+            Object o1, int o1flags, int o1off, int o1len,
+            Object o2, int o2flags, int o2off, int o2len);
+    
+    final native long invokeN4O3rN(long callContext, long functionAddress, 
+            long n1, long n2, long n3, long n4,
+            Object o1, int o1flags, int o1off, int o1len,
+            Object o2, int o2flags, int o2off, int o2len,
+            Object o3, int o3flags, int o3off, int o3len);
+    
+    final native long invokeN5O1rN(long callContext, long functionAddress, 
+            long n1, long n2, long n3, long n4, long n5,
+            Object o1, int o1off, int o1len, int o1flags);
+    
+    final native long invokeN5O2rN(long callContext, long functionAddress, 
+            long n1, long n2, long n3, long n4, long n5,
+            Object o1, int o1flags, int o1off, int o1len,
+            Object o2, int o2flags, int o2off, int o2len);
+    
+    final native long invokeN5O3rN(long callContext, long functionAddress, 
+            long n1, long n2, long n3, long n4, long n5,
+            Object o1, int o1flags, int o1off, int o1len,
+            Object o2, int o2flags, int o2off, int o2len,
+            Object o3, int o3flags, int o3off, int o3len);
+    
+    final native long invokeN6O1rN(long callContext, long functionAddress, 
+            long n1, long n2, long n3, long n4, long n5, long n6,
+            Object o1, int o1flags, int o1off, int o1len);
+    
+    final native long invokeN6O2rN(long callContext, long functionAddress, 
+            long n1, long n2, long n3, long n4, long n5, long n6,
+            Object o1, int o1flags, int o1off, int o1len,
+            Object o2, int o2flags, int o2off, int o2len);
+    
+    final native long invokeN6O3rN(long callContext, long functionAddress, 
+            long n1, long n2, long n3, long n4, long n5, long n6,
+            Object o1, int o1flags, int o1off, int o1len,
+            Object o2, int o2flags, int o2off, int o2len,
+            Object o3, int o3flags, int o3off, int o3len);
+    
+    
+    /**
      * Invokes a function that returns a 32 bit integer.
      * @param function The address of the function context structure from {@link #newFunction}.
-     * @param buffer A byte array containing the aguments to the function.
+     * @param buffer A byte array containing the arguments to the function.
      * @return A 32 bit integer value.
      */
     final native int invokeArrayReturnInt(long function, byte[] buffer);
