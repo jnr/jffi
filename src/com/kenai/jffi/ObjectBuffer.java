@@ -237,6 +237,30 @@ final class ObjectBuffer {
     public void putArray(int index, double[] array, int offset, int length, int flags) {
         putObject(array, offset, length, makeObjectFlags(flags, DOUBLE | ARRAY, index));
     }
+    
+    /**
+     * Adds a java boolean array as a pointer parameter.
+     *
+     * @param array The java array to use as the pointer parameter.
+     * @param offset The offset from the start of the array.
+     * @param length The length of the array to use.
+     * @param flags The flags to use (IN, OUT)
+     */
+    public void putArray(int index, boolean[] array, int offset, int length, int flags) {
+        putObject(array, offset, length, makeObjectFlags(flags, BOOLEAN | ARRAY, index));
+    }
+    
+    /**
+     * Adds a java char array as a pointer parameter.
+     *
+     * @param array The java array to use as the pointer parameter.
+     * @param offset The offset from the start of the array.
+     * @param length The length of the array to use.
+     * @param flags The flags to use (IN, OUT)
+     */
+    public void putArray(int index, char[] array, int offset, int length, int flags) {
+        putObject(array, offset, length, makeObjectFlags(flags, CHAR | ARRAY, index));
+    }
 
     /**
      * Adds a java direct buffer as a pointer parameter.
