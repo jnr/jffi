@@ -44,6 +44,8 @@ public abstract class Invoker {
     private static final long ADDRESS_MASK = Platform.getPlatform().addressMask();
     
     private final Foreign foreign = Foreign.getInstance();
+    
+    private final ObjectParameterInvoker objectParameterInvoker = ObjectParameterInvoker.getInstance();
 
     /** Lazy initialization singleton holder */
     private static final class SingletonHolder {
@@ -229,7 +231,7 @@ public abstract class Invoker {
     public final long invokeLrL(Function function, long arg1) {
         return foreign.invokeLrL(function.getContextAddress(), arg1);
     }
-
+    
     /**
      * Invokes a function with two 64 bit integer arguments, and returns a 64 bit integer.
      *
@@ -389,6 +391,87 @@ public abstract class Invoker {
      */
     public final long invokeNNNNNNrN(Function function, long arg1, long arg2, long arg3, long arg4, long arg5, long arg6) {
         return foreign.invokeNNNNNNrN(function.getContextAddress(), arg1, arg2, arg3, arg4, arg5, arg6);
+    }
+    
+    /**
+     * Invokes a function with two numeric arguments, and returns a numeric value.
+     *
+     * @param function The <tt>Function</tt> to invoke.
+     * @param n1 first numeric argument.
+     * @param idx1 parameter index of the first numeric argument.
+     * @param o1 array or buffer, to be passed as a pointer for the first numeric parameter.
+     * @param o1off offset from the start of the array pr buffer.
+     * @param o1len length of the array to use.
+     * @param o1flags object flags (type, direction, parameter index).
+     */
+    public final long invokeNNO1rN(Function function, 
+            long n1, long n2,
+            Object o1, int o1off, int o1len, ObjectParameterInfo o1flags) {
+
+        return objectParameterInvoker.invokeN2O1rN(function, 
+                n1, n2,
+                o1, o1off, o1len, o1flags);
+    }
+    
+    /**
+     * Invokes a function with two numeric arguments, and returns a numeric value.
+     *
+     * @param function The <tt>Function</tt> to invoke.
+     * @param arg1 An array, to be passed as a pointer for the first numeric parameter.
+     * @param off1 The offset from the start of the array.
+     * @param len1 The length of the array to use.
+     * @param flags1 Array flags (direction, type).
+     * @param arg2 The second numeric argument.
+     */
+    public final long invokeNNO2rN(Function function,
+            long n1, long n2,
+            Object o1, int o1off, int o1len, ObjectParameterInfo o1flags,
+            Object o2, int o2off, int o2len, ObjectParameterInfo o2flags) {
+
+        return objectParameterInvoker.invokeN2O2rN(function,
+                n1, n2,
+                o1, o1off, o1len, o1flags,
+                o2, o2off, o2len, o2flags);
+    }
+    
+    /**
+     * Invokes a function with two numeric arguments, and returns a numeric value.
+     *
+     * @param function The <tt>Function</tt> to invoke.
+     * @param arg1 An array, to be passed as a pointer for the first numeric parameter.
+     * @param off1 The offset from the start of the array.
+     * @param len1 The length of the array to use.
+     * @param flags1 Array flags (direction, type).
+     * @param arg2 The second numeric argument.
+     */
+    public final long invokeNNNO1rN(Function function, 
+            long n1, long n2, long n3,
+            Object o1, int o1off, int o1len, ObjectParameterInfo o1flags) {
+
+        return objectParameterInvoker.invokeN3O1rN(function, 
+                n1, n2, n3,
+                o1, o1off, o1len, o1flags);
+    }
+
+    /**
+     * Invokes a function with two numeric arguments, and returns a numeric value.
+     *
+     * @param function The <tt>Function</tt> to invoke.
+     * @param arg1 An array, to be passed as a pointer for the first numeric parameter.
+     * @param off1 The offset from the start of the array.
+     * @param len1 The length of the array to use.
+     * @param flags1 Array flags (direction, type).
+     * @param arg2 The second numeric argument.
+     */
+    public final long invokeNNNO2rN(Function function, 
+            long n1, long n2, long n3,
+            Object o1, int o1off, int o1len, ObjectParameterInfo o1flags,
+            Object o2, int o2off, int o2len, ObjectParameterInfo o2flags) {
+
+        return objectParameterInvoker.invokeN3O2rN(function, 
+                n1, n2, n3,
+                o1, o1off, o1len, o1flags,
+                o2, o2off, o2len, o2flags);
     }
 
     /**
