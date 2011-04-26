@@ -72,6 +72,8 @@ final class ObjectBuffer {
     static final int LONG = 0x4 << TYPE_SHIFT;
     static final int FLOAT = 0x5 << TYPE_SHIFT;
     static final int DOUBLE = 0x6 << TYPE_SHIFT;
+    static final int BOOLEAN = 0x7 << TYPE_SHIFT;
+    static final int CHAR = 0x8 << TYPE_SHIFT;
 
     /* NOTE: The JNI types can overlap the primitive type, since they are mutually exclusive */
     /** The JNIEnv address */
@@ -141,13 +143,13 @@ final class ObjectBuffer {
     /**
      * Encodes the native object flags for an array.
      *
-     * @param flags The array flags (IN, OUT) for the object.
+     * @param ioflags The array flags (IN, OUT) for the object.
      * @param type The type of the object.
      * @param index The parameter index the object should be passed as.
      * @return A bitmask of flags.
      */
-    private static final int makeArrayFlags(int flags, int type, int index) {
-        return (flags & FLAGS_MASK) | ((index << INDEX_SHIFT) & INDEX_MASK) | type;
+    static final int makeObjectFlags(int ioflags, int type, int index) {
+        return (ioflags & FLAGS_MASK) | ((index << INDEX_SHIFT) & INDEX_MASK) | type;
     }
 
     /**
@@ -156,7 +158,7 @@ final class ObjectBuffer {
      * @param index The parameter index of the buffer.
      * @return A bitmask of flags.
      */
-    private static final int makeBufferFlags(int index) {
+    static final int makeBufferFlags(int index) {
         return ((index << INDEX_SHIFT) & INDEX_MASK) | BUFFER;
     }
 
@@ -173,7 +175,7 @@ final class ObjectBuffer {
      * @param flags The flags to use (IN, OUT, NULTERMINATE)
      */
     public void putArray(int index, byte[] array, int offset, int length, int flags) {
-        putObject(array, offset, length, makeArrayFlags(flags, BYTE | ARRAY, index));
+        putObject(array, offset, length, makeObjectFlags(flags, BYTE | ARRAY, index));
     }
 
     /**
@@ -185,7 +187,7 @@ final class ObjectBuffer {
      * @param flags The flags to use (IN, OUT)
      */
     public void putArray(int index, short[] array, int offset, int length, int flags) {
-        putObject(array, offset, length, makeArrayFlags(flags, SHORT | ARRAY, index));
+        putObject(array, offset, length, makeObjectFlags(flags, SHORT | ARRAY, index));
     }
 
     /**
@@ -197,7 +199,7 @@ final class ObjectBuffer {
      * @param flags The flags to use (IN, OUT)
      */
     public void putArray(int index, int[] array, int offset, int length, int flags) {
-        putObject(array, offset, length, makeArrayFlags(flags, INT | ARRAY, index));
+        putObject(array, offset, length, makeObjectFlags(flags, INT | ARRAY, index));
     }
 
     /**
@@ -209,7 +211,7 @@ final class ObjectBuffer {
      * @param flags The flags to use (IN, OUT)
      */
     public void putArray(int index, long[] array, int offset, int length, int flags) {
-        putObject(array, offset, length, makeArrayFlags(flags, LONG | ARRAY, index));
+        putObject(array, offset, length, makeObjectFlags(flags, LONG | ARRAY, index));
     }
 
     /**
@@ -221,7 +223,7 @@ final class ObjectBuffer {
      * @param flags The flags to use (IN, OUT)
      */
     public void putArray(int index, float[] array, int offset, int length, int flags) {
-        putObject(array, offset, length, makeArrayFlags(flags, FLOAT | ARRAY, index));
+        putObject(array, offset, length, makeObjectFlags(flags, FLOAT | ARRAY, index));
     }
 
     /**
@@ -233,7 +235,7 @@ final class ObjectBuffer {
      * @param flags The flags to use (IN, OUT)
      */
     public void putArray(int index, double[] array, int offset, int length, int flags) {
-        putObject(array, offset, length, makeArrayFlags(flags, DOUBLE | ARRAY, index));
+        putObject(array, offset, length, makeObjectFlags(flags, DOUBLE | ARRAY, index));
     }
 
     /**
