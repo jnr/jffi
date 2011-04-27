@@ -1423,5 +1423,6 @@ final class Foreign {
     final native int registerNatives(Class clazz, long methods,  int methodCount);
     final native int unregisterNatives(Class clazz);
     
+    final native String getArch();
     
 }

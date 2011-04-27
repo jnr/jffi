@@ -194,3 +194,54 @@ Java_com_kenai_jffi_Foreign_unregisterNatives(JNIEnv *env, jobject self, jclass 
 {
     return (*env)->UnregisterNatives(env, clazz);
 }
+
+/*
+ * Determine the cpu type at compile time - useful for MacOSX where the jvm
+ * reports os.arch as 'universal'
+ */
+#if defined(__i386__) || defined(__i386)
+# define CPU "i386"
+
+#elif defined(__x86_64__) || defined(__x86_64) || defined(__amd64)
+# define CPU "x86_64"
+
+#elif defined(__ppc64__) || defined(__powerpc64__)
+# define CPU "ppc64"
+
+#elif defined(__ppc__) || defined(__powerpc__) || defined(__powerpc)
+# define CPU "ppc"
+
+/* Need to check for __sparcv9 first, because __sparc will be defined either way
+. */
+#elif defined(__sparcv9__) || defined(__sparcv9)
+# define CPU "sparcv9"
+
+#elif defined(__sparc__) || defined(__sparc)
+# define CPU "sparc"
+
+#elif defined(__arm__) || defined(__arm)
+# define CPU "arm"
+
+#elif defined(__ia64__) || defined(__ia64)
+# define CPU "ia64"
+
+#elif defined(__mips__) || defined(__mips)
+# define CPU "mips"
+
+#elif defined(__s390__)
+# define CPU "s390"
+
+#else
+# define CPU "unknown"
+#endif
+
+/*
+ * Class:     com_kenai_jffi_Foreign
+ * Method:    getArch
+ * Signature: ()Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL 
+Java_com_kenai_jffi_Foreign_getArch(JNIEnv *env, jobject self)
+{
+    return (*env)->NewStringUTF(env, CPU);
+}

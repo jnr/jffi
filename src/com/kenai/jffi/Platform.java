@@ -37,10 +37,6 @@ package com.kenai.jffi;
  */
 public abstract class Platform {
     private final OS os;
-    private final CPU cpu;
-    private final int addressSize;
-    private final long addressMask;
-    private final int longSize;
     private final int javaVersionMajor;
 
     /**
@@ -84,22 +80,29 @@ public abstract class Platform {
      */
     public enum CPU {
         /** Intel ia32 */
-        I386,
+        I386(32),
         /** AMD 64 bit (aka EM64T/X64) */
-        X86_64,
+        X86_64(64),
         /** Power PC 32 bit */
-        PPC,
+        PPC(32),
         /** Power PC 64 bit */
-        PPC64,
+        PPC64(64),
         /** Sun sparc 32 bit */
-        SPARC,
+        SPARC(32),
         /** Sun sparc 64 bit */
-        SPARCV9,
+        SPARCV9(64),
         /** IBM zSeries S/390 64 bit */
-        S390X,
+        S390X(64),
         /** Unknown CPU */
-        UNKNOWN;
+        UNKNOWN(64);
+        
+        CPU(int dataModel) {
+            this.dataModel = dataModel;
+            this.addressMask = dataModel == 32 ? 0xffffffffL : 0xffffffffffffffffL;
+        }
 
+        public final int dataModel;
+        public final long addressMask;
         @Override
         public String toString() { return name().toLowerCase(); }
     }
@@ -120,20 +123,27 @@ public abstract class Platform {
         String osName = System.getProperty("os.name").split(" ")[0].toLowerCase();
         if (osName.startsWith("mac") || osName.startsWith("darwin")) {
             return OS.DARWIN;
+        
         } else if (osName.startsWith("linux")) {
             return OS.LINUX;
+        
         } else if (osName.startsWith("sunos") || osName.startsWith("solaris")) {
             return OS.SOLARIS;
+        
         } else if (osName.startsWith("aix")) {
             return OS.AIX; 
+        
         } else if (osName.startsWith("openbsd")) {
             return OS.OPENBSD;
+        
         } else if (osName.startsWith("freebsd")) {
             return OS.FREEBSD;
+        
         } else if (osName.startsWith("windows")) {
             return OS.WINDOWS;
+        
         } else {
-            throw new ExceptionInInitializerError("Unsupported operating system");
+            return OS.UNKNOWN;
         }
     }
 
@@ -146,40 +156,73 @@ public abstract class Platform {
     private static final Platform determinePlatform(OS os) {
         switch (os) {
             case DARWIN:
-                return new Darwin();
+                return newDarwinPlatform();
+            
             case WINDOWS:
-                return new Windows();
-            case UNKNOWN:
-                throw new ExceptionInInitializerError("Unsupported operating system");
+                return newWindowsPlatform();
+            
             default:
-                return new Default(os);
+                return newDefaultPlatform(os);
         }
     }
+    
+    private static Platform newDarwinPlatform() {
+        return new Darwin();
+    }
+    
+    private static Platform newWindowsPlatform() {
+        return new Windows();
+    }
+    
+    private static Platform newDefaultPlatform(OS os) {
+        return new Default(os);
+    }
+    
+    
+    private static final class ArchHolder {
+        public static final CPU CPU = determineCPU();
+        
+        /**
+         * Determines the CPU architecture the JVM is running on.
+         *
+         * This normalizes all the variations that are equivalent (e.g. i386, x86, i86pc)
+         * into a common cpu type.
+         *
+         * @return A member of the <tt>CPU</tt> enum.
+         */
+        private static CPU determineCPU() {
+            String archString = null;
+            try {
+                archString = Foreign.getInstance().getArch().toLowerCase();
+            } catch (UnsatisfiedLinkError ex) {}
+            
+            if (archString == null || "unknown".equals(archString)) {
+                archString = System.getProperty("os.arch", "unknown").toLowerCase();
+            }
 
-    /**
-     * Determines the CPU architecture the JVM is running on.
-     *
-     * This normalizes all the variations that are equivalent (e.g. i386, x86, i86pc)
-     * into a common cpu type.
-     *
-     * @return A member of the <tt>CPU</tt> enum.
-     */
-    private static final CPU determineCPU() {
-        String archString = System.getProperty("os.arch", "unknown").toLowerCase();
-        if ("x86".equals(archString) || "i386".equals(archString) || "i86pc".equals(archString)) {
-            return CPU.I386;
-        } else if ("x86_64".equals(archString) || "amd64".equals(archString)) {
-            return CPU.X86_64;
-        } else if ("ppc".equals(archString) || "powerpc".equals(archString)) {
-            return CPU.PPC;
-        } else if ("powerpc64".equals(archString)) {
-            return CPU.PPC64;
-        }
-        // Try to find by lookup up in the CPU list
-        try {
-            return CPU.valueOf(archString.toUpperCase());
-        } catch (IllegalArgumentException ex) {
-            throw new ExceptionInInitializerError("Unsupported CPU architecture: " + archString);
+            if ("x86".equals(archString) || "i386".equals(archString) || "i86pc".equals(archString)) {
+                return CPU.I386;
+
+            } else if ("x86_64".equals(archString) || "amd64".equals(archString)) {
+                return CPU.X86_64;
+
+            } else if ("ppc".equals(archString) || "powerpc".equals(archString)) {
+                return CPU.PPC;
+
+            } else if ("ppc64".equals(archString) || "powerpc64".equals(archString)) {
+                return CPU.PPC64;
+            
+            } else if ("s390".equals(archString) || "s390x".equals(archString)) {
+                return CPU.S390X;
+            }
+
+            // Try to find by lookup up in the CPU list
+            try {
+                return CPU.valueOf(archString.toUpperCase());
+
+            } catch (IllegalArgumentException ex) {
+                return CPU.UNKNOWN;
+            }
         }
     }
 
@@ -190,36 +233,6 @@ public abstract class Platform {
      */
     private Platform(OS os) {
         this.os = os;
-        this.cpu = determineCPU();
-
-        
-        int dataModel = Integer.getInteger("sun.arch.data.model", 0);
-
-        //
-        // If we're running on a broken JVM that doesn't support the sun.arch.data.model property
-        // try to deduce the data model using the CPU type.
-        //
-        if (dataModel != 32 && dataModel != 64) {
-            switch (cpu) {
-                case I386:
-                case PPC:
-                case SPARC:
-                    dataModel = 32;
-                    break;
-                case X86_64:
-                case PPC64:
-                case SPARCV9:
-                case S390X:
-                    dataModel = 64;
-                    break;
-                default:
-                    throw new ExceptionInInitializerError("Cannot determine cpu address size");
-            }
-        }
-
-        addressSize = dataModel;
-        addressMask = addressSize == 32 ? 0xffffffffL : 0xffffffffffffffffL;
-        longSize = os == OS.WINDOWS ? 32 : addressSize;
 
         int version = 5;
         try {
@@ -229,8 +242,10 @@ public abstract class Platform {
                 version = Integer.valueOf(v[1]);
             }
         } catch (Exception ex) {
-            throw new ExceptionInInitializerError("Could not determine java version");
+            // Assume version 5 or above.
+            version = 5;
         }
+
         javaVersionMajor = version;
     }
     
@@ -258,7 +273,7 @@ public abstract class Platform {
      * @return A <tt>CPU</tt> value representing the current processor architecture.
      */
     public final CPU getCPU() {
-        return cpu;
+        return ArchHolder.CPU;
     }
     
     /**
@@ -275,9 +290,7 @@ public abstract class Platform {
      *
      * @return the size of a long in bits
      */
-    public final int longSize() {
-        return longSize;
-    }
+    public abstract int longSize();
 
     /**
      * Gets the size of a C address/pointer on the native platform.
@@ -285,7 +298,7 @@ public abstract class Platform {
      * @return the size of a pointer in bits
      */
     public final int addressSize() {
-        return addressSize;
+        return getCPU().dataModel;
     }
 
     /**
@@ -294,7 +307,7 @@ public abstract class Platform {
      * @return the size of a pointer in bits
      */
     public final long addressMask() {
-        return addressMask;
+        return getCPU().addressMask;
     }
 
     /**
@@ -355,6 +368,9 @@ public abstract class Platform {
             super(os);
         }
         
+        public final int longSize() {
+            return getCPU().dataModel;
+        }        
     }
     /**
      * A {@link Platform} subclass representing the MacOS system.
@@ -384,13 +400,17 @@ public abstract class Platform {
         public String getName() {
             return "Darwin";
         }
+        
+        public final int longSize() {
+            return getCPU().dataModel;
+        }
 
     }
 
     /**
      * A {@link Platform} subclass representing the Windows system.
      */
-    private static class Windows extends Platform {
+    private static final class Windows extends Platform {
 
         public Windows() {
             super(OS.WINDOWS);
@@ -399,6 +419,10 @@ public abstract class Platform {
         @Override
         public String getLibraryNamePattern() {
             return ".*\\.dll$";
+        }
+        
+        public final int longSize() {
+            return 32;
         }
     }
 }
