@@ -193,7 +193,12 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
 
     public final void putJNIEnvironment() {
         paramOffset = encoder.putAddress(buffer, paramOffset, 0L);
-        getObjectBuffer().putJNI(paramIndex++, ObjectBuffer.JNIENV);
+        getObjectBuffer().putJNI(paramIndex++, null, ObjectBuffer.JNIENV);
+    }
+    
+    public final void putJNIObject(Object obj) {
+        paramOffset = encoder.putAddress(buffer, paramOffset, 0L);
+        getObjectBuffer().putJNI(paramIndex++, obj, ObjectBuffer.JNIOBJECT);
     }
 
     static final Encoder getEncoder() {

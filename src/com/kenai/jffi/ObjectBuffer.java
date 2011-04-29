@@ -277,8 +277,8 @@ final class ObjectBuffer {
      *
      * @param index The index of the parameter.
      */
-    public void putJNI(int index, int type) {
-        putObject(null, 0, 0, makeJNIFlags(index, type));
+    public void putJNI(int index, Object obj, int type) {
+        putObject(obj, 0, 0, makeJNIFlags(index, type));
     }
 
     private void putObject(Object array, int offset, int length, int flags) {
