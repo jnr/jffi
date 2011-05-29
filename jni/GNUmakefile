@@ -145,10 +145,15 @@ ifeq ($(OS), darwin)
   ifneq ($(findstring $(CPU), i386 x86_64),)
     ARCHES += i386 x86_64
   endif
-  CC = gcc
+  ifneq ($(realpath $(wildcard /Xcode3/usr/bin/gcc)),)
+    CC = /Xcode3/usr/bin/gcc-4.0
+  else
+    CC = gcc
+  endif
 
-  ifneq ($(realpath /Developer/SDKs/MacOSX10.4u.sdk),)
+  ifneq ($(realpath $(wildcard /Developer/SDKs/MacOSX10.4?.sdk)),)
     MACSDK = /Developer/SDKs/MacOSX10.4u.sdk
+    ARCHES += ppc
   else
     MACSDK = $(firstword $(strip $(wildcard /Developer/SDKs/MacOSX10.*.sdk)))
   endif
@@ -159,7 +164,7 @@ ifeq ($(OS), darwin)
 	-Wl,-syslibroot,$(MACSDK) -mmacosx-version-min=10.4
   JNIEXT = jnilib
   #CFLAGS += -I$(MACSDK)/System/Library/Frameworks/Kernel.framework/Versions/A/Headers
-  FFI_CFLAGS += -isysroot $(MACSDK)
+  FFI_CFLAGS += -isysroot $(MACSDK) -I$(MACSDK)/usr/include
   PICFLAGS =
   SOFLAGS =
 endif

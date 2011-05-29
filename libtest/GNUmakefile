@@ -81,15 +81,23 @@ ifeq ($(OS), darwin)
   ifneq ($(findstring $(CPU), i386 x86_64),)
     ARCHES += i386 x86_64
   endif
-  CC = gcc
-  ifneq ($(realpath /Developer/SDKs/MacOSX10.4u.sdk),)
+  ifneq ($(realpath $(wildcard /Xcode3/usr/bin/gcc)),)
+    CC = /Xcode3/usr/bin/gcc-4.0
+  else
+    CC = gcc
+  endif
+
+  ifneq ($(realpath $(wildcard /Developer/SDKs/MacOSX10.4?.sdk)),)
     MACSDK = /Developer/SDKs/MacOSX10.4u.sdk
+    ARCHES += ppc
   else
     MACSDK = $(firstword $(strip $(wildcard /Developer/SDKs/MacOSX10.*.sdk)))
   endif
   CFLAGS += $(ARCHFLAGS) -isysroot $(MACSDK) -DTARGET_RT_MAC_CFM=0
   CFLAGS += -fno-common
+  CFLAGS += $(foreach arch, $(ARCHES),-arch $(arch))
   LDFLAGS = $(ARCHFLAGS) -dynamiclib -Wl,-syslibroot,$(MACSDK) -mmacosx-version-min=10.4
+  LDFLAGS += $(foreach arch, $(ARCHES),-arch $(arch))
   # link against the universal libraries on ppc machines
   LDFLAGS += -L$(MACSDK)/usr/lib
   LIBEXT = dylib
