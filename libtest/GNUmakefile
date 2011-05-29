@@ -74,12 +74,19 @@ ifeq ($(OS), win32)
 endif
 
 ifeq ($(OS), darwin)
-  ARCHFLAGS = -arch ppc
-  ifneq ($(findstring $(CPU), i386 x86_64),)
-    ARCHFLAGS += -arch i386 -arch x86_64
+  ARCHFLAGS = 
+  ifneq ($(findstring $(CPU), ppc powerpc),)
+    ARCHES += ppc
   endif
-  CC = gcc-4.0
-  MACSDK = /Developer/SDKs/MacOSX10.4u.sdk
+  ifneq ($(findstring $(CPU), i386 x86_64),)
+    ARCHES += i386 x86_64
+  endif
+  CC = gcc
+  ifneq ($(realpath /Developer/SDKs/MacOSX10.4u.sdk),)
+    MACSDK = /Developer/SDKs/MacOSX10.4u.sdk
+  else
+    MACSDK = $(firstword $(strip $(wildcard /Developer/SDKs/MacOSX10.*.sdk)))
+  endif
   CFLAGS += $(ARCHFLAGS) -isysroot $(MACSDK) -DTARGET_RT_MAC_CFM=0
   CFLAGS += -fno-common
   LDFLAGS = $(ARCHFLAGS) -dynamiclib -Wl,-syslibroot,$(MACSDK) -mmacosx-version-min=10.4

@@ -138,13 +138,20 @@ endif
 
 ifeq ($(OS), darwin)
   PLATFORM = darwin
-  ARCHES = ppc
-  ifneq ($(findstring $(CPU), i386 x86_64),)
-    ARCHES = ppc i386 x86_64
+  ARCHES =
+  ifneq ($(findstring $(CPU), ppc powerpc),)
+    ARCHES += ppc
   endif
-  CC = gcc-4.0
+  ifneq ($(findstring $(CPU), i386 x86_64),)
+    ARCHES += i386 x86_64
+  endif
+  CC = gcc
 
-  MACSDK = /Developer/SDKs/MacOSX10.4u.sdk
+  ifneq ($(realpath /Developer/SDKs/MacOSX10.4u.sdk),)
+    MACSDK = /Developer/SDKs/MacOSX10.4u.sdk
+  else
+    MACSDK = $(firstword $(strip $(wildcard /Developer/SDKs/MacOSX10.*.sdk)))
+  endif
   CFLAGS += -isysroot $(MACSDK) -DTARGET_RT_MAC_CFM=0
   CFLAGS += -I$(MACSDK)/System/Library/Frameworks/JavaVM.framework/Headers
   CFLAGS += $(foreach arch, $(ARCHES),-arch $(arch))
@@ -231,11 +238,6 @@ debug:
 $(LIBJFFI):  $(OBJS) $(LIBFFI_LIBS)
 	$(CC) -o $@ $(LDFLAGS) $(SOFLAGS) $(OBJS) $(LIBFFI_LIBS) $(LIBS)
 	$(STRIP) $@
-
-# For the primitive int interface, don't do frame pointer save/restore
-$(JFFI_BUILD_DIR)/Fast%Invoke.o : $(JFFI_SRC_DIR)/Fast%Invoke.c $(wildcard $(JFFI_SRC_DIR)/*.h) $(LIBFFI)
-	@mkdir -p $(@D)
-	@$(CCACHE) $(CC) $(CFLAGS) -fomit-frame-pointer -c $< -o $@
 
 
 $(BUILD_DIR)/%.o : $(SRC_DIR)/%.c $(wildcard $(JFFI_SRC_DIR)/*.h)
