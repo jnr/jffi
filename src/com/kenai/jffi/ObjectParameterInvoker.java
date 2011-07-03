@@ -19,6 +19,8 @@ abstract public class ObjectParameterInvoker {
         return new HeapObjectParameterInvoker();
     }
     
+    abstract public boolean isNative();
+    
     abstract public long invokeN1O1rN(Function function, 
             long n1, 
             Object o1, int o1off, int o1len, ObjectParameterInfo o1flags);
@@ -41,6 +43,12 @@ abstract public class ObjectParameterInvoker {
             Object o1, int o1off, int o1len, ObjectParameterInfo o1flags,
             Object o2, int o2off, int o2len, ObjectParameterInfo o2flags);
     
+    abstract public long invokeN3O3rN(Function function, 
+            long n1, long n2, long n3,
+            Object o1, int o1off, int o1len, ObjectParameterInfo o1flags,
+            Object o2, int o2off, int o2len, ObjectParameterInfo o2flags,
+            Object o3, int o3off, int o3len, ObjectParameterInfo o3flags);
+    
     abstract public long invokeN4O1rN(Function function, 
             long n1, long n2, long n3, long n4,
             Object o1, int o1off, int o1len, ObjectParameterInfo o1flags);
@@ -49,6 +57,12 @@ abstract public class ObjectParameterInvoker {
             long n1, long n2, long n3, long n4,
             Object o1, int o1off, int o1len, ObjectParameterInfo o1flags,
             Object o2, int o2off, int o2len, ObjectParameterInfo o2flags);
+    
+    abstract public long invokeN4O3rN(Function function, 
+            long n1, long n2, long n3, long n4,
+            Object o1, int o1off, int o1len, ObjectParameterInfo o1flags,
+            Object o2, int o2off, int o2len, ObjectParameterInfo o2flags,
+            Object o3, int o3off, int o3len, ObjectParameterInfo o3flags);
     
     abstract public long invokeN5O1rN(Function function, 
             long n1, long n2, long n3, long n4, long n5,
@@ -59,6 +73,12 @@ abstract public class ObjectParameterInvoker {
             Object o1, int o1off, int o1len, ObjectParameterInfo o1flags,
             Object o2, int o2off, int o2len, ObjectParameterInfo o2flags);
     
+    abstract public long invokeN5O3rN(Function function, 
+            long n1, long n2, long n3, long n4, long n5,
+            Object o1, int o1off, int o1len, ObjectParameterInfo o1flags,
+            Object o2, int o2off, int o2len, ObjectParameterInfo o2flags,
+            Object o3, int o3off, int o3len, ObjectParameterInfo o3flags);
+    
     abstract public long invokeN6O1rN(Function function, 
             long n1, long n2, long n3, long n4, long n5, long n6,
             Object o1, int o1off, int o1len, ObjectParameterInfo o1flags);
@@ -67,4 +87,10 @@ abstract public class ObjectParameterInvoker {
             long n1, long n2, long n3, long n4, long n5, long n6,
             Object o1, int o1off, int o1len, ObjectParameterInfo o1flags,
             Object o2, int o2off, int o2len, ObjectParameterInfo o2flags);
+    
+    abstract public long invokeN6O3rN(Function function, 
+            long n1, long n2, long n3, long n4, long n5, long n6,
+            Object o1, int o1off, int o1len, ObjectParameterInfo o1flags,
+            Object o2, int o2off, int o2len, ObjectParameterInfo o2flags,
+            Object o3, int o3off, int o3len, ObjectParameterInfo o3flags);
 }

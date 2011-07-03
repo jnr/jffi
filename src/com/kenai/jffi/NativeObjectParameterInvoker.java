@@ -4,7 +4,7 @@ package com.kenai.jffi;
 /**
  *
  */
-public final class NativeObjectParameterInvoker extends ObjectParameterInvoker {
+final class NativeObjectParameterInvoker extends ObjectParameterInvoker {
     private final Foreign foreign = Foreign.getInstance();
 
     public final boolean isNative() {

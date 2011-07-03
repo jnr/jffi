@@ -66,6 +66,14 @@ public abstract class Invoker {
     private Invoker() {}
 
     /**
+     * Gets the fast-path object parameter invoker.
+     * 
+     * @return An instance of {@link ObjectParameterInvoker}
+     */
+    public final ObjectParameterInvoker getObjectParameterInvoker() {
+        return objectParameterInvoker;
+    }
+    /**
      * Invokes a function with no arguments, and returns a 32 bit integer.
      *
      * @param function The <tt>Function</tt> to invoke.

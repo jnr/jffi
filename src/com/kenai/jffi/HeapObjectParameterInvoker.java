@@ -3,8 +3,12 @@ package com.kenai.jffi;
 /**
  *
  */
-public class HeapObjectParameterInvoker extends ObjectParameterInvoker {
+final class HeapObjectParameterInvoker extends ObjectParameterInvoker {
     private final Foreign foreign = Foreign.getInstance();
+
+    public final boolean isNative() {
+        return false;
+    }
 
     private static int encode(byte[] paramBuffer, int off, Type type, long n) {
         HeapInvocationBuffer.Encoder encoder = HeapInvocationBuffer.encoder;
@@ -87,6 +91,32 @@ public class HeapObjectParameterInvoker extends ObjectParameterInvoker {
                 o1, o1flags.asObjectInfo(), o1off, o1len,
                 o2, o2flags.asObjectInfo(), o2off, o2len);
     }
+    
+    public long invokeN3O3rN(Function function, 
+        long n1, long n2, long n3, 
+        Object o1, int o1off, int o1len, ObjectParameterInfo o1flags, 
+        Object o2, int o2off, int o2len, ObjectParameterInfo o2flags,
+        Object o3, int o3off, int o3len, ObjectParameterInfo o3flags) {
+        
+        HeapInvocationBuffer.Encoder encoder = HeapInvocationBuffer.encoder;
+        byte[] paramBuffer = new byte[encoder.getBufferSize(function)];
+        
+        int poff = 0;
+        poff = encode(paramBuffer, poff, function.getParameterType(0), n1);
+        poff = encode(paramBuffer, poff, function.getParameterType(1), n2);
+        poff = encode(paramBuffer, poff, function.getParameterType(2), n3);
+        
+        int[] objInfo = { 
+            o1flags.asObjectInfo(), o1off, o1len,
+            o2flags.asObjectInfo(), o2off, o2len,
+            o3flags.asObjectInfo(), o3off, o3len 
+        };
+        Object[] objects = { o1, o2, o3 };
+        
+        return foreign.invokeArrayWithObjectsInt64(function.getContextAddress(), 
+                paramBuffer, 3, objInfo, objects);
+    }
+
 
     public long invokeN4O1rN(Function function, 
         long n1, long n2, long n3, long n4,
@@ -127,6 +157,33 @@ public class HeapObjectParameterInvoker extends ObjectParameterInvoker {
                 o1, o1flags.asObjectInfo(), o1off, o1len,
                 o2, o2flags.asObjectInfo(), o2off, o2len);
     }
+    
+    public long invokeN4O3rN(Function function, 
+        long n1, long n2, long n3, long n4,
+        Object o1, int o1off, int o1len, ObjectParameterInfo o1flags, 
+        Object o2, int o2off, int o2len, ObjectParameterInfo o2flags,
+        Object o3, int o3off, int o3len, ObjectParameterInfo o3flags) {
+        
+        HeapInvocationBuffer.Encoder encoder = HeapInvocationBuffer.encoder;
+        byte[] paramBuffer = new byte[encoder.getBufferSize(function)];
+        
+        int poff = 0;
+        poff = encode(paramBuffer, poff, function.getParameterType(0), n1);
+        poff = encode(paramBuffer, poff, function.getParameterType(1), n2);
+        poff = encode(paramBuffer, poff, function.getParameterType(2), n3);
+        poff = encode(paramBuffer, poff, function.getParameterType(3), n4);
+
+        int[] objInfo = { 
+            o1flags.asObjectInfo(), o1off, o1len,
+            o2flags.asObjectInfo(), o2off, o2len,
+            o3flags.asObjectInfo(), o3off, o3len 
+        };
+        Object[] objects = { o1, o2, o3 };
+        
+        return foreign.invokeArrayWithObjectsInt64(function.getContextAddress(),
+                paramBuffer, 3, objInfo, objects);
+    }
+
 
     @Override
     public long invokeN5O1rN(Function function, 
@@ -169,6 +226,33 @@ public class HeapObjectParameterInvoker extends ObjectParameterInvoker {
                 paramBuffer, 
                 o1, o1flags.asObjectInfo(), o1off, o1len,
                 o2, o2flags.asObjectInfo(), o2off, o2len);
+    }
+    
+    public long invokeN5O3rN(Function function, 
+        long n1, long n2, long n3, long n4, long n5,
+        Object o1, int o1off, int o1len, ObjectParameterInfo o1flags, 
+        Object o2, int o2off, int o2len, ObjectParameterInfo o2flags,
+        Object o3, int o3off, int o3len, ObjectParameterInfo o3flags) {
+        
+        HeapInvocationBuffer.Encoder encoder = HeapInvocationBuffer.encoder;
+        byte[] paramBuffer = new byte[encoder.getBufferSize(function)];
+        
+        int poff = 0;
+        poff = encode(paramBuffer, poff, function.getParameterType(0), n1);
+        poff = encode(paramBuffer, poff, function.getParameterType(1), n2);
+        poff = encode(paramBuffer, poff, function.getParameterType(2), n3);
+        poff = encode(paramBuffer, poff, function.getParameterType(3), n4);
+        poff = encode(paramBuffer, poff, function.getParameterType(4), n5);
+
+        int[] objInfo = { 
+            o1flags.asObjectInfo(), o1off, o1len,
+            o2flags.asObjectInfo(), o2off, o2len,
+            o3flags.asObjectInfo(), o3off, o3len 
+        };
+        Object[] objects = { o1, o2, o3 };
+        
+        return foreign.invokeArrayWithObjectsInt64(function.getContextAddress(),
+                paramBuffer, 3, objInfo, objects);
     }
 
     @Override
@@ -215,6 +299,32 @@ public class HeapObjectParameterInvoker extends ObjectParameterInvoker {
                 o2, o2flags.asObjectInfo(), o2off, o2len);
     }
     
-    
+    public long invokeN6O3rN(Function function, 
+        long n1, long n2, long n3, long n4, long n5, long n6,
+        Object o1, int o1off, int o1len, ObjectParameterInfo o1flags, 
+        Object o2, int o2off, int o2len, ObjectParameterInfo o2flags,
+        Object o3, int o3off, int o3len, ObjectParameterInfo o3flags) {
+        
+        HeapInvocationBuffer.Encoder encoder = HeapInvocationBuffer.encoder;
+        byte[] paramBuffer = new byte[encoder.getBufferSize(function)];
+        
+        int poff = 0;
+        poff = encode(paramBuffer, poff, function.getParameterType(0), n1);
+        poff = encode(paramBuffer, poff, function.getParameterType(1), n2);
+        poff = encode(paramBuffer, poff, function.getParameterType(2), n3);
+        poff = encode(paramBuffer, poff, function.getParameterType(3), n4);
+        poff = encode(paramBuffer, poff, function.getParameterType(4), n5);
+        poff = encode(paramBuffer, poff, function.getParameterType(5), n6);
+
+        int[] objInfo = { 
+            o1flags.asObjectInfo(), o1off, o1len,
+            o2flags.asObjectInfo(), o2off, o2len,
+            o3flags.asObjectInfo(), o3off, o3len 
+        };
+        Object[] objects = { o1, o2, o3 };
+        
+        return foreign.invokeArrayWithObjectsInt64(function.getContextAddress(),
+                paramBuffer, 3, objInfo, objects);
+    }
 
 }
