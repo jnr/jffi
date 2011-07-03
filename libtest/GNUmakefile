@@ -93,9 +93,9 @@ ifeq ($(OS), darwin)
   else
     MACSDK = $(firstword $(strip $(wildcard /Developer/SDKs/MacOSX10.*.sdk)))
   endif
+  ARCHFLAGS = $(foreach arch, $(ARCHES),-arch $(arch))
   CFLAGS += $(ARCHFLAGS) -isysroot $(MACSDK) -DTARGET_RT_MAC_CFM=0
   CFLAGS += -fno-common
-  CFLAGS += $(foreach arch, $(ARCHES),-arch $(arch))
   LDFLAGS = $(ARCHFLAGS) -dynamiclib -Wl,-syslibroot,$(MACSDK) -mmacosx-version-min=10.4
   LDFLAGS += $(foreach arch, $(ARCHES),-arch $(arch))
   # link against the universal libraries on ppc machines
