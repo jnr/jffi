@@ -6,10 +6,10 @@
             <name>jffi</name>
             <minimum-ant-version>1.6.5</minimum-ant-version>
             <source-roots>
-                <root id="src.dir"/>
+                <root id="src.java.dir"/>
             </source-roots>
             <test-roots>
-                <root id="test.src.dir"/>
+                <root id="test.java.dir"/>
             </test-roots>
         </data>
         <libraries xmlns="http://www.netbeans.org/ns/ant-project-libraries/1">

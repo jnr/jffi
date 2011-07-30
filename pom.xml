@@ -73,13 +73,6 @@
   </profiles>
 
   <build>
-    <directory>build</directory>
-    <outputDirectory>build/classes</outputDirectory>
-    <testOutputDirectory>build/test/classes</testOutputDirectory>
-    <sourceDirectory>src</sourceDirectory>
-    <!-- <testSourceDirectory>test</testSourceDirectory> -->
-    <resources>
-    </resources>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -178,7 +171,7 @@
         <version>2.2</version>
         <configuration>
           <descriptors>
-            <descriptor>native-assemble.xml</descriptor>
+            <descriptor>src/main/assembly/native.xml</descriptor>
           </descriptors>
           <archive>
             <index>true</index>
@@ -199,7 +192,4 @@
       </plugin>
     </plugins>
   </build>
-  <reporting>
-    <outputDirectory>build/report</outputDirectory>
-  </reporting>
 </project>
