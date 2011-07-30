@@ -109,11 +109,12 @@
         </executions>
       </plugin>
 -->
-    <plugin>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <version>1.1</version>
-        <executions>
-          <execution>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-antrun-plugin</artifactId>
+          <version>1.6</version>
+          <executions>
+            <execution>
             <id>build-native-library</id>
             <phase>generate-sources</phase>
             <configuration>
@@ -135,12 +136,6 @@
               <goal>run</goal>
             </goals>
           </execution>
-        </executions>
-      </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-antrun-plugin</artifactId>
-          <executions>
             <execution>
                 <phase>process-test-resources</phase>
                 <goals>
