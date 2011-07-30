@@ -87,9 +87,7 @@ public class ClosureManager {
      * native closure.
      *
      * @param closure The java object to be called when the native closure is invoked.
-     * @param returnType The return type of the closure.
-     * @param parameterTypes The parameter types of the closure.
-     * @param convention The calling convention of the closure.
+     * @param callContext The call context (return type, param types, convention) of the Closure
      * @return A new {@link Closure.Handle} instance.
      */
     public final Closure.Handle newClosure(Closure closure, CallContext callContext) {
@@ -98,7 +96,7 @@ public class ClosureManager {
         return pool.newClosureHandle(closure);
     }
 
-    private final synchronized ClosurePool getClosurePool(CallContext callContext) {
+    public final synchronized ClosurePool getClosurePool(CallContext callContext) {
         Reference<ClosurePool> ref = poolMap.get(callContext);
         ClosurePool pool;
         if (ref != null && (pool = ref.get()) != null) {

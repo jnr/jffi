@@ -40,7 +40,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-final class ClosurePool {
+public final class ClosurePool {
 
     private final List<MagazineHolder> partial = new LinkedList<MagazineHolder>();
     private final List<MagazineHolder> full = new LinkedList<MagazineHolder>();
@@ -89,8 +89,8 @@ final class ClosurePool {
     }
 
     public synchronized Closure.Handle newClosureHandle(Closure closure) {
-        Magazine.Slot s = null;
-        MagazineHolder h = null;
+        Magazine.Slot s;
+        MagazineHolder h;
         do {
             h = getMagazineHolder();
             s = h.magazine.get();
@@ -120,8 +120,8 @@ final class ClosurePool {
         /**
          * Creates a new Handle to lifecycle manager the native closure.
          *
-         * @param handle The address of the native closure structure.
-         * @param pool The native pool the closure was allocated from.
+         * @param slot THe magazine slot this handle belongs to
+         * @param holder The magazine holder containing this handle
          */
         Handle(Magazine.Slot slot, MagazineHolder holder) {
             this.slot = slot;
@@ -291,10 +291,11 @@ final class ClosurePool {
         volatile Closure closure;
 
         /**
-         * Gets the
-         * @return
+         * Gets the Method to be invoked by native code
+         *
+         * @return The method to be invoked by native code
          */
-        private static final Method getMethod() {
+        private static Method getMethod() {
             try {
                 return Proxy.class.getDeclaredMethod("invoke", new Class[]{long.class, long.class});
             } catch (Throwable ex) {
