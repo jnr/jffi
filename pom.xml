@@ -1,5 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.sonatype.oss</groupId>
@@ -9,7 +8,7 @@
   <groupId>com.github.jnr</groupId>
   <artifactId>jffi</artifactId>
   <packaging>jar</packaging>
-  <version>1.0.11-SNAPSHOT</version>
+  <version>1.0.11</version>
   <name>jffi</name>
   <description>Java Foreign Function Interface</description>
   <url>http://github.com/jnr/jffi</url>
@@ -92,14 +91,14 @@
             <phase>process-classes</phase>
             <configuration>
               <tasks>
-                <property name="os.name" value="${os.name}"/>
-                <property name="os.arch" value="${os.arch}"/>
-                <property name="java.home" value="${java.home}"/>
-                <property name="dist.dir" value="${project.build.directory}"/>
-                <property name="build.dir" value="${project.build.directory}"/>
-                <property name="build.classes.dir" value="${project.build.outputDirectory}"/>
-                <ant antfile="custom-build.xml" dir="." target="-assemble-native-jar"/>
-                <unjar src="${project.build.directory}/native.jar" dest="${project.build.outputDirectory}"/>
+                <property name="os.name" value="${os.name}" />
+                <property name="os.arch" value="${os.arch}" />
+                <property name="java.home" value="${java.home}" />
+                <property name="dist.dir" value="${project.build.directory}" />
+                <property name="build.dir" value="${project.build.directory}" />
+                <property name="build.classes.dir" value="${project.build.outputDirectory}" />
+                <ant antfile="custom-build.xml" dir="." target="-assemble-native-jar" />
+                <unjar src="${project.build.directory}/native.jar" dest="${project.build.outputDirectory}" />
               </tasks>
             </configuration>
             <goals>
@@ -119,13 +118,13 @@
             <phase>generate-sources</phase>
             <configuration>
               <tasks>
-                <property name="os.name" value="${os.name}"/>
-                <property name="os.arch" value="${os.arch}"/>
-                <property name="java.home" value="${java.home}"/>
-                <property name="dist.dir" value="${project.build.directory}"/>
-                <property name="build.dir" value="${project.build.directory}"/>
-                <property name="build.classes.dir" value="${project.build.outputDirectory}"/>
-                <ant antfile="version.xml" dir="." target="-generate-version-source"/>
+                <property name="os.name" value="${os.name}" />
+                <property name="os.arch" value="${os.arch}" />
+                <property name="java.home" value="${java.home}" />
+                <property name="dist.dir" value="${project.build.directory}" />
+                <property name="build.dir" value="${project.build.directory}" />
+                <property name="build.classes.dir" value="${project.build.outputDirectory}" />
+                <ant antfile="version.xml" dir="." target="-generate-version-source" />
               </tasks>
               <sourceRoot>
                 ${project.build.directory}/java
@@ -145,14 +144,14 @@
                     <tasks>
                       <unzip dest="${project.build.directory}/" overwrite="true">
                           <patternset>
-                            <include name="**/*.so"/>
-                            <include name="**/*.dylib"/>
-                            <include name="**/*.jnilib"/>
-                            <include name="**/*.dll"/>
-                            <include name="**/*.a"/>
+                            <include name="**/*.so" />
+                            <include name="**/*.dylib" />
+                            <include name="**/*.jnilib" />
+                            <include name="**/*.dll" />
+                            <include name="**/*.a" />
                           </patternset>
                           <fileset dir="archive">
-                            <include name="**/*.jar"/>
+                            <include name="**/*.jar" />
                           </fileset>
                       </unzip>
                     </tasks>
