@@ -8,3 +8,4 @@ dist
 lib/nblibraries-private.properties
 jni/libffi/doc/libffi.info$
 /.settings/
+target
