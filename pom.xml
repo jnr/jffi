@@ -13,6 +13,7 @@
   <name>jffi</name>
   <description>Java Foreign Function Interface</description>
   <url>http://github.com/jnr/jffi</url>
+
   <licenses>
     <license>
       <name>The Apache Software License, Version 2.0</name>
@@ -20,11 +21,13 @@
       <distribution>repo</distribution>
     </license>
   </licenses>
+
   <scm>
     <connection>scm:git:git@github.com:jnr/jffi.git</connection>
     <developerConnection>scm:git:git@github.com:jnr/jffi.git</developerConnection>
     <url>git@github.com:jnr/jffi.git</url>
   </scm>
+
   <developers>
     <developer>
       <id>wmeissner</id>
@@ -41,11 +44,16 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+
   <properties>
-      <maven.test.skip>true</maven.test.skip>
-      <maven.test.failure.ignore>true</maven.test.failure.ignore>
-      <make.exe>make</make.exe>
+    <maven.test.skip>true</maven.test.skip>
+    <maven.test.failure.ignore>true</maven.test.failure.ignore>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>1.5</maven.compiler.source>
+    <maven.compiler.target>1.5</maven.compiler.target>
+    <make.exe>make</make.exe>
   </properties>
+
   <profiles>
       <profile>
           <id>linux-profile</id>
@@ -63,6 +71,7 @@
           </properties>
       </profile>
   </profiles>
+
   <build>
     <directory>build</directory>
     <outputDirectory>build/classes</outputDirectory>
@@ -74,11 +83,10 @@
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>2.0.2</version>
+        <artifactId>maven-release-plugin</artifactId>
+        <version>2.2</version>
         <configuration>
-          <source>1.5</source>
-          <target>1.5</target>
+          <tagNameFormat>@{project.version}</tagNameFormat>
         </configuration>
       </plugin>
 <!--
