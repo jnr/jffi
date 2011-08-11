@@ -119,6 +119,8 @@ typedef union FFIValue {
 #ifndef _WIN32
 typedef struct ThreadData {
     int error;
+    int attach_count;
+    JavaVM* attached_vm;
 } ThreadData;
 
 extern pthread_key_t jffi_threadDataKey;

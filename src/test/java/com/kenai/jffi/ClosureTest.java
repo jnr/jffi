@@ -32,6 +32,8 @@ public class ClosureTest {
         void testClosureFrV(Address closure, float value);
         void testClosureDrV(Address closure, double value);
         
+        void testThreadedClosureVrV(Address closure, int count);
+        
     }
     private LibClosureTest lib, fastint, fastlong, fastnum;
     public ClosureTest() {
@@ -87,6 +89,24 @@ public class ClosureTest {
     @Test public void fastLongClosureVrV() throws Throwable {
         testClosureVrV(fastlong);
     }
+    
+    private void testThreadedClosureVrV(LibClosureTest lib, int count) {
+        final boolean called[] = { false };
+        Closure closure = new Closure() {
+            public void invoke(Buffer buffer) {
+                called[0] = true;
+            }
+        };
+        Closure.Handle handle = ClosureManager.getInstance().newClosure(closure,
+                Type.VOID, new Type[0], CallingConvention.DEFAULT);
+        lib.testThreadedClosureVrV(new Address(handle), count);
+        assertTrue("Closure not called", called[0]);
+    }
+    @Test public void defaultThreadedClosureVrV() throws Throwable {
+        testThreadedClosureVrV(lib, 10000);
+    }
+    
+    
     private void testClosureVrB(LibClosureTest lib) {
         final boolean called[] = { false };
         final byte MAGIC = (byte) 0x12;

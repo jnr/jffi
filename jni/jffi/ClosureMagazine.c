@@ -51,6 +51,8 @@
 #include "MemoryUtil.h"
 #include "com_kenai_jffi_Foreign.h"
 
+#define THREAD_ATTACH_THRESHOLD (1000)
+
 struct Closure;
 
 typedef struct ClosureMagazine {
@@ -190,8 +192,17 @@ static void
 closure_begin(Closure* closure, JNIEnv** penv, bool* detach)
 {
     JavaVM* jvm = closure->magazine->jvm;
+
     *detach = (*jvm)->GetEnv(jvm, (void **)penv, JNI_VERSION_1_4) != JNI_OK
         && (*jvm)->AttachCurrentThreadAsDaemon(jvm, (void **)penv, NULL) == JNI_OK;
+
+#ifndef _WIN32
+    if (*detach && thread_data_get()->attach_count++ >= THREAD_ATTACH_THRESHOLD) {
+        thread_data_get()->attached_vm = jvm;
+        *detach = false;
+    }
+#endif
+    
     if ((**penv)->ExceptionCheck(*penv)) {
         (**penv)->ExceptionClear(*penv);
     }

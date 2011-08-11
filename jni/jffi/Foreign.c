@@ -54,6 +54,12 @@ JNI_OnLoad(JavaVM *vm, void *reserved)
     return JNI_VERSION_1_4;
 }
 
+JNIEXPORT void JNICALL 
+JNI_OnUnload(JavaVM *jvm, void *reserved)
+{
+    pthread_key_delete(jffi_threadDataKey);
+}
+
 #ifndef _WIN32
 ThreadData*
 jffi_thread_data_init()
@@ -66,6 +72,12 @@ jffi_thread_data_init()
 static void
 thread_data_free(void *ptr)
 {
+    ThreadData* td = (ThreadData *) ptr;
+    
+    if (td->attached_vm != NULL) {
+        (*td->attached_vm)->DetachCurrentThread(td->attached_vm);
+    }
+
     free(ptr);
 }
 #endif /* !_WIN32 */
