@@ -32,7 +32,6 @@
 
 package com.kenai.jffi;
 
-import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -112,10 +111,9 @@ public final class ClosurePool {
          * Keep references to the closure pool so it does not get garbage collected
          * until all closures using it do.
          */
-        private final MagazineHolder holder;
-        private final Magazine.Slot slot;
-
-        private volatile boolean disposed = false;
+        final MagazineHolder holder;
+        final Magazine.Slot slot;
+        private volatile boolean disposed;
 
         /**
          * Creates a new Handle to lifecycle manager the native closure.
@@ -142,11 +140,13 @@ public final class ClosurePool {
         }
 
         public synchronized void dispose() {
-            if (disposed) {
-                throw new IllegalStateException("closure already disposed");
-            }
-            disposed = true;
             slot.autorelease = true;
+            if (!disposed) {
+                disposed = true;
+                synchronized (holder.pool) {
+                    holder.magazine.recycle(slot);
+                }
+            }
         }
     }
 
@@ -176,6 +176,11 @@ public final class ClosurePool {
             return !nativeEmpty ? newSlot() : null;
         }
 
+        void recycle(Slot slot) {
+            slot.proxy.closure = NULL_CLOSURE;
+            free.add(slot);
+        }
+
         private Slot newSlot() {
             Proxy proxy = new Proxy(ctx);
             long h = foreign.closureMagazineGet(magazine, proxy);
@@ -200,8 +205,7 @@ public final class ClosurePool {
             free.clear();
             for (Slot s : all) {
                 if (s.autorelease) {
-                    s.proxy.closure = NULL_CLOSURE;
-                    free.add(s);
+                    recycle(s);
                 }
             }
         }
@@ -254,22 +258,18 @@ public final class ClosurePool {
     }
 
     private static final class MagazineHolder {
-        private final WeakReference<ClosurePool> poolref;
-        private final Magazine magazine;
+        final ClosurePool pool;
+        final Magazine magazine;
 
         public MagazineHolder(ClosurePool pool, Magazine magazine) {
-            this.poolref = new WeakReference<ClosurePool>(pool);
+            this.pool = pool;
             this.magazine = magazine;
         }
-
 
         @Override
         protected void finalize() throws Throwable {
             try {
-                ClosurePool pool = poolref.get();
-                if (pool != null) {
-                    pool.recycle(magazine);
-                }
+                pool.recycle(magazine);
             } finally {
                 super.finalize();
             }
@@ -315,7 +315,7 @@ public final class ClosurePool {
          * @param retvalAddress The address of the native return value buffer
          * @param paramAddress The address of the native parameter buffer.
          */
-        void invoke(long retvalAddress, long paramAddress) {
+        public void invoke(long retvalAddress, long paramAddress) {
             closure.invoke(new DirectClosureBuffer(callContext, retvalAddress, paramAddress));
         }
     }
