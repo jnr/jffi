@@ -33,17 +33,14 @@
 package com.kenai.jffi;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public final class ClosurePool {
 
-    private final List<MagazineHolder> partial = new LinkedList<MagazineHolder>();
-    private final List<MagazineHolder> full = new LinkedList<MagazineHolder>();
-    private final Set<Magazine> magazines = new HashSet<Magazine>();
+    private final Set<Magazine> magazines = Collections.synchronizedSet(new HashSet<Magazine>());
+    private final ConcurrentLinkedQueue<Handle> freeQueue = new ConcurrentLinkedQueue<Handle>();
+    private final ConcurrentLinkedQueue<Handle> partialQueue = new ConcurrentLinkedQueue<Handle>();
 
     //
     // Since the CallContext native handle is used by the native pool code
@@ -58,12 +55,7 @@ public final class ClosurePool {
     synchronized void recycle(Magazine magazine) {
         magazine.recycle();
         if (!magazine.isEmpty()) {
-            MagazineHolder h = new MagazineHolder(this, magazine);
-            if (magazine.isFull()) {
-                full.add(h);
-            } else {
-                partial.add(h);
-            }
+            useMagazine(magazine);
         } else {
             // If the magazine was empty during recycling, it means all the closures
             // allocated from it set autorelease=false, so we cannot re-use it.
@@ -72,33 +64,47 @@ public final class ClosurePool {
         }
     }
 
-    private synchronized MagazineHolder getMagazineHolder() {
-        if (!partial.isEmpty()) {
-            return partial.get(0);
-        } else if (!full.isEmpty()) {
-            MagazineHolder h = full.remove(0);
-            partial.add(h);
-            return h;
-        }
-        Magazine m = new Magazine(callContext);
+    void recycle(Magazine.Slot slot, MagazineHolder holder) {
+        partialQueue.add(new Handle(slot, holder));
+    }
+
+    private void useMagazine(Magazine m) {
         MagazineHolder h = new MagazineHolder(this, m);
-        partial.add(h);
-        magazines.add(m);
+
+        ArrayList<Handle> handles = new ArrayList<Handle>();
+        Magazine.Slot s;
+        ConcurrentLinkedQueue<Handle> q = m.isFull() ? freeQueue : partialQueue;
+        while ((s = m.get()) != null) {
+            handles.add(new Handle(s, h));
+        }
+
+        q.addAll(handles);
+    }
+
+    public Closure.Handle newClosureHandle(Closure closure) {
+        Handle h = partialQueue.poll();
+        if (h == null) {
+            h = freeQueue.poll();
+        }
+        if (h == null) {
+            h = allocateNewHandle();
+        }
+
+        h.slot.proxy.closure = closure;
+
         return h;
     }
 
-    public synchronized Closure.Handle newClosureHandle(Closure closure) {
-        Magazine.Slot s;
-        MagazineHolder h;
-        do {
-            h = getMagazineHolder();
-            s = h.magazine.get();
-            if (s == null) {
-                partial.remove(0);
-            }
-        } while (s == null);
-        s.proxy.closure = closure;
-        return new Handle(s, h);
+    private Handle allocateNewHandle() {
+        Handle h;
+
+        while ((h = partialQueue.poll()) == null && (h = freeQueue.poll()) == null) {
+            Magazine m = new Magazine(callContext);
+            useMagazine(m);
+            magazines.add(m);
+        }
+
+        return h;
     }
 
         /**
@@ -127,11 +133,16 @@ public final class ClosurePool {
         }
 
         public long getAddress() {
-            return slot.cbAddress;
+            if (disposed) {
+                throw new RuntimeException("trying to access disposed closure handle");
+            }
+            return slot.codeAddress;
         }
 
         public void setAutoRelease(boolean autorelease) {
-            slot.autorelease = autorelease;
+            if (!disposed) {
+                slot.autorelease = autorelease;
+            }
         }
 
         @Deprecated
@@ -140,12 +151,11 @@ public final class ClosurePool {
         }
 
         public synchronized void dispose() {
-            slot.autorelease = true;
             if (!disposed) {
                 disposed = true;
-                synchronized (holder.pool) {
-                    holder.magazine.recycle(slot);
-                }
+                slot.autorelease = true;
+                slot.proxy.closure = NULL_CLOSURE;
+                holder.pool.recycle(slot, holder);
             }
         }
     }
@@ -243,7 +253,7 @@ public final class ClosurePool {
             final long handle;
 
             /** The code trampoline address */
-            final long cbAddress;
+            final long codeAddress;
 
             final Proxy proxy;
             volatile boolean autorelease;
@@ -252,7 +262,7 @@ public final class ClosurePool {
                 this.handle = handle;
                 this.proxy = proxy;
                 this.autorelease = true;
-                cbAddress = IO.getAddress(handle);
+                codeAddress = IO.getAddress(handle);
             }
         }
     }
