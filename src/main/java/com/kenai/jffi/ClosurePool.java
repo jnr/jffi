@@ -168,56 +168,60 @@ public final class ClosurePool {
 
         private final CallContext ctx;
         private final long magazine;
-        private boolean nativeEmpty = false;
-
-        private final List<Slot> free = new ArrayList<Slot>();
-        private final List<Slot> all = new ArrayList<Slot>();
+        private final Slot[] slots;
+        private int next;
+        private int freeCount;
 
         Magazine(CallContext ctx) {
             this.ctx = ctx;
             this.magazine = foreign.newClosureMagazine(ctx.getAddress(), Proxy.METHOD);
+            ArrayList<Slot> slots = new ArrayList<Slot>();
+
+            for (;;) {
+                long h;
+                Proxy proxy = new Proxy(ctx);
+                if ((h = foreign.closureMagazineGet(magazine, proxy)) == 0) {
+                    break;
+                }
+
+                Slot s = new Slot(h, proxy);
+                slots.add(s);
+            }
+
+            this.slots = new Slot[slots.size()];
+            slots.toArray(this.slots);
+            next = 0;
+            freeCount = this.slots.length;
         }
 
         Slot get() {
-            if (!free.isEmpty()) {
-                return free.remove(free.size() - 1);
+            while (freeCount > 0 && next < slots.length) {
+                Slot s = slots[next++];
+                if (s.autorelease) {
+                    freeCount--;
+                    return s;
+                }
             }
-
-            return !nativeEmpty ? newSlot() : null;
-        }
-
-        void recycle(Slot slot) {
-            slot.proxy.closure = NULL_CLOSURE;
-            free.add(slot);
-        }
-
-        private Slot newSlot() {
-            Proxy proxy = new Proxy(ctx);
-            long h = foreign.closureMagazineGet(magazine, proxy);
-            if (h == 0) {
-                nativeEmpty = true;
-                return null;
-            }
-            Slot s = new Slot(h, proxy);
-            all.add(s);
-            return s;
+            return null;
         }
 
         boolean isFull() {
-            return free.size() == all.size();
+            return slots.length == freeCount;
         }
 
         boolean isEmpty() {
-            return free.isEmpty();
+            return freeCount < 1;
         }
 
         void recycle() {
-            free.clear();
-            for (Slot s : all) {
+            for (int i = 0; i < slots.length; i++) {
+                Slot s = slots[i];
                 if (s.autorelease) {
-                    recycle(s);
+                    freeCount++;
+                    s.proxy.closure = NULL_CLOSURE;
                 }
             }
+            next = 0;
         }
 
         @Override
@@ -228,8 +232,8 @@ public final class ClosurePool {
                 // If any of the closures allocated from this magazine set autorelease=false
                 // then this magazine cannot be freed, so just let it leak
                 //
-                for (Slot s : all) {
-                    if (!s.autorelease) {
+                for (int i = 0; i < slots.length; i++) {
+                    if (!slots[i].autorelease) {
                         release = false;
                         break;
                     }
