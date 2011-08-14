@@ -212,10 +212,21 @@ static void
 closure_end(Closure* closure, JNIEnv* env, bool detach)
 {
     JavaVM* jvm = closure->magazine->jvm;
-    if (detach && env != NULL) {
+    bool clearException = detach;
+
+#ifndef _WIN32
+    if (thread_data_get()->attached_vm != NULL) {
+        clearException = true;
+    }
+#endif
+
+    if (env != NULL && clearException) {
         if ((*env)->ExceptionCheck(env)) {
             (*env)->ExceptionClear(env);
         }
+    }
+
+    if (detach) {
         (*jvm)->DetachCurrentThread(jvm);
     }
 }
