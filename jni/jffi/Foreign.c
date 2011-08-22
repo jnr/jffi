@@ -257,3 +257,4 @@ Java_com_kenai_jffi_Foreign_getArch(JNIEnv *env, jobject self)
 {
     return (*env)->NewStringUTF(env, CPU);
 }
+
