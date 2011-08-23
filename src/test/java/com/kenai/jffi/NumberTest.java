@@ -223,12 +223,6 @@ public class NumberTest {
     @Test public void returnDefaultF32() {
         returnF32(InvokerType.Default);
     }
-    @Test public void returnFastIntF32() {
-        returnF32(InvokerType.FastInt);
-    }
-    @Test public void returnFastNumericF32() {
-        returnF32(InvokerType.FastNumeric);
-    }
     @Test public void returnPointerArrayF32() {
         returnF32(InvokerType.PointerArray);
     }
@@ -243,12 +237,6 @@ public class NumberTest {
 
     @Test public void returnDefaultF64() {
         returnF64(InvokerType.Default);
-    }
-    @Test public void returnFastNumericF64() {
-        returnF64(InvokerType.FastNumeric);
-    }
-    @Test public void returnPointerArrayF64() {
-        returnF64(InvokerType.PointerArray);
     }
 
     private void returnF64(InvokerType type) {

@@ -47,14 +47,24 @@ public class ClosureTest {
     public static void tearDownClass() throws Exception {
     }
 
+    private static boolean isFastLongSupported() {
+        return Platform.getPlatform().getCPU() == Platform.CPU.I386
+                || Platform.getPlatform().getCPU() == Platform.CPU.X86_64;
+    }
+
+    private static boolean isFastIntSupported() {
+        return Platform.getPlatform().getCPU() == Platform.CPU.I386
+                || Platform.getPlatform().getCPU() == Platform.CPU.X86_64;
+    }
+
     @Before
     public void setUp() {
         lib = UnitHelper.loadTestLibrary(LibClosureTest.class, InvokerType.Default);
-        fastlong = UnitHelper.loadTestLibrary(LibClosureTest.class, InvokerType.FastLong);
+        fastlong = UnitHelper.loadTestLibrary(LibClosureTest.class,
+                isFastLongSupported() ? InvokerType.FastLong : InvokerType.Default);
         fastnum = UnitHelper.loadTestLibrary(LibClosureTest.class, InvokerType.FastNumeric);
-        fastint = Platform.getPlatform().addressSize() == 32
-                ? UnitHelper.loadTestLibrary(LibClosureTest.class, InvokerType.FastInt)
-                : fastlong;
+        fastint = UnitHelper.loadTestLibrary(LibClosureTest.class,
+                    isFastIntSupported() ? InvokerType.FastLong : InvokerType.Default);
     }
 
     @After
@@ -219,11 +229,9 @@ public class ClosureTest {
         assertTrue("Closure not called", called[0]);
         assertTrue("Wrong value returned by closure", (MAGIC -retval) < 0.0001);
     }
+
     @Test public void defaultClosureVrF() throws Throwable {
         testClosureVrF(lib);
-    }
-    @Test public void fastNumericClosureVrF() throws Throwable {
-        testClosureVrF(fastnum);
     }
 
     private void testClosureVrD(LibClosureTest lib) {
