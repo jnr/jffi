@@ -275,7 +275,7 @@ public abstract class Invoker {
      * @param arg4 The fourth 64 bit integer argument.
      * @return A 64 bit integer value.
      */
-    public final long invokeLLLLrL(Function function, long arg1, long arg2, long arg3, long arg4, long arg5) {
+    public final long invokeLLLLrL(Function function, long arg1, long arg2, long arg3, long arg4) {
         return foreign.invokeLLLLrL(function.getContextAddress(), arg1, arg2, arg3, arg4);
     }
 
