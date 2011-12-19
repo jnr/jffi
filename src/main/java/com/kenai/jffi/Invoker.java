@@ -220,6 +220,52 @@ public abstract class Invoker {
     }
 
     /**
+     * Invokes a function with four integer arguments, and returns a 32 bit integer.
+     *
+     * @param function The <tt>Function</tt> to invoke.
+     * @param arg1 The first 32 bit integer argument.
+     * @param arg2 The second 32 bit integer argument.
+     * @param arg3 The third 32 bit integer argument.
+     * @param arg4 The fourth 32 bit integer argument.
+     * @return A 32 bit integer value.
+     */
+    public final int invokeIIIIrI(Function function, int arg1, int arg2, int arg3, int arg4) {
+        return foreign.invokeIIIIrI(function.getContextAddress(), arg1, arg2, arg3, arg4);
+    }
+
+    /**
+     * Invokes a function with five integer arguments, and returns a 32 bit integer.
+     *
+     * @param function The <tt>Function</tt> to invoke.
+     * @param arg1 The first 32 bit integer argument.
+     * @param arg2 The second 32 bit integer argument.
+     * @param arg3 The third 32 bit integer argument.
+     * @param arg4 The fourth 32 bit integer argument.
+     * @param arg5 The fifth 32 bit integer argument.
+     * @return A 32 bit integer value.
+     */
+    public final int invokeIIIIIrI(Function function, int arg1, int arg2, int arg3, int arg4, int arg5) {
+        return foreign.invokeIIIIIrI(function.getContextAddress(), arg1, arg2, arg3, arg4, arg5);
+    }
+
+    /**
+     * Invokes a function with six integer arguments, and returns a 32 bit integer.
+     *
+     * @param function The <tt>Function</tt> to invoke.
+     * @param arg1 The first 32 bit integer argument.
+     * @param arg2 The second 32 bit integer argument.
+     * @param arg3 The third 32 bit integer argument.
+     * @param arg4 The fourth 32 bit integer argument.
+     * @param arg5 The fifth 32 bit integer argument.
+     * @param arg6 The sixth 32 bit integer argument.
+     * @return A 32 bit integer value.
+     */
+    public final int invokeIIIIIIrI(Function function, int arg1, int arg2, int arg3, int arg4, int arg5, int arg6) {
+        return foreign.invokeIIIIIIrI(function.getContextAddress(), arg1, arg2, arg3, arg4, arg5, arg6);
+    }
+
+
+    /**
      * Invokes a function with no arguments, and returns a 64 bit integer.
      *
      * @param function The <tt>Function</tt> to invoke.
@@ -275,7 +321,7 @@ public abstract class Invoker {
      * @param arg4 The fourth 64 bit integer argument.
      * @return A 64 bit integer value.
      */
-    public final long invokeLLLLrL(Function function, long arg1, long arg2, long arg3, long arg4, long arg5) {
+    public final long invokeLLLLrL(Function function, long arg1, long arg2, long arg3, long arg4) {
         return foreign.invokeLLLLrL(function.getContextAddress(), arg1, arg2, arg3, arg4);
     }
 
@@ -363,7 +409,7 @@ public abstract class Invoker {
      * @param arg1 The first numeric argument.
      * @param arg2 The second numeric argument.
      * @param arg3 The third numeric argument.
-     * @param arg3 The fourth numeric argument.
+     * @param arg4 The fourth numeric argument.
      * @return A numeric value.
      */
     public final long invokeNNNNrN(Function function, long arg1, long arg2, long arg3, long arg4) {
