@@ -46,6 +46,8 @@ abstract public class PageManager {
     public static final int PROT_WRITE = Foreign.PROT_WRITE;
 
     private final Foreign foreign = Foreign.getInstance();
+    
+    private int pageSize;
 
     final Foreign getForeign() {
         return foreign;
@@ -71,7 +73,12 @@ abstract public class PageManager {
      * @return The size of a page on the current system, in bytes.
      */
     public final long pageSize() {
-        return getForeign().pageSize();
+        return pageSize != 0 ? pageSize : calculatePageSize();
+    }
+
+    private long calculatePageSize() {
+        long pgSize = getForeign().pageSize();
+        return pgSize < Integer.MAX_VALUE ? this.pageSize = (int) pgSize : pgSize;
     }
 
     /**
@@ -110,9 +117,10 @@ abstract public class PageManager {
         @Override
         public long allocatePages(int npages, int protection) {
             long sz = npages * pageSize();
-            return getForeign().mmap(0, sz, protection,
+            long memory = getForeign().mmap(0, sz, protection,
                     Foreign.MAP_ANON | Foreign.MAP_PRIVATE, -1, 0);
 
+            return memory != -1L ? memory : 0L;
         }
 
         @Override
@@ -133,17 +141,34 @@ abstract public class PageManager {
 
         @Override
         public long allocatePages(int npages, int protection) {
-            throw new UnsupportedOperationException("Not supported yet.");
+            return getForeign().VirtualAlloc(0, (int) pageSize() * npages, Foreign.MEM_COMMIT | Foreign.MEM_RESERVE, w32prot(protection));
         }
 
         @Override
         public void freePages(long address, int npages) {
-            throw new UnsupportedOperationException("Not supported yet.");
+            getForeign().VirtualFree(address, (int) pageSize() * npages, Foreign.MEM_RELEASE);
         }
 
         @Override
         public void protectPages(long address, int npages, int protection) {
-            throw new UnsupportedOperationException("Not supported yet.");
+            getForeign().VirtualProtect(address, (int) pageSize() * npages, w32prot(protection));
+        }
+
+        private static int w32prot(int p) {
+            int w32 = Foreign.PAGE_NOACCESS;
+        
+            if ((p & (PROT_READ | PROT_WRITE)) == (PROT_READ | PROT_WRITE)) {
+                w32 = Foreign.PAGE_READWRITE;
+
+            } else if ((p & PROT_READ) == PROT_READ) {
+                w32 = Foreign.PAGE_READONLY;
+            }
+
+            if ((p & PROT_EXEC) == PROT_EXEC) {
+                w32 <<= 4;
+            }
+            
+            return w32;
         }
     }
 }
