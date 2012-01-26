@@ -93,6 +93,8 @@ public abstract class Platform {
         SPARCV9(64),
         /** IBM zSeries S/390 64 bit */
         S390X(64),
+        /** ARM */
+        ARM(32),
         /** Unknown CPU */
         UNKNOWN(64);
         
@@ -214,6 +216,10 @@ public abstract class Platform {
             
             } else if ("s390".equals(archString) || "s390x".equals(archString)) {
                 return CPU.S390X;
+                
+            } else if ("arm".equals(archString)) {
+                return CPU.ARM;
+                
             }
 
             // Try to find by lookup up in the CPU list

@@ -103,6 +103,8 @@ public class StubLoader {
         SPARCV9,
         /** IBM zSeries S/390 64 bit */
         S390X,
+        /** ARM */
+        ARM,
         /** Unknown CPU */
         UNKNOWN;
 
