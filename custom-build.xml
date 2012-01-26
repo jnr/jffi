@@ -210,6 +210,7 @@
             <zipfileset src="archive/jffi-sparcv9-SunOS.jar"/>
             <zipfileset src="archive/jffi-ppc-AIX.jar"/>
             <zipfileset src="archive/jffi-ppc-Linux.jar"/>
+            <zipfileset src="archive/jffi-arm-Linux.jar"/>
         </jar>
     </target>
     <target name="-archive-platform-jar" depends="-build-platform-jar">
