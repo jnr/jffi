@@ -79,6 +79,17 @@ invokeArray(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer, void* returnB
 }
 
 #else
+#define COPY_ARGS(ctx, src, ffiArgs) do { \
+    int idx; \
+    for (idx = 0; idx < (int) ctx->cif.nargs; ++idx) { \
+        if (unlikely(ctx->cif.arg_types[idx]->type == FFI_TYPE_STRUCT)) { \
+            ffiArgs[idx] = *(void **) &src[idx * PARAM_SIZE]; \
+        } else { \
+            ffiArgs[idx] = &src[idx * PARAM_SIZE]; \
+        } \
+    } \
+} while (0)
+
 static void
 invokeArray(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer, void* returnBuffer)
 {
@@ -88,19 +99,12 @@ invokeArray(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer, void* returnB
     jbyte *tmpBuffer = NULL;
     
     if (ctx->cif.nargs > 0) {
-        unsigned int i;
         tmpBuffer = alloca(ctx->cif.nargs * PARAM_SIZE);
         ffiArgs = alloca(ctx->cif.nargs * sizeof(void *));
         
         (*env)->GetByteArrayRegion(env, paramBuffer, 0, ctx->cif.nargs * PARAM_SIZE, tmpBuffer);
 
-        for (i = 0; i < ctx->cif.nargs; ++i) {
-            if (unlikely(ctx->cif.arg_types[i]->type == FFI_TYPE_STRUCT)) {
-                ffiArgs[i] = *(void **) &tmpBuffer[i * PARAM_SIZE];
-            } else {
-                ffiArgs[i] = &tmpBuffer[i * PARAM_SIZE];
-            }
-        }
+        COPY_ARGS(ctx, tmpBuffer, ffiArgs);
     }
 
     ffi_call(&ctx->cif, FFI_FN(ctx->function), returnBuffer, ffiArgs);
@@ -209,9 +213,8 @@ Java_com_kenai_jffi_Foreign_invokeArrayReturnStruct(JNIEnv* env, jclass self, jl
 #else
     tmpBuffer = alloca(ctx->cif.nargs * PARAM_SIZE);
     (*env)->GetByteArrayRegion(env, paramBuffer, 0, ctx->cif.nargs * PARAM_SIZE, tmpBuffer);
-    for (i = 0; i < (int) ctx->cif.nargs; ++i) {
-        ffiArgs[i] = &tmpBuffer[i * PARAM_SIZE];
-    }
+
+    COPY_ARGS(ctx, tmpBuffer, ffiArgs);
 #endif
     ffi_call(&ctx->cif, FFI_FN(ctx->function), retval, ffiArgs);
     SAVE_ERRNO(ctx);
@@ -245,10 +248,7 @@ invokeArrayWithObjects_(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer,
 
 #ifndef USE_RAW
     ffiArgs = alloca(ctx->cif.nargs * sizeof(void *));
-    
-    for (i = 0; i < (unsigned int) ctx->cif.nargs; ++i) {
-        ffiArgs[i] = &tmpBuffer[i * PARAM_SIZE];
-    }
+    COPY_ARGS(ctx, tmpBuffer, ffiArgs);
 #endif    
 
     
