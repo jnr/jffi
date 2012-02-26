@@ -56,11 +56,16 @@ CFLAGS = $(OFLAGS) $(WFLAGS) $(IFLAGS) $(PICFLAGS) -D_REENTRANT
 ifeq ($(OS), win64)
   override CPU = x86_64
   JDK_INCLUDES=-I$(JNI_DIR)/win32/include -I$(JNI_DIR)/win32/include/win32
-  CC = gcc -m64
-  CXX = g++
+  CC = x86_64-w64-mingw32-gcc -m64
   PICFLAGS =
+  ifneq ($(findstring cygwin, $(BUILD_OS)),)
+    CC += -mno-cygwin
+    LDFLAGS += -mno-cygwin
+  endif
+  CFLAGS += -mwin32 -D_JNI_IMPLEMENTATION_
   LDFLAGS += -Wl,--add-stdcall-alias
-  PICFLAGS =
+  PICFLAGS=
+  SOFLAGS += -shared -mimpure-text -static-libgcc
   PREFIX =
   LIBEXT = dll
 endif
@@ -81,17 +86,25 @@ ifeq ($(OS), darwin)
   ifneq ($(findstring $(CPU), i386 x86_64),)
     ARCHES += i386 x86_64
   endif
+
   ifneq ($(realpath $(wildcard /Xcode3/usr/bin/gcc)),)
-    CC = /Xcode3/usr/bin/gcc-4.0
+    XCODE=/Xcode3
+  else
+    XCODE=/Developer
+  endif
+  ifneq ($(realpath $(wildcard $(XCODE)/usr/bin/gcc-4.0)),)
+    CC = $(XCODE)/usr/bin/gcc-4.0
   else
     CC = gcc
   endif
 
-  ifneq ($(realpath $(wildcard /Developer/SDKs/MacOSX10.4?.sdk)),)
-    MACSDK = /Developer/SDKs/MacOSX10.4u.sdk
-    ARCHES += ppc
+  ifneq ($(realpath $(wildcard $(XCODE)/SDKs/MacOSX10.4?.sdk)),)
+    MACSDK = $(XCODE)/SDKs/MacOSX10.4u.sdk
+    ifeq ($(findstring ppc, $(ARCHES)),)
+      ARCHES += ppc
+    endif
   else
-    MACSDK = $(firstword $(strip $(wildcard /Developer/SDKs/MacOSX10.*.sdk)))
+    MACSDK = $(firstword $(strip $(wildcard $(XCODE)/SDKs/MacOSX10.*.sdk)))
   endif
   ARCHFLAGS = $(foreach arch, $(ARCHES),-arch $(arch))
   CFLAGS += $(ARCHFLAGS) -isysroot $(MACSDK) -DTARGET_RT_MAC_CFM=0
