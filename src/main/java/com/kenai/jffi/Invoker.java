@@ -36,20 +36,12 @@ package com.kenai.jffi;
  * Provides native function invocation facilities.
  */
 public abstract class Invoker {
-
-    /** The size in bits of a native memory address */
-    private static final long ADDRESS_SIZE = Platform.getPlatform().addressSize();
-
-    /** A mask to apply to native memory addresses to cancel sign extension */
-    private static final long ADDRESS_MASK = Platform.getPlatform().addressMask();
-    
-    private final Foreign foreign = Foreign.getInstance();
-    
-    private final ObjectParameterInvoker objectParameterInvoker = ObjectParameterInvoker.getInstance();
+    private final Foreign foreign;
+    private final ObjectParameterInvoker objectParameterInvoker;
 
     /** Lazy initialization singleton holder */
     private static final class SingletonHolder {
-        private static final Invoker INSTANCE = ADDRESS_SIZE == 64
+        private static final Invoker INSTANCE = Platform.getPlatform().addressSize() == 64
                 ? LP64.INSTANCE : ILP32.INSTANCE;
     }
 
@@ -58,12 +50,19 @@ public abstract class Invoker {
      *
      * @return An instance of <tt>Invoker</tt>.
      */
-    public static final Invoker getInstance() {
+    public static Invoker getInstance() {
         return SingletonHolder.INSTANCE;
     }
 
     /** Creates a new <tt>Invoker</tt> */
-    private Invoker() {}
+    private Invoker() {
+        this(Foreign.getInstance(), ObjectParameterInvoker.getInstance());
+    }
+
+    Invoker(Foreign foreign, ObjectParameterInvoker objectParameterInvoker) {
+        this.foreign = foreign;
+        this.objectParameterInvoker = objectParameterInvoker;
+    }
 
     /**
      * Gets the fast-path object parameter invoker.
@@ -532,6 +531,11 @@ public abstract class Invoker {
         return new RuntimeException("invalid object count: " + objCount);
     }
 
+    private static RuntimeException newInsufficientObjectCountError(int objCount) {
+        return new RuntimeException("invalid object count: " + objCount);
+    }
+
+
     private static RuntimeException newHeapObjectCountError(int objCount) {
         return new RuntimeException("insufficient number of heap objects supplied (" + objCount + " required)");
     }
@@ -539,17 +543,24 @@ public abstract class Invoker {
     public final long invokeN1OrN(Function function,
             long n1, int objCount,
             Object o1, ObjectParameterStrategy s1, ObjectParameterInfo o1info) {
-
-        return objectParameterInvoker.invokeN1O1rN(function, n1,
+        if (objCount == 1) {
+            return objectParameterInvoker.invokeN1O1rN(function, n1,
                 s1.object(o1), s1.offset(o1), s1.length(o1), o1info);
 
+        } else {
+            throw newObjectCountError(objCount);
+        }
     }
 
     public final long invokeN2OrN(Function function,
             long n1, long n2, int objCount,
             Object o1, ObjectParameterStrategy s1, ObjectParameterInfo o1info) {
-        return objectParameterInvoker.invokeN2O1rN(function, n1, n2,
+        if (objCount == 1) {
+            return objectParameterInvoker.invokeN2O1rN(function, n1, n2,
                 s1.object(o1), s1.offset(o1), s1.length(o1), o1info);
+        } else {
+            throw newObjectCountError(objCount);
+        }
     }
 
     public final long invokeN2OrN(Function function,
@@ -583,9 +594,12 @@ public abstract class Invoker {
     public final long invokeN3OrN(Function function,
             long n1, long n2, long n3, int objCount,
             Object o1, ObjectParameterStrategy s1, ObjectParameterInfo o1info) {
-        
-        return objectParameterInvoker.invokeN3O1rN(function, n1, n2, n3,
+        if (objCount == 1) {
+            return objectParameterInvoker.invokeN3O1rN(function, n1, n2, n3,
                 s1.object(o1), s1.offset(o1), s1.length(o1), o1info);
+        } else {
+            throw newObjectCountError(objCount);
+        }
     }
 
 
@@ -677,8 +691,12 @@ public abstract class Invoker {
             long n1, long n2, long n3, long n4, int objCount,
             Object o1, ObjectParameterStrategy s1, ObjectParameterInfo o1info) {
 
-        return objectParameterInvoker.invokeN4O1rN(function, n1, n2, n3, n4,
+        if (objCount == 1) {
+            return objectParameterInvoker.invokeN4O1rN(function, n1, n2, n3, n4,
                 s1.object(o1), s1.offset(o1), s1.length(o1), o1info);
+        } else {
+            throw newObjectCountError(objCount);
+        }
     }
 
     public final long invokeN4OrN(Function function,
@@ -751,7 +769,7 @@ public abstract class Invoker {
                     o2 = o3; s2 = s3; o2info = o3info;
 
                 } else {
-                    throw newHeapObjectCountError(objCount);
+                    throw newInsufficientObjectCountError(objCount);
                 }
 
                 return objectParameterInvoker.invokeN4O2rN(function, n1, n2, n3, n4,
@@ -809,12 +827,12 @@ public abstract class Invoker {
             next = 3;
 
         } else if (next <= 3 && !s3.isDirect()) {
-            // move third param into second  place
+            // move third param into second place
             o2 = o3; s2 = s3; o2info = o3info;
             next = 4;
 
         } else if (next <= 4) {
-            // move fourth param into second  place
+            // move fourth param into second place
             o2 = o4; s2 = s4; o2info = o4info;
             next = 5;
         }
@@ -1224,6 +1242,8 @@ public abstract class Invoker {
      */
     private static final class ILP32 extends Invoker {
         private static final Invoker INSTANCE = new ILP32();
+        /** A mask to apply to native memory addresses to cancel sign extension */
+        private static final long ADDRESS_MASK = 0xffffffffL;
 
         public final long invokeAddress(Function function, HeapInvocationBuffer buffer) {
             return ((long)invokeInt(function, buffer)) & ADDRESS_MASK;

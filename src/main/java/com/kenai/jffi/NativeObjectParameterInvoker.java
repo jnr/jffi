@@ -5,27 +5,40 @@ package com.kenai.jffi;
  *
  */
 final class NativeObjectParameterInvoker extends ObjectParameterInvoker {
-    private final Foreign foreign = Foreign.getInstance();
+    private final Foreign foreign;
 
     public final boolean isNative() {
         return true;
     }
+
+    NativeObjectParameterInvoker(Foreign foreign) {
+        this.foreign = foreign;
+    }
     
-    public final long invokeN1O1rN(Function function, 
-            long n1, 
+    public final long invokeN1O1rN(Function function,
+            long n1,
             Object o1, int o1off, int o1len, ObjectParameterInfo o1flags) {
         return foreign.invokeN1O1rN(function.getContextAddress(), function.getFunctionAddress(),
                 n1, 
                 o1, o1flags.asObjectInfo(), o1off, o1len);
     }
 
-    
+
+    public final long invokeN1O1rN(CallContext ctx, long fn,
+                                   long n1,
+                                   Object o1, int o1off, int o1len, ObjectParameterInfo o1flags) {
+        return foreign.invokeN1O1rN(ctx.getAddress(), fn,
+                n1,
+                o1, o1flags.asObjectInfo(), o1off, o1len);
+    }
+
+
     /**
      * Invokes a function with two numeric arguments, and returns a numeric value.
      *
      * @param function The <tt>Function</tt> to invoke.
      * @param n1 first numeric argument.
-     * @param idx1 parameter index of the first numeric argument.
+     * @param n2 The second numeric argument.
      * @param o1 array or buffer, to be passed as a pointer for the first numeric parameter.
      * @param o1off offset from the start of the array or buffer.
      * @param o1len length of the array to use.
@@ -44,11 +57,17 @@ final class NativeObjectParameterInvoker extends ObjectParameterInvoker {
      * Invokes a function with two numeric arguments, and returns a numeric value.
      *
      * @param function The <tt>Function</tt> to invoke.
-     * @param arg1 An array, to be passed as a pointer for the first numeric parameter.
-     * @param off1 The offset from the start of the array.
-     * @param len1 The length of the array to use.
-     * @param flags1 Array flags (direction, type).
-     * @param arg2 The second numeric argument.
+     * @param n1 The first numeric argument.
+     * @param n2 The second numeric argument.
+     * @param o1 An Object (array or buffer), to be passed as a pointer.
+     * @param o1off The offset from the start of the array or buffer.
+     * @param o1len The length of the array to use.
+     * @param o1flags Object flags (direction, type, parameter index).
+     * @param o2 An Object (array or buffer), to be passed as a pointer.
+     * @param o2off The offset from the start of the array or buffer.
+     * @param o2len The length of the array to use.
+     * @param o2flags Object flags (direction, type, idx).
+
      */
     public final long invokeN2O2rN(Function function,
             long n1, long n2,
@@ -65,11 +84,13 @@ final class NativeObjectParameterInvoker extends ObjectParameterInvoker {
      * Invokes a function with two numeric arguments, and returns a numeric value.
      *
      * @param function The <tt>Function</tt> to invoke.
-     * @param arg1 An array, to be passed as a pointer for the first numeric parameter.
-     * @param off1 The offset from the start of the array.
-     * @param len1 The length of the array to use.
-     * @param flags1 Array flags (direction, type).
-     * @param arg2 The second numeric argument.
+     * @param n1 The first numeric argument.
+     * @param n2 The second numeric argument.
+     * @param n3 The third numeric argument.
+     * @param o1 An Object (array or buffer), to be passed as a pointer.
+     * @param o1off The offset from the start of the array or buffer.
+     * @param o1len The length of the array to use.
+     * @param o1flags Object flags (direction, type, parameter index).
      */
     public final long invokeN3O1rN(Function function, 
             long n1, long n2, long n3,
@@ -84,11 +105,17 @@ final class NativeObjectParameterInvoker extends ObjectParameterInvoker {
      * Invokes a function with two numeric arguments, and returns a numeric value.
      *
      * @param function The <tt>Function</tt> to invoke.
-     * @param arg1 An array, to be passed as a pointer for the first numeric parameter.
-     * @param off1 The offset from the start of the array.
-     * @param len1 The length of the array to use.
-     * @param flags1 Array flags (direction, type).
-     * @param arg2 The second numeric argument.
+     * @param n1 The first numeric argument.
+     * @param n2 The second numeric argument.
+     * @param n3 The third numeric argument.
+     * @param o1 An Object (array or buffer), to be passed as a pointer.
+     * @param o1off The offset from the start of the array or buffer.
+     * @param o1len The length of the array to use.
+     * @param o1flags Object flags (direction, type, parameter index).
+     * @param o2 An Object (array or buffer), to be passed as a pointer.
+     * @param o2off The offset from the start of the array or buffer.
+     * @param o2len The length of the array to use.
+     * @param o2flags Object flags (direction, type, idx).
      */
     public final long invokeN3O2rN(Function function, 
             long n1, long n2, long n3,

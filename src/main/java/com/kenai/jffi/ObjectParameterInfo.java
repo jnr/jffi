@@ -2,7 +2,6 @@ package com.kenai.jffi;
 
 public final class ObjectParameterInfo {
     private final int parameterIndex;
-    private final ComponentType componentType;
     private final int objectInfo;
 
     
@@ -17,8 +16,7 @@ public final class ObjectParameterInfo {
             ComponentType componentType, int ioflags) {
         
         this.parameterIndex = parameterIndex;
-        this.componentType = componentType;
-        this.objectInfo = ObjectBuffer.makeObjectFlags(ioflags, 
+        this.objectInfo = ObjectBuffer.makeObjectFlags(ioflags,
                 objectType.value | componentType.value, parameterIndex);
     }
 

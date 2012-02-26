@@ -82,3 +82,96 @@ ptr_from_address(uintptr_t addr)
     return (void *) addr;
 }
 
+long 
+invokeO(long *ptr)
+{
+    long ret = *ptr;
+    *ptr = 0xfee1deadL;
+    return ret;
+}
+
+long 
+invokeON(long *ptr, long val)
+{
+    long ret = *ptr;
+    *ptr = val;
+    return ret;
+}
+
+long 
+invokeNO(long val, long *ptr)
+{
+    long ret = *ptr;
+    *ptr = val;
+    return ret;
+}
+
+long 
+invokeOO(long *p1, long *p2)
+{
+    long ret = *p1 + *p2;
+    long tmp = *p1;
+    *p1 = *p2;
+    *p2 = tmp;
+    return ret;
+}
+
+
+long 
+invokeONN(long *ptr, long n1, long n2)
+{
+    long ret = *ptr;
+    ptr[0] = n1;
+    ptr[1] = n2;
+    return ret;
+}
+
+long
+invokeOON(long *p1, long *p2, long n1)
+{
+    long ret = *p1;
+    *p1 = n1;
+    *p2 = n1;
+    return ret;
+}
+
+
+long 
+invokeNNO(long n1, long n2, long *ptr)
+{
+    long ret = *ptr;
+    ptr[0] = n1;
+    ptr[1] = n2;
+    return ret;
+}
+
+long 
+invokeNON(long n1, long *ptr, long n2)
+{
+    long ret = *ptr;
+    ptr[0] = n1;
+    ptr[1] = n2;
+    return ret;
+}
+
+long 
+invokeNOO(long n1, long *p1, long *p2)
+{
+    long ret = *p1;
+    *p1 = n1;
+    *p2 = n1;
+    return ret;
+}
+
+
+long 
+invokeOOO(long *p1, long *p2, long *p3)
+{
+    long ret = *p1;
+    *p1 = *p3;
+    *p2 = *p3;
+    *p3 = ret;
+    return ret;
+}
+#define N3O1 p1[0] = n1; p1[1] = n2; p1[2] = n3
+#define N3O2 p1[0] = n1; p1[1] = n2; p1[2] = n3

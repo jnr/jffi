@@ -36,9 +36,16 @@ package com.kenai.jffi;
  */
 abstract public class ObjectParameterStrategy {
     private final boolean isDirect;
+    protected static enum StrategyType { DIRECT, HEAP }
+    protected static final StrategyType DIRECT = StrategyType.DIRECT;
+    protected static final StrategyType HEAP = StrategyType.HEAP;
 
     public ObjectParameterStrategy(boolean isDirect) {
         this.isDirect = isDirect;
+    }
+
+    public ObjectParameterStrategy(StrategyType type) {
+        this.isDirect = type == DIRECT;
     }
 
     public final boolean isDirect() {
