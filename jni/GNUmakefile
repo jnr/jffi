@@ -145,18 +145,27 @@ ifeq ($(OS), darwin)
   ifneq ($(findstring $(CPU), i386 x86_64),)
     ARCHES += i386 x86_64
   endif
+
   ifneq ($(realpath $(wildcard /Xcode3/usr/bin/gcc)),)
-    CC = /Xcode3/usr/bin/gcc-4.0
+    XCODE=/Xcode3
+  else
+    XCODE=/Developer
+  endif
+  ifneq ($(realpath $(wildcard $(XCODE)/usr/bin/gcc-4.0)),)
+    CC = $(XCODE)/usr/bin/gcc-4.0
   else
     CC = gcc
   endif
 
-  ifneq ($(realpath $(wildcard /Developer/SDKs/MacOSX10.4?.sdk)),)
-    MACSDK = /Developer/SDKs/MacOSX10.4u.sdk
-    ARCHES += ppc
+  ifneq ($(realpath $(wildcard $(XCODE)/SDKs/MacOSX10.4?.sdk)),)
+    MACSDK = $(XCODE)/SDKs/MacOSX10.4u.sdk
+    ifeq ($(findstring ppc, $(ARCHES)),)
+      ARCHES += ppc
+    endif
   else
-    MACSDK = $(firstword $(strip $(wildcard /Developer/SDKs/MacOSX10.*.sdk)))
+    MACSDK = $(firstword $(strip $(wildcard $(XCODE)/SDKs/MacOSX10.*.sdk)))
   endif
+
   CFLAGS += -isysroot $(MACSDK) -DTARGET_RT_MAC_CFM=0
   CFLAGS += -I$(MACSDK)/System/Library/Frameworks/JavaVM.framework/Headers
   CFLAGS += $(foreach arch, $(ARCHES),-arch $(arch))
@@ -265,7 +274,6 @@ build_ffi = \
 $(LIBFFI):
 	@mkdir -p $(@D)
 	@for arch in $(ARCHES); do $(call build_ffi,$$arch);done
-	
 	# Assemble into a FAT (i386, x86_64, ppc) library
 	@mkdir -p $(BUILD_DIR)/libffi/.libs
 	@env MACOSX_DEPLOYMENT_TARGET=10.4 /usr/bin/libtool -static -o $@ \
