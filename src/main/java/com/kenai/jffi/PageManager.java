@@ -140,18 +140,18 @@ abstract public class PageManager {
         }
 
         @Override
-        public long allocatePages(int npages, int protection) {
-            return getForeign().VirtualAlloc(0, (int) pageSize() * npages, Foreign.MEM_COMMIT | Foreign.MEM_RESERVE, w32prot(protection));
+        public long allocatePages(int pageCount, int protection) {
+            return getForeign().VirtualAlloc(0, (int) pageSize() * pageCount, Foreign.MEM_COMMIT | Foreign.MEM_RESERVE, w32prot(protection));
         }
 
         @Override
-        public void freePages(long address, int npages) {
-            getForeign().VirtualFree(address, (int) pageSize() * npages, Foreign.MEM_RELEASE);
+        public void freePages(long address, int pageCount) {
+            getForeign().VirtualFree(address, (int) pageSize() * pageCount, Foreign.MEM_RELEASE);
         }
 
         @Override
-        public void protectPages(long address, int npages, int protection) {
-            getForeign().VirtualProtect(address, (int) pageSize() * npages, w32prot(protection));
+        public void protectPages(long address, int pageCount, int protection) {
+            getForeign().VirtualProtect(address, (int) pageSize() * pageCount, w32prot(protection));
         }
 
         private static int w32prot(int p) {
