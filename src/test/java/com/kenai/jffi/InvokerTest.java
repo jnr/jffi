@@ -2,6 +2,8 @@ package com.kenai.jffi;
 
 import org.junit.Test;
 
+import java.util.Arrays;
+
 import static junit.framework.Assert.assertEquals;
 
 /**
@@ -14,16 +16,60 @@ public class InvokerTest {
         return new Function(fn.address, returnType, parameterTypes);
     }
 
-    static long getNativeLong(UnitHelper.Address ptr) {
-        return Platform.getPlatform().longSize() == 32 ? IO.getInt(ptr.address) : IO.getLong(ptr.address);
+    static final long N1 = 0x1eafbeef;
+    static final long N2 = 0x1010dead;
+
+    static ObjectParameterInfo.ComponentType NATIVE_LONG = Platform.getPlatform().longSize() == 32
+            ? ObjectParameterInfo.INT : ObjectParameterInfo.LONG;
+
+    static long getNativeUnsignedLong(UnitHelper.Address ptr) {
+        if (Platform.getPlatform().longSize() == 32) {
+            long n = IO.getInt(ptr.address);
+            return n < 0 ? ((n & 0x7FFFFFFFL) + 0x80000000L) : n;
+        } else {
+            return IO.getLong(ptr.address);
+        }
     }
 
-    static void putNativeLong(UnitHelper.Address ptr, long value) {
+    static void putNativeUnsignedLong(UnitHelper.Address ptr, long value) {
         if (Platform.getPlatform().longSize() == 32) {
             IO.putInt(ptr.address, (int) value);
         } else {
             IO.putLong(ptr.address, value);
         }
+    }
+
+    static Object newNativeUnsignedLongArray(long... values) {
+        if (Platform.getPlatform().longSize() == 32) {
+            int[] iarray = new int[values.length];
+            for (int i = 0; i < iarray.length; i++) {
+                iarray[i] = (int) values[i];
+            }
+            return iarray;
+
+        } else {
+            return values;
+        }
+    }
+
+    static long getNativeUnsignedLong(Object arr) {
+        return getNativeUnsignedLong(arr, 0);
+    }
+
+    static long getNativeUnsignedLong(Object arr, int idx) {
+
+        if (long[].class == arr.getClass()) {
+            long[] larr = long[].class.cast(arr);
+            return larr[idx];
+        } else {
+            int[] iarr = int[].class.cast(arr);
+            long n = iarr[idx];
+            return n < 0 ? ((n & 0x7FFFFFFFL) + 0x80000000L) : n;
+        }
+    }
+
+    static long unsigned(long n) {
+        return n < 0 ? ((n & 0x7FFFFFFFL) + 0x80000000L) : n;
     }
 
 
@@ -118,87 +164,87 @@ public class InvokerTest {
 
     public static void invokeO(Invoker invoker) {
         Function function = getFunction("invokeO", Type.SLONG, Type.POINTER);
-        long[] arr = { 0xdeadbeefL };
+        Object arr = newNativeUnsignedLongArray(N1);
         ObjectParameterStrategy strategy = new HeapArrayStrategy(0, 1);
         ObjectParameterInfo info = ObjectParameterInfo.create(0, ObjectParameterInfo.ARRAY,
-                ObjectParameterInfo.LONG, ObjectParameterInfo.IN | ObjectParameterInfo.OUT);
+                NATIVE_LONG, ObjectParameterInfo.IN | ObjectParameterInfo.OUT);
 
         long ret = invoker.invokeN1OrN(function, 0, 1, arr, strategy, info);
-        assertEquals("incorrect return value", 0xdeadbeefL, ret);
-        assertEquals("incorrect array value", 0xfee1deadL, arr[0]);
+        assertEquals("incorrect return value", N1, unsigned(ret));
+        assertEquals("incorrect array value", 0xdeadbeefL, getNativeUnsignedLong(arr));
     }
 
     public static void invokeNO(Invoker invoker) {
         Function function = getFunction("invokeNO", Type.SLONG, Type.SLONG, Type.POINTER);
-        long[] arr = { 0xdeadbeefL };
+        Object arr = newNativeUnsignedLongArray(N1);
         ObjectParameterStrategy strategy = new HeapArrayStrategy(0, 1);
         ObjectParameterInfo info = ObjectParameterInfo.create(1, ObjectParameterInfo.ARRAY,
-                ObjectParameterInfo.LONG, ObjectParameterInfo.IN | ObjectParameterInfo.OUT);
-        long ret = invoker.invokeN2OrN(function, 0xfee1deadL, 0L, 1, arr, strategy, info);
-        assertEquals("incorrect return value", 0xdeadbeefL, ret);
-        assertEquals("incorrect array value", 0xfee1deadL, arr[0]);
+                NATIVE_LONG, ObjectParameterInfo.IN | ObjectParameterInfo.OUT);
+        long ret = invoker.invokeN2OrN(function, N2, 0L, 1, arr, strategy, info);
+        assertEquals("incorrect return value", N1, unsigned(ret));
+        assertEquals("incorrect array value", N2, getNativeUnsignedLong(arr));
     }
 
     public static void invokeON(Invoker invoker) {
         Function function = getFunction("invokeON", Type.SLONG, Type.POINTER, Type.SLONG);
-        long[] arr = { 0xdeadbeefL };
+        Object arr = newNativeUnsignedLongArray(N1);
         ObjectParameterStrategy strategy = new HeapArrayStrategy(0, 1);
         ObjectParameterInfo info = ObjectParameterInfo.create(0, ObjectParameterInfo.ARRAY,
-                ObjectParameterInfo.LONG, ObjectParameterInfo.IN | ObjectParameterInfo.OUT);
-        long ret = invoker.invokeN2OrN(function, 0L, 0xfee1deadL, 1, arr, strategy, info);
-        assertEquals("incorrect return value", 0xdeadbeefL, ret);
-        assertEquals("incorrect array value", 0xfee1deadL, arr[0]);
+                NATIVE_LONG, ObjectParameterInfo.IN | ObjectParameterInfo.OUT);
+        long ret = invoker.invokeN2OrN(function, 0L, N2, 1, arr, strategy, info);
+        assertEquals("incorrect return value", N1, unsigned(ret));
+        assertEquals("incorrect array value", N2, getNativeUnsignedLong(arr));
     }
 
     public static void invokeOO(Invoker invoker) {
         Function function = getFunction("invokeOO", Type.SLONG, Type.POINTER, Type.POINTER);
-        long[] arr1 = { 0xdeadbeefL };
-        long[] arr2 = { 0xfee1deadL };
+        Object arr1 = newNativeUnsignedLongArray(N1);
+        Object arr2 = newNativeUnsignedLongArray(N2);
         ObjectParameterStrategy strategy = new HeapArrayStrategy(0, 1);
         ObjectParameterInfo o1info = ObjectParameterInfo.create(0, ObjectParameterInfo.ARRAY,
-                ObjectParameterInfo.LONG, ObjectParameterInfo.IN | ObjectParameterInfo.OUT);
+                NATIVE_LONG, ObjectParameterInfo.IN | ObjectParameterInfo.OUT);
         ObjectParameterInfo o2info = ObjectParameterInfo.create(1, ObjectParameterInfo.ARRAY,
-                ObjectParameterInfo.LONG, ObjectParameterInfo.IN | ObjectParameterInfo.OUT);
+                NATIVE_LONG, ObjectParameterInfo.IN | ObjectParameterInfo.OUT);
         long ret = invoker.invokeN2OrN(function, 0L, 0L, 2, arr1, strategy, o1info, arr2, strategy, o2info);
-        assertEquals("incorrect return value", 0xdeadbeefL + 0xfee1deadL, ret);
-        assertEquals("incorrect array value", 0xfee1deadL, arr1[0]);
-        assertEquals("incorrect array value", 0xdeadbeefL, arr2[0]);
+        assertEquals("incorrect array value", N2, getNativeUnsignedLong(arr1));
+        assertEquals("incorrect array value", N1, getNativeUnsignedLong(arr2));
+        assertEquals("incorrect return value", unsigned(N1 + N2), unsigned(ret));
     }
 
     public static void invokeDO(Invoker invoker) {
         Function function = getFunction("invokeOO", Type.SLONG, Type.POINTER, Type.POINTER);
         UnitHelper.Address o1 =  new UnitHelper.Address(IO.allocateMemory(8, true));
-        putNativeLong(o1, 0xdeadbeefL);
-        long[] o2 = { 0xfee1deadL };
+        putNativeUnsignedLong(o1, N1);
+        Object o2 = newNativeUnsignedLongArray(N2);
         ObjectParameterStrategy s1 = new DirectStrategy();
         ObjectParameterStrategy s2 = new HeapArrayStrategy(0, 1);
         ObjectParameterInfo o1info = ObjectParameterInfo.create(0, ObjectParameterInfo.ARRAY,
-                ObjectParameterInfo.LONG, ObjectParameterInfo.IN | ObjectParameterInfo.OUT);
+                NATIVE_LONG, ObjectParameterInfo.IN | ObjectParameterInfo.OUT);
         ObjectParameterInfo o2info = ObjectParameterInfo.create(1, ObjectParameterInfo.ARRAY,
-                ObjectParameterInfo.LONG, ObjectParameterInfo.IN | ObjectParameterInfo.OUT);
+                NATIVE_LONG, ObjectParameterInfo.IN | ObjectParameterInfo.OUT);
 
         long ret = invoker.invokeN2OrN(function, o1.address, 0L, 1, o1, s1, o1info, o2, s2, o2info);
-        assertEquals("incorrect ptr value", 0xfee1deadL, getNativeLong(o1));
-        assertEquals("incorrect array value", 0xdeadbeefL, o2[0]);
-        assertEquals("incorrect return value", 0xdeadbeefL + 0xfee1deadL, ret);
+        assertEquals("incorrect ptr value", N2, getNativeUnsignedLong(o1));
+        assertEquals("incorrect array value", N1, getNativeUnsignedLong(o2));
+        assertEquals("incorrect return value", N1 + N2, unsigned(ret));
     }
 
     public static void invokeOD(Invoker invoker) {
         Function function = getFunction("invokeOO", Type.SLONG, Type.POINTER, Type.POINTER);
         UnitHelper.Address ptr =  new UnitHelper.Address(IO.allocateMemory(8, true));
-        putNativeLong(ptr, 0xfee1deadL);
-        long[] array = { 0xdeadbeefL };
+        putNativeUnsignedLong(ptr, N2);
+        Object array = newNativeUnsignedLongArray(N1);
         ObjectParameterStrategy ptrStrategy = new DirectStrategy();
         ObjectParameterStrategy arrayStrategy = new HeapArrayStrategy(0, 1);
         ObjectParameterInfo o1info = ObjectParameterInfo.create(0, ObjectParameterInfo.ARRAY,
-                ObjectParameterInfo.LONG, ObjectParameterInfo.IN | ObjectParameterInfo.OUT);
+                NATIVE_LONG, ObjectParameterInfo.IN | ObjectParameterInfo.OUT);
         ObjectParameterInfo o2info = ObjectParameterInfo.create(1, ObjectParameterInfo.ARRAY,
-                ObjectParameterInfo.LONG, ObjectParameterInfo.IN | ObjectParameterInfo.OUT);
+                NATIVE_LONG, ObjectParameterInfo.IN | ObjectParameterInfo.OUT);
 
         long ret = invoker.invokeN2OrN(function, 0L, ptr.address, 1, array, arrayStrategy, o1info, ptr, ptrStrategy, o2info);
-        assertEquals("incorrect ptr value", 0xdeadbeefL, getNativeLong(ptr));
-        assertEquals("incorrect array value", 0xfee1deadL, array[0]);
-        assertEquals("incorrect return value", 0xdeadbeefL + 0xfee1deadL, ret);
+        assertEquals("incorrect ptr value", N1, getNativeUnsignedLong(ptr));
+        assertEquals("incorrect array value", N2, getNativeUnsignedLong(array));
+        assertEquals("incorrect return value", N1 + N2, unsigned(ret));
     }
 
 

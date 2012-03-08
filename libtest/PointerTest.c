@@ -82,92 +82,92 @@ ptr_from_address(uintptr_t addr)
     return (void *) addr;
 }
 
-long 
-invokeO(long *ptr)
+unsigned long 
+invokeO(unsigned long *ptr)
 {
-    long ret = *ptr;
-    *ptr = 0xfee1deadL;
+    unsigned long ret = *ptr;
+    *ptr = 0xdeadbeefUL;
     return ret;
 }
 
-long 
-invokeON(long *ptr, long val)
+unsigned long 
+invokeON(unsigned long *ptr, unsigned long val)
 {
-    long ret = *ptr;
+    unsigned long ret = *ptr;
     *ptr = val;
     return ret;
 }
 
-long 
-invokeNO(long val, long *ptr)
+unsigned long 
+invokeNO(unsigned long val, unsigned long *ptr)
 {
-    long ret = *ptr;
+    unsigned long ret = *ptr;
     *ptr = val;
     return ret;
 }
 
-long 
-invokeOO(long *p1, long *p2)
+unsigned long 
+invokeOO(unsigned long *p1, unsigned long *p2)
 {
-    long ret = *p1 + *p2;
-    long tmp = *p1;
+    unsigned long ret = *p1 + *p2;
+    unsigned long tmp = *p1;
     *p1 = *p2;
     *p2 = tmp;
     return ret;
 }
 
 
-long 
-invokeONN(long *ptr, long n1, long n2)
+unsigned long 
+invokeONN(unsigned long *ptr, unsigned long n1, unsigned long n2)
 {
-    long ret = *ptr;
+    unsigned long ret = *ptr;
     ptr[0] = n1;
     ptr[1] = n2;
     return ret;
 }
 
-long
-invokeOON(long *p1, long *p2, long n1)
+unsigned long
+invokeOON(unsigned long *p1, unsigned long *p2, unsigned long n1)
 {
-    long ret = *p1;
+    unsigned long ret = *p1;
     *p1 = n1;
     *p2 = n1;
     return ret;
 }
 
 
-long 
-invokeNNO(long n1, long n2, long *ptr)
+unsigned long 
+invokeNNO(unsigned long n1, unsigned long n2, unsigned long *ptr)
 {
-    long ret = *ptr;
+    unsigned long ret = *ptr;
     ptr[0] = n1;
     ptr[1] = n2;
     return ret;
 }
 
-long 
-invokeNON(long n1, long *ptr, long n2)
+unsigned long 
+invokeNON(unsigned long n1, unsigned long *ptr, unsigned long n2)
 {
-    long ret = *ptr;
+    unsigned long ret = *ptr;
     ptr[0] = n1;
     ptr[1] = n2;
     return ret;
 }
 
-long 
-invokeNOO(long n1, long *p1, long *p2)
+unsigned long 
+invokeNOO(unsigned long n1, unsigned long *p1, unsigned long *p2)
 {
-    long ret = *p1;
+    unsigned long ret = *p1;
     *p1 = n1;
     *p2 = n1;
     return ret;
 }
 
 
-long 
-invokeOOO(long *p1, long *p2, long *p3)
+unsigned long 
+invokeOOO(unsigned long *p1, unsigned long *p2, unsigned long *p3)
 {
-    long ret = *p1;
+    unsigned long ret = *p1;
     *p1 = *p3;
     *p2 = *p3;
     *p3 = ret;
