@@ -7,6 +7,9 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import java.math.BigDecimal;
+
 import static org.junit.Assert.*;
 
 public class NumberTest {
@@ -21,6 +24,7 @@ public class NumberTest {
         long ret_u64(long v);
         float ret_float(float v);
         double ret_double(double v);
+        BigDecimal ret_f128(BigDecimal v);
     }
 
     private static interface LibM {
@@ -246,4 +250,33 @@ public class NumberTest {
             assertEquals("Value not returned correctly", values[i], lib.ret_double(values[i]), 0.1f);
         }
     }
+
+    @Test public void returnDefaultF128() {
+        returnF128(InvokerType.Default);
+    }
+
+    @Test public void returnDefaultF128HighPrecision() {
+        returnF128HighPrecision(InvokerType.Default);
+    }
+
+    private void returnF128HighPrecision(InvokerType type) {
+        LibNumberTest lib = UnitHelper.loadTestLibrary(LibNumberTest.class, type);
+        BigDecimal param = new BigDecimal("1.234567890123456789");
+        BigDecimal result = lib.ret_f128(param);
+        BigDecimal delta = param.subtract(result).abs();
+        assertTrue(delta.compareTo(new BigDecimal("0.0000000000000000001")) < 0);
+    }
+
+
+    private void returnF128(InvokerType type) {
+        LibNumberTest lib = UnitHelper.loadTestLibrary(LibNumberTest.class, type);
+        double[] values = { 0d, 1.0d, -2.0d };
+        for (double v : values) {
+            BigDecimal param = BigDecimal.valueOf(v);
+            BigDecimal result = lib.ret_f128(param);
+            BigDecimal delta = param.subtract(result).abs();
+            assertTrue(delta.compareTo(new BigDecimal("0.1")) < 0);
+        }
+    }
+
 }

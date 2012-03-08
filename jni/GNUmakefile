@@ -156,9 +156,9 @@ ifeq ($(OS), darwin)
   else
     CC = gcc
   endif
-
-  ifneq ($(realpath $(wildcard $(XCODE)/SDKs/MacOSX10.4?.sdk)),)
-    MACSDK = $(XCODE)/SDKs/MacOSX10.4u.sdk
+  UNIVERSAL_SDK = $(firstword $(strip $(realpath $(XCODE)/SDKs/MacOSX10.4u.sdk) $(realpath $(XCODE)/SDKs/MacOSX10.5.sdk)))
+  ifneq ($(UNIVERSAL_SDK),)
+    MACSDK = $(UNIVERSAL_SDK)
     ifeq ($(findstring ppc, $(ARCHES)),)
       ARCHES += ppc
     endif

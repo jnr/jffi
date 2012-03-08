@@ -1399,6 +1399,14 @@ final class Foreign {
      */
     final native long getDirectBufferAddress(Buffer buffer);
 
+    final native void longDoubleFromDouble(double doubleValue, byte[] buf, int off, int len);
+    final native double longDoubleToDouble(byte[] buf, int off, int len);
+    final native void longDoubleFromString(String doubleString, byte[] buf, int off, int len);
+    final native String longDoubleToString(byte[] buf, int off, int len);
+    final native String longDoubleToEngineeringString(byte[] buf, int off, int len);
+    final native String longDoubleToPlainString(byte[] buf, int off, int len);
+
+
     final native long newNativeMethod(String name, String signature, long functionContext);
     final native void freeNativeMethod(long handle);
     final native long compileNativeMethods(long[] methods);

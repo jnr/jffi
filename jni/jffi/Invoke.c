@@ -52,6 +52,16 @@
 
 #define MAX_STACK_ARRAY (1024)
 
+#if !defined(USE_RAW) && 0
+#  define USE_RAW (1)
+#endif
+
+#if defined(USE_RAW) && defined(__i386__)
+#  define USE_RAW_CALL (1)
+#  define USE_RAW_PACKING (1)
+#elif defined(USE_RAW)
+#  define USE_RAW_PACKING (1)
+#endif
 
 typedef struct Pinned {
     jobject object;
@@ -60,26 +70,18 @@ typedef struct Pinned {
     int type;
 } Pinned;
 
-#ifdef USE_RAW
-static void
-invokeArray(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer, void* returnBuffer)
-{
-    Function* ctx = (Function *) j2p(ctxAddress);
-    FFIValue tmpValue;
-    jbyte *tmpBuffer = (jbyte *) &tmpValue;
-    
-    if (likely(ctx->cif.nargs > 0)) {
-        tmpBuffer = alloca(ctx->cif.bytes);
-        
-        (*env)->GetByteArrayRegion(env, paramBuffer, 0, ctx->rawParameterSize, tmpBuffer);
-    }
 
-    ffi_raw_call(&ctx->cif, FFI_FN(ctx->function), returnBuffer, (ffi_raw *) tmpBuffer);
-    SAVE_ERRNO(ctx);
-}
+#if defined(USE_RAW_PACKING)
+#  define COPY_ARGS(ctx, src, ffiArgs) do { \
+    int idx; \
+    for (idx = 0; idx < (int) (ctx)->cif.nargs; ++idx) { \
+	ffiArgs[idx] = (caddr_t) src + (ctx)->rawParamOffsets[idx]; \
+    } \
+} while (0)
+#  define ARG_BUFFER_SIZE(ctx) ((ctx)->rawParameterSize)
 
 #else
-#define COPY_ARGS(ctx, src, ffiArgs) do { \
+#  define COPY_ARGS(ctx, src, ffiArgs) do { \
     int idx; \
     for (idx = 0; idx < (int) ctx->cif.nargs; ++idx) { \
         if (unlikely(ctx->cif.arg_types[idx]->type == FFI_TYPE_STRUCT)) { \
@@ -89,29 +91,37 @@ invokeArray(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer, void* returnB
         } \
     } \
 } while (0)
+#  define ARG_BUFFER_SIZE(ctx) ((ctx)->cif.nargs * PARAM_SIZE)
+#endif
 
 static void
 invokeArray(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer, void* returnBuffer)
 {
     Function* ctx = (Function *) j2p(ctxAddress);
+    FFIValue tmpValue;
+    jbyte *tmpBuffer = (jbyte *) &tmpValue;
 
+#ifndef USE_RAW_CALL
     void** ffiArgs = { NULL };
-    jbyte *tmpBuffer = NULL;
+#endif
     
     if (ctx->cif.nargs > 0) {
-        tmpBuffer = alloca(ctx->cif.nargs * PARAM_SIZE);
+        tmpBuffer = alloca(ARG_BUFFER_SIZE(ctx));
+        (*env)->GetByteArrayRegion(env, paramBuffer, 0, ARG_BUFFER_SIZE(ctx), tmpBuffer);
+#ifndef USE_RAW_CALL
         ffiArgs = alloca(ctx->cif.nargs * sizeof(void *));
-        
-        (*env)->GetByteArrayRegion(env, paramBuffer, 0, ctx->cif.nargs * PARAM_SIZE, tmpBuffer);
-
         COPY_ARGS(ctx, tmpBuffer, ffiArgs);
+#endif
     }
 
+#ifdef USE_RAW_CALL
+    ffi_raw_call(&ctx->cif, FFI_FN(ctx->function), returnBuffer, (ffi_raw *) tmpBuffer);
+#else
     ffi_call(&ctx->cif, FFI_FN(ctx->function), returnBuffer, ffiArgs);
-
+#endif
     SAVE_ERRNO(ctx);
 }
-#endif
+
 /*
  * Class:     com_kenai_jffi_Foreign
  * Method:    isRawParameterPackingEnabled
@@ -120,7 +130,7 @@ invokeArray(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer, void* returnB
 JNIEXPORT jboolean JNICALL
 Java_com_kenai_jffi_Foreign_isRawParameterPackingEnabled(JNIEnv* env, jobject self)
 {
-#ifdef USE_RAW
+#ifdef USE_RAW_PACKING
     return JNI_TRUE;
 #else
     return JNI_FALSE;
@@ -196,32 +206,15 @@ Java_com_kenai_jffi_Foreign_invokeArrayReturnStruct(JNIEnv* env, jclass self, jl
     void** ffiArgs;
     int i;
 
-    //
-    // Due to the undocumented and somewhat strange struct-return handling when
-    // using ffi_raw_call(), we convert from raw to ptr array, then call via normal
-    // ffi_call
-    //
-
     ffiArgs = alloca(ctx->cif.nargs * sizeof(void *));
-
-#ifdef USE_RAW
-    tmpBuffer = alloca(ctx->rawParameterSize);
-    (*env)->GetByteArrayRegion(env, paramBuffer, 0, ctx->rawParameterSize, tmpBuffer);
-    for (i = 0; i < (int) ctx->cif.nargs; ++i) {
-        ffiArgs[i] = (tmpBuffer + ctx->rawParamOffsets[i]);
-    }
-#else
-    tmpBuffer = alloca(ctx->cif.nargs * PARAM_SIZE);
-    (*env)->GetByteArrayRegion(env, paramBuffer, 0, ctx->cif.nargs * PARAM_SIZE, tmpBuffer);
-
+    tmpBuffer = alloca(ARG_BUFFER_SIZE(ctx));
+    (*env)->GetByteArrayRegion(env, paramBuffer, 0, ARG_BUFFER_SIZE(ctx), tmpBuffer);
     COPY_ARGS(ctx, tmpBuffer, ffiArgs);
-#endif
+
     ffi_call(&ctx->cif, FFI_FN(ctx->function), retval, ffiArgs);
     SAVE_ERRNO(ctx);
     (*env)->SetByteArrayRegion(env, returnBuffer, offset, ctx->cif.rtype->size, retval);
 }
-
-#define MAX_STACK_OBJECTS (4)
 
 static void
 invokeArrayWithObjects_(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer,
@@ -237,20 +230,10 @@ invokeArrayWithObjects_(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer,
     arrays = alloca(objectCount * sizeof(Array));
     pinned = alloca(objectCount * sizeof(Pinned));
 
-#if defined(USE_RAW)
-    paramBytes = ctx->rawParameterSize;
-#else
-    paramBytes = ctx->cif.nargs * PARAM_SIZE;
-#endif
-
-    tmpBuffer = alloca(paramBytes);
-    (*env)->GetByteArrayRegion(env, paramBuffer, 0, paramBytes, tmpBuffer);
-
-#ifndef USE_RAW
+    tmpBuffer = alloca(ARG_BUFFER_SIZE(ctx));
+    (*env)->GetByteArrayRegion(env, paramBuffer, 0, ARG_BUFFER_SIZE(ctx), tmpBuffer);
     ffiArgs = alloca(ctx->cif.nargs * sizeof(void *));
     COPY_ARGS(ctx, tmpBuffer, ffiArgs);
-#endif    
-
     
     for (i = 0; i < (unsigned int) objectCount; ++i) {
         int type = infoBuffer[i * 3];
@@ -333,15 +316,11 @@ invokeArrayWithObjects_(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer,
                 goto cleanup;
         }
 
-#if defined(USE_RAW)
-        *((void **)(tmpBuffer + ctx->rawParamOffsets[idx])) = ptr;
-#else
-        if (unlikely(ctx->cif.arg_types[idx]->type == FFI_TYPE_STRUCT)) {
-            ffiArgs[idx] = ptr;
-        } else {
+	if (likely(ctx->cif.arg_types[idx]->type == FFI_TYPE_POINTER)) {
             *((void **) ffiArgs[idx]) = ptr;
-        }
-#endif
+	} else {
+            ffiArgs[idx] = ptr;
+	}
     }
     
     //
@@ -360,35 +339,17 @@ invokeArrayWithObjects_(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer,
         if (unlikely(ptr == NULL)) {
             goto cleanup;
         }
-#if defined(USE_RAW)
-        *((void **)(tmpBuffer + ctx->rawParamOffsets[idx])) = ptr;
-#else
-        if (unlikely(ctx->cif.arg_types[idx]->type == FFI_TYPE_STRUCT)) {
-            ffiArgs[idx] = ptr;
-        } else {
+
+       	if (likely(ctx->cif.arg_types[idx]->type == FFI_TYPE_POINTER)) {
             *((void **) ffiArgs[idx]) = ptr;
-        }
-#endif
+	} else {
+            ffiArgs[idx] = ptr;
+	}
+
         ++arrayCount;
     }
-                
-#if defined(USE_RAW)
-    //
-    // Special case for struct return values - unroll into a ptr array and
-    // use ffi_call, since ffi_raw_call with struct return values is undocumented.
-    //
-    if (unlikely(ctx->cif.rtype->type == FFI_TYPE_STRUCT)) {
-        ffiArgs = alloca(ctx->cif.nargs * sizeof(void *));
-        for (i = 0; i < ctx->cif.nargs; ++i) {
-            ffiArgs[i] = (tmpBuffer + ctx->rawParamOffsets[i]);
-        }
-        ffi_call(&ctx->cif, FFI_FN(ctx->function), retval, ffiArgs);
-    } else {
-        ffi_raw_call(&ctx->cif, FFI_FN(ctx->function), retval, (ffi_raw *) tmpBuffer);
-    }
-#else
+
     ffi_call(&ctx->cif, FFI_FN(ctx->function), retval, ffiArgs);
-#endif
     SAVE_ERRNO(ctx);
 cleanup:
     /* Release any array backing memory */

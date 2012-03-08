@@ -32,6 +32,7 @@
 
 package com.kenai.jffi;
 
+import java.math.BigDecimal;
 import java.nio.ByteOrder;
 
 /**
@@ -113,6 +114,35 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
 
     public final void putDouble(final double value) {
         paramOffset = encoder.putDouble(buffer, paramOffset, value);
+        ++paramIndex;
+    }
+
+    public final void putLongDouble(final double value) {
+
+        if (encoder.isRaw()) {
+            Foreign.getInstance().longDoubleFromDouble(value, buffer, paramOffset, Type.LONGDOUBLE.size());
+            paramOffset += FFI_ALIGN(Type.LONGDOUBLE.size(), FFI_SIZEOF_ARG);
+
+        } else {
+            byte[] ld = new byte[Type.LONGDOUBLE.size()];
+            Foreign.getInstance().longDoubleFromDouble(value, ld, 0, Type.LONGDOUBLE.size());
+            getObjectBuffer().putArray(paramIndex, ld, 0, ld.length, ObjectBuffer.IN);
+            paramOffset += PARAM_SIZE;
+        }
+        ++paramIndex;
+    }
+
+    public final void putLongDouble(final BigDecimal value) {
+        if (encoder.isRaw()) {
+            Foreign.getInstance().longDoubleFromString(value.toEngineeringString(), buffer, paramOffset, Type.LONGDOUBLE.size());
+            paramOffset += FFI_ALIGN(Type.LONGDOUBLE.size(), FFI_SIZEOF_ARG);
+
+        } else {
+            byte[] ld = new byte[Type.LONGDOUBLE.size()];
+            Foreign.getInstance().longDoubleFromString(value.toEngineeringString(), ld, 0, Type.LONGDOUBLE.size());
+            getObjectBuffer().putArray(paramIndex, ld, 0, ld.length, ObjectBuffer.IN);
+            paramOffset += PARAM_SIZE;
+        }
         ++paramIndex;
     }
 
@@ -201,39 +231,71 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
         getObjectBuffer().putJNI(paramIndex++, obj, ObjectBuffer.JNIOBJECT);
     }
 
-    static final Encoder getEncoder() {
-        if (Platform.getPlatform().getCPU() == Platform.CPU.I386) {
-            return Foreign.getInstance().isRawParameterPackingEnabled()
-                    ? newI386RawEncoder()
-                    : newLE32Encoder();
-        } else if (Platform.getPlatform().addressSize() == 64) {
-            return ByteOrder.nativeOrder().equals(ByteOrder.BIG_ENDIAN)
-                    ? newBE64Encoder() : newLE64Encoder();
-        } else {
-            return ByteOrder.nativeOrder().equals(ByteOrder.BIG_ENDIAN)
-                    ? newBE32Encoder() : newLE32Encoder();
+    private static Encoder getEncoder() {
+        Foreign foreign = Foreign.getInstance();
+        Platform platform = Platform.getPlatform();
+
+        if (platform.getCPU() == Platform.CPU.I386 && Foreign.getInstance().isRawParameterPackingEnabled()) {
+            return newI386RawEncoder();
         }
+
+        ArrayIO io = ByteOrder.nativeOrder().equals(ByteOrder.BIG_ENDIAN)
+                ? platform.addressSize() == 64 ? getBE64IO() : getBE32IO()
+                : platform.addressSize() == 64 ? getLE64IO() : getLE32IO();
+        return foreign.isRawParameterPackingEnabled()
+                ? newRawEncoder(io) : newDefaultEncoder(io);
     }
-    private static final Encoder newI386RawEncoder() {
+
+    static ArrayIO getBE32IO() {
+        return BE32ArrayIO.INSTANCE;
+    }
+
+    static ArrayIO getLE32IO() {
+        return LE32ArrayIO.INSTANCE;
+    }
+
+    static ArrayIO getLE64IO() {
+        return LE64ArrayIO.INSTANCE;
+    }
+
+    static ArrayIO getBE64IO() {
+        return BE64ArrayIO.INSTANCE;
+    }
+
+    private static Encoder newI386RawEncoder() {
         return new I386RawEncoder();
     }
-    private static final Encoder newLE32Encoder() {
-        return new DefaultEncoder(LE32ArrayIO.INSTANCE);
+
+    private static Encoder newRawEncoder(ArrayIO io) {
+        return new RawEncoder(io);
     }
-    private static final Encoder newLE64Encoder() {
-        return new DefaultEncoder(LE64ArrayIO.INSTANCE);
-    }
-    private static final Encoder newBE32Encoder() {
-        return new DefaultEncoder(BE32ArrayIO.INSTANCE);
-    }
-    private static final Encoder newBE64Encoder() {
-        return new DefaultEncoder(BE64ArrayIO.INSTANCE);
+
+    private static Encoder newDefaultEncoder(ArrayIO io) {
+        return new DefaultEncoder(io);
     }
 
     /**
      * Encodes java data types into native parameter frames
      */
     static abstract class Encoder {
+        static final int BYTE_ALIGN = Type.SINT8.alignment();
+        static final int BYTE_SIZE = Type.SINT8.size();
+        static final int SHORT_ALIGN = Type.SSHORT.alignment();
+        static final int SHORT_SIZE = Type.SSHORT.size();
+        static final int INT_ALIGN = Type.SINT.alignment();
+        static final int INT_SIZE = Type.SINT.size();
+        static final int LONG_ALIGN = Type.SINT64.alignment();
+        static final int LONG_SIZE = Type.SINT64.size();
+        static final int FLOAT_ALIGN = Type.FLOAT.alignment();
+        static final int FLOAT_SIZE = Type.FLOAT.size();
+        static final int DOUBLE_ALIGN = Type.DOUBLE.alignment();
+        static final int DOUBLE_SIZE = Type.DOUBLE.size();
+        static final int LONGDOUBLE_ALIGN = Type.LONGDOUBLE.alignment();
+        static final int LONGDOUBLE_SIZE = Type.LONGDOUBLE.size();
+        static final int ADDRESS_ALIGN = Type.POINTER.alignment();
+        static final int ADDRESS_SIZE = Type.POINTER.size();
+        static final int FFI_SIZEOF_ARG = Platform.getPlatform().longSize() == 32 ? 4 : 8;
+
         /** Returns true if this <tt>Encoder</tt> is a raw encoder */
         public abstract boolean isRaw();
 
@@ -356,6 +418,74 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
             IO.putAddress(buffer, offset, value); return offset + 4;
         }
     }
+
+    /**
+     * Packs arguments into a byte array in the format compliant with the
+     * i386 sysv ABI, so the buffer can be copied directly onto the stack and
+     * used.
+     */
+    private static final class RawEncoder extends Encoder {
+        private final ArrayIO io;
+
+        private RawEncoder(ArrayIO io) {
+            this.io = io;
+        }
+
+        public final boolean isRaw() {
+            return true;
+        }
+
+        public final int getBufferSize(CallInfo info) {
+            return info.getRawParameterSize();
+        }
+
+        public final int getBufferOffset(Function function, int parameterIndex) {
+            return function.getParameterOffset(parameterIndex);
+        }
+
+        public final int putByte(byte[] buffer, int offset, int value) {
+            offset = FFI_ALIGN(offset, FFI_SIZEOF_ARG);
+            io.putByte(buffer, offset, value);
+            return offset + BYTE_SIZE;
+        }
+
+        public final int putShort(byte[] buffer, int offset, int value) {
+            offset = FFI_ALIGN(offset, FFI_SIZEOF_ARG);
+            io.putShort(buffer, offset, value);
+            return offset + SHORT_SIZE;
+        }
+
+        public final int putInt(byte[] buffer, int offset, int value) {
+            offset = FFI_ALIGN(offset, FFI_SIZEOF_ARG);
+            io.putInt(buffer, offset, value);
+            return offset + INT_SIZE;
+        }
+
+        public final int putLong(byte[] buffer, int offset, long value) {
+            offset = FFI_ALIGN(offset, FFI_SIZEOF_ARG);
+            io.putLong(buffer, offset, value);
+            return offset + LONG_SIZE;
+        }
+
+        public final int putFloat(byte[] buffer, int offset, float value) {
+            offset = FFI_ALIGN(offset, FFI_SIZEOF_ARG);
+            io.putFloat(buffer, offset, value);
+            return offset + FLOAT_SIZE;
+        }
+
+        public final int putDouble(byte[] buffer, int offset, double value) {
+            offset = FFI_ALIGN(offset, FFI_SIZEOF_ARG);
+            io.putDouble(buffer, offset, value);
+            return offset + DOUBLE_SIZE;
+        }
+
+        public final int putAddress(byte[] buffer, int offset, long value) {
+            offset = FFI_ALIGN(offset, FFI_SIZEOF_ARG);
+            io.putAddress(buffer, offset, value);
+            return offset + ADDRESS_SIZE;
+        }
+    }
+
     private static final class DefaultEncoder extends Encoder {
         private final ArrayIO io;
 
@@ -528,7 +658,7 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
      * @param a The boundary to align to.
      * @return The aligned address.
      */
-    static final int FFI_ALIGN(int v, int a) {
+    static int FFI_ALIGN(int v, int a) {
         return ((v - 1) | (a - 1)) + 1;
     }
 

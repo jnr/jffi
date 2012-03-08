@@ -32,6 +32,8 @@
 
 package com.kenai.jffi;
 
+import java.math.BigDecimal;
+
 /**
  * Provides native function invocation facilities.
  */
@@ -1022,6 +1024,17 @@ public abstract class Invoker {
         }
     }
 
+    /**
+     * Invokes a function and returns a 64 bit floating point value.
+     *
+     * @param function The <tt>Function</tt> to invoke.
+     * @param buffer A buffer containing the arguments to the function.
+     * @return A native memory address.
+     */
+    public final BigDecimal invokeBigDecimal(Function function, HeapInvocationBuffer buffer) {
+        byte[] rval = invokeStruct(function, buffer);
+        return new BigDecimal(foreign.longDoubleToString(rval, 0, rval.length));
+    }
     /**
      * Invokes a function that returns a C struct by value.
      *

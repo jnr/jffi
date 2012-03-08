@@ -42,6 +42,7 @@ typedef signed long sL;
 typedef unsigned long uL;
 typedef float f32;
 typedef double f64;
+typedef long double f128;
 #if !defined(__OpenBSD__)
 typedef unsigned long ulong;
 #endif
@@ -65,6 +66,7 @@ TEST(s64);
 TEST(u64);
 TEST(float);
 TEST(double);
+TEST(f128);
 TEST(long);
 TEST(ulong);
 
@@ -95,6 +97,7 @@ TEST2(u64)
 #define ADD3(R, T1, T2, T3) R add_##T1##T2##T3##_##R(T1 arg1, T2 arg2, T3 arg3) { return arg1 + arg2 + arg3; }
 #define pack_f32(buf, v) do { *(float *)(buf) = v; } while(0)
 #define pack_f64(buf, v) do { *(double *)(buf) = v; } while(0)
+#define pack_f128(buf, v) do { *(long double *)(buf) = v; } while(0)
 #define pack_int(buf, v) do { *(buf) = v; } while(0)
 #define pack_s8 pack_int
 #define pack_u8 pack_int

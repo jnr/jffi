@@ -5,6 +5,7 @@ import java.io.File;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.math.BigDecimal;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -182,6 +183,8 @@ public class UnitHelper {
             return Type.FLOAT;
         } else if (type == double.class || type == Double.class) {
             return Type.DOUBLE;
+        } else if (BigDecimal.class.isAssignableFrom(type)) {
+            return Type.LONGDOUBLE;
         } else if (Address.class.isAssignableFrom(type)) {
             return Type.POINTER;
         } else {
@@ -218,6 +221,8 @@ public class UnitHelper {
                     buffer.putFloat(((Number) args[i]).floatValue());
                 } else if (parameterTypes[i] == double.class || parameterTypes[i] == Double.class) {
                     buffer.putDouble(((Number) args[i]).doubleValue());
+                } else if (BigDecimal.class.isAssignableFrom(parameterTypes[i])) {
+                    buffer.putLongDouble(BigDecimal.class.cast(args[i]));
                 } else if (Address.class.isAssignableFrom(parameterTypes[i])) {
                     buffer.putAddress(((Address) args[i]).address);
                 } else {
@@ -240,6 +245,10 @@ public class UnitHelper {
                 return Float.valueOf(invoker.invokeFloat(function, buffer));
             } else if (returnType == double.class || returnType == Double.class) {
                 return Double.valueOf(invoker.invokeDouble(function, buffer));
+
+            } else if (BigDecimal.class.isAssignableFrom(returnType)) {
+                return invoker.invokeBigDecimal(function, buffer);
+
             } else if (Address.class.isAssignableFrom(returnType)) {
                 return new Address(invoker.invokeAddress(function, buffer));
             }
