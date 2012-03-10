@@ -151,8 +151,8 @@
             <arg value="-f"/>
             <arg value="jni/GNUmakefile"/>
         </exec>
-        <exec executable="i386-mingw32-strip" failonerror="true">
-            <arg value="-S"/> <!-- Strip debug symbols only -->
+        <exec executable="i686-w64-mingw32-strip" failonerror="true">
+            <arg value="--strip-debug"/> <!-- Strip debug symbols only -->
             <arg value="${build.native.dir}/jffi-${jffi.version.major}.${jffi.version.minor}.dll"/>
         </exec>
         <mkdir dir="${dist.dir}"/>

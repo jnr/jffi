@@ -57,7 +57,9 @@ JNI_OnLoad(JavaVM *vm, void *reserved)
 JNIEXPORT void JNICALL 
 JNI_OnUnload(JavaVM *jvm, void *reserved)
 {
+#ifndef _WIN32
     pthread_key_delete(jffi_threadDataKey);
+#endif
 }
 
 #ifndef _WIN32

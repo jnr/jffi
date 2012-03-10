@@ -108,10 +108,12 @@ ifeq ($(OS),cross-mingw32)
   override OS = win32
   override CPU = i386
   JDK_INCLUDES=-I$(JNI_DIR)/win32/include -I$(JNI_DIR)/win32/include/win32
-  CC = i386-mingw32-gcc
-  LD = i386-mingw32-ld
-  STRIP = i386-mingw32-strip --strip-debug
-  CONFIGURE_HOST = i386-mingw32
+  CC = i686-w64-mingw32-gcc
+  LD = i686-w64-mingw32-ld
+  STRIP = i686-w64-mingw32-strip --strip-debug
+  export RANLIB = i686-w64-mingw32-ranlib
+  CONFIGURE_HOST = i686-mingw32
+  CROSS_COMPILE=1
 endif
 
 ifneq ($(findstring cygwin,$(BUILD_OS)),)
@@ -128,7 +130,9 @@ ifeq ($(OS), win32)
   # Linking against CRTMT.O is a workaround for GCC 4.4 bug
   # that ignores __thread (which we really need for errno handling).
   # See: http://n2.nabble.com/gcc-4-4-multi-threaded-exception-handling-thread-specifier-not-working-td3440749.html
-  CRTMT.O = $(shell $(CC) -print-file-name=crtmt.o)
+  ifeq ($(findstring -w64-,$(CC)),)
+    CRTMT.O = $(shell $(CC) -print-file-name=crtmt.o)
+  endif
   LDFLAGS += -Wl,--add-stdcall-alias $(CRTMT.O)
   PICFLAGS=
   SOFLAGS += -shared -mimpure-text -static-libgcc
