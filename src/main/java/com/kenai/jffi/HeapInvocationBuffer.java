@@ -302,9 +302,6 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
         /** Gets the size in bytes of the buffer required for the function */
         public abstract int getBufferSize(CallInfo info);
 
-        /* Gets the buffer offset of a parameter */
-        public abstract int getBufferOffset(Function function, int parameterIndex);
-
         /**
          * Encodes a byte value into the byte array.
          *
@@ -391,10 +388,7 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
         public final int getBufferSize(CallInfo info) {
             return info.getRawParameterSize();
         }
-        
-        public final int getBufferOffset(Function function, int parameterIndex) {
-            return function.getParameterOffset(parameterIndex);
-        }
+
         
         public final int putByte(byte[] buffer, int offset, int value) {
             IO.putByte(buffer, offset, value); return offset + 4;
@@ -437,10 +431,6 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
 
         public final int getBufferSize(CallInfo info) {
             return info.getRawParameterSize();
-        }
-
-        public final int getBufferOffset(Function function, int parameterIndex) {
-            return function.getParameterOffset(parameterIndex);
         }
 
         public final int putByte(byte[] buffer, int offset, int value) {

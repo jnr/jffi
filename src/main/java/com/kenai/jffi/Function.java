@@ -42,32 +42,10 @@ import java.util.logging.Logger;
  * native function.
  */
 public final class Function implements CallInfo {
-    /** The native address of the context */
-    private final long contextAddress;
+    private final CallContext callContext;
 
     /** The address of the function */
     private final long functionAddress;
-
-    /** The number of parameters this function takes */
-    private final int parameterCount;
-
-    /** The size of buffer required when packing parameters */
-    private final int rawParameterSize;
-
-    /** The return type of this function */
-    private final Type returnType;
-
-    /** The parameter types of this function */
-    private final Type[] paramTypes;
-    
-    /* offset within encoding buffer of a parameter */
-    private final int[] parameterOffsets;
-
-    /** Whether the native context has been freed yet */
-    private volatile boolean disposed = false;
-
-    /** A handle to the foreign interface to keep it alive as long as this object is alive */
-    private final Foreign foreign = Foreign.getInstance();
 
     /**
      * Creates a new instance of <tt>Function</tt> with default calling convention.
@@ -78,6 +56,16 @@ public final class Function implements CallInfo {
      */
     public Function(long address, Type returnType, Type... paramTypes) {
         this(address, returnType, paramTypes, CallingConvention.DEFAULT, true);
+    }
+
+    /**
+     * Creates a new instance of <tt>Function</tt> with default calling convention.
+     *
+     * @param address The native address of the function to invoke.
+     */
+    public Function(long address, CallContext callContext) {
+        this.functionAddress = address;
+        this.callContext = callContext;
     }
 
     /**
@@ -107,32 +95,7 @@ public final class Function implements CallInfo {
     public Function(long address, Type returnType, Type[] paramTypes, CallingConvention convention, boolean saveErrno) {
 
         this.functionAddress = address;
-        final int flags = (!saveErrno ? Foreign.F_NOERRNO : 0)
-                | (convention == CallingConvention.STDCALL ? Foreign.F_STDCALL : Foreign.F_DEFAULT);
-
-        final long h = foreign.newFunction(address,
-                returnType.handle(), Type.nativeHandles(paramTypes),
-                flags);
-        if (h == 0) {
-            throw new RuntimeException("Failed to create native function");
-        }
-        this.contextAddress = h;
-
-        //
-        // Keep references to the return and parameter types so they do not get
-        // garbage collected
-        //
-        this.returnType = returnType;
-        this.paramTypes = (Type[]) paramTypes.clone();
-
-        this.parameterCount = paramTypes.length;
-        this.rawParameterSize = foreign.getFunctionRawParameterSize(h);        
-        this.parameterOffsets = new int[parameterCount];
-        int rawOffset = 0;
-        for (int i = 0; i < parameterCount; i++) {
-            rawOffset += HeapInvocationBuffer.FFI_ALIGN(paramTypes[i].size(), HeapInvocationBuffer.FFI_SIZEOF_ARG);
-            parameterOffsets[i] = rawOffset;
-        }
+        this.callContext = new CallContext(returnType, paramTypes, convention, saveErrno);
     }    
 
     /**
@@ -141,7 +104,7 @@ public final class Function implements CallInfo {
      * @return The number of parameters the native function accepts.
      */
     public final int getParameterCount() {
-        return parameterCount;
+        return callContext.getParameterCount();
     }
 
     /**
@@ -151,7 +114,11 @@ public final class Function implements CallInfo {
      * @return The number of bytes required to store all paraameters of this function.
      */
     public final int getRawParameterSize() {
-        return rawParameterSize;
+        return callContext.getRawParameterSize();
+    }
+
+    public final CallContext getCallContext() {
+        return callContext;
     }
 
     /**
@@ -160,7 +127,7 @@ public final class Function implements CallInfo {
      * @return The address of the native function context struct.
      */
     final long getContextAddress() {
-        return contextAddress;
+        return callContext.getAddress();
     }
 
     /**
@@ -178,7 +145,7 @@ public final class Function implements CallInfo {
      * @return The native return type of this function.
      */
     public final Type getReturnType() {
-        return returnType;
+        return callContext.getReturnType();
     }
     
     /**
@@ -188,38 +155,6 @@ public final class Function implements CallInfo {
      * @return The <tt>Type</tt> of the parameter.
      */
     public final Type getParameterType(int index) {
-        return paramTypes[index];
-    }
-    
-    /**
-     * Gets the encoding buffer offset of a parameter.
-     * 
-     * @param index The index of the parameter in the function signature
-     * @return the offset of the parameter.
-     */
-    final int getParameterOffset(int index) {
-        return parameterOffsets[index];
-    }
-
-    public synchronized final void dispose() {
-        if (disposed) {
-            throw new RuntimeException("function already freed");
-        }
-        foreign.freeFunction(contextAddress);
-        disposed = true;
-    }
-
-    @Override
-    protected void finalize() throws Throwable {
-        try {
-            if (contextAddress != 0 && !disposed) {
-                foreign.freeFunction(contextAddress);
-            }
-        } catch (Throwable t) {
-            Logger.getLogger(getClass().getName()).log(Level.WARNING, 
-                    "Exception when freeing function context: %s", t.getLocalizedMessage());
-        } finally {
-            super.finalize();
-        }
+        return callContext.getParameterType(index);
     }
 }
