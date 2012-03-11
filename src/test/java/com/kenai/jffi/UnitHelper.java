@@ -302,28 +302,16 @@ public class UnitHelper {
             final int result;
             switch (args.length) {
                 case 0:
-                    if (isFloat(returnType)) {
-                        return Invoker.getInstance().invokeVrF(function);
-                    }
                     result = Invoker.getInstance().invokeVrI(function);
                     break;
                 case 1:
-                    if (isFloat(returnType)) {
-                        return Invoker.getInstance().invokeIrF(function, i(args[0]));
-                    }
                     result = Invoker.getInstance().invokeIrI(function, i(args[0]));
                     break;
                 case 2:
-                    if (isFloat(returnType)) {
-                        return Invoker.getInstance().invokeIIrF(function, i(args[0]), i(args[1]));
-                    }
                     result = Invoker.getInstance().invokeIIrI(function,
                             ((Number) args[0]).intValue(), ((Number) args[1]).intValue());
                     break;
                 case 3:
-                    if (isFloat(returnType)) {
-                        return Invoker.getInstance().invokeIIIrF(function, i(args[0]), i(args[1]), i(args[2]));
-                    }
                     result = Invoker.getInstance().invokeIIIrI(function,
                             ((Number) args[0]).intValue(), ((Number) args[1]).intValue(), ((Number) args[2]).intValue());
                     break;

@@ -92,10 +92,11 @@ Java_com_kenai_jffi_Foreign_newCallContext(JNIEnv* env, jobject self,
     paramTypes = alloca(paramCount * sizeof(jlong));
     (*env)->GetLongArrayRegion(env, paramArray, 0, paramCount, paramTypes);
 
+    ctx->resultMask = (((ffi_type *) j2p(returnType))->size > 4) ? ~0UL : 0xffffffffUL;
 #if defined(__i386__) || defined(__x86_64__) 
     ctx->isFastInt = true;
     ctx->isFastLong = true;
-    
+
     switch (((ffi_type *) j2p(returnType))->type) {
         case FFI_TYPE_INT:
         case FFI_TYPE_SINT8:

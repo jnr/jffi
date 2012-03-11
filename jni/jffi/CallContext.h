@@ -45,6 +45,7 @@ typedef struct CallContext {
     void* reserved0; // Function address - just used to pad this struct to match Function
     bool isFastInt;
     bool isFastLong;
+    long resultMask;
 } CallContext;
 
 #define SAVE_ERRNO(ctx) do { \

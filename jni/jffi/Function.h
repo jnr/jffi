@@ -45,6 +45,7 @@ typedef struct Function {
     void* function;
     bool isFastInt;
     bool isFastLong;
+    long resultMask;
 } Function;
 
 #endif /* FUNCTION_H */

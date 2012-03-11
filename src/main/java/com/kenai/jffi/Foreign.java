@@ -482,15 +482,8 @@ final class Foreign {
      * @param functionContext The address of the function context structure from {@link #newFunction}.
      * @return A 32 bit integer value.
      */
-    final native int invokeVrI(long functionContext);
+    final native int invokeI0(long ctx, long function);
 
-    /**
-     * Invokes a function with no arguments, and returns a 32 bit float.
-     *
-     * @param functionContext The address of the function context structure from {@link #newFunction}.
-     * @return A 32 bit float value.
-     */
-    final native float invokeVrF(long functionContext);
 
     /**
      * Invokes a function with no arguments, and returns a 32 bit integer.
@@ -500,7 +493,7 @@ final class Foreign {
      * @param functionContext The address of the function context structure from {@link #newFunction}.
      * @return A 32 bit integer value.
      */
-    final native int invokeNoErrnoVrI(long functionContext);
+    final native int invokeI0NoErrno(long ctx, long function);
 
     /**
      * Invokes a function with one integer argument, and returns a 32 bit integer.
@@ -509,7 +502,7 @@ final class Foreign {
      * @param arg1 The 32 bit integer argument.
      * @return A 32 bit integer value.
      */
-    final native int invokeIrI(long functionContext, int arg1);
+    final native int invokeI1(long ctx, long function, int arg1);
 
     /**
      * Invokes a function with one integer argument, and returns a 32 bit integer.
@@ -520,16 +513,7 @@ final class Foreign {
      * @param arg1 The 32 bit integer argument.
      * @return A 32 bit integer value.
      */
-    final native int invokeNoErrnoIrI(long functionContext, int arg1);
-
-    /**
-     * Invokes a function with one integer argument, and returns a 32 bit float.
-     *
-     * @param functionContext The address of the function context structure from {@link #newFunction}.
-     * @param arg1 The 32 bit integer argument.
-     * @return A 32 bit float value.
-     */
-    final native float invokeIrF(long functionContext, int arg1);
+    final native int invokeI1NoErrno(long ctx, long function, int arg1);
 
     /**
      * Invokes a function with two integer arguments, and returns a 32 bit integer.
@@ -539,17 +523,7 @@ final class Foreign {
      * @param arg2 The second 32 bit integer argument.
      * @return A 32 bit integer value.
      */
-    final native int invokeIIrI(long functionContext, int arg1, int arg2);
-
-    /**
-     * Invokes a function with two integer arguments, and returns a 32 bit float.
-     *
-     * @param functionContext The address of the function context structure from {@link #newFunction}.
-     * @param arg1 The first 32 bit integer argument.
-     * @param arg2 The second 32 bit integer argument.
-     * @return A 32 bit float value.
-     */
-    final native float invokeIIrF(long functionContext, int arg1, int arg2);
+    final native int invokeI2(long ctx, long function, int arg1, int arg2);
 
     /**
      * Invokes a function with two integer arguments, and returns a 32 bit integer.
@@ -561,7 +535,7 @@ final class Foreign {
      * @param arg2 The second 32 bit integer argument.
      * @return A 32 bit integer value.
      */
-    final native int invokeNoErrnoIIrI(long functionContext, int arg1, int arg2);
+    final native int invokeI2NoErrno(long ctx, long function, int arg1, int arg2);
 
     /**
      * Invokes a function with three integer arguments, and returns a 32 bit integer.
@@ -572,7 +546,7 @@ final class Foreign {
      * @param arg3 The third 32 bit integer argument.
      * @return A 32 bit integer value.
      */
-    final native int invokeIIIrI(long functionContext, int arg1, int arg2, int arg3);
+    final native int invokeI3(long ctx, long function, int arg1, int arg2, int arg3);
 
     /**
      * Invokes a function with four integer arguments, and returns a 32 bit integer.
@@ -584,7 +558,7 @@ final class Foreign {
      * @param arg4 The third 32 bit integer argument.
      * @return A 32 bit integer value.
      */
-    final native int invokeIIIIrI(long functionContext, int arg1, int arg2, int arg3, int arg4);
+    final native int invokeI4(long ctx, long function, int arg1, int arg2, int arg3, int arg4);
 
     /**
      * Invokes a function with five integer arguments, and returns a 32 bit integer.
@@ -597,7 +571,7 @@ final class Foreign {
      * @param arg5 The fifth 32 bit integer argument.
      * @return A 32 bit integer value.
      */
-    final native int invokeIIIIIrI(long functionContext, int arg1, int arg2, int arg3, int arg4, int arg5);
+    final native int invokeI5(long ctx, long function, int arg1, int arg2, int arg3, int arg4, int arg5);
 
     /**
      * Invokes a function with six integer arguments, and returns a 32 bit integer.
@@ -611,18 +585,7 @@ final class Foreign {
      * @param arg6 The sixth 32 bit integer argument.
      * @return A 32 bit integer value.
      */
-    final native int invokeIIIIIIrI(long functionContext, int arg1, int arg2, int arg3, int arg4, int arg5, int arg6);
-
-    /**
-     * Invokes a function with three integer arguments, and returns a 32 bit float.
-     *
-     * @param functionContext The address of the function context structure from {@link #newFunction}.
-     * @param arg1 The first 32 bit integer argument.
-     * @param arg2 The second 32 bit integer argument.
-     * @param arg3 The third 32 bit integer argument.
-     * @return A 32 bit float value.
-     */
-    final native float invokeIIIrF(long functionContext, int arg1, int arg2, int arg3);
+    final native int invokeI6(long ctx, long function, int arg1, int arg2, int arg3, int arg4, int arg5, int arg6);
 
     /**
      * Invokes a function with three integer arguments, and returns a 32 bit integer.
@@ -635,7 +598,7 @@ final class Foreign {
      * @param arg3 The third 32 bit integer argument.
      * @return A 32 bit integer value.
      */
-    final native int invokeNoErrnoIIIrI(long functionContext, int arg1, int arg2, int arg3);
+    final native int invokeI3NoErrno(long ctx, long function, int arg1, int arg2, int arg3);
     
     /**
      * Invokes a function with no arguments, and returns a 64 bit integer.
@@ -643,15 +606,7 @@ final class Foreign {
      * @param function The address of the function context structure from {@link #newFunction}.
      * @return A 64 bit integer value.
      */
-    final native long invokeVrL(long function);
-
-    /**
-     * Invokes a function with no arguments, and returns a 64 bit float.
-     *
-     * @param function The address of the function context structure from {@link #newFunction}.
-     * @return A 64 bit float value.
-     */
-    final native double invokeVrD(long function);
+    final native long invokeL0(long ctx, long function);
 
     /**
      * Invokes a function with one 64 bit integer argument, and returns a 64 bit integer.
@@ -660,16 +615,8 @@ final class Foreign {
      * @param arg1 The 64 bit integer argument.
      * @return A 64 bit integer value.
      */
-    final native long invokeLrL(long function, long arg1);
+    final native long invokeL1(long ctx, long function, long arg1);
 
-    /**
-     * Invokes a function with one 64 bit integer argument, and returns a 64 bit float.
-     *
-     * @param function The address of the function context structure from {@link #newFunction}.
-     * @param arg1 The 64 bit integer argument.
-     * @return A 64 bit float value.
-     */
-    final native double invokeLrD(long function, long arg1);
 
     /**
      * Invokes a function with two 64 bit integer arguments, and returns a 64 bit integer.
@@ -679,17 +626,7 @@ final class Foreign {
      * @param arg2 The second 64 bit integer argument.
      * @return A 64 bit integer value.
      */
-    final native long invokeLLrL(long function, long arg1, long arg2);
-
-    /**
-     * Invokes a function with two 64 bit integer arguments, and returns a 64 bit float.
-     *
-     * @param function The address of the function context structure from {@link #newFunction}.
-     * @param arg1 The first 64 bit integer argument.
-     * @param arg2 The second 64 bit integer argument.
-     * @return A 64 bit float value.
-     */
-    final native double invokeLLrD(long function, long arg1, long arg2);
+    final native long invokeL2(long ctx, long function, long arg1, long arg2);
 
     /**
      * Invokes a function with three 64 bit integer arguments, and returns a 64 bit integer.
@@ -700,7 +637,7 @@ final class Foreign {
      * @param arg3 The third 64 bit integer argument.
      * @return A 64 bit integer value.
      */
-    final native long invokeLLLrL(long function, long arg1, long arg2, long arg3);
+    final native long invokeL3(long ctx, long function, long arg1, long arg2, long arg3);
 
     /**
      * Invokes a function with four 64 bit integer arguments, and returns a 64 bit integer.
@@ -712,7 +649,7 @@ final class Foreign {
      * @param arg4 The fourth 64 bit integer argument.
      * @return A 64 bit integer value.
      */
-    final native long invokeLLLLrL(long function, long arg1, long arg2, long arg3, long arg4);
+    final native long invokeL4(long ctx, long function, long arg1, long arg2, long arg3, long arg4);
 
     /**
      * Invokes a function with five 64 bit integer arguments, and returns a 64 bit integer.
@@ -725,7 +662,7 @@ final class Foreign {
      * @param arg5 The fifth 64 bit integer argument.
      * @return A 64 bit integer value.
      */
-    final native long invokeLLLLLrL(long function, long arg1, long arg2, long arg3, long arg4, long arg5);
+    final native long invokeL5(long ctx, long function, long arg1, long arg2, long arg3, long arg4, long arg5);
 
     /**
      * Invokes a function with six 64 bit integer arguments, and returns a 64 bit integer.
@@ -739,18 +676,7 @@ final class Foreign {
      * @param arg6 The sixth 64 bit integer argument.
      * @return A 64 bit integer value.
      */
-    final native long invokeLLLLLLrL(long function, long arg1, long arg2, long arg3, long arg4, long arg5, long arg6);
-
-    /**
-     * Invokes a function with three 64 bit integer arguments, and returns a 64 bit float.
-     *
-     * @param function The address of the function context structure from {@link #newFunction}.
-     * @param arg1 The first 64 bit integer argument.
-     * @param arg2 The second 64 bit integer argument.
-     * @param arg3 The third 64 bit integer argument.
-     * @return A 64 bit float value.
-     */
-    final native double invokeLLLrD(long function, long arg1, long arg2, long arg3);
+    final native long invokeL6(long ctx, long function, long arg1, long arg2, long arg3, long arg4, long arg5, long arg6);
 
     /**
      * Invokes a function with zero numeric arguments, and returns a numeric value.
@@ -758,7 +684,7 @@ final class Foreign {
      * @param function The address of the function context structure from {@link #newFunction}.
      * @return A numeric value.
      */
-    final native long invokeVrN(long function);
+    final native long invokeN0(long ctx, long function);
 
     /**
      * Invokes a function with one numeric arguments, and returns a numeric value.
@@ -767,7 +693,7 @@ final class Foreign {
      * @param arg1 The first numeric argument.
      * @return A numeric value.
      */
-    final native long invokeNrN(long function, long arg1);
+    final native long invokeN1(long ctx, long function, long arg1);
 
     /**
      * Invokes a function with two numeric arguments, and returns a numeric value.
@@ -777,7 +703,7 @@ final class Foreign {
      * @param arg2 The second numeric argument.
      * @return A numeric value.
      */
-    final native long invokeNNrN(long function, long arg1, long arg2);
+    final native long invokeN2(long ctx, long function, long arg1, long arg2);
 
     /**
      * Invokes a function with three numeric arguments, and returns a numeric value.
@@ -788,7 +714,7 @@ final class Foreign {
      * @param arg3 The third numeric argument.
      * @return A numeric value.
      */
-    final native long invokeNNNrN(long function, long arg1, long arg2, long arg3);
+    final native long invokeN3(long ctx, long function, long arg1, long arg2, long arg3);
 
     /**
      * Invokes a function with four numeric arguments, and returns a numeric value.
@@ -800,7 +726,7 @@ final class Foreign {
      * @param arg4 The fourth numeric argument.
      * @return A numeric value.
      */
-    final native long invokeNNNNrN(long function, long arg1, long arg2, long arg3, long arg4);
+    final native long invokeN4(long ctx, long function, long arg1, long arg2, long arg3, long arg4);
 
     /**
      * Invokes a function with five numeric arguments, and returns a numeric value.
@@ -813,7 +739,7 @@ final class Foreign {
      * @param arg5 The fifth numeric argument.
      * @return A numeric value.
      */
-    final native long invokeNNNNNrN(long function, long arg1, long arg2, long arg3, long arg4, long arg5);
+    final native long invokeN5(long ctx, long function, long arg1, long arg2, long arg3, long arg4, long arg5);
 
     /**
      * Invokes a function with six numeric arguments, and returns a numeric value.
@@ -827,7 +753,7 @@ final class Foreign {
      * @param arg6 The sixth numeric argument.
      * @return A numeric value.
      */
-    final native long invokeNNNNNNrN(long function, long arg1, long arg2, long arg3, long arg4, long arg5, long arg6);
+    final native long invokeN6(long ctx, long function, long arg1, long arg2, long arg3, long arg4, long arg5, long arg6);
 
     /**
      * Invokes a function with one numeric argument, and returns a numeric value.
@@ -840,7 +766,7 @@ final class Foreign {
      * @param o1off The offset from the start of the array or buffer.
      * @param o1len The length of the array to use.
      */
-    final native long invokeN1O1rN(long callContext, long functionAddress,
+    final native long invokeN1O1(long callContext, long functionAddress,
             long n1,
             Object o1, int o1flags, int o1off, int o1len);
     
@@ -857,7 +783,7 @@ final class Foreign {
      * @param o1len The length of the array to use.
      * @return A numeric value.
      */
-    final native long invokeN2O1rN(long callContext, long functionAddress, 
+    final native long invokeN2O1(long callContext, long functionAddress,
             long n1, long n2, 
             Object o1, int o1flags, int o1off, int o1len);
     
@@ -878,7 +804,7 @@ final class Foreign {
      * @param o2flags Object flags (direction, type, idx).
      * @return A numeric value.
      */
-    final native long invokeN2O2rN(long callContext, long functionAddress,
+    final native long invokeN2O2(long callContext, long functionAddress,
             long n1, long n2,
             Object o1, int o1flags, int o1off, int o1len,
             Object o2, int o2flags, int o2off, int o2len);
@@ -897,61 +823,61 @@ final class Foreign {
      * @param o1flags Object flags (direction, type, parameter index).
      * @return A numeric value.
      */
-    final native long invokeN3O1rN(long callContext, long functionAddress, 
+    final native long invokeN3O1(long callContext, long functionAddress,
             long n1, long n2, long n3,
             Object o1, int o1flags, int o1off, int o1len);
     
-    final native long invokeN3O2rN(long callContext, long functionAddress, 
+    final native long invokeN3O2(long callContext, long functionAddress,
             long n1, long n2, long n3,
             Object o1, int o1flags, int o1off, int o1len,
             Object o2, int o2flags, int o2off, int o2len);
     
-    final native long invokeN3O3rN(long callContext, long functionAddress, 
+    final native long invokeN3O3(long callContext, long functionAddress,
             long n1, long n2, long n3,
             Object o1, int o1flags, int o1off, int o1len,
             Object o2, int o2flags, int o2off, int o2len,
             Object o3, int o3flags, int o3off, int o3len);
     
-    final native long invokeN4O1rN(long callContext, long functionAddress, 
+    final native long invokeN4O1(long callContext, long functionAddress,
             long n1, long n2, long n3, long n4,
             Object o1, int o1flags, int o1off, int o1len);
     
-    final native long invokeN4O2rN(long callContext, long functionAddress, 
+    final native long invokeN4O2(long callContext, long functionAddress,
             long n1, long n2, long n3, long n4,
             Object o1, int o1flags, int o1off, int o1len,
             Object o2, int o2flags, int o2off, int o2len);
     
-    final native long invokeN4O3rN(long callContext, long functionAddress, 
+    final native long invokeN4O3(long callContext, long functionAddress,
             long n1, long n2, long n3, long n4,
             Object o1, int o1flags, int o1off, int o1len,
             Object o2, int o2flags, int o2off, int o2len,
             Object o3, int o3flags, int o3off, int o3len);
     
-    final native long invokeN5O1rN(long callContext, long functionAddress, 
+    final native long invokeN5O1(long callContext, long functionAddress,
             long n1, long n2, long n3, long n4, long n5,
             Object o1, int o1off, int o1len, int o1flags);
     
-    final native long invokeN5O2rN(long callContext, long functionAddress, 
+    final native long invokeN5O2(long callContext, long functionAddress,
             long n1, long n2, long n3, long n4, long n5,
             Object o1, int o1flags, int o1off, int o1len,
             Object o2, int o2flags, int o2off, int o2len);
     
-    final native long invokeN5O3rN(long callContext, long functionAddress, 
+    final native long invokeN5O3(long callContext, long functionAddress,
             long n1, long n2, long n3, long n4, long n5,
             Object o1, int o1flags, int o1off, int o1len,
             Object o2, int o2flags, int o2off, int o2len,
             Object o3, int o3flags, int o3off, int o3len);
     
-    final native long invokeN6O1rN(long callContext, long functionAddress, 
+    final native long invokeN6O1(long callContext, long functionAddress,
             long n1, long n2, long n3, long n4, long n5, long n6,
             Object o1, int o1flags, int o1off, int o1len);
     
-    final native long invokeN6O2rN(long callContext, long functionAddress, 
+    final native long invokeN6O2(long callContext, long functionAddress,
             long n1, long n2, long n3, long n4, long n5, long n6,
             Object o1, int o1flags, int o1off, int o1len,
             Object o2, int o2flags, int o2off, int o2len);
     
-    final native long invokeN6O3rN(long callContext, long functionAddress, 
+    final native long invokeN6O3(long callContext, long functionAddress,
             long n1, long n2, long n3, long n4, long n5, long n6,
             Object o1, int o1flags, int o1off, int o1len,
             Object o2, int o2flags, int o2off, int o2len,

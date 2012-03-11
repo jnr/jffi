@@ -81,19 +81,9 @@ public abstract class Invoker {
      * @return A 32 bit integer value.
      */
     public final int invokeVrI(Function function) {
-        return foreign.invokeVrI(function.getContextAddress());
+        return foreign.invokeI0(function.getContextAddress(), function.getFunctionAddress());
     }
-    
-    /**
-     * Invokes a function with no arguments, and returns a 32 bit float.
-     *
-     * @param function The <tt>Function</tt> to invoke.
-     * @return A 32 bit float value.
-     */
-    public final float invokeVrF(Function function) {
-        return foreign.invokeVrF(function.getContextAddress());
-    }
-    
+
     /**
      * Invokes a function with no arguments, and returns a 32 bit integer.
      *
@@ -103,7 +93,7 @@ public abstract class Invoker {
      * @return A 32 bit integer value.
      */
     public final int invokeNoErrnoVrI(Function function) {
-        return foreign.invokeNoErrnoVrI(function.getContextAddress());
+        return foreign.invokeI0(function.getContextAddress(), function.getFunctionAddress());
     }
     
     /**
@@ -114,7 +104,7 @@ public abstract class Invoker {
      * @return A 32 bit integer value.
      */
     public final int invokeIrI(Function function, int arg1) {
-        return foreign.invokeIrI(function.getContextAddress(), arg1);
+        return foreign.invokeI1(function.getContextAddress(), function.getFunctionAddress(), arg1);
     }
     
     /**
@@ -127,20 +117,9 @@ public abstract class Invoker {
      * @return A 32 bit integer value.
      */
     public final int invokeNoErrnoIrI(Function function, int arg1) {
-        return foreign.invokeNoErrnoIrI(function.getContextAddress(), arg1);
+        return foreign.invokeI1(function.getContextAddress(), function.getFunctionAddress(), arg1);
     }
-    
-    /**
-     * Invokes a function with one integer argument, and returns a 32 bit float.
-     *
-     * @param function The <tt>Function</tt> to invoke.
-     * @param arg1 A 32 bit integer argument.
-     * @return A 32 bit float value.
-     */
-    public final float invokeIrF(Function function, int arg1) {
-        return foreign.invokeIrF(function.getContextAddress(), arg1);
-    }
-    
+
     /**
      * Invokes a function with two integer arguments, and returns a 32 bit integer.
      *
@@ -150,7 +129,7 @@ public abstract class Invoker {
      * @return A 32 bit integer value.
      */
     public final int invokeIIrI(Function function, int arg1, int arg2) {
-        return foreign.invokeIIrI(function.getContextAddress(), arg1, arg2);
+        return foreign.invokeI2(function.getContextAddress(), function.getFunctionAddress(), arg1, arg2);
     }
     
     /**
@@ -164,19 +143,7 @@ public abstract class Invoker {
      * @return A 32 bit integer value.
      */
     public final int invokeNoErrnoIIrI(Function function, int arg1, int arg2) {
-        return foreign.invokeNoErrnoIIrI(function.getContextAddress(), arg1, arg2);
-    }
-    
-    /**
-     * Invokes a function with two integer arguments, and returns a 32 bit float.
-     *
-     * @param function The <tt>Function</tt> to invoke.
-     * @param arg1 The first 32 bit integer argument.
-     * @param arg2 The second 32 bit integer argument.
-     * @return A 32 bit float value.
-     */
-    public final float invokeIIrF(Function function, int arg1, int arg2) {
-        return foreign.invokeIIrF(function.getContextAddress(), arg1, arg2);
+        return foreign.invokeI2(function.getContextAddress(), function.getFunctionAddress(), arg1, arg2);
     }
 
     /**
@@ -189,7 +156,7 @@ public abstract class Invoker {
      * @return A 32 bit integer value.
      */
     public final int invokeIIIrI(Function function, int arg1, int arg2, int arg3) {
-        return foreign.invokeIIIrI(function.getContextAddress(), arg1, arg2, arg3);
+        return foreign.invokeI3(function.getContextAddress(), function.getFunctionAddress(), arg1, arg2, arg3);
     }
 
     /**
@@ -204,20 +171,7 @@ public abstract class Invoker {
      * @return A 32 bit integer value.
      */
     public final int invokeNoErrnoIIIrI(Function function, int arg1, int arg2, int arg3) {
-        return foreign.invokeNoErrnoIIIrI(function.getContextAddress(), arg1, arg2, arg3);
-    }
-
-    /**
-     * Invokes a function with three integer arguments, and returns a 32 bit float.
-     *
-     * @param function The <tt>Function</tt> to invoke.
-     * @param arg1 The first 32 bit integer argument.
-     * @param arg2 The second 32 bit integer argument.
-     * @param arg3 The third 32 bit integer argument.
-     * @return A 32 bit float value.
-     */
-    public final float invokeIIIrF(Function function, int arg1, int arg2, int arg3) {
-        return foreign.invokeIIIrF(function.getContextAddress(), arg1, arg2, arg3);
+        return foreign.invokeI3(function.getContextAddress(), function.getFunctionAddress(), arg1, arg2, arg3);
     }
 
     /**
@@ -231,7 +185,7 @@ public abstract class Invoker {
      * @return A 32 bit integer value.
      */
     public final int invokeIIIIrI(Function function, int arg1, int arg2, int arg3, int arg4) {
-        return foreign.invokeIIIIrI(function.getContextAddress(), arg1, arg2, arg3, arg4);
+        return foreign.invokeI4(function.getContextAddress(), function.getFunctionAddress(), arg1, arg2, arg3, arg4);
     }
 
     /**
@@ -246,7 +200,7 @@ public abstract class Invoker {
      * @return A 32 bit integer value.
      */
     public final int invokeIIIIIrI(Function function, int arg1, int arg2, int arg3, int arg4, int arg5) {
-        return foreign.invokeIIIIIrI(function.getContextAddress(), arg1, arg2, arg3, arg4, arg5);
+        return foreign.invokeI5(function.getContextAddress(), function.getFunctionAddress(), arg1, arg2, arg3, arg4, arg5);
     }
 
     /**
@@ -262,7 +216,7 @@ public abstract class Invoker {
      * @return A 32 bit integer value.
      */
     public final int invokeIIIIIIrI(Function function, int arg1, int arg2, int arg3, int arg4, int arg5, int arg6) {
-        return foreign.invokeIIIIIIrI(function.getContextAddress(), arg1, arg2, arg3, arg4, arg5, arg6);
+        return foreign.invokeI6(function.getContextAddress(), function.getFunctionAddress(), arg1, arg2, arg3, arg4, arg5, arg6);
     }
 
 
@@ -273,7 +227,7 @@ public abstract class Invoker {
      * @return A 64 bit integer value.
      */
     public final long invokeVrL(Function function) {
-        return foreign.invokeVrL(function.getContextAddress());
+        return foreign.invokeL0(function.getContextAddress(), function.getFunctionAddress());
     }
 
     /**
@@ -284,7 +238,7 @@ public abstract class Invoker {
      * @return A 64 bit integer value.
      */
     public final long invokeLrL(Function function, long arg1) {
-        return foreign.invokeLrL(function.getContextAddress(), arg1);
+        return foreign.invokeL1(function.getContextAddress(), function.getFunctionAddress(), arg1);
     }
     
     /**
@@ -296,7 +250,7 @@ public abstract class Invoker {
      * @return A 64 bit integer value.
      */
     public final long invokeLLrL(Function function, long arg1, long arg2) {
-        return foreign.invokeLLrL(function.getContextAddress(), arg1, arg2);
+        return foreign.invokeL2(function.getContextAddress(), function.getFunctionAddress(), arg1, arg2);
     }
 
     /**
@@ -309,7 +263,7 @@ public abstract class Invoker {
      * @return A 64 bit integer value.
      */
     public final long invokeLLLrL(Function function, long arg1, long arg2, long arg3) {
-        return foreign.invokeLLLrL(function.getContextAddress(), arg1, arg2, arg3);
+        return foreign.invokeL3(function.getContextAddress(), function.getFunctionAddress(), arg1, arg2, arg3);
     }
 
     /**
@@ -323,7 +277,7 @@ public abstract class Invoker {
      * @return A 64 bit integer value.
      */
     public final long invokeLLLLrL(Function function, long arg1, long arg2, long arg3, long arg4) {
-        return foreign.invokeLLLLrL(function.getContextAddress(), arg1, arg2, arg3, arg4);
+        return foreign.invokeL4(function.getContextAddress(), function.getFunctionAddress(), arg1, arg2, arg3, arg4);
     }
 
     /**
@@ -338,7 +292,7 @@ public abstract class Invoker {
      * @return A 64 bit integer value.
      */
     public final long invokeLLLLLrL(Function function, long arg1, long arg2, long arg3, long arg4, long arg5) {
-        return foreign.invokeLLLLLrL(function.getContextAddress(), arg1, arg2, arg3, arg4, arg5);
+        return foreign.invokeL5(function.getContextAddress(), function.getFunctionAddress(), arg1, arg2, arg3, arg4, arg5);
     }
 
     /**
@@ -354,7 +308,7 @@ public abstract class Invoker {
      * @return A 64 bit integer value.
      */
     public final long invokeLLLLLLrL(Function function, long arg1, long arg2, long arg3, long arg4, long arg5, long arg6) {
-        return foreign.invokeLLLLLLrL(function.getContextAddress(), arg1, arg2, arg3, arg4, arg5, arg6);
+        return foreign.invokeL6(function.getContextAddress(), function.getFunctionAddress(), arg1, arg2, arg3, arg4, arg5, arg6);
     }
 
     /**
@@ -364,18 +318,18 @@ public abstract class Invoker {
      * @return A numeric value.
      */
     public final long invokeVrN(Function function) {
-        return foreign.invokeVrN(function.getContextAddress());
+        return foreign.invokeN0(function.getContextAddress(), function.getFunctionAddress());
     }
 
     /**
-     * Invokes a function with one numberic argument, and returns a numeric value.
+     * Invokes a function with one numeric argument, and returns a numeric value.
      *
      * @param function The <tt>Function</tt> to invoke.
      * @param arg1 The numeric argument.
      * @return A numeric value.
      */
     public final long invokeNrN(Function function, long arg1) {
-        return foreign.invokeNrN(function.getContextAddress(), arg1);
+        return foreign.invokeN1(function.getContextAddress(), function.getFunctionAddress(), arg1);
     }
 
     /**
@@ -387,7 +341,7 @@ public abstract class Invoker {
      * @return A numeric value.
      */
     public final long invokeNNrN(Function function, long arg1, long arg2) {
-        return foreign.invokeNNrN(function.getContextAddress(), arg1, arg2);
+        return foreign.invokeN2(function.getContextAddress(), function.getFunctionAddress(), arg1, arg2);
     }
 
     /**
@@ -400,7 +354,7 @@ public abstract class Invoker {
      * @return A numeric value.
      */
     public final long invokeNNNrN(Function function, long arg1, long arg2, long arg3) {
-        return foreign.invokeNNNrN(function.getContextAddress(), arg1, arg2, arg3);
+        return foreign.invokeN3(function.getContextAddress(), function.getFunctionAddress(), arg1, arg2, arg3);
     }
 
     /**
@@ -414,7 +368,7 @@ public abstract class Invoker {
      * @return A numeric value.
      */
     public final long invokeNNNNrN(Function function, long arg1, long arg2, long arg3, long arg4) {
-        return foreign.invokeNNNNrN(function.getContextAddress(), arg1, arg2, arg3, arg4);
+        return foreign.invokeN4(function.getContextAddress(), function.getFunctionAddress(), arg1, arg2, arg3, arg4);
     }
 
     /**
@@ -429,7 +383,7 @@ public abstract class Invoker {
      * @return A numeric value.
      */
     public final long invokeNNNNNrN(Function function, long arg1, long arg2, long arg3, long arg4, long arg5) {
-        return foreign.invokeNNNNNrN(function.getContextAddress(), arg1, arg2, arg3, arg4, arg5);
+        return foreign.invokeN5(function.getContextAddress(), function.getFunctionAddress(), arg1, arg2, arg3, arg4, arg5);
     }
 
     /**
@@ -445,7 +399,7 @@ public abstract class Invoker {
      * @return A numeric value.
      */
     public final long invokeNNNNNNrN(Function function, long arg1, long arg2, long arg3, long arg4, long arg5, long arg6) {
-        return foreign.invokeNNNNNNrN(function.getContextAddress(), arg1, arg2, arg3, arg4, arg5, arg6);
+        return foreign.invokeN6(function.getContextAddress(), function.getFunctionAddress(), arg1, arg2, arg3, arg4, arg5, arg6);
     }
     
     /**
@@ -453,7 +407,7 @@ public abstract class Invoker {
      *
      * @param function The <tt>Function</tt> to invoke.
      * @param n1 first numeric argument.
-     * @param idx1 parameter index of the first numeric argument.
+     * @param n2 second numeric argument.
      * @param o1 array or buffer, to be passed as a pointer for the first numeric parameter.
      * @param o1off offset from the start of the array pr buffer.
      * @param o1len length of the array to use.
@@ -463,7 +417,7 @@ public abstract class Invoker {
             long n1, long n2,
             Object o1, int o1off, int o1len, ObjectParameterInfo o1flags) {
 
-        return objectParameterInvoker.invokeN2O1rN(function, 
+        return objectParameterInvoker.invokeN2O1(function,
                 n1, n2,
                 o1, o1off, o1len, o1flags);
     }
@@ -472,18 +426,20 @@ public abstract class Invoker {
      * Invokes a function with two numeric arguments, and returns a numeric value.
      *
      * @param function The <tt>Function</tt> to invoke.
-     * @param arg1 An array, to be passed as a pointer for the first numeric parameter.
-     * @param off1 The offset from the start of the array.
-     * @param len1 The length of the array to use.
-     * @param flags1 Array flags (direction, type).
-     * @param arg2 The second numeric argument.
+     * @param n1 first numeric argument.
+     * @param n2 second numeric argument.
+     * @param o1 array or buffer, to be passed as a pointer for the first numeric parameter.
+     * @param o1off offset from the start of the array pr buffer.
+     * @param o1len length of the array to use.
+     * @param o1flags object flags (type, direction, parameter index).
+
      */
     public final long invokeNNO2rN(Function function,
             long n1, long n2,
             Object o1, int o1off, int o1len, ObjectParameterInfo o1flags,
             Object o2, int o2off, int o2len, ObjectParameterInfo o2flags) {
 
-        return objectParameterInvoker.invokeN2O2rN(function,
+        return objectParameterInvoker.invokeN2O2(function,
                 n1, n2,
                 o1, o1off, o1len, o1flags,
                 o2, o2off, o2len, o2flags);
@@ -493,17 +449,12 @@ public abstract class Invoker {
      * Invokes a function with two numeric arguments, and returns a numeric value.
      *
      * @param function The <tt>Function</tt> to invoke.
-     * @param arg1 An array, to be passed as a pointer for the first numeric parameter.
-     * @param off1 The offset from the start of the array.
-     * @param len1 The length of the array to use.
-     * @param flags1 Array flags (direction, type).
-     * @param arg2 The second numeric argument.
      */
     public final long invokeNNNO1rN(Function function, 
             long n1, long n2, long n3,
             Object o1, int o1off, int o1len, ObjectParameterInfo o1flags) {
 
-        return objectParameterInvoker.invokeN3O1rN(function, 
+        return objectParameterInvoker.invokeN3O1(function,
                 n1, n2, n3,
                 o1, o1off, o1len, o1flags);
     }
@@ -512,18 +463,13 @@ public abstract class Invoker {
      * Invokes a function with two numeric arguments, and returns a numeric value.
      *
      * @param function The <tt>Function</tt> to invoke.
-     * @param arg1 An array, to be passed as a pointer for the first numeric parameter.
-     * @param off1 The offset from the start of the array.
-     * @param len1 The length of the array to use.
-     * @param flags1 Array flags (direction, type).
-     * @param arg2 The second numeric argument.
      */
     public final long invokeNNNO2rN(Function function, 
             long n1, long n2, long n3,
             Object o1, int o1off, int o1len, ObjectParameterInfo o1flags,
             Object o2, int o2off, int o2len, ObjectParameterInfo o2flags) {
 
-        return objectParameterInvoker.invokeN3O2rN(function, 
+        return objectParameterInvoker.invokeN3O2(function,
                 n1, n2, n3,
                 o1, o1off, o1len, o1flags,
                 o2, o2off, o2len, o2flags);
@@ -546,7 +492,7 @@ public abstract class Invoker {
             long n1, int objCount,
             Object o1, ObjectParameterStrategy s1, ObjectParameterInfo o1info) {
         if (objCount == 1) {
-            return objectParameterInvoker.invokeN1O1rN(function, n1,
+            return objectParameterInvoker.invokeN1O1(function, n1,
                 s1.object(o1), s1.offset(o1), s1.length(o1), o1info);
 
         } else {
@@ -558,7 +504,7 @@ public abstract class Invoker {
             long n1, long n2, int objCount,
             Object o1, ObjectParameterStrategy s1, ObjectParameterInfo o1info) {
         if (objCount == 1) {
-            return objectParameterInvoker.invokeN2O1rN(function, n1, n2,
+            return objectParameterInvoker.invokeN2O1(function, n1, n2,
                 s1.object(o1), s1.offset(o1), s1.length(o1), o1info);
         } else {
             throw newObjectCountError(objCount);
@@ -579,12 +525,12 @@ public abstract class Invoker {
                 o1 = o2; s1 = s2; o1info = o2info;
             }
 
-            return objectParameterInvoker.invokeN2O1rN(function, n1, n2,
+            return objectParameterInvoker.invokeN2O1(function, n1, n2,
                 s1.object(o1), s1.offset(o1), s1.length(o1), o1info);
 
         } else if (objCount == 2) {
             // Two objects to be passed as heap objects, just use both arguments as-is
-            return objectParameterInvoker.invokeN2O2rN(function, n1, n2,
+            return objectParameterInvoker.invokeN2O2(function, n1, n2,
                 s1.object(o1), s1.offset(o1), s1.length(o1), o1info,
                 s2.object(o2), s2.offset(o2), s2.length(o2), o2info);
 
@@ -593,11 +539,11 @@ public abstract class Invoker {
         }
     }
 
-    public final long invokeN3OrN(Function function,
+    public final long invokeN3O(Function function,
             long n1, long n2, long n3, int objCount,
             Object o1, ObjectParameterStrategy s1, ObjectParameterInfo o1info) {
         if (objCount == 1) {
-            return objectParameterInvoker.invokeN3O1rN(function, n1, n2, n3,
+            return objectParameterInvoker.invokeN3O1(function, n1, n2, n3,
                 s1.object(o1), s1.offset(o1), s1.length(o1), o1info);
         } else {
             throw newObjectCountError(objCount);
@@ -605,7 +551,7 @@ public abstract class Invoker {
     }
 
 
-    public final long invokeN3OrN(Function function,
+    public final long invokeN3O(Function function,
             long n1, long n2, long n3, int objCount,
             Object o1, ObjectParameterStrategy s1, ObjectParameterInfo o1info,
             Object o2, ObjectParameterStrategy s2, ObjectParameterInfo o2info) {
@@ -619,11 +565,11 @@ public abstract class Invoker {
                 o1 = o2; s1 = s2; o1info = o2info;
             }
 
-            return objectParameterInvoker.invokeN3O1rN(function, n1, n2, n3,
+            return objectParameterInvoker.invokeN3O1(function, n1, n2, n3,
                 s1.object(o1), s1.offset(o1), s1.length(o1), o1info);
 
         } else if (objCount == 2) {
-            return objectParameterInvoker.invokeN3O2rN(function, n1, n2, n3,
+            return objectParameterInvoker.invokeN3O2(function, n1, n2, n3,
                 s1.object(o1), s1.offset(o1), s1.length(o1), o1info,
                 s2.object(o2), s2.offset(o2), s2.length(o2), o2info);
 
@@ -632,7 +578,7 @@ public abstract class Invoker {
         }
     }
 
-    public final long invokeN3OrN(Function function,
+    public final long invokeN3O(Function function,
             long n1, long n2, long n3, int objCount,
             Object o1, ObjectParameterStrategy s1, ObjectParameterInfo o1info,
             Object o2, ObjectParameterStrategy s2, ObjectParameterInfo o2info,
@@ -658,7 +604,7 @@ public abstract class Invoker {
 
             if (objCount == 1) {
 
-                return objectParameterInvoker.invokeN3O1rN(function, n1, n2, n3,
+                return objectParameterInvoker.invokeN3O1(function, n1, n2, n3,
                         s1.object(o1), s1.offset(o1), s1.length(o1), o1info);
 
             } else if (objCount == 2) {
@@ -674,7 +620,7 @@ public abstract class Invoker {
                     throw newHeapObjectCountError(objCount);
                 }
 
-                return objectParameterInvoker.invokeN3O2rN(function, n1, n2, n3,
+                return objectParameterInvoker.invokeN3O2(function, n1, n2, n3,
                         s1.object(o1), s1.offset(o1), s1.length(o1), o1info,
                         s2.object(o2), s2.offset(o2), s2.length(o2), o2info);
             } else {
@@ -683,25 +629,25 @@ public abstract class Invoker {
         }
 
         // Three objects to be passed as heap objects, just use all arguments as-is
-        return objectParameterInvoker.invokeN3O3rN(function, n1, n2, n3,
+        return objectParameterInvoker.invokeN3O3(function, n1, n2, n3,
             s1.object(o1), s1.offset(o1), s1.length(o1), o1info,
             s2.object(o2), s2.offset(o2), s2.length(o2), o2info,
             s3.object(o3), s3.offset(o3), s3.length(o3), o3info);
     }
 
-    public final long invokeN4OrN(Function function,
+    public final long invokeN4O(Function function,
             long n1, long n2, long n3, long n4, int objCount,
             Object o1, ObjectParameterStrategy s1, ObjectParameterInfo o1info) {
 
         if (objCount == 1) {
-            return objectParameterInvoker.invokeN4O1rN(function, n1, n2, n3, n4,
+            return objectParameterInvoker.invokeN4O1(function, n1, n2, n3, n4,
                 s1.object(o1), s1.offset(o1), s1.length(o1), o1info);
         } else {
             throw newObjectCountError(objCount);
         }
     }
 
-    public final long invokeN4OrN(Function function,
+    public final long invokeN4O(Function function,
             long n1, long n2, long n3, long n4, int objCount,
             Object o1, ObjectParameterStrategy s1, ObjectParameterInfo o1info,
             Object o2, ObjectParameterStrategy s2, ObjectParameterInfo o2info) {
@@ -716,12 +662,12 @@ public abstract class Invoker {
                 o1 = o2; s1 = s2; o1info = o2info;
             }
 
-            return objectParameterInvoker.invokeN4O1rN(function, n1, n2, n3, n4,
+            return objectParameterInvoker.invokeN4O1(function, n1, n2, n3, n4,
                 s1.object(o1), s1.offset(o1), s1.length(o1), o1info);
 
         } else if (objCount == 2) {
             // Two objects to be passed as heap objects, just use both arguments as-is
-            return objectParameterInvoker.invokeN4O2rN(function, n1, n2, n3, n4,
+            return objectParameterInvoker.invokeN4O2(function, n1, n2, n3, n4,
                 s1.object(o1), s1.offset(o1), s1.length(o1), o1info,
                 s2.object(o2), s2.offset(o2), s2.length(o2), o2info);
 
@@ -730,7 +676,7 @@ public abstract class Invoker {
         }
     }
     
-    public final long invokeN4OrN(Function function,
+    public final long invokeN4O(Function function,
             long n1, long n2, long n3, long n4, int objCount,
             Object o1, ObjectParameterStrategy s1, ObjectParameterInfo o1info,
             Object o2, ObjectParameterStrategy s2, ObjectParameterInfo o2info,
@@ -757,7 +703,7 @@ public abstract class Invoker {
 
             if (objCount == 1) {
 
-                return objectParameterInvoker.invokeN4O1rN(function, n1, n2, n3, n4,
+                return objectParameterInvoker.invokeN4O1(function, n1, n2, n3, n4,
                         s1.object(o1), s1.offset(o1), s1.length(o1), o1info);
 
             } else if (objCount == 2) {
@@ -774,7 +720,7 @@ public abstract class Invoker {
                     throw newInsufficientObjectCountError(objCount);
                 }
 
-                return objectParameterInvoker.invokeN4O2rN(function, n1, n2, n3, n4,
+                return objectParameterInvoker.invokeN4O2(function, n1, n2, n3, n4,
                         s1.object(o1), s1.offset(o1), s1.length(o1), o1info,
                         s2.object(o2), s2.offset(o2), s2.length(o2), o2info);
             } else {
@@ -783,13 +729,13 @@ public abstract class Invoker {
         }
 
         // Three objects to be passed as heap objects, just use all arguments as-is
-        return objectParameterInvoker.invokeN4O3rN(function, n1, n2, n3, n4,
+        return objectParameterInvoker.invokeN4O3(function, n1, n2, n3, n4,
                 s1.object(o1), s1.offset(o1), s1.length(o1), o1info,
                 s2.object(o2), s2.offset(o2), s2.length(o2), o2info,
                 s3.object(o3), s3.offset(o3), s3.length(o3), o3info);
     }
 
-    public final long invokeN4OrN(Function function,
+    public final long invokeN4O(Function function,
             long n1, long n2, long n3, long n4, int objCount,
             Object o1, ObjectParameterStrategy s1, ObjectParameterInfo o1info,
             Object o2, ObjectParameterStrategy s2, ObjectParameterInfo o2info,
@@ -819,7 +765,7 @@ public abstract class Invoker {
         }
 
         if (objCount == 1) {
-            return objectParameterInvoker.invokeN4O1rN(function, n1, n2, n3, n4,
+            return objectParameterInvoker.invokeN4O1(function, n1, n2, n3, n4,
                     s1.object(o1), s1.offset(o1), s1.length(o1), o1info);
         }
 
@@ -840,7 +786,7 @@ public abstract class Invoker {
         }
         
         if (objCount == 2) {
-            return objectParameterInvoker.invokeN4O2rN(function, n1, n2, n3, n4,
+            return objectParameterInvoker.invokeN4O2(function, n1, n2, n3, n4,
                     s1.object(o1), s1.offset(o1), s1.length(o1), o1info,
                     s2.object(o2), s2.offset(o2), s2.length(o2), o2info);
         }
@@ -858,7 +804,7 @@ public abstract class Invoker {
         }
 
         if (objCount == 3) {
-            return objectParameterInvoker.invokeN4O3rN(function, n1, n2, n3, n4,
+            return objectParameterInvoker.invokeN4O3(function, n1, n2, n3, n4,
                 s1.object(o1), s1.offset(o1), s1.length(o1), o1info,
                 s2.object(o2), s2.offset(o2), s2.length(o2), o2info,
                 s3.object(o3), s3.offset(o3), s3.length(o3), o3info);

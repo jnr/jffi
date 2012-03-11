@@ -46,7 +46,11 @@
 
 
 /* for return values <= sizeof(long), need to use an ffi_sarg sized return value */
-#define RETVAL(retval, rtype) ((rtype)->size > sizeof(ffi_sarg) ? (retval).j : (retval).sarg)
+#if (BYTE_ORDER == BIG_ENDIAN) || defined(__i386__)
+# define RETVAL(retval, ctx) ((ctx->cif.rtype)->size > sizeof(ffi_sarg) ? (retval).j : (retval).sarg)
+#else
+# define RETVAL(retval, ctx) ((retval).j)
+#endif
 
 #if defined(__i386__)
 # define INT_BYPASS_FFI
@@ -85,17 +89,17 @@ typedef struct ObjectParam {
 } ObjectParam;
 
 
-static void call1(CallContext* ctx, void* function, FFIValue* retval, 
+static jlong call1(CallContext* ctx, void* function, 
         jlong n1);
-static void call2(CallContext* ctx, void* function, FFIValue* retval, 
+static jlong call2(CallContext* ctx, void* function, 
         jlong n1, jlong n2);
-static void call3(CallContext* ctx, void* function, FFIValue* retval, 
+static jlong call3(CallContext* ctx, void* function, 
         jlong n1, jlong n2, jlong n3);
-static void call4(CallContext* ctx, void* function, FFIValue* retval, 
+static jlong call4(CallContext* ctx, void* function, 
         jlong n1, jlong n2, jlong n3, jlong n4);
-static void call5(CallContext* ctx, void* function, FFIValue* retval, 
+static jlong call5(CallContext* ctx, void* function, 
         jlong n1, jlong n2, jlong n3, jlong n4, jlong n5);
-static void call6(CallContext* ctx, void* function, FFIValue* retval, 
+static jlong call6(CallContext* ctx, void* function, 
         jlong n1, jlong n2, jlong n3, jlong n4, jlong n5, jlong n6);
 static bool pin_arrays(JNIEnv* env, Pinned* pinned, int pinnedCount, 
         Array* arrays, int *arrayCount, jlong* v);
@@ -108,28 +112,28 @@ static bool object_to_ptr(JNIEnv* env, jobject obj, int off, int len, int f, voi
  * Signature: (J)J
  */
 JNIEXPORT jlong JNICALL
-Java_com_kenai_jffi_Foreign_invokeVrN(JNIEnv* env, jobject self, jlong ctxAddress)
+Java_com_kenai_jffi_Foreign_invokeN0(JNIEnv* env, jobject self, jlong ctxAddress, jlong function)
 {
-    Function* ctx = (Function *) j2p(ctxAddress);
+    CallContext* ctx = (CallContext *) j2p(ctxAddress);
     FFIValue retval;
     
     if (0) {
 #if defined(LONG_BYPASS_FFI)
     } else if (likely(ctx->isFastLong)) {
-        retval.j = ((jlong (*)(void)) ctx->function)();
+        retval.j = ((jlong (*)(void)) j2p(function))();
 #endif    
 
 #if defined(INT_BYPASS_FFI)
     } else if (likely(ctx->isFastInt)) {
-        retval.sarg = ((jint (*)(void)) ctx->function)();
+        retval.sarg = ((jint (*)(void)) j2p(function))();
 #endif
     } else {
-        ffi_call0(ctx, ctx->function, &retval);
+        ffi_call0(ctx, j2p(function), &retval);
     }
 
     SAVE_ERRNO(ctx);
 
-    return RETVAL(retval, ctx->cif.rtype);
+    return RETVAL(retval, ctx);
 }
 
 /*
@@ -138,14 +142,9 @@ Java_com_kenai_jffi_Foreign_invokeVrN(JNIEnv* env, jobject self, jlong ctxAddres
  * Signature: (JJ)J
  */
 JNIEXPORT jlong JNICALL
-Java_com_kenai_jffi_Foreign_invokeNrN(JNIEnv* env, jobject self, jlong ctxAddress, jlong arg1)
+Java_com_kenai_jffi_Foreign_invokeN1(JNIEnv* env, jobject self, jlong ctxAddress, jlong function, jlong arg1)
 {
-    Function* ctx = (Function *) j2p(ctxAddress);
-    FFIValue retval;
-
-    call1((CallContext *) ctx, ctx->function, &retval, arg1);
-    
-    return RETVAL(retval, ctx->cif.rtype);
+    return call1((CallContext *) j2p(ctxAddress), j2p(function), arg1);
 }
 
 /*
@@ -154,14 +153,9 @@ Java_com_kenai_jffi_Foreign_invokeNrN(JNIEnv* env, jobject self, jlong ctxAddres
  * Signature: (JJJ)J
  */
 JNIEXPORT jlong JNICALL
-Java_com_kenai_jffi_Foreign_invokeNNrN(JNIEnv* env, jobject self, jlong ctxAddress, jlong arg1, jlong arg2)
+Java_com_kenai_jffi_Foreign_invokeN2(JNIEnv* env, jobject self, jlong ctxAddress, jlong function, jlong arg1, jlong arg2)
 {
-    Function* ctx = (Function *) j2p(ctxAddress);
-    FFIValue retval;
-
-    call2((CallContext *) ctx, ctx->function, &retval, arg1, arg2);
-    
-    return RETVAL(retval, ctx->cif.rtype);
+    return call2((CallContext *) j2p(ctxAddress), j2p(function), arg1, arg2);
 }
 
 /*
@@ -170,190 +164,188 @@ Java_com_kenai_jffi_Foreign_invokeNNrN(JNIEnv* env, jobject self, jlong ctxAddre
  * Signature: (JJJJ)J
  */
 JNIEXPORT jlong JNICALL
-Java_com_kenai_jffi_Foreign_invokeNNNrN(JNIEnv* env, jobject self, jlong ctxAddress,
+Java_com_kenai_jffi_Foreign_invokeN3(JNIEnv* env, jobject self, jlong ctxAddress, jlong function,
         jlong arg1, jlong arg2, jlong arg3)
 {
-    Function* ctx = (Function *) j2p(ctxAddress);
-    FFIValue retval;
-
-    call3((CallContext *) ctx, ctx->function, &retval, arg1, arg2, arg3);
-    
-    return RETVAL(retval, ctx->cif.rtype);
+    return call3((CallContext *) j2p(ctxAddress), j2p(function), arg1, arg2, arg3);
 }
 
 JNIEXPORT jlong JNICALL
-Java_com_kenai_jffi_Foreign_invokeNNNNrN(JNIEnv* env, jobject self, jlong ctxAddress,
+Java_com_kenai_jffi_Foreign_invokeN4(JNIEnv* env, jobject self, jlong ctxAddress, jlong function,
         jlong arg1, jlong arg2, jlong arg3, jlong arg4)
 {
-    Function* ctx = (Function *) j2p(ctxAddress);
-    FFIValue retval;
-
-    call4((CallContext *) ctx, ctx->function, &retval, arg1, arg2, arg3, arg4);
-    
-    return RETVAL(retval, ctx->cif.rtype);
+    return call4((CallContext *) j2p(ctxAddress), j2p(function), arg1, arg2, arg3, arg4);
 }
 
 JNIEXPORT jlong JNICALL
-Java_com_kenai_jffi_Foreign_invokeNNNNNrN(JNIEnv* env, jobject self, jlong ctxAddress,
+Java_com_kenai_jffi_Foreign_invokeN5(JNIEnv* env, jobject self, jlong ctxAddress, jlong function,
         jlong arg1, jlong arg2, jlong arg3, jlong arg4, jlong arg5)
 {
-    Function* ctx = (Function *) j2p(ctxAddress);
-    FFIValue retval;
-
-    call5((CallContext *) ctx, ctx->function, &retval, arg1, arg2, arg3, arg4, arg5);
-    
-    return RETVAL(retval, ctx->cif.rtype);
+    return call5((CallContext *) j2p(ctxAddress), j2p(function), arg1, arg2, arg3, arg4, arg5);
 }
 
 JNIEXPORT jlong JNICALL
-Java_com_kenai_jffi_Foreign_invokeNNNNNNrN(JNIEnv* env, jobject self, jlong ctxAddress,
+Java_com_kenai_jffi_Foreign_invokeN6(JNIEnv* env, jobject self, jlong ctxAddress, jlong function,
         jlong arg1, jlong arg2, jlong arg3, jlong arg4, jlong arg5, jlong arg6)
 {
-    Function* ctx = (Function *) j2p(ctxAddress);
-    FFIValue retval;
-
-    call6((CallContext *) ctx, ctx->function, &retval, arg1, arg2, arg3, arg4, arg5, arg6);
-    
-    return RETVAL(retval, ctx->cif.rtype);
+    return call6((CallContext *) j2p(ctxAddress), j2p(function), arg1, arg2, arg3, arg4, arg5, arg6);
 }
 
-static void
-call1(CallContext* ctx, void* function, FFIValue* retval, jlong n1)
+static jlong
+call1(CallContext* ctx, void* function, jlong n1)
 {
+    jlong retval;
     if (0) {
 #if defined(LONG_BYPASS_FFI)
     } else if (likely(ctx->isFastLong)) {
-        retval->j = ((jlong (*)(jlong)) function)(n1);
+        retval = ((jlong (*)(jlong)) function)(n1);
 #endif    
 
 #if defined(INT_BYPASS_FFI)
     } else if (likely(ctx->isFastInt)) {
-        retval->sarg = ((jint (*)(jint)) function)(*(jint *) &n1);
+        retval = ((jint (*)(jint)) function)((jint) n1);
 #endif
 
     } else {
-        ffi_call1(ctx, function, retval, n1);
+	FFIValue ffiReturn;
+        ffi_call1(ctx, function, &ffiReturn, n1);
+	retval = RETVAL(ffiReturn, ctx);
     }
     
     SAVE_ERRNO(ctx);
+    return retval;
 }
 
-static void 
-call2(CallContext* ctx, void* function, FFIValue* retval, jlong n1, jlong n2)
+static jlong 
+call2(CallContext* ctx, void* function, jlong n1, jlong n2)
 {
+    jlong retval;
     if (0) {
 #if defined(LONG_BYPASS_FFI)
     } else if (likely(ctx->isFastLong)) {
-        retval->j = ((jlong (*)(jlong, jlong)) function)(n1, n2);
+        retval = ((jlong (*)(jlong, jlong)) function)(n1, n2);
 #endif    
 
 #if defined(INT_BYPASS_FFI)
     } else if (likely(ctx->isFastInt)) {
-        retval->sarg = ((jint (*)(jint, jint)) function)(
-                *(jint *) &n1, *(jint *) &n2);
+        retval = ((jint (*)(jint, jint)) function)((jint) n1, (jint) n2);
 #endif
 
     } else {
-        ffi_call2(ctx, function, retval, n1, n2);
+	FFIValue ffiReturn;
+        ffi_call2(ctx, function, &ffiReturn, n1, n2);
+	retval = RETVAL(ffiReturn, ctx);
     }
     
     SAVE_ERRNO(ctx);
+    return retval;
 }
 
-static void 
-call3(CallContext* ctx, void* function, FFIValue* retval, jlong n1, jlong n2, jlong n3)
+static jlong
+call3(CallContext* ctx, void* function, jlong n1, jlong n2, jlong n3)
 {
+    jlong retval;
     if (0) {
 #if defined(LONG_BYPASS_FFI)
     } else if (likely(ctx->isFastLong)) {
-        retval->j = ((jlong (*)(jlong, jlong, jlong)) function)(n1, n2, n3);
+        retval = ((jlong (*)(jlong, jlong, jlong)) function)(n1, n2, n3);
 #endif    
 
 #if defined(INT_BYPASS_FFI)
     } else if (likely(ctx->isFastInt)) {
-        retval->sarg = ((jint (*)(jint, jint, jint)) function)(
-                *(jint *) &n1, *(jint *) &n2, *(jint *) &n3);
+        retval = ((jint (*)(jint, jint, jint)) function)((jint) n1, (jint) n2, (jint) n3);
 #endif
 
     } else {
-        ffi_call3(ctx, function, retval, n1, n2, n3);
+	FFIValue ffiReturn;
+        ffi_call3(ctx, function, &ffiReturn, n1, n2, n3);
+	retval = RETVAL(ffiReturn, ctx);
     }
     
     SAVE_ERRNO(ctx);
+    return retval;
 }
 
 
 
-static void 
-call4(CallContext* ctx, void* function, FFIValue* retval, jlong n1, jlong n2, jlong n3, jlong n4)
+static jlong 
+call4(CallContext* ctx, void* function, jlong n1, jlong n2, jlong n3, jlong n4)
 {
+    jlong retval;
     if (0) {
 #if defined(LONG_BYPASS_FFI)
     } else if (likely(ctx->isFastLong)) {
-        retval->j = ((jlong (*)(jlong, jlong, jlong, jlong)) function)(n1, n2, n3, n4);
+        retval = ((jlong (*)(jlong, jlong, jlong, jlong)) function)(n1, n2, n3, n4);
 #endif    
 
 #if defined(INT_BYPASS_FFI)
     } else if (likely(ctx->isFastInt)) {
-        retval->sarg = ((jint (*)(jint, jint, jint, jint)) function)(
-                *(jint *) &n1, *(jint *) &n2, *(jint *) &n3, *(jint *) &n4);
+        retval = ((jint (*)(jint, jint, jint, jint)) function)((jint) n1, (jint) n2, (jint) n3, (jint) n4);
 #endif
 
     } else {
-        ffi_call4(ctx, function, retval, n1, n2, n3, n4);
+	FFIValue ffiReturn;
+        ffi_call4(ctx, function, &ffiReturn, n1, n2, n3, n4);
+	retval = RETVAL(ffiReturn, ctx);
     }
     
     SAVE_ERRNO(ctx);
+    return retval;
 }
 
 
-static void 
-call5(CallContext* ctx, void* function, FFIValue* retval, 
+static jlong 
+call5(CallContext* ctx, void* function, 
         jlong n1, jlong n2, jlong n3, jlong n4, jlong n5)
 {
+    jlong retval;
     if (0) {
 #if defined(LONG_BYPASS_FFI)
     } else if (likely(ctx->isFastLong)) {
-        retval->j = ((jlong (*)(jlong, jlong, jlong, jlong, jlong)) function)(n1, n2, n3, n4, n5);
+        retval = ((jlong (*)(jlong, jlong, jlong, jlong, jlong)) function)(n1, n2, n3, n4, n5);
 #endif    
 
 #if defined(INT_BYPASS_FFI)
     } else if (likely(ctx->isFastInt)) {
-        retval->sarg = ((jint (*)(jint, jint, jint, jint, jint)) function)(
-                *(jint *) &n1, *(jint *) &n2, *(jint *) &n3, 
-                *(jint *) &n4, *(jint *) &n5);
+        retval = ((jint (*)(jint, jint, jint, jint, jint)) function)((jint) n1, (jint) n2, (jint) n3, (jint) n4, (jint) n5);
 #endif
 
     } else {
-        ffi_call5(ctx, function, retval, n1, n2, n3, n4, n5);
+	FFIValue ffiReturn;
+        ffi_call5(ctx, function, &ffiReturn, n1, n2, n3, n4, n5);
+	retval = RETVAL(ffiReturn, ctx);
     }
     
     SAVE_ERRNO(ctx);
+    return retval;
 }
 
-static void 
-call6(CallContext* ctx, void* function, FFIValue* retval, 
+static jlong 
+call6(CallContext* ctx, void* function, 
         jlong n1, jlong n2, jlong n3, jlong n4, jlong n5, jlong n6)
 {
+    jlong retval;
     if (0) {
 #if defined(LONG_BYPASS_FFI)
     } else if (likely(ctx->isFastLong)) {
-        retval->j = ((jlong (*)(jlong, jlong, jlong, jlong, jlong, jlong)) function)(
+        retval = ((jlong (*)(jlong, jlong, jlong, jlong, jlong, jlong)) function)(
                 n1, n2, n3, n4, n5, n6);
 #endif    
 
 #if defined(INT_BYPASS_FFI)
     } else if (likely(ctx->isFastInt)) {
-        retval->sarg = ((jint (*)(jint, jint, jint, jint, jint, jint)) function)(
-                *(jint *) &n1, *(jint *) &n2, *(jint *) &n3, 
-                *(jint *) &n4, *(jint *) &n5, *(jint *) &n6);
+        retval = ((jint (*)(jint, jint, jint, jint, jint, jint)) function)(
+                            (jint) n1, (jint) n2, (jint) n3, (jint) n4, (jint) n5, (jint) n6);
 #endif
 
     } else {
-        ffi_call6(ctx, function, retval, n1, n2, n3, n4, n5, n6);
+	FFIValue ffiReturn;
+        ffi_call6(ctx, function, &ffiReturn, n1, n2, n3, n4, n5, n6);
+	retval = RETVAL(ffiReturn, ctx);
     }
     
     SAVE_ERRNO(ctx);
+    return retval;
 }
 
 static bool
@@ -430,13 +422,13 @@ object_to_ptr(JNIEnv* env, jobject obj, int off, int len, int f, void** pptr,
     Array arrays[(n)]; \
     Pinned pinned[(n)]; \
     int arrayCount = 0, pinnedCount = 0; \
-    FFIValue retval; \
+    jlong retval = 0; \
     jlong v[] = { N##n }
 
 #define END \
     error: \
         RELEASE_ARRAYS(env, arrays, arrayCount); \
-        return RETVAL(retval, ctx->cif.rtype)
+        return retval
 
 #define ADDOBJ(obj, off, len, flags) do { \
     int idx = OBJIDX(flags); \
@@ -465,7 +457,7 @@ object_to_ptr(JNIEnv* env, jobject obj, int off, int len, int f, void** pptr,
 
 #define CALL(n, args...) \
     PIN_ARRAYS; \
-    call##n(ctx, j2p(function), &retval, args); \
+    retval = call##n(ctx, j2p(function), args); \
     END
 
 #define CALL1 CALL(1, v[0])
@@ -582,7 +574,7 @@ invoke6(JNIEnv* env, jlong ctxAddress, jlong function,
  * Signature: (JJJLjava/lang/Object;III)J
  */
 JNIEXPORT jlong JNICALL 
-Java_com_kenai_jffi_Foreign_invokeN1O1rN(JNIEnv* env, jobject self, jlong ctxAddress, jlong function, 
+Java_com_kenai_jffi_Foreign_invokeN1O1(JNIEnv* env, jobject self, jlong ctxAddress, jlong function, 
         jlong n1,
         jobject o1, jint o1flags, jint o1off, jint o1len)
 {
@@ -595,7 +587,7 @@ Java_com_kenai_jffi_Foreign_invokeN1O1rN(JNIEnv* env, jobject self, jlong ctxAdd
  * Signature: (JJJJLjava/lang/Object;III)J
  */
 JNIEXPORT jlong JNICALL 
-Java_com_kenai_jffi_Foreign_invokeN2O1rN(JNIEnv* env, jobject self, jlong ctxAddress, jlong function, 
+Java_com_kenai_jffi_Foreign_invokeN2O1(JNIEnv* env, jobject self, jlong ctxAddress, jlong function, 
         jlong n1, jlong n2,
         jobject o1, jint o1flags, jint o1off, jint o1len)
 {
@@ -608,7 +600,7 @@ Java_com_kenai_jffi_Foreign_invokeN2O1rN(JNIEnv* env, jobject self, jlong ctxAdd
  * Signature: (JJJJLjava/lang/Object;IIILjava/lang/Object;III)J
  */
 JNIEXPORT jlong JNICALL 
-Java_com_kenai_jffi_Foreign_invokeN2O2rN(JNIEnv* env, jobject self, jlong ctxAddress, jlong function,
+Java_com_kenai_jffi_Foreign_invokeN2O2(JNIEnv* env, jobject self, jlong ctxAddress, jlong function,
         jlong n1, jlong n2,
         jobject o1, jint o1flags, jint o1off, jint o1len,
         jobject o2, jint o2flags, jint o2off, jint o2len)
@@ -622,7 +614,7 @@ Java_com_kenai_jffi_Foreign_invokeN2O2rN(JNIEnv* env, jobject self, jlong ctxAdd
  * Signature: (JJJJJLjava/lang/Object;III)J
  */
 JNIEXPORT jlong JNICALL 
-Java_com_kenai_jffi_Foreign_invokeN3O1rN(JNIEnv* env, jobject self, 
+Java_com_kenai_jffi_Foreign_invokeN3O1(JNIEnv* env, jobject self, 
         jlong ctxAddress, jlong function, 
         jlong n1, jlong n2, jlong n3, 
         jobject o1, jint o1flags, jint o1off, jint o1len)
@@ -636,7 +628,7 @@ Java_com_kenai_jffi_Foreign_invokeN3O1rN(JNIEnv* env, jobject self,
  * Signature: (JJJJJLjava/lang/Object;IIILjava/lang/Object;III)J
  */
 JNIEXPORT jlong JNICALL 
-Java_com_kenai_jffi_Foreign_invokeN3O2rN(JNIEnv* env, jobject self, jlong ctxAddress, jlong function, 
+Java_com_kenai_jffi_Foreign_invokeN3O2(JNIEnv* env, jobject self, jlong ctxAddress, jlong function, 
         jlong n1, jlong n2, jlong n3,
         jobject o1, jint o1flags, jint o1off, jint o1len,
         jobject o2, jint o2flags, jint o2off, jint o2len)
@@ -650,7 +642,7 @@ Java_com_kenai_jffi_Foreign_invokeN3O2rN(JNIEnv* env, jobject self, jlong ctxAdd
  * Signature: (JJLjava/lang/Object;IIILjava/lang/Object;IIILjava/lang/Object;III)J
  */
 JNIEXPORT jlong JNICALL 
-Java_com_kenai_jffi_Foreign_invokeN3O3rN(JNIEnv* env, jobject self, jlong ctxAddress, jlong function,
+Java_com_kenai_jffi_Foreign_invokeN3O3(JNIEnv* env, jobject self, jlong ctxAddress, jlong function,
         jlong n1, jlong n2, jlong n3,
         jobject o1, jint o1flags, jint o1off, jint o1len,
         jobject o2, jint o2flags, jint o2off, jint o2len,
@@ -665,7 +657,7 @@ Java_com_kenai_jffi_Foreign_invokeN3O3rN(JNIEnv* env, jobject self, jlong ctxAdd
  * Signature: (JJJJJJLjava/lang/Object;III)J
  */
 JNIEXPORT jlong JNICALL 
-Java_com_kenai_jffi_Foreign_invokeN4O1rN(JNIEnv* env, jobject self, jlong ctxAddress, jlong function, 
+Java_com_kenai_jffi_Foreign_invokeN4O1(JNIEnv* env, jobject self, jlong ctxAddress, jlong function, 
         jlong n1, jlong n2, jlong n3, jlong n4,
         jobject o1, jint o1flags, jint o1off, jint o1len)
 {
@@ -678,7 +670,7 @@ Java_com_kenai_jffi_Foreign_invokeN4O1rN(JNIEnv* env, jobject self, jlong ctxAdd
  * Signature: (JJJJJJLjava/lang/Object;IIILjava/lang/Object;III)J
  */
 JNIEXPORT jlong JNICALL 
-Java_com_kenai_jffi_Foreign_invokeN4O2rN(JNIEnv* env, jobject self, jlong ctxAddress, jlong function, 
+Java_com_kenai_jffi_Foreign_invokeN4O2(JNIEnv* env, jobject self, jlong ctxAddress, jlong function, 
         jlong n1, jlong n2, jlong n3, jlong n4,
         jobject o1, jint o1flags, jint o1off, jint o1len,
         jobject o2, jint o2flags, jint o2off, jint o2len)
@@ -692,7 +684,7 @@ Java_com_kenai_jffi_Foreign_invokeN4O2rN(JNIEnv* env, jobject self, jlong ctxAdd
  * Signature: (JJJJJJLjava/lang/Object;IIILjava/lang/Object;IIILjava/lang/Object;III)J
  */
 JNIEXPORT jlong JNICALL 
-Java_com_kenai_jffi_Foreign_invokeN4O3rN(JNIEnv* env, jobject self, jlong ctxAddress, jlong function, 
+Java_com_kenai_jffi_Foreign_invokeN4O3(JNIEnv* env, jobject self, jlong ctxAddress, jlong function, 
         jlong n1, jlong n2, jlong n3, jlong n4,
         jobject o1, jint o1flags, jint o1off, jint o1len,
         jobject o2, jint o2flags, jint o2off, jint o2len,
@@ -708,7 +700,7 @@ Java_com_kenai_jffi_Foreign_invokeN4O3rN(JNIEnv* env, jobject self, jlong ctxAdd
  * Signature: (JJJJJJJLjava/lang/Object;III)J
  */
 JNIEXPORT jlong JNICALL 
-Java_com_kenai_jffi_Foreign_invokeN5O1rN(JNIEnv* env, jobject self, jlong ctxAddress, jlong function, 
+Java_com_kenai_jffi_Foreign_invokeN5O1(JNIEnv* env, jobject self, jlong ctxAddress, jlong function, 
         jlong n1, jlong n2, jlong n3, jlong n4, jlong n5,
         jobject o1, jint o1flags, jint o1off, jint o1len)
 {
@@ -721,7 +713,7 @@ Java_com_kenai_jffi_Foreign_invokeN5O1rN(JNIEnv* env, jobject self, jlong ctxAdd
  * Signature: (JJJJJJJLjava/lang/Object;IIILjava/lang/Object;III)J
  */
 JNIEXPORT jlong JNICALL 
-Java_com_kenai_jffi_Foreign_invokeN5O2rN(JNIEnv* env, jobject self, jlong ctxAddress, jlong function, 
+Java_com_kenai_jffi_Foreign_invokeN5O2(JNIEnv* env, jobject self, jlong ctxAddress, jlong function, 
         jlong n1, jlong n2, jlong n3, jlong n4, jlong n5,
         jobject o1, jint o1flags, jint o1off, jint o1len,
         jobject o2, jint o2flags, jint o2off, jint o2len)
@@ -735,7 +727,7 @@ Java_com_kenai_jffi_Foreign_invokeN5O2rN(JNIEnv* env, jobject self, jlong ctxAdd
  * Signature: (JJJJJJJLjava/lang/Object;IIILjava/lang/Object;IIILjava/lang/Object;III)J
  */
 JNIEXPORT jlong JNICALL 
-Java_com_kenai_jffi_Foreign_invokeN5O3rN(JNIEnv* env, jobject self, jlong ctxAddress, jlong function, 
+Java_com_kenai_jffi_Foreign_invokeN5O3(JNIEnv* env, jobject self, jlong ctxAddress, jlong function, 
         jlong n1, jlong n2, jlong n3, jlong n4, jlong n5,
         jobject o1, jint o1flags, jint o1off, jint o1len,
         jobject o2, jint o2flags, jint o2off, jint o2len,
@@ -750,7 +742,7 @@ Java_com_kenai_jffi_Foreign_invokeN5O3rN(JNIEnv* env, jobject self, jlong ctxAdd
  * Signature: (JJJJJJJJLjava/lang/Object;III)J
  */
 JNIEXPORT jlong JNICALL 
-Java_com_kenai_jffi_Foreign_invokeN6O1rN(JNIEnv* env, jobject self, jlong ctxAddress, jlong function, 
+Java_com_kenai_jffi_Foreign_invokeN6O1(JNIEnv* env, jobject self, jlong ctxAddress, jlong function, 
         jlong n1, jlong n2, jlong n3, jlong n4, jlong n5, jlong n6,
         jobject o1, jint o1flags, jint o1off, jint o1len)
 {
@@ -763,7 +755,7 @@ Java_com_kenai_jffi_Foreign_invokeN6O1rN(JNIEnv* env, jobject self, jlong ctxAdd
  * Signature: (JJJJJJJJLjava/lang/Object;IIILjava/lang/Object;III)J
  */
 JNIEXPORT jlong JNICALL 
-Java_com_kenai_jffi_Foreign_invokeN6O2rN(JNIEnv* env, jobject self, jlong ctxAddress, jlong function, 
+Java_com_kenai_jffi_Foreign_invokeN6O2(JNIEnv* env, jobject self, jlong ctxAddress, jlong function, 
         jlong n1, jlong n2, jlong n3, jlong n4, jlong n5, jlong n6,
         jobject o1, jint o1flags, jint o1off, jint o1len,
         jobject o2, jint o2flags, jint o2off, jint o2len)
@@ -777,7 +769,7 @@ Java_com_kenai_jffi_Foreign_invokeN6O2rN(JNIEnv* env, jobject self, jlong ctxAdd
  * Signature: (JJJJJJJJLjava/lang/Object;IIILjava/lang/Object;IIILjava/lang/Object;III)J
  */
 JNIEXPORT jlong JNICALL 
-Java_com_kenai_jffi_Foreign_invokeN6O3rN(JNIEnv* env, jobject self, jlong ctxAddress, jlong function, 
+Java_com_kenai_jffi_Foreign_invokeN6O3(JNIEnv* env, jobject self, jlong ctxAddress, jlong function, 
         jlong n1, jlong n2, jlong n3, jlong n4, jlong n5, jlong n6,
         jobject o1, jint o1flags, jint o1off, jint o1len,
         jobject o2, jint o2flags, jint o2off, jint o2len,

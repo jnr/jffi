@@ -31,7 +31,7 @@ abstract public class ObjectParameterInvoker {
      * @param o1len length of the array to use.
      * @param o1flags object flags (type, direction, parameter index).
      */
-    abstract public long invokeN1O1rN(Function function, 
+    abstract public long invokeN1O1(Function function,
             long n1, 
             Object o1, int o1off, int o1len, ObjectParameterInfo o1flags);
 
@@ -46,7 +46,7 @@ abstract public class ObjectParameterInvoker {
      * @param o1len length of the array to use.
      * @param o1flags object flags (type, direction, parameter index).
      */
-    abstract public long invokeN2O1rN(Function function, 
+    abstract public long invokeN2O1(Function function,
             long n1, long n2,
             Object o1, int o1off, int o1len, ObjectParameterInfo o1flags);
 
@@ -65,7 +65,7 @@ abstract public class ObjectParameterInvoker {
      * @param o2len The length of the array to use.
      * @param o2flags Object flags (direction, type, idx).
      */
-    abstract public long invokeN2O2rN(Function function,
+    abstract public long invokeN2O2(Function function,
             long n1, long n2,
             Object o1, int o1off, int o1len, ObjectParameterInfo o1flags,
             Object o2, int o2off, int o2len, ObjectParameterInfo o2flags);
@@ -82,61 +82,61 @@ abstract public class ObjectParameterInvoker {
      * @param o1len length of the array to use.
      * @param o1flags object flags (type, direction, parameter index).
      */
-    abstract public long invokeN3O1rN(Function function, 
+    abstract public long invokeN3O1(Function function,
             long n1, long n2, long n3,
             Object o1, int o1off, int o1len, ObjectParameterInfo o1flags);
     
-    abstract public long invokeN3O2rN(Function function, 
+    abstract public long invokeN3O2(Function function,
             long n1, long n2, long n3,
             Object o1, int o1off, int o1len, ObjectParameterInfo o1flags,
             Object o2, int o2off, int o2len, ObjectParameterInfo o2flags);
     
-    abstract public long invokeN3O3rN(Function function, 
+    abstract public long invokeN3O3(Function function,
             long n1, long n2, long n3,
             Object o1, int o1off, int o1len, ObjectParameterInfo o1flags,
             Object o2, int o2off, int o2len, ObjectParameterInfo o2flags,
             Object o3, int o3off, int o3len, ObjectParameterInfo o3flags);
     
-    abstract public long invokeN4O1rN(Function function, 
+    abstract public long invokeN4O1(Function function,
             long n1, long n2, long n3, long n4,
             Object o1, int o1off, int o1len, ObjectParameterInfo o1flags);
     
-    abstract public long invokeN4O2rN(Function function, 
+    abstract public long invokeN4O2(Function function,
             long n1, long n2, long n3, long n4,
             Object o1, int o1off, int o1len, ObjectParameterInfo o1flags,
             Object o2, int o2off, int o2len, ObjectParameterInfo o2flags);
     
-    abstract public long invokeN4O3rN(Function function, 
+    abstract public long invokeN4O3(Function function,
             long n1, long n2, long n3, long n4,
             Object o1, int o1off, int o1len, ObjectParameterInfo o1flags,
             Object o2, int o2off, int o2len, ObjectParameterInfo o2flags,
             Object o3, int o3off, int o3len, ObjectParameterInfo o3flags);
     
-    abstract public long invokeN5O1rN(Function function, 
+    abstract public long invokeN5O1(Function function,
             long n1, long n2, long n3, long n4, long n5,
             Object o1, int o1off, int o1len, ObjectParameterInfo o1flags);
     
-    abstract public long invokeN5O2rN(Function function, 
+    abstract public long invokeN5O2(Function function,
             long n1, long n2, long n3, long n4, long n5,
             Object o1, int o1off, int o1len, ObjectParameterInfo o1flags,
             Object o2, int o2off, int o2len, ObjectParameterInfo o2flags);
     
-    abstract public long invokeN5O3rN(Function function, 
+    abstract public long invokeN5O3(Function function,
             long n1, long n2, long n3, long n4, long n5,
             Object o1, int o1off, int o1len, ObjectParameterInfo o1flags,
             Object o2, int o2off, int o2len, ObjectParameterInfo o2flags,
             Object o3, int o3off, int o3len, ObjectParameterInfo o3flags);
     
-    abstract public long invokeN6O1rN(Function function, 
+    abstract public long invokeN6O1(Function function,
             long n1, long n2, long n3, long n4, long n5, long n6,
             Object o1, int o1off, int o1len, ObjectParameterInfo o1flags);
     
-    abstract public long invokeN6O2rN(Function function, 
+    abstract public long invokeN6O2(Function function,
             long n1, long n2, long n3, long n4, long n5, long n6,
             Object o1, int o1off, int o1len, ObjectParameterInfo o1flags,
             Object o2, int o2off, int o2len, ObjectParameterInfo o2flags);
     
-    abstract public long invokeN6O3rN(Function function, 
+    abstract public long invokeN6O3(Function function,
             long n1, long n2, long n3, long n4, long n5, long n6,
             Object o1, int o1off, int o1len, ObjectParameterInfo o1flags,
             Object o2, int o2off, int o2len, ObjectParameterInfo o2flags,
