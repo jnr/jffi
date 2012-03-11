@@ -180,6 +180,12 @@ Java_com_kenai_jffi_Foreign_newCallContext(JNIEnv* env, jobject self,
     abi = FFI_DEFAULT_ABI;
 #endif
 
+    // Cannot bypass FFI unless ABI is cdecl
+    if (abi != FFI_DEFAULT_ABI) {
+	ctx->isFastInt = false;
+	ctx->isFastLong = false;
+    }
+
     ffiStatus = ffi_prep_cif(&ctx->cif, abi, paramCount, (ffi_type *) j2p(returnType),
             ctx->ffiParamTypes);
     switch (ffiStatus) {
