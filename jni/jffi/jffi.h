@@ -134,10 +134,6 @@ thread_data_get()
 }
 #endif /* !_WIN32 */
 
-#if defined(__i386__)
-#  define USE_RAW 1
-#endif
-
 #if BYTE_ORDER == LITTLE_ENDIAN
 # define return_int(retval) return ((retval).i)
 # define ARGPTR(argp, type) (argp)

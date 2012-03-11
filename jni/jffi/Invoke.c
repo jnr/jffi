@@ -52,17 +52,6 @@
 
 #define MAX_STACK_ARRAY (1024)
 
-#if !defined(USE_RAW) && 0
-#  define USE_RAW (1)
-#endif
-
-#if defined(USE_RAW) && defined(__i386__)
-#  define USE_RAW_CALL (1)
-#  define USE_RAW_PACKING (1)
-#elif defined(USE_RAW)
-#  define USE_RAW_PACKING (1)
-#endif
-
 typedef struct Pinned {
     jobject object;
     jsize offset;
@@ -70,17 +59,6 @@ typedef struct Pinned {
     int type;
 } Pinned;
 
-
-#if defined(USE_RAW_PACKING)
-#  define COPY_ARGS(ctx, src, ffiArgs) do { \
-    int idx; \
-    for (idx = 0; idx < (int) (ctx)->cif.nargs; ++idx) { \
-	ffiArgs[idx] = (caddr_t) src + (ctx)->rawParamOffsets[idx]; \
-    } \
-} while (0)
-#  define ARG_BUFFER_SIZE(ctx) ((ctx)->rawParameterSize)
-
-#else
 #  define COPY_ARGS(ctx, src, ffiArgs) do { \
     int idx; \
     for (idx = 0; idx < (int) ctx->cif.nargs; ++idx) { \
@@ -92,7 +70,6 @@ typedef struct Pinned {
     } \
 } while (0)
 #  define ARG_BUFFER_SIZE(ctx) ((ctx)->cif.nargs * PARAM_SIZE)
-#endif
 
 static void
 invokeArray(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer, void* returnBuffer)
@@ -100,25 +77,16 @@ invokeArray(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer, void* returnB
     Function* ctx = (Function *) j2p(ctxAddress);
     FFIValue tmpValue;
     jbyte *tmpBuffer = (jbyte *) &tmpValue;
-
-#ifndef USE_RAW_CALL
     void** ffiArgs = { NULL };
-#endif
     
     if (ctx->cif.nargs > 0) {
         tmpBuffer = alloca(ARG_BUFFER_SIZE(ctx));
         (*env)->GetByteArrayRegion(env, paramBuffer, 0, ARG_BUFFER_SIZE(ctx), tmpBuffer);
-#ifndef USE_RAW_CALL
         ffiArgs = alloca(ctx->cif.nargs * sizeof(void *));
         COPY_ARGS(ctx, tmpBuffer, ffiArgs);
-#endif
     }
 
-#ifdef USE_RAW_CALL
-    ffi_raw_call(&ctx->cif, FFI_FN(ctx->function), returnBuffer, (ffi_raw *) tmpBuffer);
-#else
     ffi_call(&ctx->cif, FFI_FN(ctx->function), returnBuffer, ffiArgs);
-#endif
     SAVE_ERRNO(ctx);
 }
 
@@ -130,12 +98,9 @@ invokeArray(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer, void* returnB
 JNIEXPORT jboolean JNICALL
 Java_com_kenai_jffi_Foreign_isRawParameterPackingEnabled(JNIEnv* env, jobject self)
 {
-#ifdef USE_RAW_PACKING
-    return JNI_TRUE;
-#else
     return JNI_FALSE;
-#endif
 }
+
 /*
  * Class:     com_kenai_jffi_Foreign
  * Method:    invokeArrayInt32
