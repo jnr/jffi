@@ -488,30 +488,31 @@ public abstract class Invoker {
         return new RuntimeException("insufficient number of heap objects supplied (" + objCount + " required)");
     }
 
-    public final long invokeN1OrN(Function function,
-            long n1, int objCount,
-            Object o1, ObjectParameterStrategy s1, ObjectParameterInfo o1info) {
+    public final long invokeN1OrN(CallContext ctx, long function,
+                                  long n1, int objCount,
+                                  Object o1, ObjectParameterStrategy s1, ObjectParameterInfo o1info) {
         if (objCount == 1) {
-            return objectParameterInvoker.invokeN1O1(function, n1,
-                s1.object(o1), s1.offset(o1), s1.length(o1), o1info);
+            return foreign.invokeN1O1(ctx.getAddress(), function, n1,
+                    s1.object(o1), o1info.asObjectInfo(), s1.offset(o1), s1.length(o1));
 
         } else {
             throw newObjectCountError(objCount);
         }
     }
 
-    public final long invokeN2OrN(Function function,
-            long n1, long n2, int objCount,
-            Object o1, ObjectParameterStrategy s1, ObjectParameterInfo o1info) {
+    public final long invokeN2OrN(CallContext ctx, long function,
+                                  long n1, long n2, int objCount,
+                                  Object o1, ObjectParameterStrategy s1, ObjectParameterInfo o1info) {
         if (objCount == 1) {
-            return objectParameterInvoker.invokeN2O1(function, n1, n2,
-                s1.object(o1), s1.offset(o1), s1.length(o1), o1info);
+            return foreign.invokeN2O1(ctx.getAddress(), function, n1, n2,
+                    s1.object(o1), o1info.asObjectInfo(), s1.offset(o1), s1.length(o1));
         } else {
             throw newObjectCountError(objCount);
         }
     }
 
-    public final long invokeN2OrN(Function function,
+
+    public final long invokeN2OrN(CallContext ctx, long function,
             long n1, long n2, int objCount,
             Object o1, ObjectParameterStrategy s1, ObjectParameterInfo o1info,
             Object o2, ObjectParameterStrategy s2, ObjectParameterInfo o2info) {
@@ -525,26 +526,26 @@ public abstract class Invoker {
                 o1 = o2; s1 = s2; o1info = o2info;
             }
 
-            return objectParameterInvoker.invokeN2O1(function, n1, n2,
-                s1.object(o1), s1.offset(o1), s1.length(o1), o1info);
+            return foreign.invokeN2O1(ctx.getAddress(), function, n1, n2,
+                s1.object(o1), o1info.asObjectInfo(), s1.offset(o1), s1.length(o1));
 
         } else if (objCount == 2) {
             // Two objects to be passed as heap objects, just use both arguments as-is
-            return objectParameterInvoker.invokeN2O2(function, n1, n2,
-                s1.object(o1), s1.offset(o1), s1.length(o1), o1info,
-                s2.object(o2), s2.offset(o2), s2.length(o2), o2info);
+            return foreign.invokeN2O2(ctx.getAddress(), function, n1, n2,
+                s1.object(o1), o1info.asObjectInfo(), s1.offset(o1), s1.length(o1),
+                s2.object(o2), o2info.asObjectInfo(), s2.offset(o2), s2.length(o2));
 
         } else {
             throw newObjectCountError(objCount);
         }
     }
 
-    public final long invokeN3O(Function function,
+    public final long invokeN3O(CallContext ctx, long function,
             long n1, long n2, long n3, int objCount,
             Object o1, ObjectParameterStrategy s1, ObjectParameterInfo o1info) {
         if (objCount == 1) {
-            return objectParameterInvoker.invokeN3O1(function, n1, n2, n3,
-                s1.object(o1), s1.offset(o1), s1.length(o1), o1info);
+            return foreign.invokeN3O1(ctx.getAddress(), function, n1, n2, n3,
+                s1.object(o1), o1info.asObjectInfo(), s1.offset(o1), s1.length(o1));
         } else {
             throw newObjectCountError(objCount);
         }
@@ -566,12 +567,12 @@ public abstract class Invoker {
             }
 
             return objectParameterInvoker.invokeN3O1(function, n1, n2, n3,
-                s1.object(o1), s1.offset(o1), s1.length(o1), o1info);
+                    s1.object(o1), s1.offset(o1), s1.length(o1), o1info);
 
         } else if (objCount == 2) {
             return objectParameterInvoker.invokeN3O2(function, n1, n2, n3,
-                s1.object(o1), s1.offset(o1), s1.length(o1), o1info,
-                s2.object(o2), s2.offset(o2), s2.length(o2), o2info);
+                    s1.object(o1), s1.offset(o1), s1.length(o1), o1info,
+                    s2.object(o2), s2.offset(o2), s2.length(o2), o2info);
 
         } else {
             throw newObjectCountError(objCount);
@@ -630,9 +631,9 @@ public abstract class Invoker {
 
         // Three objects to be passed as heap objects, just use all arguments as-is
         return objectParameterInvoker.invokeN3O3(function, n1, n2, n3,
-            s1.object(o1), s1.offset(o1), s1.length(o1), o1info,
-            s2.object(o2), s2.offset(o2), s2.length(o2), o2info,
-            s3.object(o3), s3.offset(o3), s3.length(o3), o3info);
+                s1.object(o1), s1.offset(o1), s1.length(o1), o1info,
+                s2.object(o2), s2.offset(o2), s2.length(o2), o2info,
+                s3.object(o3), s3.offset(o3), s3.length(o3), o3info);
     }
 
     public final long invokeN4O(Function function,
@@ -641,7 +642,7 @@ public abstract class Invoker {
 
         if (objCount == 1) {
             return objectParameterInvoker.invokeN4O1(function, n1, n2, n3, n4,
-                s1.object(o1), s1.offset(o1), s1.length(o1), o1info);
+                    s1.object(o1), s1.offset(o1), s1.length(o1), o1info);
         } else {
             throw newObjectCountError(objCount);
         }
@@ -663,13 +664,13 @@ public abstract class Invoker {
             }
 
             return objectParameterInvoker.invokeN4O1(function, n1, n2, n3, n4,
-                s1.object(o1), s1.offset(o1), s1.length(o1), o1info);
+                    s1.object(o1), s1.offset(o1), s1.length(o1), o1info);
 
         } else if (objCount == 2) {
             // Two objects to be passed as heap objects, just use both arguments as-is
             return objectParameterInvoker.invokeN4O2(function, n1, n2, n3, n4,
-                s1.object(o1), s1.offset(o1), s1.length(o1), o1info,
-                s2.object(o2), s2.offset(o2), s2.length(o2), o2info);
+                    s1.object(o1), s1.offset(o1), s1.length(o1), o1info,
+                    s2.object(o2), s2.offset(o2), s2.length(o2), o2info);
 
         } else {
             throw newObjectCountError(objCount);
@@ -805,9 +806,9 @@ public abstract class Invoker {
 
         if (objCount == 3) {
             return objectParameterInvoker.invokeN4O3(function, n1, n2, n3, n4,
-                s1.object(o1), s1.offset(o1), s1.length(o1), o1info,
-                s2.object(o2), s2.offset(o2), s2.length(o2), o2info,
-                s3.object(o3), s3.offset(o3), s3.length(o3), o3info);
+                    s1.object(o1), s1.offset(o1), s1.length(o1), o1info,
+                    s2.object(o2), s2.offset(o2), s2.length(o2), o2info,
+                    s3.object(o3), s3.offset(o3), s3.length(o3), o3info);
 
         } else {
             throw newObjectCountError(objCount);
@@ -844,7 +845,7 @@ public abstract class Invoker {
         ObjectBuffer objectBuffer = buffer.objectBuffer();
         return objectBuffer != null
                 ? invokeArrayWithObjectsInt32(function, buffer, objectBuffer)
-                : foreign.invokeArrayReturnInt(function.getContextAddress(), buffer.array());
+                : foreign.invokeArrayReturnInt(function.getContextAddress(), function.getFunctionAddress(), buffer.array());
     }
     
     /**
@@ -857,14 +858,9 @@ public abstract class Invoker {
      */
     public final int invokeInt(CallContext ctx, long function, HeapInvocationBuffer buffer) {
         ObjectBuffer objectBuffer = buffer.objectBuffer();
-        final long fnHandle = newFunction(ctx, function);
-        try {
-            return objectBuffer != null
-                ? invokeArrayWithObjectsInt32(fnHandle, buffer, objectBuffer)
-                : foreign.invokeArrayReturnInt(fnHandle, buffer.array());
-        } finally {
-            foreign.freeFunction(fnHandle);
-        }
+        return objectBuffer != null
+                ? invokeArrayWithObjectsInt32(ctx.getAddress(), function, buffer, objectBuffer)
+                : foreign.invokeArrayReturnInt(ctx.getAddress(), function, buffer.array());
     }
 
     /**
@@ -877,8 +873,8 @@ public abstract class Invoker {
     public final long invokeLong(Function function, HeapInvocationBuffer buffer) {
         ObjectBuffer objectBuffer = buffer.objectBuffer();
         return objectBuffer != null
-                ? foreign.invokeArrayWithObjectsInt64(function.getContextAddress(), buffer.array(), objectBuffer.objectCount(), objectBuffer.info(), objectBuffer.objects())
-                : foreign.invokeArrayReturnLong(function.getContextAddress(), buffer.array());
+                ? foreign.invokeArrayWithObjectsInt64(function.getContextAddress(), function.getFunctionAddress(), buffer.array(), objectBuffer.objectCount(), objectBuffer.info(), objectBuffer.objects())
+                : foreign.invokeArrayReturnLong(function.getContextAddress(), function.getFunctionAddress(), buffer.array());
     }
     
     /**
@@ -891,14 +887,9 @@ public abstract class Invoker {
      */
     public final long invokeLong(CallContext ctx, long function, HeapInvocationBuffer buffer) {
         ObjectBuffer objectBuffer = buffer.objectBuffer();
-        final long fnHandle = newFunction(ctx, function);
-        try {
-            return objectBuffer != null
-                ? invokeArrayWithObjectsInt64(fnHandle, buffer, objectBuffer)
-                : foreign.invokeArrayReturnLong(fnHandle, buffer.array());
-        } finally {
-            foreign.freeFunction(fnHandle);
-        }
+        return objectBuffer != null
+                ? invokeArrayWithObjectsInt64(ctx.getAddress(), function, buffer, objectBuffer)
+                : foreign.invokeArrayReturnLong(ctx.getAddress(), function, buffer.array());
     }
 
     /**
@@ -911,8 +902,8 @@ public abstract class Invoker {
     public final float invokeFloat(Function function, HeapInvocationBuffer buffer) {
         ObjectBuffer objectBuffer = buffer.objectBuffer();
         return objectBuffer != null
-                ? foreign.invokeArrayWithObjectsFloat(function.getContextAddress(), buffer.array(), objectBuffer.objectCount(), objectBuffer.info(), objectBuffer.objects())
-                : foreign.invokeArrayReturnFloat(function.getContextAddress(), buffer.array());
+                ? foreign.invokeArrayWithObjectsFloat(function.getContextAddress(), function.getFunctionAddress(), buffer.array(), objectBuffer.objectCount(), objectBuffer.info(), objectBuffer.objects())
+                : foreign.invokeArrayReturnFloat(function.getContextAddress(), function.getFunctionAddress(), buffer.array());
     }
     
     /**
@@ -928,8 +919,8 @@ public abstract class Invoker {
         final long fnHandle = newFunction(ctx, function);
         try {
             return objectBuffer != null
-                ? foreign.invokeArrayWithObjectsFloat(fnHandle, buffer.array(), objectBuffer.objectCount(), objectBuffer.info(), objectBuffer.objects())
-                : foreign.invokeArrayReturnFloat(fnHandle, buffer.array());
+                ? foreign.invokeArrayWithObjectsFloat(ctx.getAddress(), function, buffer.array(), objectBuffer.objectCount(), objectBuffer.info(), objectBuffer.objects())
+                : foreign.invokeArrayReturnFloat(ctx.getAddress(), function, buffer.array());
         } finally {
             foreign.freeFunction(fnHandle);
         }
@@ -946,8 +937,8 @@ public abstract class Invoker {
     public final double invokeDouble(Function function, HeapInvocationBuffer buffer) {
         ObjectBuffer objectBuffer = buffer.objectBuffer();
         return objectBuffer != null
-                ? foreign.invokeArrayWithObjectsDouble(function.getContextAddress(), buffer.array(), objectBuffer.objectCount(), objectBuffer.info(), objectBuffer.objects())
-                : foreign.invokeArrayReturnDouble(function.getContextAddress(), buffer.array());
+                ? foreign.invokeArrayWithObjectsDouble(function.getContextAddress(), function.getFunctionAddress(), buffer.array(), objectBuffer.objectCount(), objectBuffer.info(), objectBuffer.objects())
+                : foreign.invokeArrayReturnDouble(function.getContextAddress(), function.getFunctionAddress(), buffer.array());
     }
     
     /**
@@ -960,14 +951,9 @@ public abstract class Invoker {
      */
     public final double invokeDouble(CallContext ctx, long function, HeapInvocationBuffer buffer) {
         ObjectBuffer objectBuffer = buffer.objectBuffer();
-        final long fnHandle = newFunction(ctx, function);
-        try {
-            return objectBuffer != null
-                ? foreign.invokeArrayWithObjectsDouble(fnHandle, buffer.array(), objectBuffer.objectCount(), objectBuffer.info(), objectBuffer.objects())
-                : foreign.invokeArrayReturnDouble(fnHandle, buffer.array());
-        } finally {
-            foreign.freeFunction(fnHandle);
-        }
+        return objectBuffer != null
+            ? foreign.invokeArrayWithObjectsDouble(ctx.getAddress(), function, buffer.array(), objectBuffer.objectCount(), objectBuffer.info(), objectBuffer.objects())
+            : foreign.invokeArrayReturnDouble(ctx.getAddress(), function, buffer.array());
     }
 
     /**
@@ -1022,11 +1008,11 @@ public abstract class Invoker {
     public final void invokeStruct(Function function, HeapInvocationBuffer buffer, byte[] returnBuffer, int offset) {
         ObjectBuffer objectBuffer = buffer.objectBuffer();
         if (objectBuffer != null) {
-            foreign.invokeArrayWithObjectsReturnStruct(function.getContextAddress(),
+            foreign.invokeArrayWithObjectsReturnStruct(function.getContextAddress(), function.getFunctionAddress(),
                     buffer.array(), objectBuffer.objectCount(), objectBuffer.info(), objectBuffer.objects(),
                     returnBuffer, offset);
         } else {
-            foreign.invokeArrayReturnStruct(function.getContextAddress(), buffer.array(), returnBuffer, offset);
+            foreign.invokeArrayReturnStruct(function.getContextAddress(), function.getFunctionAddress(), buffer.array(), returnBuffer, offset);
         }
     }
     
@@ -1041,23 +1027,18 @@ public abstract class Invoker {
      */
     public final void invokeStruct(CallContext ctx, long function, HeapInvocationBuffer buffer, byte[] returnBuffer, int offset) {
         ObjectBuffer objectBuffer = buffer.objectBuffer();
-        final long fnHandle = newFunction(ctx, function);
-        try {
-            if (objectBuffer != null) {
-                foreign.invokeArrayWithObjectsReturnStruct(fnHandle,
-                        buffer.array(), objectBuffer.objectCount(), objectBuffer.info(), objectBuffer.objects(),
-                        returnBuffer, offset);
-            } else {
-                foreign.invokeArrayReturnStruct(fnHandle, buffer.array(), returnBuffer, offset);
-            }
-        } finally { 
-            foreign.freeFunction(fnHandle);
+        if (objectBuffer != null) {
+            foreign.invokeArrayWithObjectsReturnStruct(ctx.getAddress(), function,
+                    buffer.array(), objectBuffer.objectCount(), objectBuffer.info(), objectBuffer.objects(),
+                    returnBuffer, offset);
+        } else {
+            foreign.invokeArrayReturnStruct(ctx.getAddress(), function, buffer.array(), returnBuffer, offset);
         }
     }
 
     public final Object invokeObject(Function function, HeapInvocationBuffer buffer) {
         ObjectBuffer objectBuffer = buffer.objectBuffer();
-        return foreign.invokeArrayWithObjectsReturnObject(function.getContextAddress(),
+        return foreign.invokeArrayWithObjectsReturnObject(function.getContextAddress(), function.getFunctionAddress(),
                 buffer.array(), objectBuffer.objectCount(), objectBuffer.info(), objectBuffer.objects());
     }
 
@@ -1071,7 +1052,7 @@ public abstract class Invoker {
      * @param parameters An array of addresses of the function parameters.
      */
     public final void invoke(Function function, long returnBuffer, long[] parameters) {
-        foreign.invokePointerParameterArray(function.getContextAddress(), returnBuffer, parameters);
+        foreign.invokePointerParameterArray(function.getContextAddress(), function.getFunctionAddress(), returnBuffer, parameters);
     }
     
     /**
@@ -1085,12 +1066,7 @@ public abstract class Invoker {
      * @param parameters An array of addresses of the function parameters.
      */
     public final void invoke(CallContext ctx, long function, long returnBuffer, long[] parameters) {
-        final long fnHandle = newFunction(ctx, function);
-        try {
-            foreign.invokePointerParameterArray(fnHandle, returnBuffer, parameters);
-        } finally {
-            foreign.freeFunction(fnHandle);
-        }
+        foreign.invokePointerParameterArray(ctx.getAddress(), function, returnBuffer, parameters);
     }
 
     /**
@@ -1105,41 +1081,21 @@ public abstract class Invoker {
      */
     private final int invokeArrayWithObjectsInt32(Function function, HeapInvocationBuffer buffer,
             ObjectBuffer objectBuffer) {
-        return invokeArrayWithObjectsInt32(function.getContextAddress(), buffer, objectBuffer);
+        return invokeArrayWithObjectsInt32(function.getContextAddress(), function.getFunctionAddress(), buffer, objectBuffer);
     }
+
     
     /**
      * Convenience method to pass the objects and object descriptor array down as
      * normal arguments, so hotspot can optimize it.  This is faster than the native
      * code pulling the objects and descriptors out of arrays.
      *
-     * @param ctx The call context which describes how to call the native function.
-     * @param function The address of the native function to invoke.
+     * @param function The native function to invoke.
      * @param buffer A buffer containing the arguments to the function.
      * @param objectBuffer A buffer containing objects to be passed to the native function.
      * @return A 32 bit integer value.
      */
-    private final int invokeArrayWithObjectsInt32(CallContext ctx, long function, HeapInvocationBuffer buffer,
-            ObjectBuffer objectBuffer) {
-        final long fnHandle = newFunction(ctx, function);
-        try {
-            return invokeArrayWithObjectsInt32(fnHandle, buffer, objectBuffer);
-        } finally {
-            foreign.freeFunction(fnHandle);
-        }
-    }
-    
-    /**
-     * Convenience method to pass the objects and object descriptor array down as
-     * normal arguments, so hotspot can optimize it.  This is faster than the native
-     * code pulling the objects and descriptors out of arrays.
-     *
-     * @param fnHandle The native function handle to invoke.
-     * @param buffer A buffer containing the arguments to the function.
-     * @param objectBuffer A buffer containing objects to be passed to the native function.
-     * @return A 32 bit integer value.
-     */
-    private final int invokeArrayWithObjectsInt32(long fnHandle, HeapInvocationBuffer buffer,
+    private int invokeArrayWithObjectsInt32(long ctx, long function, HeapInvocationBuffer buffer,
             ObjectBuffer objectBuffer) {
 
         Object[] objects = objectBuffer.objects();
@@ -1148,15 +1104,15 @@ public abstract class Invoker {
 
         switch (objectCount) {
             case 1:
-                return foreign.invokeArrayO1Int32(fnHandle, buffer.array(),
+                return foreign.invokeArrayO1Int32(ctx, function, buffer.array(),
                         objects[0], info[0], info[1], info[2]);
             case 2:
-                return foreign.invokeArrayO2Int32(fnHandle, buffer.array(),
+                return foreign.invokeArrayO2Int32(ctx, function, buffer.array(),
                         objects[0], info[0], info[1], info[2],
                         objects[1], info[3], info[4], info[5]);
         }
 
-        return foreign.invokeArrayWithObjectsInt32(fnHandle, buffer.array(),
+        return foreign.invokeArrayWithObjectsInt32(ctx, function, buffer.array(),
             objectCount, info, objects);
     }
     
@@ -1165,12 +1121,12 @@ public abstract class Invoker {
      * normal arguments, so hotspot can optimize it.  This is faster than the native
      * code pulling the objects and descriptors out of arrays.
      *
-     * @param fnHandle The native function handle to invoke.
+     * @param function The native function to invoke.
      * @param buffer A buffer containing the arguments to the function.
      * @param objectBuffer A buffer containing objects to be passed to the native function.
      * @return A 64 bit integer value.
      */
-    private final long invokeArrayWithObjectsInt64(long fnHandle, HeapInvocationBuffer buffer,
+    private final long invokeArrayWithObjectsInt64(long ctx, long function, HeapInvocationBuffer buffer,
             ObjectBuffer objectBuffer) {
 
         Object[] objects = objectBuffer.objects();
@@ -1179,20 +1135,20 @@ public abstract class Invoker {
 
         switch (objectCount) {
             case 1:
-                return foreign.invokeArrayO1Int64(fnHandle, buffer.array(),
+                return foreign.invokeArrayO1Int64(ctx, function, buffer.array(),
                         objects[0], info[0], info[1], info[2]);
             case 2:
-                return foreign.invokeArrayO2Int64(fnHandle, buffer.array(),
+                return foreign.invokeArrayO2Int64(ctx, function, buffer.array(),
                         objects[0], info[0], info[1], info[2],
                         objects[1], info[3], info[4], info[5]);
         }
 
-        return foreign.invokeArrayWithObjectsInt64(fnHandle, buffer.array(),
+        return foreign.invokeArrayWithObjectsInt64(ctx, function, buffer.array(),
             objectCount, info, objects);
     }
     
     private long newFunction(CallContext ctx, long function) {
-        return foreign.newFunction(function, ctx.getReturnType().handle(), 
+        return foreign.newFunction(function, ctx.getReturnType().handle(),
                 ctx.parameterTypeHandles, ctx.flags);
     }
     

@@ -52,6 +52,26 @@ final class NativeObjectParameterInvoker extends ObjectParameterInvoker {
                 n1, n2,
                 o1, o1flags.asObjectInfo(), o1off, o1len);
     }
+
+    /**
+     * Invokes a function with two numeric arguments, and returns a numeric value.
+     *
+     * @param function The <tt>Function</tt> to invoke.
+     * @param n1 first numeric argument.
+     * @param n2 The second numeric argument.
+     * @param o1 array or buffer, to be passed as a pointer for the first numeric parameter.
+     * @param o1off offset from the start of the array or buffer.
+     * @param o1len length of the array to use.
+     * @param o1flags object flags (type, direction, parameter index).
+     */
+    public final long invokeN2O1(CallContext ctx, long function,
+                                 long n1, long n2,
+                                 Object o1, int o1off, int o1len, ObjectParameterInfo o1flags) {
+
+        return foreign.invokeN2O1(ctx.getAddress(), function,
+                n1, n2,
+                o1, o1flags.asObjectInfo(), o1off, o1len);
+    }
     
     /**
      * Invokes a function with two numeric arguments, and returns a numeric value.

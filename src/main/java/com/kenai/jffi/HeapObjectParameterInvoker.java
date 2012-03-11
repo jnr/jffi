@@ -23,10 +23,10 @@ final class HeapObjectParameterInvoker extends ObjectParameterInvoker {
 
     private long invokeO1(Function function, byte[] paramBuffer, Object o1, int o1off, int o1len, ObjectParameterInfo o1flags) {
         return function.getReturnType().size() == 8
-            ? foreign.invokeArrayO1Int64(function.getContextAddress(),
+            ? foreign.invokeArrayO1Int64(function.getContextAddress(), function.getFunctionAddress(),
                 paramBuffer,
                 o1, o1flags.asObjectInfo(), o1off, o1len)
-            : foreign.invokeArrayO1Int32(function.getContextAddress(),
+            : foreign.invokeArrayO1Int32(function.getContextAddress(), function.getFunctionAddress(),
                 paramBuffer,
                 o1, o1flags.asObjectInfo(), o1off, o1len);
     }
@@ -35,11 +35,11 @@ final class HeapObjectParameterInvoker extends ObjectParameterInvoker {
                           Object o1, int o1off, int o1len, ObjectParameterInfo o1flags,
                           Object o2, int o2off, int o2len, ObjectParameterInfo o2flags) {
         return function.getReturnType().size() == 8
-            ? foreign.invokeArrayO2Int64(function.getContextAddress(),
+            ? foreign.invokeArrayO2Int64(function.getContextAddress(), function.getFunctionAddress(),
                 paramBuffer,
                 o1, o1flags.asObjectInfo(), o1off, o1len,
                 o2, o2flags.asObjectInfo(), o2off, o2len)
-            : foreign.invokeArrayO2Int32(function.getContextAddress(),
+            : foreign.invokeArrayO2Int32(function.getContextAddress(), function.getFunctionAddress(),
                 paramBuffer,
                 o1, o1flags.asObjectInfo(), o1off, o1len,
                 o2, o2flags.asObjectInfo(), o2off, o2len);
@@ -57,9 +57,9 @@ final class HeapObjectParameterInvoker extends ObjectParameterInvoker {
         Object[] objects = { o1, o2, o3 };
 
         return function.getReturnType().size() == 8
-            ? foreign.invokeArrayWithObjectsInt64(function.getContextAddress(),
+            ? foreign.invokeArrayWithObjectsInt64(function.getContextAddress(), function.getFunctionAddress(),
                 paramBuffer, 3, objInfo, objects)
-            : foreign.invokeArrayWithObjectsInt32(function.getContextAddress(),
+            : foreign.invokeArrayWithObjectsInt32(function.getContextAddress(), function.getFunctionAddress(),
                 paramBuffer, 3, objInfo, objects);
     }
 

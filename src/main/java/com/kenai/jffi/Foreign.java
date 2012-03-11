@@ -855,7 +855,7 @@ final class Foreign {
     
     final native long invokeN5O1(long callContext, long functionAddress,
             long n1, long n2, long n3, long n4, long n5,
-            Object o1, int o1off, int o1len, int o1flags);
+            Object o1, int o1flags, int o1off, int o1len);
     
     final native long invokeN5O2(long callContext, long functionAddress,
             long n1, long n2, long n3, long n4, long n5,
@@ -890,7 +890,7 @@ final class Foreign {
      * @param buffer A byte array containing the arguments to the function.
      * @return A 32 bit integer value.
      */
-    final native int invokeArrayReturnInt(long function, byte[] buffer);
+    final native int invokeArrayReturnInt(long callContext, long function, byte[] buffer);
 
     /**
      * Invokes a function that returns a 64 bit integer.
@@ -898,7 +898,7 @@ final class Foreign {
      * @param buffer A byte array containing the aguments to the function.
      * @return A 64 bit integer value.
      */
-    final native long invokeArrayReturnLong(long function, byte[] buffer);
+    final native long invokeArrayReturnLong(long callContext, long function, byte[] buffer);
 
     /**
      * Invokes a function that returns a 32 bit floating point value.
@@ -906,7 +906,7 @@ final class Foreign {
      * @param buffer A byte array containing the aguments to the function.
      * @return A 32 bit floating point value.
      */
-    final native float invokeArrayReturnFloat(long function, byte[] buffer);
+    final native float invokeArrayReturnFloat(long callContext, long function, byte[] buffer);
 
     /**
      * Invokes a function that returns a 64 bit floating point value.
@@ -914,14 +914,14 @@ final class Foreign {
      * @param buffer A byte array containing the aguments to the function.
      * @return A 64 bit floating point value.
      */
-    final native double invokeArrayReturnDouble(long function, byte[] buffer);
+    final native double invokeArrayReturnDouble(long callContext, long function, byte[] buffer);
 
     /**
      * Invokes a function and pack the return value into a byte array.
      * @param function The address of the function context structure from {@link #newFunction}.
      * @param buffer A byte array containing the aguments to the function.
      */
-    final native void invokeArrayReturnStruct(long function, byte[] paramBuffer, byte[] returnBuffer, int offset);
+    final native void invokeArrayReturnStruct(long callContext, long function, byte[] paramBuffer, byte[] returnBuffer, int offset);
 
     /**
      * Invokes a function that returns a java object.
@@ -931,23 +931,23 @@ final class Foreign {
      * @param function The address of the function context structure from {@link #newFunction}.
      * @param buffer A byte array containing the aguments to the function.
      */
-    final native Object invokeArrayWithObjectsReturnObject(long function, byte[] paramBuffer,
+    final native Object invokeArrayWithObjectsReturnObject(long callContext, long function, byte[] paramBuffer,
             int objectCount, int[] objectInfo, Object[] objects);
 
     /* ---------------------------------------------------------------------- */
-    final native int invokeArrayWithObjectsInt32(long function, byte[] buffer, int objectCount, int[] objectInfo, Object[] objects);
-    final native long invokeArrayWithObjectsInt64(long function, byte[] buffer, int objectCount, int[] objectInfo, Object[] objects);
-    final native float invokeArrayWithObjectsFloat(long function, byte[] buffer, int objectCount, int[] objectInfo, Object[] objects);
-    final native double invokeArrayWithObjectsDouble(long function, byte[] buffer, int objectCount, int[] objectInfo, Object[] objects);
-    final native void invokeArrayWithObjectsReturnStruct(long function, byte[] buffer, int objectCount, int[] objectInfo, Object[] objects,
+    final native int invokeArrayWithObjectsInt32(long callContext, long function, byte[] buffer, int objectCount, int[] objectInfo, Object[] objects);
+    final native long invokeArrayWithObjectsInt64(long callContext, long function, byte[] buffer, int objectCount, int[] objectInfo, Object[] objects);
+    final native float invokeArrayWithObjectsFloat(long callContext, long function, byte[] buffer, int objectCount, int[] objectInfo, Object[] objects);
+    final native double invokeArrayWithObjectsDouble(long callContext, long function, byte[] buffer, int objectCount, int[] objectInfo, Object[] objects);
+    final native void invokeArrayWithObjectsReturnStruct(long callContext, long function, byte[] buffer, int objectCount, int[] objectInfo, Object[] objects,
             byte[] returnBuffer, int returnBufferOffset);
     /* ---------------------------------------------------------------------- */
-    final native int invokeArrayO1Int32(long function, byte[] buffer, Object o1, int o1Info, int o1off, int o1len);
-    final native int invokeArrayO2Int32(long function, byte[] buffer, Object o1, int o1Info, int o1off, int o1len,
+    final native int invokeArrayO1Int32(long callContext, long function, byte[] buffer, Object o1, int o1Info, int o1off, int o1len);
+    final native int invokeArrayO2Int32(long callContext, long function, byte[] buffer, Object o1, int o1Info, int o1off, int o1len,
             Object o2, int o2info, int o2off, int o2len);
     
-    final native long invokeArrayO1Int64(long function, byte[] buffer, Object o1, int o1Info, int o1off, int o1len);
-    final native long invokeArrayO2Int64(long function, byte[] buffer, Object o1, int o1Info, int o1off, int o1len,
+    final native long invokeArrayO1Int64(long callContext, long function, byte[] buffer, Object o1, int o1Info, int o1off, int o1len);
+    final native long invokeArrayO2Int64(long callContext, long function, byte[] buffer, Object o1, int o1Info, int o1off, int o1len,
             Object o2, int o2info, int o2off, int o2len);
 
     /* ---------------------------------------------------------------------- */
@@ -961,7 +961,7 @@ final class Foreign {
      * of the function call in.
      * @param parameters An array of addresses of the function parameters.
      */
-    final native void invokePointerParameterArray(long functionContext,
+    final native void invokePointerParameterArray(long callContext, long functionContext,
             long returnBuffer, long[] parameters);
 
     /**
