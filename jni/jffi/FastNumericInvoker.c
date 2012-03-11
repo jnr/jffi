@@ -48,11 +48,11 @@
 /* for return values <= sizeof(long), need to use an ffi_sarg sized return value */
 #define RETVAL(retval, rtype) ((rtype)->size > sizeof(ffi_sarg) ? (retval).j : (retval).sarg)
 
-#if defined(__i386__) && 1
+#if defined(__i386__)
 # define INT_BYPASS_FFI
 #endif
 
-#if defined(__x86_64__) && 1
+#if defined(__x86_64__)
 # define INT_BYPASS_FFI
 # define LONG_BYPASS_FFI
 #endif
@@ -114,12 +114,12 @@ Java_com_kenai_jffi_Foreign_invokeVrN(JNIEnv* env, jobject self, jlong ctxAddres
     FFIValue retval;
     
     if (0) {
-#if defined(LONG_BYPASS_FFI) && defined(__x86_64__)
+#if defined(LONG_BYPASS_FFI)
     } else if (likely(ctx->isFastLong)) {
         retval.j = ((jlong (*)(void)) ctx->function)();
 #endif    
 
-#if defined(INT_BYPASS_FFI) && defined(__i386__)
+#if defined(INT_BYPASS_FFI)
     } else if (likely(ctx->isFastInt)) {
         retval.sarg = ((jint (*)(void)) ctx->function)();
 #endif
@@ -221,12 +221,12 @@ static void
 call1(CallContext* ctx, void* function, FFIValue* retval, jlong n1)
 {
     if (0) {
-#if defined(LONG_BYPASS_FFI) && defined(__x86_64__)
+#if defined(LONG_BYPASS_FFI)
     } else if (likely(ctx->isFastLong)) {
         retval->j = ((jlong (*)(jlong)) function)(n1);
 #endif    
 
-#if defined(INT_BYPASS_FFI) && defined(__i386__)
+#if defined(INT_BYPASS_FFI)
     } else if (likely(ctx->isFastInt)) {
         retval->sarg = ((jint (*)(jint)) function)(*(jint *) &n1);
 #endif
@@ -242,12 +242,12 @@ static void
 call2(CallContext* ctx, void* function, FFIValue* retval, jlong n1, jlong n2)
 {
     if (0) {
-#if defined(LONG_BYPASS_FFI) && defined(__x86_64__)
+#if defined(LONG_BYPASS_FFI)
     } else if (likely(ctx->isFastLong)) {
         retval->j = ((jlong (*)(jlong, jlong)) function)(n1, n2);
 #endif    
 
-#if defined(INT_BYPASS_FFI) && defined(__i386__)
+#if defined(INT_BYPASS_FFI)
     } else if (likely(ctx->isFastInt)) {
         retval->sarg = ((jint (*)(jint, jint)) function)(
                 *(jint *) &n1, *(jint *) &n2);
@@ -264,12 +264,12 @@ static void
 call3(CallContext* ctx, void* function, FFIValue* retval, jlong n1, jlong n2, jlong n3)
 {
     if (0) {
-#if defined(LONG_BYPASS_FFI) && defined(__x86_64__)
+#if defined(LONG_BYPASS_FFI)
     } else if (likely(ctx->isFastLong)) {
         retval->j = ((jlong (*)(jlong, jlong, jlong)) function)(n1, n2, n3);
 #endif    
 
-#if defined(INT_BYPASS_FFI) && defined(__i386__)
+#if defined(INT_BYPASS_FFI)
     } else if (likely(ctx->isFastInt)) {
         retval->sarg = ((jint (*)(jint, jint, jint)) function)(
                 *(jint *) &n1, *(jint *) &n2, *(jint *) &n3);
@@ -288,12 +288,12 @@ static void
 call4(CallContext* ctx, void* function, FFIValue* retval, jlong n1, jlong n2, jlong n3, jlong n4)
 {
     if (0) {
-#if defined(LONG_BYPASS_FFI) && defined(__x86_64__)
+#if defined(LONG_BYPASS_FFI)
     } else if (likely(ctx->isFastLong)) {
         retval->j = ((jlong (*)(jlong, jlong, jlong, jlong)) function)(n1, n2, n3, n4);
 #endif    
 
-#if defined(INT_BYPASS_FFI) && defined(__i386__)
+#if defined(INT_BYPASS_FFI)
     } else if (likely(ctx->isFastInt)) {
         retval->sarg = ((jint (*)(jint, jint, jint, jint)) function)(
                 *(jint *) &n1, *(jint *) &n2, *(jint *) &n3, *(jint *) &n4);
@@ -312,12 +312,12 @@ call5(CallContext* ctx, void* function, FFIValue* retval,
         jlong n1, jlong n2, jlong n3, jlong n4, jlong n5)
 {
     if (0) {
-#if defined(LONG_BYPASS_FFI) && defined(__x86_64__)
+#if defined(LONG_BYPASS_FFI)
     } else if (likely(ctx->isFastLong)) {
         retval->j = ((jlong (*)(jlong, jlong, jlong, jlong, jlong)) function)(n1, n2, n3, n4, n5);
 #endif    
 
-#if defined(INT_BYPASS_FFI) && defined(__i386__)
+#if defined(INT_BYPASS_FFI)
     } else if (likely(ctx->isFastInt)) {
         retval->sarg = ((jint (*)(jint, jint, jint, jint, jint)) function)(
                 *(jint *) &n1, *(jint *) &n2, *(jint *) &n3, 
@@ -336,13 +336,13 @@ call6(CallContext* ctx, void* function, FFIValue* retval,
         jlong n1, jlong n2, jlong n3, jlong n4, jlong n5, jlong n6)
 {
     if (0) {
-#if defined(LONG_BYPASS_FFI) && defined(__x86_64__)
+#if defined(LONG_BYPASS_FFI)
     } else if (likely(ctx->isFastLong)) {
         retval->j = ((jlong (*)(jlong, jlong, jlong, jlong, jlong, jlong)) function)(
                 n1, n2, n3, n4, n5, n6);
 #endif    
 
-#if defined(INT_BYPASS_FFI) && defined(__i386__)
+#if defined(INT_BYPASS_FFI)
     } else if (likely(ctx->isFastInt)) {
         retval->sarg = ((jint (*)(jint, jint, jint, jint, jint, jint)) function)(
                 *(jint *) &n1, *(jint *) &n2, *(jint *) &n3, 
@@ -416,16 +416,6 @@ object_to_ptr(JNIEnv* env, jobject obj, int off, int len, int f, void** pptr,
     return true;
 }
 
-static void 
-free_arrays(JNIEnv* env, Array* arrays, int arrayCount)
-{
-    int aryIdx;
-    for (aryIdx = arrayCount; aryIdx >= 0; aryIdx--) {
-        if (arrays[aryIdx].release != NULL) {
-            (*arrays[aryIdx].release)(env, &arrays[aryIdx]);
-        }
-    }
-}
 
 #define N1 n1
 #define N2 N1, n2
@@ -442,13 +432,6 @@ free_arrays(JNIEnv* env, Array* arrays, int arrayCount)
     int arrayCount = 0, pinnedCount = 0; \
     FFIValue retval; \
     jlong v[] = { N##n }
-
-#define FREE_ARRAYS(env, arrays, arrayCount) do { \
-    int aryIdx; \
-    for (aryIdx = arrayCount; aryIdx >= 0; aryIdx--) { \
-        if (arrays[aryIdx].release != NULL) (*arrays[aryIdx].release)(env, &arrays[aryIdx]); \
-    } \
-} while(0)
 
 #define END \
     error: \

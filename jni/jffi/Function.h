@@ -47,11 +47,5 @@ typedef struct Function {
     bool isFastLong;
 } Function;
 
-#define SAVE_ERRNO(ctx) do { \
-    if (unlikely(ctx->saveErrno)) { \
-        jffi_save_errno(); \
-    } \
-} while(0)
-
 #endif /* FUNCTION_H */
 

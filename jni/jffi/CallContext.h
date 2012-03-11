@@ -47,5 +47,11 @@ typedef struct CallContext {
     bool isFastLong;
 } CallContext;
 
+#define SAVE_ERRNO(ctx) do { \
+    if (unlikely(ctx->saveErrno)) { \
+        jffi_save_errno(); \
+    } \
+} while(0)
+
 #endif /* JFFI_CALLCONTEXT_H */
 

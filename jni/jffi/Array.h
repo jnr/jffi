@@ -74,7 +74,7 @@ extern void jffi_releaseArrays(JNIEnv* env, Array* arrays, int arrayCount);
 #define IS_OUT_ARRAY(flags) (((flags) & (com_kenai_jffi_ObjectBuffer_ARRAY | ARRAY_IN | ARRAY_OUT)) != (com_kenai_jffi_ObjectBuffer_ARRAY | ARRAY_IN))
 #define IS_IN_ARRAY(flags) (((flags) & (com_kenai_jffi_ObjectBuffer_ARRAY | ARRAY_IN | ARRAY_OUT)) != (com_kenai_jffi_ObjectBuffer_ARRAY | ARRAY_IN))
 
-#define RELEASE_ARRAYS(env, arrays, arrayCount) jffi_releaseArrays(env, arrays, arrayCount)
+#define RELEASE_ARRAYS(env, arrays, arrayCount) do { if (unlikely(arrayCount > 0)) jffi_releaseArrays(env, arrays, arrayCount); } while (0)
 
 #endif /* jffi_Array_h */
 
