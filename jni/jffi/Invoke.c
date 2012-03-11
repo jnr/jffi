@@ -44,6 +44,7 @@
 #include "jffi.h"
 #include "Exception.h"
 #include "Function.h"
+#include "CallContext.h"
 #include "Array.h"
 #include "LastError.h"
 #include "com_kenai_jffi_Foreign.h"
@@ -72,23 +73,9 @@ typedef struct Pinned {
 #  define ARG_BUFFER_SIZE(ctx) ((ctx)->cif.nargs * PARAM_SIZE)
 
 static void
-invokeArray(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer, void* returnBuffer)
-{
-    Function* ctx = (Function *) j2p(ctxAddress);
-    FFIValue tmpValue;
-    jbyte *tmpBuffer = (jbyte *) &tmpValue;
-    void** ffiArgs = { NULL };
-    
-    if (ctx->cif.nargs > 0) {
-        tmpBuffer = alloca(ARG_BUFFER_SIZE(ctx));
-        (*env)->GetByteArrayRegion(env, paramBuffer, 0, ARG_BUFFER_SIZE(ctx), tmpBuffer);
-        ffiArgs = alloca(ctx->cif.nargs * sizeof(void *));
-        COPY_ARGS(ctx, tmpBuffer, ffiArgs);
-    }
+invokeArrayWithObjects_(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer,
+			jint objectCount, jint* infoBuffer, jobject* objectBuffer, void* retval);
 
-    ffi_call(&ctx->cif, FFI_FN(ctx->function), returnBuffer, ffiArgs);
-    SAVE_ERRNO(ctx);
-}
 
 /*
  * Class:     com_kenai_jffi_Foreign
@@ -111,7 +98,7 @@ Java_com_kenai_jffi_Foreign_invokeArrayReturnInt(JNIEnv* env, jclass self, jlong
         jbyteArray paramBuffer)
 {
     FFIValue retval;
-    invokeArray(env, ctxAddress, paramBuffer, &retval);
+    invokeArrayWithObjects_(env, ctxAddress, paramBuffer, 0, NULL, NULL, &retval);
     return_int(retval);
 }
 
@@ -125,7 +112,7 @@ Java_com_kenai_jffi_Foreign_invokeArrayReturnLong(JNIEnv* env, jclass self, jlon
         jbyteArray paramBuffer)
 {
     FFIValue retval;
-    invokeArray(env, ctxAddress, paramBuffer, &retval);
+    invokeArrayWithObjects_(env, ctxAddress, paramBuffer, 0, NULL, NULL, &retval);
     return retval.s64;
 }
 
@@ -139,7 +126,7 @@ Java_com_kenai_jffi_Foreign_invokeArrayReturnFloat(JNIEnv* env, jclass self, jlo
         jbyteArray paramBuffer)
 {
     FFIValue retval;
-    invokeArray(env, ctxAddress, paramBuffer, &retval);
+    invokeArrayWithObjects_(env, ctxAddress, paramBuffer, 0, NULL, NULL, &retval);
     return retval.f;
 }
 /*
@@ -152,7 +139,7 @@ Java_com_kenai_jffi_Foreign_invokeArrayReturnDouble(JNIEnv* env, jclass self, jl
         jbyteArray paramBuffer)
 {
     FFIValue retval;
-    invokeArray(env, ctxAddress, paramBuffer, &retval);
+    invokeArrayWithObjects_(env, ctxAddress, paramBuffer, 0, NULL, NULL, &retval);
     return retval.d;
 }
 
@@ -167,17 +154,8 @@ Java_com_kenai_jffi_Foreign_invokeArrayReturnStruct(JNIEnv* env, jclass self, jl
 {
     Function* ctx = (Function *) j2p(ctxAddress);
     jbyte* retval = alloca(ctx->cif.rtype->size);
-    jbyte* tmpBuffer;
-    void** ffiArgs;
-    int i;
 
-    ffiArgs = alloca(ctx->cif.nargs * sizeof(void *));
-    tmpBuffer = alloca(ARG_BUFFER_SIZE(ctx));
-    (*env)->GetByteArrayRegion(env, paramBuffer, 0, ARG_BUFFER_SIZE(ctx), tmpBuffer);
-    COPY_ARGS(ctx, tmpBuffer, ffiArgs);
-
-    ffi_call(&ctx->cif, FFI_FN(ctx->function), retval, ffiArgs);
-    SAVE_ERRNO(ctx);
+    invokeArrayWithObjects_(env, ctxAddress, paramBuffer, 0, NULL, NULL, retval);
     (*env)->SetByteArrayRegion(env, returnBuffer, offset, ctx->cif.rtype->size, retval);
 }
 
@@ -186,21 +164,24 @@ invokeArrayWithObjects_(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer,
         jint objectCount, jint* infoBuffer, jobject* objectBuffer, void* retval)
 {
     Function* ctx = (Function *) j2p(ctxAddress);
-    jbyte *tmpBuffer = NULL;
-    void **ffiArgs = NULL;
+    void **ffiArgs = { NULL };
     Array *arrays = NULL;
     Pinned *pinned = NULL;
-    unsigned int i, arrayCount = 0, pinnedCount = 0, paramBytes = 0;
+    int i, arrayCount = 0, pinnedCount = 0, paramBytes = 0;
 
-    arrays = alloca(objectCount * sizeof(Array));
-    pinned = alloca(objectCount * sizeof(Pinned));
+    if (unlikely(objectCount > 0)) {
+	arrays = alloca(objectCount * sizeof(Array));
+	pinned = alloca(objectCount * sizeof(Pinned));
+    }
 
-    tmpBuffer = alloca(ARG_BUFFER_SIZE(ctx));
-    (*env)->GetByteArrayRegion(env, paramBuffer, 0, ARG_BUFFER_SIZE(ctx), tmpBuffer);
-    ffiArgs = alloca(ctx->cif.nargs * sizeof(void *));
-    COPY_ARGS(ctx, tmpBuffer, ffiArgs);
+    if (ctx->cif.nargs > 0) {
+	jbyte* tmpBuffer = alloca(ARG_BUFFER_SIZE(ctx));
+	(*env)->GetByteArrayRegion(env, paramBuffer, 0, ARG_BUFFER_SIZE(ctx), tmpBuffer);
+	ffiArgs = alloca(ctx->cif.nargs * sizeof(void *));
+	COPY_ARGS(ctx, tmpBuffer, ffiArgs);
+    }
     
-    for (i = 0; i < (unsigned int) objectCount; ++i) {
+    for (i = 0; i < objectCount; ++i) {
         int type = infoBuffer[i * 3];
         jsize offset = infoBuffer[(i * 3) + 1];
         jsize length = infoBuffer[(i * 3) + 2];
@@ -254,7 +235,7 @@ invokeArrayWithObjects_(JNIEnv* env, jlong ctxAddress, jbyteArray paramBuffer,
                 
                 ptr = (*env)->GetDirectBufferAddress(env, object);
                 if (unlikely(ptr == NULL)) {
-                    throwException(env, NullPointer, "Could not get direct Buffer address");
+                    throwException(env, NullPointer, "null direct buffer address for parameter %d", idx);
                     goto cleanup;
                 }
                 ptr = ((char *) ptr + offset);
