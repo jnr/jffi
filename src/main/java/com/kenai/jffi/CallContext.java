@@ -119,10 +119,10 @@ public final class CallContext implements CallInfo {
         // garbage collected
         //
         this.returnType = returnType;
-        this.parameterTypes = (Type[]) paramTypes.clone();
+        this.parameterTypes = paramTypes.clone();
 
         this.parameterCount = paramTypes.length;
-        this.rawParameterSize = foreign.getFunctionRawParameterSize(h);
+        this.rawParameterSize = foreign.getCallContextRawParameterSize(h);
         this.parameterTypeHandles = Type.nativeHandles(paramTypes);
         this.flags = flags;
     }

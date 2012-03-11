@@ -336,40 +336,7 @@ final class Foreign {
     final native boolean VirtualFree(long addr, int size, int flags);
 
     final native boolean VirtualProtect(long addr, int size, int prot);
-    
-    /**
-     * Creates a new native function context.
-     *
-     * @param address The address of the native function to call
-     * @param returnType The return type of the function
-     * @param paramTypes The types of the parameters
-     * @param flags A bitmask of F_DEFAULT, F_STDCALL or F_NOERRNO
-     * @return The native address of a new function context
-     */
-    final native long newFunction(long address, long returnType, long[] paramTypes, int flags);
 
-    /**
-     * Frees a function context created by {@link #newFunction}
-     *
-     * @param handle The native function context to free
-     */
-    final native void freeFunction(long functionContext);
-
-    /**
-     * Gets the address of the function in a function context.
-     *
-     * @param functionContext The function context
-     * @return The address of the native function.
-     */
-    final native long getFunctionAddress(long functionContext);
-
-    /**
-     * Gets the size required to pack parameters for the function in libffi raw format.
-     * 
-     * @param functionContext The function context
-     * @return The size in bytes required to pack parameters in raw format
-     */
-    final native int getFunctionRawParameterSize(long functionContext);
 
     /**
      * Creates a new native call context.
