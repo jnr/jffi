@@ -302,17 +302,17 @@ public class UnitHelper {
             final int result;
             switch (args.length) {
                 case 0:
-                    result = Invoker.getInstance().invokeVrI(function);
+                    result = Invoker.getInstance().invokeI0(function.getCallContext(), function.getFunctionAddress());
                     break;
                 case 1:
-                    result = Invoker.getInstance().invokeIrI(function, i(args[0]));
+                    result = Invoker.getInstance().invokeI1(function.getCallContext(), function.getFunctionAddress(), i(args[0]));
                     break;
                 case 2:
-                    result = Invoker.getInstance().invokeIIrI(function,
+                    result = Invoker.getInstance().invokeI2(function.getCallContext(), function.getFunctionAddress(),
                             ((Number) args[0]).intValue(), ((Number) args[1]).intValue());
                     break;
                 case 3:
-                    result = Invoker.getInstance().invokeIIIrI(function,
+                    result = Invoker.getInstance().invokeI3(function.getCallContext(), function.getFunctionAddress(),
                             ((Number) args[0]).intValue(), ((Number) args[1]).intValue(), ((Number) args[2]).intValue());
                     break;
                 default:
@@ -336,17 +336,17 @@ public class UnitHelper {
             final long result;
             switch (args.length) {
                 case 0:
-                    result = Invoker.getInstance().invokeVrL(function);
+                    result = Invoker.getInstance().invokeL0(function.getCallContext(), function.getFunctionAddress());
                     break;
                 case 1:
-                    result = Invoker.getInstance().invokeLrL(function, ((Number) args[0]).longValue());
+                    result = Invoker.getInstance().invokeL1(function.getCallContext(), function.getFunctionAddress(), ((Number) args[0]).longValue());
                     break;
                 case 2:
-                    result = Invoker.getInstance().invokeLLrL(function,
+                    result = Invoker.getInstance().invokeL2(function.getCallContext(), function.getFunctionAddress(),
                             ((Number) args[0]).longValue(), ((Number) args[1]).longValue());
                     break;
                 case 3:
-                    result = Invoker.getInstance().invokeLLLrL(function,
+                    result = Invoker.getInstance().invokeL3(function.getCallContext(), function.getFunctionAddress(),
                             ((Number) args[0]).longValue(), ((Number) args[1]).longValue(), ((Number) args[2]).longValue());
                     break;
                 default:
@@ -374,16 +374,16 @@ public class UnitHelper {
             final long result;
             switch (args.length) {
                 case 0:
-                    result = Invoker.getInstance().invokeVrN(function);
+                    result = Invoker.getInstance().invokeN0(function.getCallContext(), function.getFunctionAddress());
                     break;
                 case 1:
-                    result = Invoker.getInstance().invokeNrN(function, l(args[0]));
+                    result = Invoker.getInstance().invokeN1(function.getCallContext(), function.getFunctionAddress(), l(args[0]));
                     break;
                 case 2:
-                    result = Invoker.getInstance().invokeNNrN(function, l(args[0]), l(args[1]));
+                    result = Invoker.getInstance().invokeN2(function.getCallContext(), function.getFunctionAddress(), l(args[0]), l(args[1]));
                     break;
                 case 3:
-                    result = Invoker.getInstance().invokeNNNrN(function, l(args[0]), l(args[1]), l(args[1]));
+                    result = Invoker.getInstance().invokeN3(function.getCallContext(), function.getFunctionAddress(), l(args[0]), l(args[1]), l(args[1]));
                     break;
                 default:
                     throw new IndexOutOfBoundsException("fast-numeric invoker limited to 3 parameters");
