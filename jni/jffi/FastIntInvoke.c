@@ -38,7 +38,6 @@
 #include "endian.h"
 #include "jffi.h"
 #include "Exception.h"
-#include "Function.h"
 #include "CallContext.h"
 #include "LastError.h"
 #include "com_kenai_jffi_Foreign.h"

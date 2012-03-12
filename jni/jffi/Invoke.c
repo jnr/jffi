@@ -43,7 +43,6 @@
 #include <jni.h>
 #include "jffi.h"
 #include "Exception.h"
-#include "Function.h"
 #include "CallContext.h"
 #include "Array.h"
 #include "LastError.h"
