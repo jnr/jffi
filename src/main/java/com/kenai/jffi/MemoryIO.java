@@ -283,7 +283,7 @@ public abstract class MemoryIO {
      * @param size The number of bytes to copy.
      */
     public final void memcpy(long dst, long src, long size) {
-        _copyMemory(src, dst, size);
+        foreign.memcpy(dst, src, size);
     }
 
     /**
@@ -294,8 +294,7 @@ public abstract class MemoryIO {
      * @param size The number of bytes to copy.
      */
     public final void memmove(long dst, long src, long size) {
-        // FIXME: the order of the arguments in the native code is wrong
-        foreign.memmove(src, dst, size);
+        foreign.memmove(dst, src, size);
     }
 
     /**
@@ -489,7 +488,7 @@ public abstract class MemoryIO {
     }
 
     /**
-     * Releases memory allocated via {@link allocateMemory} back to the system.
+     * Releases memory allocated via {@link #allocateMemory} back to the system.
      *
      * @param address The address of the memory to release.
      */

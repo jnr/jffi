@@ -135,7 +135,7 @@ Java_com_kenai_jffi_Foreign_memchr(JNIEnv* env, jobject self, jlong address, jin
  * Signature: (JJJ)V
  */
 JNIEXPORT void JNICALL
-Java_com_kenai_jffi_Foreign_memmove(JNIEnv* env, jobject self, jlong src, jlong dst, jlong size)
+Java_com_kenai_jffi_Foreign_memmove(JNIEnv* env, jobject self, jlong dst, jlong src, jlong size)
 {
       memmove(j2p(dst), j2p(src), size);
 }
@@ -146,7 +146,7 @@ Java_com_kenai_jffi_Foreign_memmove(JNIEnv* env, jobject self, jlong src, jlong 
  * Signature: (JJJ)V
  */
 JNIEXPORT void JNICALL
-Java_com_kenai_jffi_Foreign_memcpy(JNIEnv* env, jobject self, jlong src, jlong dst, jlong size)
+Java_com_kenai_jffi_Foreign_memcpy(JNIEnv* env, jobject self, jlong dst, jlong src, jlong size)
 {
       memcpy(j2p(dst), j2p(src), size);
 }
