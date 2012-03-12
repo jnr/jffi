@@ -47,6 +47,8 @@ public final class Function implements CallInfo {
     /** The address of the function */
     private final long functionAddress;
 
+    private final long contextAddress;
+
     /**
      * Creates a new instance of <tt>Function</tt> with default calling convention.
      *
@@ -66,6 +68,7 @@ public final class Function implements CallInfo {
     public Function(long address, CallContext callContext) {
         this.functionAddress = address;
         this.callContext = callContext;
+        this.contextAddress = callContext.getAddress();
     }
 
     /**
@@ -93,9 +96,9 @@ public final class Function implements CallInfo {
      * @param saveErrno Whether the errno should be saved or not
      */
     public Function(long address, Type returnType, Type[] paramTypes, CallingConvention convention, boolean saveErrno) {
-
         this.functionAddress = address;
         this.callContext = new CallContext(returnType, paramTypes, convention, saveErrno);
+        this.contextAddress = callContext.getAddress();
     }    
 
     /**
@@ -127,7 +130,7 @@ public final class Function implements CallInfo {
      * @return The address of the native function context struct.
      */
     final long getContextAddress() {
-        return callContext.getAddress();
+        return contextAddress;
     }
 
     /**
@@ -157,4 +160,7 @@ public final class Function implements CallInfo {
     public final Type getParameterType(int index) {
         return callContext.getParameterType(index);
     }
+
+    @Deprecated
+    public final void dispose() {}
 }

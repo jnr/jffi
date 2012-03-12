@@ -15,9 +15,9 @@ final class NativeObjectParameterInvoker extends ObjectParameterInvoker {
         this.foreign = foreign;
     }
     
-    public final long invokeN1O1(Function function,
-            long n1,
-            Object o1, int o1off, int o1len, ObjectParameterInfo o1flags) {
+    public final long invokeN1O1rN(Function function,
+                                   long n1,
+                                   Object o1, int o1off, int o1len, ObjectParameterInfo o1flags) {
         return foreign.invokeN1O1(function.getContextAddress(), function.getFunctionAddress(),
                 n1, 
                 o1, o1flags.asObjectInfo(), o1off, o1len);
@@ -44,9 +44,9 @@ final class NativeObjectParameterInvoker extends ObjectParameterInvoker {
      * @param o1len length of the array to use.
      * @param o1flags object flags (type, direction, parameter index).
      */
-    public final long invokeN2O1(Function function,
-            long n1, long n2,
-            Object o1, int o1off, int o1len, ObjectParameterInfo o1flags) {
+    public final long invokeN2O1rN(Function function,
+                                   long n1, long n2,
+                                   Object o1, int o1off, int o1len, ObjectParameterInfo o1flags) {
 
         return foreign.invokeN2O1(function.getContextAddress(), function.getFunctionAddress(),
                 n1, n2,
@@ -89,10 +89,10 @@ final class NativeObjectParameterInvoker extends ObjectParameterInvoker {
      * @param o2flags Object flags (direction, type, idx).
 
      */
-    public final long invokeN2O2(Function function,
-            long n1, long n2,
-            Object o1, int o1off, int o1len, ObjectParameterInfo o1flags,
-            Object o2, int o2off, int o2len, ObjectParameterInfo o2flags) {
+    public final long invokeN2O2rN(Function function,
+                                   long n1, long n2,
+                                   Object o1, int o1off, int o1len, ObjectParameterInfo o1flags,
+                                   Object o2, int o2off, int o2len, ObjectParameterInfo o2flags) {
 
         return foreign.invokeN2O2(function.getContextAddress(), function.getFunctionAddress(),
                 n1, n2,
@@ -112,9 +112,9 @@ final class NativeObjectParameterInvoker extends ObjectParameterInvoker {
      * @param o1len The length of the array to use.
      * @param o1flags Object flags (direction, type, parameter index).
      */
-    public final long invokeN3O1(Function function,
-            long n1, long n2, long n3,
-            Object o1, int o1off, int o1len, ObjectParameterInfo o1flags) {
+    public final long invokeN3O1rN(Function function,
+                                   long n1, long n2, long n3,
+                                   Object o1, int o1off, int o1len, ObjectParameterInfo o1flags) {
 
         return foreign.invokeN3O1(function.getContextAddress(), function.getFunctionAddress(),
                 n1, n2, n3, 
@@ -137,10 +137,10 @@ final class NativeObjectParameterInvoker extends ObjectParameterInvoker {
      * @param o2len The length of the array to use.
      * @param o2flags Object flags (direction, type, idx).
      */
-    public final long invokeN3O2(Function function,
-            long n1, long n2, long n3,
-            Object o1, int o1off, int o1len, ObjectParameterInfo o1flags,
-            Object o2, int o2off, int o2len, ObjectParameterInfo o2flags) {
+    public final long invokeN3O2rN(Function function,
+                                   long n1, long n2, long n3,
+                                   Object o1, int o1off, int o1len, ObjectParameterInfo o1flags,
+                                   Object o2, int o2off, int o2len, ObjectParameterInfo o2flags) {
 
         return foreign.invokeN3O2(function.getContextAddress(), function.getFunctionAddress(),
                 n1, n2, n3,
@@ -148,11 +148,11 @@ final class NativeObjectParameterInvoker extends ObjectParameterInvoker {
                 o2, o2flags.asObjectInfo(), o2off, o2len);
     }
     
-    public final long invokeN3O3(Function function,
-            long n1, long n2, long n3,
-            Object o1, int o1off, int o1len, ObjectParameterInfo o1flags,
-            Object o2, int o2off, int o2len, ObjectParameterInfo o2flags,
-            Object o3, int o3off, int o3len, ObjectParameterInfo o3flags) {
+    public final long invokeN3O3rN(Function function,
+                                   long n1, long n2, long n3,
+                                   Object o1, int o1off, int o1len, ObjectParameterInfo o1flags,
+                                   Object o2, int o2off, int o2len, ObjectParameterInfo o2flags,
+                                   Object o3, int o3off, int o3len, ObjectParameterInfo o3flags) {
 
         return foreign.invokeN3O3(function.getContextAddress(), function.getFunctionAddress(),
                 n1, n2, n3,
@@ -161,19 +161,19 @@ final class NativeObjectParameterInvoker extends ObjectParameterInvoker {
                 o3, o3flags.asObjectInfo(), o3off, o3len);
     }
 
-    public final long invokeN4O1(Function function,
-            long n1, long n2, long n3, long n4,
-            Object o1, int o1off, int o1len, ObjectParameterInfo o1flags) {
+    public final long invokeN4O1rN(Function function,
+                                   long n1, long n2, long n3, long n4,
+                                   Object o1, int o1off, int o1len, ObjectParameterInfo o1flags) {
 
         return foreign.invokeN4O1(function.getContextAddress(), function.getFunctionAddress(),
                 n1, n2, n3, n4,
                 o1, o1flags.asObjectInfo(), o1off, o1len);
     }
 
-    public final long invokeN4O2(Function function,
-            long n1, long n2, long n3, long n4,
-            Object o1, int o1off, int o1len, ObjectParameterInfo o1flags,
-            Object o2, int o2off, int o2len, ObjectParameterInfo o2flags) {
+    public final long invokeN4O2rN(Function function,
+                                   long n1, long n2, long n3, long n4,
+                                   Object o1, int o1off, int o1len, ObjectParameterInfo o1flags,
+                                   Object o2, int o2off, int o2len, ObjectParameterInfo o2flags) {
 
         return foreign.invokeN4O2(function.getContextAddress(), function.getFunctionAddress(),
                 n1, n2, n3, n4,
@@ -181,11 +181,11 @@ final class NativeObjectParameterInvoker extends ObjectParameterInvoker {
                 o2, o2flags.asObjectInfo(), o2off, o2len);
     }
     
-    public final long invokeN4O3(Function function,
-            long n1, long n2, long n3, long n4,
-            Object o1, int o1off, int o1len, ObjectParameterInfo o1flags,
-            Object o2, int o2off, int o2len, ObjectParameterInfo o2flags,
-            Object o3, int o3off, int o3len, ObjectParameterInfo o3flags) {
+    public final long invokeN4O3rN(Function function,
+                                   long n1, long n2, long n3, long n4,
+                                   Object o1, int o1off, int o1len, ObjectParameterInfo o1flags,
+                                   Object o2, int o2off, int o2len, ObjectParameterInfo o2flags,
+                                   Object o3, int o3off, int o3len, ObjectParameterInfo o3flags) {
 
         return foreign.invokeN4O3(function.getContextAddress(), function.getFunctionAddress(),
                 n1, n2, n3, n4,
@@ -195,9 +195,9 @@ final class NativeObjectParameterInvoker extends ObjectParameterInvoker {
     }
 
     @Override
-    public long invokeN5O1(Function function,
-            long n1, long n2, long n3, long n4, long n5, 
-            Object o1, int o1off, int o1len, ObjectParameterInfo o1flags) {
+    public long invokeN5O1rN(Function function,
+                             long n1, long n2, long n3, long n4, long n5,
+                             Object o1, int o1off, int o1len, ObjectParameterInfo o1flags) {
         
         return foreign.invokeN5O1(function.getContextAddress(), function.getFunctionAddress(),
                 n1, n2, n3, n4, n5,
@@ -205,10 +205,10 @@ final class NativeObjectParameterInvoker extends ObjectParameterInvoker {
     }
 
     @Override
-    public long invokeN5O2(Function function,
-            long n1, long n2, long n3, long n4, long n5, 
-            Object o1, int o1off, int o1len, ObjectParameterInfo o1flags, 
-            Object o2, int o2off, int o2len, ObjectParameterInfo o2flags) {
+    public long invokeN5O2rN(Function function,
+                             long n1, long n2, long n3, long n4, long n5,
+                             Object o1, int o1off, int o1len, ObjectParameterInfo o1flags,
+                             Object o2, int o2off, int o2len, ObjectParameterInfo o2flags) {
         
         return foreign.invokeN5O2(function.getContextAddress(), function.getFunctionAddress(),
                 n1, n2, n3, n4, n5,
@@ -216,11 +216,11 @@ final class NativeObjectParameterInvoker extends ObjectParameterInvoker {
                 o2, o2flags.asObjectInfo(), o2off, o2len);
     }
     
-    public final long invokeN5O3(Function function,
-            long n1, long n2, long n3, long n4, long n5,
-            Object o1, int o1off, int o1len, ObjectParameterInfo o1flags,
-            Object o2, int o2off, int o2len, ObjectParameterInfo o2flags,
-            Object o3, int o3off, int o3len, ObjectParameterInfo o3flags) {
+    public final long invokeN5O3rN(Function function,
+                                   long n1, long n2, long n3, long n4, long n5,
+                                   Object o1, int o1off, int o1len, ObjectParameterInfo o1flags,
+                                   Object o2, int o2off, int o2len, ObjectParameterInfo o2flags,
+                                   Object o3, int o3off, int o3len, ObjectParameterInfo o3flags) {
 
         return foreign.invokeN5O3(function.getContextAddress(), function.getFunctionAddress(),
                 n1, n2, n3, n4, n5,
@@ -230,9 +230,9 @@ final class NativeObjectParameterInvoker extends ObjectParameterInvoker {
     }
 
     @Override
-    public long invokeN6O1(Function function,
-            long n1, long n2, long n3, long n4, long n5, long n6, 
-            Object o1, int o1off, int o1len, ObjectParameterInfo o1flags) {
+    public long invokeN6O1rN(Function function,
+                             long n1, long n2, long n3, long n4, long n5, long n6,
+                             Object o1, int o1off, int o1len, ObjectParameterInfo o1flags) {
         
         return foreign.invokeN6O1(function.getContextAddress(), function.getFunctionAddress(),
                 n1, n2, n3, n4, n5, n6,
@@ -240,10 +240,10 @@ final class NativeObjectParameterInvoker extends ObjectParameterInvoker {
     }
 
     @Override
-    public long invokeN6O2(Function function,
-            long n1, long n2, long n3, long n4, long n5, long n6, 
-            Object o1, int o1off, int o1len, ObjectParameterInfo o1flags, 
-            Object o2, int o2off, int o2len, ObjectParameterInfo o2flags) {
+    public long invokeN6O2rN(Function function,
+                             long n1, long n2, long n3, long n4, long n5, long n6,
+                             Object o1, int o1off, int o1len, ObjectParameterInfo o1flags,
+                             Object o2, int o2off, int o2len, ObjectParameterInfo o2flags) {
         
         return foreign.invokeN6O2(function.getContextAddress(), function.getFunctionAddress(),
                 n1, n2, n3, n4, n5, n6,
@@ -251,11 +251,11 @@ final class NativeObjectParameterInvoker extends ObjectParameterInvoker {
                 o2, o2flags.asObjectInfo(), o2off, o2len);
     }
     
-    public final long invokeN6O3(Function function,
-            long n1, long n2, long n3, long n4, long n5, long n6,
-            Object o1, int o1off, int o1len, ObjectParameterInfo o1flags,
-            Object o2, int o2off, int o2len, ObjectParameterInfo o2flags,
-            Object o3, int o3off, int o3len, ObjectParameterInfo o3flags) {
+    public final long invokeN6O3rN(Function function,
+                                   long n1, long n2, long n3, long n4, long n5, long n6,
+                                   Object o1, int o1off, int o1len, ObjectParameterInfo o1flags,
+                                   Object o2, int o2off, int o2len, ObjectParameterInfo o2flags,
+                                   Object o3, int o3off, int o3len, ObjectParameterInfo o3flags) {
 
         return foreign.invokeN6O3(function.getContextAddress(), function.getFunctionAddress(),
                 n1, n2, n3, n4, n5, n6,

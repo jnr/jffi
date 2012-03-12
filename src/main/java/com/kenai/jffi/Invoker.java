@@ -194,7 +194,7 @@ public abstract class Invoker {
      */
     @Deprecated
     public final int invokeNoErrnoVrI(Function function) {
-        return foreign.invokeI0(function.getContextAddress(), function.getFunctionAddress());
+        return foreign.invokeI0NoErrno(function.getContextAddress(), function.getFunctionAddress());
     }
 
     /**
@@ -220,7 +220,7 @@ public abstract class Invoker {
      */
     @Deprecated
     public final int invokeNoErrnoIrI(Function function, int arg1) {
-        return foreign.invokeI1(function.getContextAddress(), function.getFunctionAddress(), arg1);
+        return foreign.invokeI1NoErrno(function.getContextAddress(), function.getFunctionAddress(), arg1);
     }
 
     /**
@@ -248,7 +248,7 @@ public abstract class Invoker {
      */
     @Deprecated
     public final int invokeNoErrnoIIrI(Function function, int arg1, int arg2) {
-        return foreign.invokeI2(function.getContextAddress(), function.getFunctionAddress(), arg1, arg2);
+        return foreign.invokeI2NoErrno(function.getContextAddress(), function.getFunctionAddress(), arg1, arg2);
     }
 
     /**
@@ -278,7 +278,7 @@ public abstract class Invoker {
      */
     @Deprecated
     public final int invokeNoErrnoIIIrI(Function function, int arg1, int arg2, int arg3) {
-        return foreign.invokeI3(function.getContextAddress(), function.getFunctionAddress(), arg1, arg2, arg3);
+        return foreign.invokeI3NoErrno(function.getContextAddress(), function.getFunctionAddress(), arg1, arg2, arg3);
     }
 
     /**
