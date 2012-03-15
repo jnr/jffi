@@ -35,6 +35,7 @@
 #include "Exception.h"
 #include "com_kenai_jffi_Foreign.h"
 #include "LastError.h"
+#include "CallContext.h"
 #include "jffi.h"
 
 /*
@@ -48,3 +49,13 @@ Java_com_kenai_jffi_Foreign_getSaveErrnoFunction(JNIEnv *env, jobject self)
     return p2j(jffi_save_errno);
 }
 
+/*
+ * Class:     com_kenai_jffi_Foreign
+ * Method:    getSaveErrnoFunction
+ * Signature: ()J
+ */
+JNIEXPORT jlong JNICALL
+Java_com_kenai_jffi_Foreign_getSaveErrnoCtxFunction(JNIEnv *env, jobject self)
+{
+    return p2j(jffi_save_errno_ctx);
+}

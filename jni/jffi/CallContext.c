@@ -251,3 +251,9 @@ Java_com_kenai_jffi_Foreign_getCallContextRawParameterSize(JNIEnv* env, jobject 
     return ctx->rawParameterSize;
 }
 
+JNIEXPORT void JNICALL 
+Java_com_kenai_jffi_Foreign_setCallContextErrorFunction(JNIEnv* env, jobject self, jlong handle, jlong fn)
+{
+    CallContext* ctx = (CallContext *) j2p(handle);
+    ctx->error_fn = j2p(fn);
+}

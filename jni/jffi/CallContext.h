@@ -42,15 +42,17 @@ typedef struct CallContext {
     ffi_type** ffiParamTypes;
     int* rawParamOffsets;
     bool saveErrno;
-    void* reserved0; // Function address - just used to pad this struct to match Function
     bool isFastInt;
     bool isFastLong;
     long resultMask;
+    int (*error_fn)(void);
 } CallContext;
+
+extern void jffi_save_errno_ctx(CallContext* ctx);
 
 #define SAVE_ERRNO(ctx) do { \
     if (unlikely(ctx->saveErrno)) { \
-        jffi_save_errno(); \
+        jffi_save_errno_ctx(ctx); \
     } \
 } while(0)
 

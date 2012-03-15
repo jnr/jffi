@@ -1314,6 +1314,8 @@ final class Foreign {
     final native void unregisterNativeMethods(Class clazz);
 
     final native long getSaveErrnoFunction();
+    final native void setCallContextErrorFunction(long ctx, long fn);
+    final native long getSaveErrnoCtxFunction();
 
 
     final native int getJNIVersion();

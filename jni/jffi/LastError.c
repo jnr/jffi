@@ -37,6 +37,7 @@
 #endif
 #include <jni.h>
 #include "LastError.h"
+#include "CallContext.h"
 
 #if defined(_WIN32)
 static __thread int last_error = 0;
@@ -83,5 +84,23 @@ jffi_save_errno(void)
     // printf("JFFI Saving ERRNO: %d on thread %d\n", last_error, (int)GetCurrentThreadId());
 #else
     thread_data_get()->error = errno;
+#endif
+}
+
+void
+jffi_save_errno_ctx(CallContext* ctx)
+{
+#ifdef _WIN32
+    if (unlikely(ctx->error_fn != NULL)) {
+	last_error = (*ctx->error_fn)();
+    } else {
+	last_error = GetLastError();
+    }
+#else
+    if (unlikely(ctx->error_fn != NULL)) {
+	thread_data_get()->error = (*ctx->error_fn)();
+    } else {
+	thread_data_get()->error = errno;
+    }
 #endif
 }
