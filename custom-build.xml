@@ -2,14 +2,25 @@
 
 <project name="custom-build" default="default" basedir=".">
     <target name="-compile-java"/>
-    <target name="build-native" depends="-build-platform-jar, -assemble-final-jar"/>
-
+    <target name="build-native" depends="-init, -build-platform-jar, -assemble-final-jar"/>
     <target name="-init-vars">
+	<property name="src.dir" location="src/main/java"/>
+	<property name="src.test.dir" location="src/test/java"/>
+	<property name="build.dir" location="build"/>
+	<property name="dist.dir"  location="dist"/>
+
+	<property name="build.classes.dir" location="${build.dir}/classes"/>
+	<property name="build.test.dir" location="${build.dir}/test"/>
+	<property name="dist.jar"  value="${dist.dir}/jffi.jar"/>
+        <property name="complete.jar" value="${dist.dir}/jffi-complete.jar"/>
         <property name="build.native.dir" location="${build.dir}/jni"/>
         <property name="src.native.dir" location="jni"/>
-        <property name="complete.jar" value="${dist.dir}/jffi-complete.jar"/>
-        <property name="ant.build.javac.target" value="1.5"/>
+	<property name="ant.build.javac.target" value="1.5"/>
+	<property name="ant.build.javac.source" value="1.5"/>
+	<property name="ant.build.javac.includeantruntime" value="false"/>
+
         <mkdir dir="${build.native.dir}"/>
+
         
         <!-- normalize the various os.arch naming conventions -->
         <condition property="platform.cpu" value="i386">
@@ -70,9 +81,11 @@
           <not><isset property="make.exe"/></not>
         </condition>
     </target>
-    <target name="-generate-version" depends="init,-init-vars,-generate-version-source">
-        <javac target="1.5" destdir="${build.classes.dir}" srcdir="${build.dir}/java"/>
+
+    <target name="-generate-version" depends="-init,-init-vars,-generate-version-source">
+        <javac target="1.5" destdir="${build.classes.dir}" srcdir="${build.dir}/java" includeantruntime="false"/>
     </target>
+
     <target name="-generate-native-headers" depends="-init-vars,-generate-version,-compile-java">
         <mkdir dir="${build.native.dir}"/>
         <mkdir dir="${build.classes.dir}"/>
@@ -137,7 +150,7 @@
 
     </target>
 
-    <target name="cross-mingw32" depends="init, -generate-native-headers">
+    <target name="cross-mingw32" depends="-init, -generate-native-headers">
         <mkdir dir="${build.native.dir}"/>
 
         <exec executable="${make.exe}" failonerror="true">

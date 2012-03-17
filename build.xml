@@ -1,77 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- You may freely edit this file. See commented blocks below for -->
-<!-- some examples of how to customize the build. -->
-<!-- (If you delete it and reopen the project it will be recreated.) -->
-<!-- By default, only the Clean and Build commands use this build script. -->
-<!-- Commands such as Run, Debug, and Test only use this build script if -->
-<!-- the Compile on Save feature is turned off for the project. -->
-<!-- You can turn off the Compile on Save (or Deploy on Save) setting -->
-<!-- in the project's Project Properties dialog box.-->
-
 <project name="jffi" default="default" basedir=".">
     <description>Builds, tests, and runs the project jffi.</description>
-    <import file="nbproject/build-impl.xml"/>
-    <!--
+    <path id="classpath.test">
+      <pathelement location="lib/junit_4/junit-4.5.jar"/>
+      <pathelement location="lib/junit_4/junit-4.5-api.jar"/>
+    </path>
 
-    There exist several targets which are by default empty and which can be 
-    used for execution of your tasks. These targets are usually executed 
-    before and after some main targets. They are: 
-
-      -pre-init:                 called before initialization of project properties
-      -post-init:                called after initialization of project properties
-      -pre-compile:              called before javac compilation
-      -post-compile:             called after javac compilation
-      -pre-compile-single:       called before javac compilation of single file
-      -post-compile-single:      called after javac compilation of single file
-      -pre-compile-test:         called before javac compilation of JUnit tests
-      -post-compile-test:        called after javac compilation of JUnit tests
-      -pre-compile-test-single:  called before javac compilation of single JUnit test
-      -post-compile-test-single: called after javac compilation of single JUunit test
-      -pre-jar:                  called before JAR building
-      -post-jar:                 called after JAR building
-      -post-clean:               called after cleaning build products
-
-    (Targets beginning with '-' are not intended to be called on their own.)
-
-    Example of inserting an obfuscator after compilation could look like this:
-
-        <target name="-post-compile">
-            <obfuscate>
-                <fileset dir="${build.classes.dir}"/>
-            </obfuscate>
-        </target>
-
-    For list of available properties check the imported 
-    nbproject/build-impl.xml file. 
-
-
-    Another way to customize the build is by overriding existing main targets.
-    The targets of interest are: 
-
-      -init-macrodef-javac:     defines macro for javac compilation
-      -init-macrodef-junit:     defines macro for junit execution
-      -init-macrodef-debug:     defines macro for class debugging
-      -init-macrodef-java:      defines macro for class execution
-      -do-jar-with-manifest:    JAR building (if you are using a manifest)
-      -do-jar-without-manifest: JAR building (if you are not using a manifest)
-      run:                      execution of project 
-      -javadoc-build:           Javadoc generation
-      test-report:              JUnit report generation
-
-    An example of overriding the target for project execution could look like this:
-
-        <target name="run" depends="jffi-impl.jar">
-            <exec dir="bin" executable="launcher.exe">
-                <arg file="${dist.jar}"/>
-            </exec>
-        </target>
-
-    Notice that the overridden target depends on the jar target and not only on 
-    the compile target as the regular run target does. Again, for a list of available 
-    properties which you can use, check the target you are overriding in the
-    nbproject/build-impl.xml file. 
-
-    -->
     <target name="-pre-init">
         <!-- d32/d64 options are not supported on Windows -->
         <condition property="run.jvm.model" value="">
@@ -99,12 +33,79 @@
         <property name="run.jvmargs" value="${run.jvm.model} -Djffi.library.path=build/jni -Djffi.boot.library.path=build/jni"/>
     </target>
 
+
+    <target name="-init" depends="-pre-init,-init-vars,-post-init">
+      <!-- Create the time stamp -->
+      <tstamp/>
+      <!-- Create the build directory structure used by compile -->
+      <mkdir dir="${build.dir}"/>
+    </target>
+
     <import file="custom-build.xml"/>
     <import file="version.xml"/>
+
+
+    <target name="-pre-jar"/>
     <target name="-post-init" depends="-init-vars"/>
+    <target name="-pre-compile" depends="-init"/>
     <target name="-post-compile" depends="-build-native-library"/>
+    <target name="-pre-compile-test" depends="-init"/>
     <target name="-post-compile-test" depends="-build-native-testlib"/>
     <target name="-post-jar" depends="-assemble-final-jar"/>
 
+    <target name="-do-compile" depends="-init">
+      <mkdir dir="${build.classes.dir}"/>
+      <!-- Compile the java code from ${src} into ${build} -->
+      <javac srcdir="${src.dir}" destdir="${build.classes.dir}" includeantruntime="false"/>
+    </target>
+
     <target name="-compile-java" depends="-do-compile"/>
+    <target name="compile" depends="-init,-pre-compile,-do-compile,-post-compile">
+    </target>
+
+    <target name="clean" depends="-init">
+      <delete dir="${build.dir}"/>
+      <delete dir="${dist.dir}"/>
+    </target>
+
+    <target name="jar" depends="-init,-pre-jar,-do-jar,-post-jar"/>
+
+    <target name="-do-jar" depends="-init,compile">
+      <mkdir dir="${dist.dir}"/>
+      <jar destfile="${dist.jar}" basedir="${build.classes.dir}" compress="true"/>
+    </target>
+
+    <target name="test" depends="compile,-compile-test">
+      <junit fork="yes" printsummary="yes" haltonfailure="yes">
+	<jvmarg value="${run.jvm.model}"/>
+	<classpath>
+	  <pathelement location="${build.classes.dir}"/>
+	  <pathelement location="${build.test.dir}/classes"/>
+	  <pathelement location="lib/junit_4/junit-4.5.jar"/>
+	</classpath>
+	<sysproperty key="java.library.path" value="${build.native.dir}"/>
+
+	<batchtest fork="yes" todir="${build.test.dir}/results">
+	  <fileset dir="${src.test.dir}">
+	    <include name="**/*Test*.java"/>
+	  </fileset>
+	</batchtest>
+
+      </junit>
+    </target>
+
+    <target name="-compile-test" depends="-pre-compile-test,-do-compile-test,-post-compile-test"/>
+
+
+    <target name="-do-compile-test" depends="-init">
+      <mkdir dir="${build.test.dir}/classes"/>
+      <!-- Compile the java code from ${src} into ${build} -->
+      <javac srcdir="${src.test.dir}" destdir="${build.test.dir}/classes" includeantruntime="false" classpathref="classpath.test">
+	<classpath>
+	  <pathelement location="${build.classes.dir}"/>
+	  <pathelement location="lib/junit_4/junit-4.5.jar"/>
+	</classpath>
+      </javac>
+    </target>
+
 </project>
