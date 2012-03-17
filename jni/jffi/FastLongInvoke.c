@@ -32,6 +32,9 @@
 
 #include <sys/types.h>
 #include <stdlib.h>
+#ifdef __sun
+# include <alloca.h>
+#endif
 #include <errno.h>
 #include <ffi.h>
 #include <jni.h>

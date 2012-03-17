@@ -32,6 +32,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#ifdef __sun
+# include <alloca.h>
+#endif
 #include <stdint.h>
 #include <stdbool.h>
 #include <jni.h>
