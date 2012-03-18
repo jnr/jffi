@@ -183,7 +183,7 @@ public abstract class Type {
     /**
      * Creates a <tt>Type</tt> instance for builtin types.
      *
-     * @param type The builtin type enum.
+     * @param nativeType The builtin type enum.
      * @return A <tt>Type</tt> instance.
      */
     private static final Type builtin(NativeType nativeType) {
@@ -205,7 +205,11 @@ public abstract class Type {
         }
         
         public final long handle() {
-            return BuiltinTypeInfo.find(nativeType).handle;
+            long handle = BuiltinTypeInfo.find(nativeType).handle;
+            if (handle != 0L) {
+                return handle;
+            }
+            throw new RuntimeException("invalid handle for native type " + nativeType);
         }
         
         public final int size() {
@@ -239,26 +243,30 @@ public abstract class Type {
             typeMap = new BuiltinTypeInfo[nativeTypes.length];
             for (int i = 0; i < typeMap.length; ++i) {
                 long h = Foreign.getInstance().lookupBuiltinType(nativeTypes[i].ffiType);
-                if (h == 0L) {
-                    throw new RuntimeException("invalid native type " + nativeTypes[i]);
+                int type, size, alignment;
+                if (h != 0L) {
+                    type = Foreign.getInstance().getTypeType(h);
+                    size = Foreign.getInstance().getTypeSize(h);
+                    alignment = Foreign.getInstance().getTypeAlign(h);
+                } else {
+                    // Don't fail initialization, setup a dummy type
+                    type = nativeTypes[i].ffiType;
+                    size = 0;
+                    alignment = 0;
                 }
-                
-                typeMap[i] = new BuiltinTypeInfo(h);
+                typeMap[i] = new BuiltinTypeInfo(h, type, size, alignment);
             }
         }
 
-        static final BuiltinTypeInfo find(NativeType t) {
+        static BuiltinTypeInfo find(NativeType t) {
             return typeMap[t.ordinal()];
         }
 
-        private BuiltinTypeInfo(long handle) {
-            if (handle == 0L) {
-                throw new NullPointerException("null ffi_type handle");
-            }
+        private BuiltinTypeInfo(long handle, int type, int size, int alignment) {
             this.handle = handle;
-            this.type = Foreign.getInstance().getTypeType(handle);
-            this.size = Foreign.getInstance().getTypeSize(handle);
-            this.alignment = Foreign.getInstance().getTypeAlign(handle);
+            this.type = type;
+            this.size = size;
+            this.alignment = alignment;
         }
     }
 }

@@ -57,7 +57,8 @@ public enum NativeType {
     UINT(Foreign.TYPE_UINT),
     SINT(Foreign.TYPE_SINT),
     ULONG(Foreign.TYPE_ULONG),
-    SLONG(Foreign.TYPE_SLONG);
+    SLONG(Foreign.TYPE_SLONG),
+    STRUCT(Foreign.TYPE_STRUCT);
 
     final int ffiType;
 
