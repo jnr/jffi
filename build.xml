@@ -76,7 +76,8 @@
     </target>
 
     <target name="test" depends="compile,-compile-test">
-      <junit fork="yes" printsummary="yes" haltonfailure="yes">
+      <mkdir dir="${build.test.dir}/results"/>
+      <junit fork="yes" printsummary="yes" haltonfailure="false">
 	<jvmarg value="${run.jvm.model}"/>
 	<classpath>
 	  <pathelement location="${build.classes.dir}"/>
@@ -85,6 +86,7 @@
 	</classpath>
 	<sysproperty key="java.library.path" value="${build.native.dir}"/>
 
+        <formatter type="plain" /> <!-- to file -->
 	<batchtest fork="yes" todir="${build.test.dir}/results">
 	  <fileset dir="${src.test.dir}">
 	    <include name="**/*Test*.java"/>
