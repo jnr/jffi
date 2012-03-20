@@ -8,16 +8,18 @@ public final class ObjectParameterInfo {
     public static ObjectParameterInfo create(int parameterIndex, ObjectType objectType, 
             ComponentType componentType, int ioflags) {
 
-        return new ObjectParameterInfo(parameterIndex, objectType, componentType, ioflags);
+        return new ObjectParameterInfo(parameterIndex, ioflags, objectType.value | componentType.value);
     }
 
-    /* Stop ArrayFlags from being intantiated */
-    private ObjectParameterInfo(int parameterIndex, ObjectType objectType, 
-            ComponentType componentType, int ioflags) {
-        
+    public static ObjectParameterInfo create(int parameterIndex, int ioflags) {
+
+        return new ObjectParameterInfo(parameterIndex, ioflags, 0);
+    }
+
+    private ObjectParameterInfo(int parameterIndex, int ioflags, int typeInfo) {
+
         this.parameterIndex = parameterIndex;
-        this.objectInfo = ObjectBuffer.makeObjectFlags(ioflags,
-                objectType.value | componentType.value, parameterIndex);
+        this.objectInfo = ObjectBuffer.makeObjectFlags(ioflags, typeInfo, parameterIndex);
     }
 
     /** Copy the array contents to native memory before calling the function */
@@ -35,39 +37,67 @@ public final class ObjectParameterInfo {
     /** For OUT arrays, clear the native memory area before passing to the native function */
     public static final int CLEAR = ObjectBuffer.CLEAR;
 
-    public static final class ObjectType {
+    public static final ObjectType ARRAY = ObjectType.ARRAY;
+    public static final ObjectType BUFFER = ObjectType.BUFFER;
+
+
+    public static enum ObjectType {
+        ARRAY(ObjectBuffer.ARRAY),
+        BUFFER(ObjectBuffer.BUFFER);
+
         final int value;
 
         ObjectType(int type) {
             this.value = type;
         }
     }
-    
-    public static final ObjectType ARRAY = new ObjectType(ObjectBuffer.ARRAY);
-    public static final ObjectType BUFFER = new ObjectType(ObjectBuffer.BUFFER);
-    
-    public static final class ComponentType {
+
+    public static enum ComponentType {
+        BYTE(ObjectBuffer.BYTE),
+        SHORT(ObjectBuffer.SHORT),
+        INT(ObjectBuffer.INT),
+        LONG(ObjectBuffer.LONG),
+        FLOAT(ObjectBuffer.FLOAT),
+        DOUBLE(ObjectBuffer.DOUBLE),
+        BOOLEAN(ObjectBuffer.BOOLEAN),
+        CHAR(ObjectBuffer.CHAR);
+
         final int value;
 
         ComponentType(int type) {
             this.value = type;
         }
     }
-    
-    public static final ComponentType BYTE = new ComponentType(ObjectBuffer.BYTE);
-    public static final ComponentType SHORT = new ComponentType(ObjectBuffer.SHORT);
-    public static final ComponentType INT = new ComponentType(ObjectBuffer.INT);
-    public static final ComponentType LONG = new ComponentType(ObjectBuffer.LONG);
-    public static final ComponentType FLOAT = new ComponentType(ObjectBuffer.FLOAT);
-    public static final ComponentType DOUBLE = new ComponentType(ObjectBuffer.DOUBLE);
-    public static final ComponentType BOOLEAN = new ComponentType(ObjectBuffer.BOOLEAN);
-    public static final ComponentType CHAR = new ComponentType(ObjectBuffer.CHAR);
-    
+
+    public static final ComponentType BYTE = ComponentType.BYTE;
+    public static final ComponentType SHORT = ComponentType.SHORT;
+    public static final ComponentType INT = ComponentType.INT;
+    public static final ComponentType LONG = ComponentType.LONG;
+    public static final ComponentType FLOAT = ComponentType.FLOAT;
+    public static final ComponentType DOUBLE = ComponentType.DOUBLE;
+    public static final ComponentType BOOLEAN = ComponentType.BOOLEAN;
+    public static final ComponentType CHAR = ComponentType.CHAR;
+
     final int asObjectInfo() {
         return objectInfo;
     }
 
     public final int getParameterIndex() {
         return parameterIndex;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ObjectParameterInfo info = (ObjectParameterInfo) o;
+
+        return objectInfo == info.objectInfo && parameterIndex == info.parameterIndex;
+    }
+
+    @Override
+    public int hashCode() {
+        return 31 * parameterIndex + objectInfo;
     }
 }

@@ -802,14 +802,14 @@ public abstract class Invoker {
                                  long n1,
                                  Object o1, ObjectParameterStrategy s1, ObjectParameterInfo o1info) {
         return foreign.invokeN1O1(ctx.getAddress(), function, n1,
-                s1.object(o1), o1info.asObjectInfo(), s1.offset(o1), s1.length(o1));
+                s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1));
     }
 
     public final long invokeN2O1(CallContext ctx, long function,
                                  long n1, long n2,
                                  Object o1, ObjectParameterStrategy s1, ObjectParameterInfo o1info) {
         return foreign.invokeN2O1(ctx.getAddress(), function, n1, n2,
-                s1.object(o1), o1info.asObjectInfo(), s1.offset(o1), s1.length(o1));
+                s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1));
     }
 
     public final long invokeN2O2(CallContext ctx, long function,
@@ -817,8 +817,8 @@ public abstract class Invoker {
                                  Object o1, ObjectParameterStrategy s1, ObjectParameterInfo o1info,
                                  Object o2, ObjectParameterStrategy s2, ObjectParameterInfo o2info) {
         return foreign.invokeN2O2(ctx.getAddress(), function, n1, n2,
-                s1.object(o1), o1info.asObjectInfo(), s1.offset(o1), s1.length(o1),
-                s2.object(o2), o2info.asObjectInfo(), s2.offset(o2), s2.length(o2));
+                s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1),
+                s2.object(o2), s2.objectInfo(o2info), s2.offset(o2), s2.length(o2));
     }
 
 
@@ -826,7 +826,7 @@ public abstract class Invoker {
                                  long n1, long n2, long n3,
                                  Object o1, ObjectParameterStrategy s1, ObjectParameterInfo o1info) {
         return foreign.invokeN3O1(ctx.getAddress(), function, n1, n2, n3,
-                s1.object(o1), o1info.asObjectInfo(), s1.offset(o1), s1.length(o1));
+                s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1));
     }
 
     public final long invokeN3O2(CallContext ctx, long function,
@@ -834,8 +834,8 @@ public abstract class Invoker {
                                  Object o1, ObjectParameterStrategy s1, ObjectParameterInfo o1info,
                                  Object o2, ObjectParameterStrategy s2, ObjectParameterInfo o2info) {
         return foreign.invokeN3O2(ctx.getAddress(), function, n1, n2, n3,
-                s1.object(o1), o1info.asObjectInfo(), s1.offset(o1), s1.length(o1),
-                s2.object(o2), o2info.asObjectInfo(), s2.offset(o2), s2.length(o2));
+                s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1),
+                s2.object(o2), s2.objectInfo(o2info), s2.offset(o2), s2.length(o2));
     }
 
     public final long invokeN3O3(CallContext ctx, long function,
@@ -844,9 +844,9 @@ public abstract class Invoker {
                                  Object o2, ObjectParameterStrategy s2, ObjectParameterInfo o2info,
                                  Object o3, ObjectParameterStrategy s3, ObjectParameterInfo o3info) {
         return foreign.invokeN3O3(ctx.getAddress(), function, n1, n2, n3,
-                s1.object(o1), o1info.asObjectInfo(), s1.offset(o1), s1.length(o1),
-                s2.object(o2), o2info.asObjectInfo(), s2.offset(o2), s2.length(o2),
-                s3.object(o3), o3info.asObjectInfo(), s3.offset(o3), s3.length(o3));
+                s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1),
+                s2.object(o2), s2.objectInfo(o2info), s2.offset(o2), s2.length(o2),
+                s3.object(o3), s3.objectInfo(o3info), s3.offset(o3), s3.length(o3));
     }
 
 
@@ -855,7 +855,7 @@ public abstract class Invoker {
                                   Object o1, ObjectParameterStrategy s1, ObjectParameterInfo o1info) {
         if (objCount == 1) {
             return foreign.invokeN1O1(ctx.getAddress(), function, n1,
-                    s1.object(o1), o1info.asObjectInfo(), s1.offset(o1), s1.length(o1));
+                    s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1));
 
         } else {
             throw newObjectCountError(objCount);
@@ -867,7 +867,7 @@ public abstract class Invoker {
                                   Object o1, ObjectParameterStrategy s1, ObjectParameterInfo o1info) {
         if (objCount == 1) {
             return foreign.invokeN2O1(ctx.getAddress(), function, n1, n2,
-                    s1.object(o1), o1info.asObjectInfo(), s1.offset(o1), s1.length(o1));
+                    s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1));
         } else {
             throw newObjectCountError(objCount);
         }
@@ -888,13 +888,13 @@ public abstract class Invoker {
             }
 
             return foreign.invokeN2O1(ctx.getAddress(), function, n1, n2,
-                s1.object(o1), o1info.asObjectInfo(), s1.offset(o1), s1.length(o1));
+                    s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1));
 
         } else if (objCount == 2) {
             // Two objects to be passed as heap objects, just use both arguments as-is
             return foreign.invokeN2O2(ctx.getAddress(), function, n1, n2,
-                s1.object(o1), o1info.asObjectInfo(), s1.offset(o1), s1.length(o1),
-                s2.object(o2), o2info.asObjectInfo(), s2.offset(o2), s2.length(o2));
+                s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1),
+                s2.object(o2), s2.objectInfo(o2info), s2.offset(o2), s2.length(o2));
 
         } else {
             throw newObjectCountError(objCount);
@@ -906,7 +906,7 @@ public abstract class Invoker {
             Object o1, ObjectParameterStrategy s1, ObjectParameterInfo o1info) {
         if (objCount == 1) {
             return foreign.invokeN3O1(ctx.getAddress(), function, n1, n2, n3,
-                s1.object(o1), o1info.asObjectInfo(), s1.offset(o1), s1.length(o1));
+                    s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1));
         } else {
             throw newObjectCountError(objCount);
         }
@@ -928,12 +928,12 @@ public abstract class Invoker {
             }
 
             return foreign.invokeN3O1(ctx.getAddress(), function, n1, n2, n3,
-                    s1.object(o1), o1info.asObjectInfo(), s1.offset(o1), s1.length(o1));
+                    s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1));
 
         } else if (objCount == 2) {
             return foreign.invokeN3O2(ctx.getAddress(), function, n1, n2, n3,
-                    s1.object(o1), o1info.asObjectInfo(), s1.offset(o1), s1.length(o1),
-                    s2.object(o2), o2info.asObjectInfo(), s2.offset(o2), s2.length(o2));
+                    s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1),
+                    s2.object(o2), s2.objectInfo(o2info), s2.offset(o2), s2.length(o2));
 
         } else {
             throw newObjectCountError(objCount);
@@ -967,7 +967,7 @@ public abstract class Invoker {
             if (objCount == 1) {
 
                 return foreign.invokeN3O1(ctx.getAddress(), function, n1, n2, n3,
-                        s1.object(o1), o1info.asObjectInfo(), s1.offset(o1), s1.length(o1));
+                        s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1));
 
             } else if (objCount == 2) {
                 // Sort out which is the second non-direct object
@@ -983,8 +983,8 @@ public abstract class Invoker {
                 }
 
                 return foreign.invokeN3O2(ctx.getAddress(), function, n1, n2, n3,
-                        s1.object(o1), o1info.asObjectInfo(), s1.offset(o1), s1.length(o1),
-                        s2.object(o2), o2info.asObjectInfo(), s2.offset(o2), s2.length(o2));
+                        s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1),
+                        s2.object(o2), s2.objectInfo(o2info), s2.offset(o2), s2.length(o2));
             } else {
                 throw newObjectCountError(objCount);
             }
@@ -992,9 +992,9 @@ public abstract class Invoker {
 
         // Three objects to be passed as heap objects, just use all arguments as-is
         return foreign.invokeN3O3(ctx.getAddress(), function, n1, n2, n3,
-                s1.object(o1), o1info.asObjectInfo(), s1.offset(o1), s1.length(o1),
-                s2.object(o2), o2info.asObjectInfo(), s2.offset(o2), s2.length(o2),
-                s3.object(o3), o3info.asObjectInfo(), s3.offset(o3), s3.length(o3));
+                s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1),
+                s2.object(o2), s2.objectInfo(o2info), s2.offset(o2), s2.length(o2),
+                s3.object(o3), s3.objectInfo(o3info), s3.offset(o3), s3.length(o3));
     }
 
     public final long invokeN4(CallContext ctx, long function,
@@ -1003,7 +1003,7 @@ public abstract class Invoker {
 
         if (objCount == 1) {
             return foreign.invokeN4O1(ctx.getAddress(), function, n1, n2, n3, n4,
-                    s1.object(o1), o1info.asObjectInfo(), s1.offset(o1), s1.length(o1));
+                    s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1));
         } else {
             throw newObjectCountError(objCount);
         }
@@ -1026,13 +1026,13 @@ public abstract class Invoker {
             }
 
             return foreign.invokeN4O1(ctx.getAddress(), function, n1, n2, n3, n4,
-                    s1.object(o1), o1info.asObjectInfo(), s1.offset(o1), s1.length(o1));
+                    s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1));
 
         } else if (objCount == 2) {
             // Two objects to be passed as heap objects, just use both arguments as-is
             return foreign.invokeN4O2(ctx.getAddress(), function, n1, n2, n3, n4,
-                    s1.object(o1), o1info.asObjectInfo(), s1.offset(o1), s1.length(o1),
-                    s2.object(o2), o2info.asObjectInfo(), s2.offset(o2), s2.length(o2));
+                    s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1),
+                    s2.object(o2), s2.objectInfo(o2info), s2.offset(o2), s2.length(o2));
 
         } else {
             throw newObjectCountError(objCount);
@@ -1066,7 +1066,7 @@ public abstract class Invoker {
 
             if (objCount == 1) {
                 return foreign.invokeN4O1(ctx.getAddress(), function, n1, n2, n3, n4,
-                        s1.object(o1), o1info.asObjectInfo(), s1.offset(o1), s1.length(o1));
+                        s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1));
 
             } else if (objCount == 2) {
                 // Sort out which is the second non-direct object
@@ -1083,8 +1083,8 @@ public abstract class Invoker {
                 }
 
                 return foreign.invokeN4O2(ctx.getAddress(), function, n1, n2, n3, n4,
-                        s1.object(o1), o1info.asObjectInfo(), s1.offset(o1), s1.length(o1),
-                        s2.object(o2), o2info.asObjectInfo(), s2.offset(o2), s2.length(o2));
+                        s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1),
+                        s2.object(o2), s2.objectInfo(o2info), s2.offset(o2), s2.length(o2));
             } else {
                 throw newObjectCountError(objCount);
             }
@@ -1092,9 +1092,9 @@ public abstract class Invoker {
 
         // Three objects to be passed as heap objects, just use all arguments as-is
         return foreign.invokeN4O3(ctx.getAddress(), function, n1, n2, n3, n4,
-                s1.object(o1), o1info.asObjectInfo(), s1.offset(o1), s1.length(o1),
-                s2.object(o2), o2info.asObjectInfo(), s2.offset(o2), s2.length(o2),
-                s3.object(o3), o3info.asObjectInfo(), s3.offset(o3), s3.length(o3));
+                s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1),
+                s2.object(o2), s2.objectInfo(o2info), s2.offset(o2), s2.length(o2),
+                s3.object(o3), s3.objectInfo(o3info), s3.offset(o3), s3.length(o3));
     }
 
     public final long invokeN4(CallContext ctx, long function,
@@ -1128,7 +1128,7 @@ public abstract class Invoker {
 
         if (objCount == 1) {
             return foreign.invokeN4O1(ctx.getAddress(), function, n1, n2, n3, n4,
-                    s1.object(o1), o1info.asObjectInfo(), s1.offset(o1), s1.length(o1));
+                    s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1));
         }
 
         // Sort out which is the second non-direct object
@@ -1149,8 +1149,8 @@ public abstract class Invoker {
         
         if (objCount == 2) {
             return foreign.invokeN4O2(ctx.getAddress(), function, n1, n2, n3, n4,
-                    s1.object(o1), o1info.asObjectInfo(), s1.offset(o1), s1.length(o1),
-                    s2.object(o2), o2info.asObjectInfo(), s2.offset(o2), s2.length(o2));
+                    s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1),
+                    s2.object(o2), s2.objectInfo(o2info), s2.offset(o2), s2.length(o2));
         }
         
         // Sort out third parameter
@@ -1167,9 +1167,9 @@ public abstract class Invoker {
 
         if (objCount == 3) {
             return foreign.invokeN4O3(ctx.getAddress(), function, n1, n2, n3, n4,
-                    s1.object(o1), o1info.asObjectInfo(), s1.offset(o1), s1.length(o1),
-                    s2.object(o2), o2info.asObjectInfo(), s2.offset(o2), s2.length(o2),
-                    s3.object(o3), o3info.asObjectInfo(), s3.offset(o3), s3.length(o3));
+                    s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1),
+                    s2.object(o2), s2.objectInfo(o2info), s2.offset(o2), s2.length(o2),
+                    s3.object(o3), s3.objectInfo(o3info), s3.offset(o3), s3.length(o3));
 
         } else {
             throw newObjectCountError(objCount);

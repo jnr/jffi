@@ -36,20 +36,41 @@ package com.kenai.jffi;
  */
 abstract public class ObjectParameterStrategy {
     private final boolean isDirect;
+    final int typeInfo;
     protected static enum StrategyType { DIRECT, HEAP }
     protected static final StrategyType DIRECT = StrategyType.DIRECT;
     protected static final StrategyType HEAP = StrategyType.HEAP;
 
     public ObjectParameterStrategy(boolean isDirect) {
+        this(isDirect, ObjectParameterType.INVALID);
+    }
+
+    public ObjectParameterStrategy(boolean isDirect, ObjectParameterType type) {
         this.isDirect = isDirect;
+        this.typeInfo = type.typeInfo;
     }
 
     public ObjectParameterStrategy(StrategyType type) {
-        this.isDirect = type == DIRECT;
+        this(type, ObjectParameterType.INVALID);
+    }
+
+    public ObjectParameterStrategy(StrategyType strategyType, ObjectParameterType parameterType) {
+        this.isDirect = strategyType == DIRECT;
+        this.typeInfo = parameterType.typeInfo;
     }
 
     public final boolean isDirect() {
         return isDirect;
+    }
+
+    final int objectInfo(ObjectParameterInfo info) {
+        int objectInfo = info.asObjectInfo();
+        // Over-ride the type info contained in the parameter info
+        if (typeInfo != 0) {
+            return (objectInfo & ~ObjectBuffer.TYPE_MASK) | typeInfo;
+        } else {
+            return objectInfo;
+        }
     }
 
     abstract public long getAddress(Object parameter);
