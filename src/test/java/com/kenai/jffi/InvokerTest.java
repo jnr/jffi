@@ -2,9 +2,13 @@ package com.kenai.jffi;
 
 import org.junit.Test;
 
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertTrue;
 
 /**
  */
@@ -306,4 +310,27 @@ public class InvokerTest {
     @Test public void invokeHeapOD() {
         invokeOD(new HeapInvoker());
     }
+
+    public static boolean string_equals(Invoker invoker, String s1, String s2) {
+        Function function = getFunction("string_equals", Type.SINT, Type.POINTER, Type.POINTER);
+        CallContext ctx = getContext(Type.SINT, Type.POINTER, Type.POINTER);
+        ByteBuffer s1Buffer = Charset.defaultCharset().encode(CharBuffer.wrap(s1));
+        ByteBuffer s2Buffer  = Charset.defaultCharset().encode(CharBuffer.wrap(s2));
+
+        ObjectParameterStrategy s1strategy = new HeapArrayStrategy(s1Buffer.arrayOffset(), s1Buffer.remaining());
+        ObjectParameterStrategy s2strategy = new HeapArrayStrategy(s2Buffer.arrayOffset(), s2Buffer.remaining());
+        ObjectParameterInfo o1info = ObjectParameterInfo.create(0, ObjectParameterInfo.ARRAY,
+                ObjectParameterInfo.BYTE, ObjectParameterInfo.IN | ObjectParameterInfo.NULTERMINATE);
+        ObjectParameterInfo o2info = ObjectParameterInfo.create(1, ObjectParameterInfo.ARRAY,
+                ObjectParameterInfo.BYTE, ObjectParameterInfo.IN | ObjectParameterInfo.NULTERMINATE);
+
+        long ret = invoker.invokeN2(ctx, function.getFunctionAddress(), 0, 0, 2,
+                s1Buffer.array(), s1strategy, o1info, s2Buffer.array(), s2strategy, o2info);
+        return ret != 0;
+    }
+
+    @Test public void string_equals_heap() {
+        assertTrue("strings not equal", string_equals(new NativeInvoker(), "test", "test"));
+    }
+
 }
