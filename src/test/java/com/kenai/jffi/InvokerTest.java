@@ -91,7 +91,7 @@ public class InvokerTest {
         }
 
         @Override
-        public long getAddress(Object parameter) {
+        public long address(Object parameter) {
             return 0L;
         }
 
@@ -118,7 +118,7 @@ public class InvokerTest {
         }
 
         @Override
-        public long getAddress(Object parameter) {
+        public long address(Object parameter) {
             return ((UnitHelper.Address) parameter).address;
         }
 

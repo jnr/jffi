@@ -73,7 +73,7 @@ abstract public class ObjectParameterStrategy {
         }
     }
 
-    abstract public long getAddress(Object parameter);
+    abstract public long address(Object parameter);
 
     abstract public Object object(Object parameter);
     abstract public int offset(Object parameter);
