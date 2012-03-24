@@ -52,7 +52,7 @@ public class CallContextCache {
      *
      * @return An instance of a <tt>CallContextCache</tt>
      */
-    public static final CallContextCache getInstance() {
+    public static CallContextCache getInstance() {
         return SingletonHolder.INSTANCE;
     }
 
@@ -60,7 +60,11 @@ public class CallContextCache {
     private CallContextCache() { }
 
     public final CallContext getCallContext(Type returnType, Type[] parameterTypes, CallingConvention convention) {
-        Signature signature = new Signature(returnType, parameterTypes, convention);
+        return getCallContext(returnType, parameterTypes, convention, true);
+    }
+
+    public final CallContext getCallContext(Type returnType, Type[] parameterTypes, CallingConvention convention, boolean saveErrno) {
+        Signature signature = new Signature(returnType, parameterTypes, convention, saveErrno);
         CallContextRef ref = contextCache.get(signature);
         CallContext ctx;
 
@@ -98,15 +102,17 @@ public class CallContextCache {
         private final Type returnType;
         private final Type[] parameterTypes;
         private final CallingConvention convention;
+        private final boolean saveErrno;
         private int hashCode = 0;
 
-        public Signature(Type returnType, Type[] parameterTypes, CallingConvention convention) {
+        public Signature(Type returnType, Type[] parameterTypes, CallingConvention convention, boolean saveErrno) {
             if (returnType == null || parameterTypes == null) {
                 throw new NullPointerException("null return type or parameter types array");
             }
             this.returnType = returnType;
             this.parameterTypes = parameterTypes;
             this.convention = convention;
+            this.saveErrno = saveErrno;
         }
 
         @Override
@@ -117,7 +123,7 @@ public class CallContextCache {
 
             final Signature other = (Signature) obj;
 
-            if (this.convention != other.convention) {
+            if (this.convention != other.convention || this.saveErrno != other.saveErrno) {
                 return false;
             }
 
@@ -147,6 +153,7 @@ public class CallContextCache {
             }
             hash = 53 * hash + paramHash;
             hash = 53 * hash + this.convention.hashCode();
+            hash = 53 * hash + (this.saveErrno ? 1 : 0);
             return hash;
         }
 
