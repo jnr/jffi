@@ -239,6 +239,12 @@ public final class HeapInvocationBuffer extends InvocationBuffer {
                 ObjectBuffer.makeObjectFlags(info.ioflags(), strategy.typeInfo, paramIndex++));
     }
 
+    public final void putObject(Object o, ObjectParameterStrategy strategy, int flags) {
+        paramOffset = encoder.putAddress(buffer, paramOffset, 0L);
+        getObjectBuffer().putObject(strategy.object(o), strategy.offset(o), strategy.length(o),
+                ObjectBuffer.makeObjectFlags(flags, strategy.typeInfo, paramIndex++));
+    }
+
     public final void putJNIEnvironment() {
         paramOffset = encoder.putAddress(buffer, paramOffset, 0L);
         getObjectBuffer().putJNI(paramIndex++, null, ObjectBuffer.JNIENV);
