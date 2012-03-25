@@ -45,9 +45,6 @@ public final class CallContext {
     /** The native address of the context */
     private final long contextAddress;
 
-    /** Whether the native context has been freed yet */
-    private volatile boolean disposed = false;
-
     /** The number of parameters this function takes */
     private final int parameterCount;
 
@@ -66,16 +63,29 @@ public final class CallContext {
 
     /** A handle to the foreign interface to keep it alive as long as this object is alive */
     private final Foreign foreign = Foreign.getInstance();
-    
+
+    /**
+     * Returns a {@link CallContext} instance.  This may return a previously cached instance that matches
+     * the signature requested, and should be used in preference to instantiating new instances.
+     *
+     * @param returnType The return type of the native function.
+     * @param parameterTypes The parameter types the function accepts.
+     * @param convention The calling convention of the function.
+     * @param saveErrno Indicates that the errno should be saved
+     * @return
+     */
+    public static CallContext getCallContext(Type returnType, Type[] parameterTypes, CallingConvention convention, boolean saveErrno) {
+        return CallContextCache.getInstance().getCallContext(returnType, parameterTypes, convention, saveErrno);
+    }
+
     /**
      * Creates a new instance of <tt>Function</tt> with default calling convention.
      *
-     * @param address The native address of the function to invoke.
      * @param returnType The return type of the native function.
      * @param parameterTypes The parameter types the function accepts.
      */
-    public CallContext(Type returnType, Type... paramTypes) {
-        this(returnType, paramTypes, CallingConvention.DEFAULT, true);
+    public CallContext(Type returnType, Type... parameterTypes) {
+        this(returnType, parameterTypes, CallingConvention.DEFAULT, true);
     }
 
     /**
@@ -84,31 +94,29 @@ public final class CallContext {
      * <tt>Function</tt> instances created with this constructor will save the
      * C errno contents after each call.
      *
-     * @param address The native address of the function to invoke.
      * @param returnType The return type of the native function.
      * @param parameterTypes The parameter types the function accepts.
      * @param convention The calling convention of the function.
      */
-    public CallContext(Type returnType, Type[] paramTypes, CallingConvention convention) {
-        this(returnType, paramTypes, convention, true);
+    public CallContext(Type returnType, Type[] parameterTypes, CallingConvention convention) {
+        this(returnType, parameterTypes, convention, true);
     }
 
     /**
      * Creates a new instance of <tt>Function</tt>.
      *
-     * @param address The native address of the function to invoke.
      * @param returnType The return type of the native function.
      * @param parameterTypes The parameter types the function accepts.
      * @param convention The calling convention of the function.
      * @param saveErrno Whether the errno should be saved or not
      */
-    public CallContext(Type returnType, Type[] paramTypes, CallingConvention convention, boolean saveErrno) {
+    public CallContext(Type returnType, Type[] parameterTypes, CallingConvention convention, boolean saveErrno) {
 
         final int flags = (!saveErrno ? Foreign.F_NOERRNO : 0)
                 | (convention == CallingConvention.STDCALL ? Foreign.F_STDCALL : Foreign.F_DEFAULT);
 
         final long h = foreign.newCallContext(returnType.handle(),
-                Type.nativeHandles(paramTypes), flags);
+                Type.nativeHandles(parameterTypes), flags);
         if (h == 0) {
             throw new RuntimeException("Failed to create native function");
         }
@@ -119,11 +127,11 @@ public final class CallContext {
         // garbage collected
         //
         this.returnType = returnType;
-        this.parameterTypes = paramTypes.clone();
+        this.parameterTypes = parameterTypes.clone();
 
-        this.parameterCount = paramTypes.length;
+        this.parameterCount = parameterTypes.length;
         this.rawParameterSize = foreign.getCallContextRawParameterSize(h);
-        this.parameterTypeHandles = Type.nativeHandles(paramTypes);
+        this.parameterTypeHandles = Type.nativeHandles(parameterTypes);
         this.flags = flags;
     }
 
@@ -174,23 +182,19 @@ public final class CallContext {
         return parameterTypes[index];
     }
 
-    public synchronized final void dispose() {
-        if (disposed) {
-            throw new RuntimeException("context already freed");
-        }
-        foreign.freeCallContext(contextAddress);
-        disposed = true;
-    }
+
+    @Deprecated
+    public final void dispose() {}
 
     @Override
     protected void finalize() throws Throwable {
         try {
-            if (contextAddress != 0 && !disposed) {
+            if (contextAddress != 0) {
                 foreign.freeCallContext(contextAddress);
             }
         } catch (Throwable t) {
             Logger.getLogger(getClass().getName()).log(Level.WARNING, 
-                    "Exception when freeing CallContext: %s", t.getLocalizedMessage());
+                    "exception when freeing " + getClass() + ": %s", t.getLocalizedMessage());
         } finally {
             super.finalize();
         }

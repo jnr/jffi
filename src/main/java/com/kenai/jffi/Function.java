@@ -94,7 +94,7 @@ public final class Function {
      */
     public Function(long address, Type returnType, Type[] paramTypes, CallingConvention convention, boolean saveErrno) {
         this.functionAddress = address;
-        this.callContext = new CallContext(returnType, paramTypes, convention, saveErrno);
+        this.callContext = CallContext.getCallContext(returnType, paramTypes, convention, saveErrno);
         this.contextAddress = callContext.getAddress();
     }    
 

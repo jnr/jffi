@@ -77,7 +77,7 @@ public class CallContextCache {
             contextCache.remove(ref.signature);
         }
 
-        ctx = new CallContext(returnType, (Type[]) parameterTypes.clone(), convention);
+        ctx = new CallContext(returnType, parameterTypes.clone(), convention, saveErrno);
         contextCache.put(signature, new CallContextRef(signature, ctx, contextReferenceQueue));
 
         return ctx;
