@@ -39,7 +39,7 @@ import java.nio.ByteOrder;
  * An implementation of {@link InvocationBuffer} that packs its parameters onto
  * a java heap allocated buffer.
  */
-public final class HeapInvocationBuffer implements InvocationBuffer {
+public final class HeapInvocationBuffer extends InvocationBuffer {
     static final int FFI_SIZEOF_ARG = Platform.getPlatform().addressSize() / 8;
     private static final int PARAM_SIZE = 8;
     static final Encoder encoder = getEncoder();

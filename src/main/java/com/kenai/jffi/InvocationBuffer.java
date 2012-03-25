@@ -37,7 +37,7 @@ import java.nio.Buffer;
 /**
  * A parameter buffer used when invoking a function
  */
-public interface InvocationBuffer {
+public abstract class InvocationBuffer {
     /**
      * Adds an 8 bit integer parameter.
      *
@@ -163,7 +163,7 @@ public interface InvocationBuffer {
      * @param struct A java byte array with the struct contents.
      * @param offset The offset from the start of the array.
      */
-    public void putStruct(final byte[] struct, int offset);
+    public abstract void putStruct(final byte[] struct, int offset);
 
     /**
      * Adds a struct or union as a parameter.
@@ -172,5 +172,5 @@ public interface InvocationBuffer {
      *
      * @param struct The native address to use as the struct contents.
      */
-    public void putStruct(final long struct);
+    public abstract void putStruct(final long struct);
 }
