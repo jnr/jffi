@@ -172,37 +172,37 @@ public final class HeapInvocationBuffer extends InvocationBuffer {
     }
 
     public final void putArray(final byte[] array, int offset, int length, int flags) {
-        paramOffset = encoder.putAddress(buffer, paramOffset, 0L);
+        paramOffset = encoder.skipAddress(paramOffset);
         getObjectBuffer().putArray(paramIndex++, array, offset, length, flags);
     }
 
     public final void putArray(final short[] array, int offset, int length, int flags) {
-        paramOffset = encoder.putAddress(buffer, paramOffset, 0L);
+        paramOffset = encoder.skipAddress(paramOffset);
         getObjectBuffer().putArray(paramIndex++, array, offset, length, flags);
     }
 
     public final void putArray(final int[] array, int offset, int length, int flags) {
-        paramOffset = encoder.putAddress(buffer, paramOffset, 0L);
+        paramOffset = encoder.skipAddress(paramOffset);
         getObjectBuffer().putArray(paramIndex++, array, offset, length, flags);
     }
 
     public final void putArray(final long[] array, int offset, int length, int flags) {
-        paramOffset = encoder.putAddress(buffer, paramOffset, 0L);
+        paramOffset = encoder.skipAddress(paramOffset);
         getObjectBuffer().putArray(paramIndex++, array, offset, length, flags);
     }
 
     public final void putArray(final float[] array, int offset, int length, int flags) {
-        paramOffset = encoder.putAddress(buffer, paramOffset, 0L);
+        paramOffset = encoder.skipAddress(paramOffset);
         getObjectBuffer().putArray(paramIndex++, array, offset, length, flags);
     }
 
     public final void putArray(final double[] array, int offset, int length, int flags) {
-        paramOffset = encoder.putAddress(buffer, paramOffset, 0L);
+        paramOffset = encoder.skipAddress(paramOffset);
         getObjectBuffer().putArray(paramIndex++, array, offset, length, flags);
     }
 
     public final void putDirectBuffer(final java.nio.Buffer value, int offset, int length) {
-        paramOffset = encoder.putAddress(buffer, paramOffset, 0L);
+        paramOffset = encoder.skipAddress(paramOffset);
         getObjectBuffer().putDirectBuffer(paramIndex++, value, offset, length);
     }
 
@@ -214,7 +214,7 @@ public final class HeapInvocationBuffer extends InvocationBuffer {
             System.arraycopy(struct, offset, buffer, paramOffset, type.size());
             paramOffset = FFI_ALIGN(paramOffset + type.size(), FFI_SIZEOF_ARG);
         } else {
-            paramOffset = encoder.putAddress(buffer, paramOffset, 0L);
+            paramOffset = encoder.skipAddress(paramOffset);
             getObjectBuffer().putArray(paramIndex, struct, offset, type.size(), ObjectBuffer.IN);
         }
         ++paramIndex;
@@ -234,15 +234,28 @@ public final class HeapInvocationBuffer extends InvocationBuffer {
     }
 
     public final void putObject(Object o, ObjectParameterStrategy strategy, ObjectParameterInfo info) {
-        paramOffset = encoder.putAddress(buffer, paramOffset, 0L);
-        getObjectBuffer().putObject(strategy.object(o), strategy.offset(o), strategy.length(o),
-                ObjectBuffer.makeObjectFlags(info.ioflags(), strategy.typeInfo, paramIndex++));
+        if (strategy.isDirect()) {
+            paramOffset = encoder.putAddress(buffer, paramOffset, strategy.address(o));
+
+        } else {
+            paramOffset = encoder.skipAddress(paramOffset);
+            getObjectBuffer().putObject(strategy.object(o), strategy.offset(o), strategy.length(o),
+                    ObjectBuffer.makeObjectFlags(info.ioflags(), strategy.typeInfo, paramIndex));
+        }
+        ++paramIndex;
     }
 
     public final void putObject(Object o, ObjectParameterStrategy strategy, int flags) {
-        paramOffset = encoder.putAddress(buffer, paramOffset, 0L);
-        getObjectBuffer().putObject(strategy.object(o), strategy.offset(o), strategy.length(o),
-                ObjectBuffer.makeObjectFlags(flags, strategy.typeInfo, paramIndex++));
+        if (strategy.isDirect()) {
+            paramOffset = encoder.putAddress(buffer, paramOffset, strategy.address(o));
+
+        } else {
+            paramOffset = encoder.skipAddress(paramOffset);
+            getObjectBuffer().putObject(strategy.object(o), strategy.offset(o), strategy.length(o),
+                    ObjectBuffer.makeObjectFlags(flags, strategy.typeInfo, paramIndex));
+        }
+
+        ++paramIndex;
     }
 
     public final void putJNIEnvironment() {
@@ -395,6 +408,8 @@ public final class HeapInvocationBuffer extends InvocationBuffer {
          * @return The number of bytes consumed in encoding the value.
          */
         public abstract int putAddress(byte[] buffer, int offset, long value);
+
+        public abstract int skipAddress(int offset);
     }
 
     /**
@@ -433,7 +448,10 @@ public final class HeapInvocationBuffer extends InvocationBuffer {
             IO.putDouble(buffer, offset, value); return offset + 8;
         }
         public final int putAddress(byte[] buffer, int offset, long value) {
-            if (value != 0L) IO.putAddress(buffer, offset, value); return offset + 4;
+            IO.putAddress(buffer, offset, value); return offset + 4;
+        }
+        public final int skipAddress(int offset) {
+            return offset + 4;
         }
     }
 
@@ -495,8 +513,12 @@ public final class HeapInvocationBuffer extends InvocationBuffer {
 
         public final int putAddress(byte[] buffer, int offset, long value) {
             offset = FFI_ALIGN(offset, FFI_SIZEOF_ARG);
-            if (value != 0L) io.putAddress(buffer, offset, value);
+            io.putAddress(buffer, offset, value);
             return offset + ADDRESS_SIZE;
+        }
+
+        public final int skipAddress(int offset)  {
+            return FFI_ALIGN(offset, FFI_SIZEOF_ARG) + ADDRESS_SIZE;
         }
     }
 
@@ -533,7 +555,12 @@ public final class HeapInvocationBuffer extends InvocationBuffer {
             io.putDouble(buffer, offset, value); return offset + PARAM_SIZE;
         }
         public final int putAddress(byte[] buffer, int offset, long value) {
-            if (value != 0L) io.putAddress(buffer, offset, value); return offset + PARAM_SIZE;
+            io.putAddress(buffer, offset, value); return offset + PARAM_SIZE;
+        }
+
+        @Override
+        public int skipAddress(int offset) {
+            return offset + PARAM_SIZE;
         }
     }
 
