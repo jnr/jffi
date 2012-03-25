@@ -43,7 +43,7 @@ public final class HeapInvocationBuffer extends InvocationBuffer {
     static final int FFI_SIZEOF_ARG = Platform.getPlatform().addressSize() / 8;
     private static final int PARAM_SIZE = 8;
     static final Encoder encoder = getEncoder();
-    private final CallInfo info;
+    private final CallContext callContext;
     private final byte[] buffer;
     private ObjectBuffer objectBuffer;
     private int paramOffset = 0;
@@ -52,31 +52,21 @@ public final class HeapInvocationBuffer extends InvocationBuffer {
     /**
      * Creates a new instance of <tt>HeapInvocationBuffer</tt>.
      *
-     * @param info The call info that describes the function parameters
-     */
-    public HeapInvocationBuffer(CallInfo info) {
-        this.info = info;
-        buffer = new byte[encoder.getBufferSize(info)];
-    }
-
-    /**
-     * Creates a new instance of <tt>HeapInvocationBuffer</tt>.
-     *
      * @param function The function that this buffer is going to be used with.
      */
     public HeapInvocationBuffer(Function function) {
-        this.info = function;
-        buffer = new byte[encoder.getBufferSize(function)];
+        this.callContext = function.getCallContext();
+        buffer = new byte[encoder.getBufferSize(callContext)];
     }
 
     /**
      * Creates a new instance of <tt>HeapInvocationBuffer</tt>.
      *
-     * @param context The {@link CallContext} describing how the function should be invoked
+     * @param callContext The {@link CallContext} describing how the function should be invoked
      */
-    public HeapInvocationBuffer(CallContext context) {
-        this.info = context;
-        buffer = new byte[encoder.getBufferSize(context)];
+    public HeapInvocationBuffer(CallContext callContext) {
+        this.callContext = callContext;
+        buffer = new byte[encoder.getBufferSize(callContext)];
     }
 
     /**
@@ -85,7 +75,7 @@ public final class HeapInvocationBuffer extends InvocationBuffer {
      * @param context The {@link CallContext} describing how the function should be invoked
      */
     public HeapInvocationBuffer(CallContext context, int objectCount) {
-        this.info = context;
+        this.callContext = context;
         buffer = new byte[encoder.getBufferSize(context)];
         objectBuffer = new ObjectBuffer(objectCount);
     }
@@ -217,7 +207,7 @@ public final class HeapInvocationBuffer extends InvocationBuffer {
     }
 
     public final void putStruct(final byte[] struct, int offset) {
-        final Type type = info.getParameterType(paramIndex);
+        final Type type = callContext.getParameterType(paramIndex);
 
         if (encoder.isRaw()) {
             paramOffset = FFI_ALIGN(paramOffset, type.alignment());
@@ -231,7 +221,7 @@ public final class HeapInvocationBuffer extends InvocationBuffer {
     }
 
     public final void putStruct(final long struct) {
-        final Type type = info.getParameterType(paramIndex);
+        final Type type = callContext.getParameterType(paramIndex);
 
         if (encoder.isRaw()) {
             paramOffset = FFI_ALIGN(paramOffset, type.alignment());
@@ -328,7 +318,7 @@ public final class HeapInvocationBuffer extends InvocationBuffer {
         public abstract boolean isRaw();
 
         /** Gets the size in bytes of the buffer required for the function */
-        public abstract int getBufferSize(CallInfo info);
+        public abstract int getBufferSize(CallContext callContext);
 
         /**
          * Encodes a byte value into the byte array.
@@ -413,8 +403,8 @@ public final class HeapInvocationBuffer extends InvocationBuffer {
             return true;
         }
 
-        public final int getBufferSize(CallInfo info) {
-            return info.getRawParameterSize();
+        public final int getBufferSize(CallContext callContext) {
+            return callContext.getRawParameterSize();
         }
 
         
@@ -457,8 +447,8 @@ public final class HeapInvocationBuffer extends InvocationBuffer {
             return true;
         }
 
-        public final int getBufferSize(CallInfo info) {
-            return info.getRawParameterSize();
+        public final int getBufferSize(CallContext callContext) {
+            return callContext.getRawParameterSize();
         }
 
         public final int putByte(byte[] buffer, int offset, int value) {
@@ -515,12 +505,8 @@ public final class HeapInvocationBuffer extends InvocationBuffer {
             return false;
         }
         
-        public final int getBufferOffset(Function function, int parameterIndex) {
-            return parameterIndex * PARAM_SIZE;
-        }
-        
-        public final int getBufferSize(CallInfo info) {
-            return info.getParameterCount() * PARAM_SIZE;
+        public final int getBufferSize(CallContext callContext) {
+            return callContext.getParameterCount() * PARAM_SIZE;
         }
         public final int putByte(byte[] buffer, int offset, int value) {
             io.putByte(buffer, offset, value); return offset + PARAM_SIZE;

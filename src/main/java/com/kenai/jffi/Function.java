@@ -38,7 +38,7 @@ package com.kenai.jffi;
  * This class holds all the information that JFFI needs to correctly call a
  * native function.
  */
-public final class Function extends CallInfo {
+public final class Function {
     private final CallContext callContext;
 
     /** The address of the function */

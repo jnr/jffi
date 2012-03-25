@@ -41,7 +41,7 @@ import java.util.logging.Logger;
  * This class holds all the information that JFFI needs to correctly call a
  * native function, or to implement a callback from native code to java.
  */
-public final class CallContext extends CallInfo {
+public final class CallContext {
     /** The native address of the context */
     private final long contextAddress;
 
