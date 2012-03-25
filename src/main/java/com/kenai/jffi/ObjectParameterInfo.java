@@ -2,6 +2,7 @@ package com.kenai.jffi;
 
 public final class ObjectParameterInfo {
     private final int parameterIndex;
+    private final int ioflags;
     private final int objectInfo;
 
     
@@ -19,6 +20,7 @@ public final class ObjectParameterInfo {
     private ObjectParameterInfo(int parameterIndex, int ioflags, int typeInfo) {
 
         this.parameterIndex = parameterIndex;
+        this.ioflags = ioflags & ObjectBuffer.FLAGS_MASK;
         this.objectInfo = ObjectBuffer.makeObjectFlags(ioflags, typeInfo, parameterIndex);
     }
 
@@ -80,6 +82,10 @@ public final class ObjectParameterInfo {
 
     final int asObjectInfo() {
         return objectInfo;
+    }
+
+    final int ioflags() {
+        return ioflags;
     }
 
     public final int getParameterIndex() {

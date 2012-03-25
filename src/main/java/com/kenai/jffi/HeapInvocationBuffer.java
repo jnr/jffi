@@ -45,7 +45,7 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
     static final Encoder encoder = getEncoder();
     private final CallInfo info;
     private final byte[] buffer;
-    private ObjectBuffer objectBuffer = null;
+    private ObjectBuffer objectBuffer;
     private int paramOffset = 0;
     private int paramIndex = 0;
 
@@ -68,6 +68,28 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
         this.info = function;
         buffer = new byte[encoder.getBufferSize(function)];
     }
+
+    /**
+     * Creates a new instance of <tt>HeapInvocationBuffer</tt>.
+     *
+     * @param context The {@link CallContext} describing how the function should be invoked
+     */
+    public HeapInvocationBuffer(CallContext context) {
+        this.info = context;
+        buffer = new byte[encoder.getBufferSize(context)];
+    }
+
+    /**
+     * Creates a new instance of <tt>HeapInvocationBuffer</tt>.
+     *
+     * @param context The {@link CallContext} describing how the function should be invoked
+     */
+    public HeapInvocationBuffer(CallContext context, int objectCount) {
+        this.info = context;
+        buffer = new byte[encoder.getBufferSize(context)];
+        objectBuffer = new ObjectBuffer(objectCount);
+    }
+
 
     /**
      * Gets the backing array of this <tt>InvocationBuffer</tt>
@@ -219,6 +241,12 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
             paramOffset = encoder.putAddress(buffer, paramOffset, struct);
         }
         ++paramIndex;
+    }
+
+    public final void putObject(Object o, ObjectParameterStrategy strategy, ObjectParameterInfo info) {
+        paramOffset = encoder.putAddress(buffer, paramOffset, 0L);
+        getObjectBuffer().putObject(strategy.object(o), strategy.offset(o), strategy.length(o),
+                ObjectBuffer.makeObjectFlags(info.ioflags(), strategy.typeInfo, paramIndex++));
     }
 
     public final void putJNIEnvironment() {
@@ -409,7 +437,7 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
             IO.putDouble(buffer, offset, value); return offset + 8;
         }
         public final int putAddress(byte[] buffer, int offset, long value) {
-            IO.putAddress(buffer, offset, value); return offset + 4;
+            if (value != 0L) IO.putAddress(buffer, offset, value); return offset + 4;
         }
     }
 
@@ -471,7 +499,7 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
 
         public final int putAddress(byte[] buffer, int offset, long value) {
             offset = FFI_ALIGN(offset, FFI_SIZEOF_ARG);
-            io.putAddress(buffer, offset, value);
+            if (value != 0L) io.putAddress(buffer, offset, value);
             return offset + ADDRESS_SIZE;
         }
     }
@@ -513,7 +541,7 @@ public final class HeapInvocationBuffer implements InvocationBuffer {
             io.putDouble(buffer, offset, value); return offset + PARAM_SIZE;
         }
         public final int putAddress(byte[] buffer, int offset, long value) {
-            io.putAddress(buffer, offset, value); return offset + PARAM_SIZE;
+            if (value != 0L) io.putAddress(buffer, offset, value); return offset + PARAM_SIZE;
         }
     }
 

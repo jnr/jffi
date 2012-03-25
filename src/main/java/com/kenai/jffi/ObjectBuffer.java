@@ -83,7 +83,7 @@ final class ObjectBuffer {
     public static final int JNIOBJECT = 0x2 << TYPE_SHIFT;
 
     /** The objects stored in this buffer */
-    private Object[] objects = new Object[1];
+    private Object[] objects;
 
     /** 
      * The flags/offset/length descriptor array.
@@ -94,13 +94,25 @@ final class ObjectBuffer {
      * The second element stores the offset within the array the data starts.
      * The third element stores the length of data.
      */
-    private int[] info = new int[objects.length * 3];
+    private int[] info;
 
     /** The index of the next descriptor storage slot */
     private int infoIndex = 0;
 
     /** The index of the next object storage slot */
     private int objectIndex = 0;
+
+    ObjectBuffer() {
+        objects = new Object[1];
+        info = new int[objects.length * 3];
+    }
+
+    ObjectBuffer(int objectCount) {
+        objects = new Object[objectCount];
+        info = new int[objectCount * 3];
+    }
+
+
 
     /**
      * Gets the number of objects stored in this <tt>ObjectBuffer</tt>.
@@ -281,7 +293,7 @@ final class ObjectBuffer {
         putObject(obj, 0, 0, makeJNIFlags(index, type));
     }
 
-    private void putObject(Object array, int offset, int length, int flags) {
+    void putObject(Object array, int offset, int length, int flags) {
         ensureSpace();
         objects[objectIndex++] = array;
         info[infoIndex++] = flags;
