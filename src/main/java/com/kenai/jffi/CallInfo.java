@@ -32,9 +32,9 @@
 
 package com.kenai.jffi;
 
-public interface CallInfo {
-    int getParameterCount();
-    public Type getReturnType();
-    public Type getParameterType(int parameterIndex);
-    int getRawParameterSize();
+public abstract class CallInfo {
+    public abstract int getParameterCount();
+    public abstract Type getReturnType();
+    public abstract Type getParameterType(int parameterIndex);
+    public abstract int getRawParameterSize();
 }

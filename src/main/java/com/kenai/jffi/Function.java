@@ -32,16 +32,13 @@
 
 package com.kenai.jffi;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 /**
  * Native function invocation context
  *
  * This class holds all the information that JFFI needs to correctly call a
  * native function.
  */
-public final class Function implements CallInfo {
+public final class Function extends CallInfo {
     private final CallContext callContext;
 
     /** The address of the function */
