@@ -853,7 +853,11 @@ public abstract class Invoker {
     public final long invokeN1(CallContext ctx, long function,
                                   long n1, int objCount,
                                   Object o1, ObjectParameterStrategy s1, ObjectParameterInfo o1info) {
-        if (objCount == 1) {
+        if (objCount == 0) {
+            return foreign.invokeN1(ctx.getAddress(), function, n1);
+
+        } else if (objCount == 1) {
+            if (s1.isDirect()) throw newInsufficientObjectCountError(objCount);
             return foreign.invokeN1O1(ctx.getAddress(), function, n1,
                     s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1));
 
@@ -865,7 +869,11 @@ public abstract class Invoker {
     public final long invokeN2(CallContext ctx, long function,
                                   long n1, long n2, int objCount,
                                   Object o1, ObjectParameterStrategy s1, ObjectParameterInfo o1info) {
-        if (objCount == 1) {
+        if (objCount == 0) {
+            return foreign.invokeN2(ctx.getAddress(), function, n1, n2);
+
+        } else if (objCount == 1) {
+            if (s1.isDirect()) throw newInsufficientObjectCountError(objCount);
             return foreign.invokeN2O1(ctx.getAddress(), function, n1, n2,
                     s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1));
         } else {
@@ -877,20 +885,28 @@ public abstract class Invoker {
             long n1, long n2, int objCount,
             Object o1, ObjectParameterStrategy s1, ObjectParameterInfo o1info,
             Object o2, ObjectParameterStrategy s2, ObjectParameterInfo o2info) {
-        if (objCount == 1) {
+
+        if (objCount == 0) {
+            return foreign.invokeN2(ctx.getAddress(), function, n1, n2);
+
+        } else if (objCount == 1) {
             // only one object is to be passed down as a a heap object - figure out which one
             if (!s1.isDirect()) {
                 // do nothing, use the first param as-is
 
-            } else {
+            } else if (!s2.isDirect()) {
                 // move second into first place
                 o1 = o2; s1 = s2; o1info = o2info;
+
+            } else {
+                throw newInsufficientObjectCountError(objCount);
             }
 
             return foreign.invokeN2O1(ctx.getAddress(), function, n1, n2,
                     s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1));
 
         } else if (objCount == 2) {
+            if (s1.isDirect() || s2.isDirect()) throw newInsufficientObjectCountError(objCount);
             // Two objects to be passed as heap objects, just use both arguments as-is
             return foreign.invokeN2O2(ctx.getAddress(), function, n1, n2,
                 s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1),
@@ -904,9 +920,15 @@ public abstract class Invoker {
     public final long invokeN3(CallContext ctx, long function,
             long n1, long n2, long n3, int objCount,
             Object o1, ObjectParameterStrategy s1, ObjectParameterInfo o1info) {
-        if (objCount == 1) {
+
+        if (objCount == 0) {
+            return foreign.invokeN3(ctx.getAddress(), function, n1, n2, n3);
+
+        } else if (objCount == 1) {
+            if (s1.isDirect()) throw newInsufficientObjectCountError(objCount);
             return foreign.invokeN3O1(ctx.getAddress(), function, n1, n2, n3,
                     s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1));
+
         } else {
             throw newObjectCountError(objCount);
         }
@@ -917,14 +939,21 @@ public abstract class Invoker {
             long n1, long n2, long n3, int objCount,
             Object o1, ObjectParameterStrategy s1, ObjectParameterInfo o1info,
             Object o2, ObjectParameterStrategy s2, ObjectParameterInfo o2info) {
-        if (objCount == 1) {
+
+        if (objCount == 0) {
+            return foreign.invokeN3(ctx.getAddress(), function, n1, n2, n3);
+
+        } else if (objCount == 1) {
             // only one object is to be passed down as a a heap object - figure out which one
             if (!s1.isDirect()) {
                 // do nothing, use the first param as-is
 
-            } else {
+            } else if (!s2.isDirect()) {
                 // move second into first place
                 o1 = o2; s1 = s2; o1info = o2info;
+
+            } else {
+                throw newInsufficientObjectCountError(objCount);
             }
 
             return foreign.invokeN3O1(ctx.getAddress(), function, n1, n2, n3,
@@ -945,6 +974,11 @@ public abstract class Invoker {
             Object o1, ObjectParameterStrategy s1, ObjectParameterInfo o1info,
             Object o2, ObjectParameterStrategy s2, ObjectParameterInfo o2info,
             Object o3, ObjectParameterStrategy s3, ObjectParameterInfo o3info) {
+
+        if (objCount == 0) {
+            return foreign.invokeN3(ctx.getAddress(), function, n1, n2, n3);
+
+        }
 
         if (objCount < 3) {
             int next;
@@ -1001,7 +1035,11 @@ public abstract class Invoker {
             long n1, long n2, long n3, long n4, int objCount,
             Object o1, ObjectParameterStrategy s1, ObjectParameterInfo o1info) {
 
-        if (objCount == 1) {
+        if (objCount == 0) {
+            return foreign.invokeN4(ctx.getAddress(), function, n1, n2, n3, n4);
+
+        } else if (objCount == 1) {
+            if (s1.isDirect()) throw newInsufficientObjectCountError(objCount);
             return foreign.invokeN4O1(ctx.getAddress(), function, n1, n2, n3, n4,
                     s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1));
         } else {
@@ -1014,21 +1052,29 @@ public abstract class Invoker {
             long n1, long n2, long n3, long n4, int objCount,
             Object o1, ObjectParameterStrategy s1, ObjectParameterInfo o1info,
             Object o2, ObjectParameterStrategy s2, ObjectParameterInfo o2info) {
-        
-        if (objCount == 1) {
+
+        if (objCount == 0) {
+            return foreign.invokeN4(ctx.getAddress(), function, n1, n2, n3, n4);
+
+        } else if (objCount == 1) {
             // only one object is to be passed down as a a heap object - figure out which one
             if (!s1.isDirect()) {
                 // do nothing, use the first param as-is
 
-            } else {
+            } else if (!s2.isDirect()) {
                 // move second into first place
                 o1 = o2; s1 = s2; o1info = o2info;
+
+            } else {
+                throw newInsufficientObjectCountError(objCount);
             }
 
             return foreign.invokeN4O1(ctx.getAddress(), function, n1, n2, n3, n4,
                     s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1));
 
         } else if (objCount == 2) {
+            if (s1.isDirect() || s2.isDirect()) throw newInsufficientObjectCountError(objCount);
+
             // Two objects to be passed as heap objects, just use both arguments as-is
             return foreign.invokeN4O2(ctx.getAddress(), function, n1, n2, n3, n4,
                     s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1),
@@ -1044,57 +1090,51 @@ public abstract class Invoker {
             Object o1, ObjectParameterStrategy s1, ObjectParameterInfo o1info,
             Object o2, ObjectParameterStrategy s2, ObjectParameterInfo o2info,
             Object o3, ObjectParameterStrategy s3, ObjectParameterInfo o3info) {
-        
-        if (objCount < 3) {
-            int next;
-            // Sort out which is the first non-direct object
-            if (!s1.isDirect()) {
-                // do nothing, use the first param as-is
-                next = 2;
 
-            } else if (!s2.isDirect()) {
-                // move second into first place
-                o1 = o2; s1 = s2; o1info = o2info;
-                next = 3;
-
-            } else {
-                // move third into first place
-                o1 = o3; s1 = s3; o1info = o3info;
-                next = 4;
-            }
-
-
-            if (objCount == 1) {
-                return foreign.invokeN4O1(ctx.getAddress(), function, n1, n2, n3, n4,
-                        s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1));
-
-            } else if (objCount == 2) {
-                // Sort out which is the second non-direct object
-
-                if (next <= 2 && !s2.isDirect()) {
-                    // do nothing, use the second param as-is
-
-                } else if (next <= 3 && !s3.isDirect()) {
-                    // move third param into second  place
-                    o2 = o3; s2 = s3; o2info = o3info;
-
-                } else {
-                    throw newInsufficientObjectCountError(objCount);
-                }
-
-                return foreign.invokeN4O2(ctx.getAddress(), function, n1, n2, n3, n4,
-                        s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1),
-                        s2.object(o2), s2.objectInfo(o2info), s2.offset(o2), s2.length(o2));
-            } else {
-                throw newObjectCountError(objCount);
-            }
+        if (objCount == 0) {
+            return foreign.invokeN4(ctx.getAddress(), function, n1, n2, n3, n4);
         }
 
-        // Three objects to be passed as heap objects, just use all arguments as-is
-        return foreign.invokeN4O3(ctx.getAddress(), function, n1, n2, n3, n4,
-                s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1),
-                s2.object(o2), s2.objectInfo(o2info), s2.offset(o2), s2.length(o2),
-                s3.object(o3), s3.objectInfo(o3info), s3.offset(o3), s3.length(o3));
+        int next = 1;
+
+        // Sort out which is the first non-direct object
+        switch (next) {
+            case 1: next++; if (!s1.isDirect()) break;
+            case 2: next++; if (!s2.isDirect()) { o1 = o2; s1 = s2; o1info = o2info; break; }
+            case 3: next++; if (!s3.isDirect()) { o1 = o3; s1 = s3; o1info = o3info; break; }
+            default: throw newInsufficientObjectCountError(objCount);
+        }
+
+        if (objCount == 1) {
+            return foreign.invokeN4O1(ctx.getAddress(), function, n1, n2, n3, n4,
+                    s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1));
+        }
+
+        switch (next) {
+            case 2: next++; if (!s2.isDirect()) break;
+            case 3: next++; if (!s3.isDirect()) { o2 = o3; s2 = s3; o2info = o3info; break; }
+            default: throw newInsufficientObjectCountError(objCount);
+        }
+
+        if (objCount == 2) {
+            return foreign.invokeN4O2(ctx.getAddress(), function, n1, n2, n3, n4,
+                    s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1),
+                    s2.object(o2), s2.objectInfo(o2info), s2.offset(o2), s2.length(o2));
+        }
+
+        switch (next) {
+            case 3: if (!s3.isDirect()) break;
+            default: throw newInsufficientObjectCountError(objCount);
+        }
+
+        if (objCount == 3) {
+            return foreign.invokeN4O3(ctx.getAddress(), function, n1, n2, n3, n4,
+                    s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1),
+                    s2.object(o2), s2.objectInfo(o2info), s2.offset(o2), s2.length(o2),
+                    s3.object(o3), s3.objectInfo(o3info), s3.offset(o3), s3.length(o3));
+        }
+
+        throw newObjectCountError(objCount);
     }
 
     public final long invokeN4(CallContext ctx, long function,
@@ -1103,27 +1143,20 @@ public abstract class Invoker {
             Object o2, ObjectParameterStrategy s2, ObjectParameterInfo o2info,
             Object o3, ObjectParameterStrategy s3, ObjectParameterInfo o3info,
             Object o4, ObjectParameterStrategy s4, ObjectParameterInfo o4info) {
-        
-        int next;
+
+        if (objCount == 0) {
+            return foreign.invokeN4(ctx.getAddress(), function, n1, n2, n3, n4);
+        }
+
+        int next = 1;
+
         // Sort out which is the first non-direct object
-        if (!s1.isDirect()) {
-            // do nothing, use the first param as-is
-            next = 2;
-
-        } else if (!s2.isDirect()) {
-            // move second into first place
-            o1 = o2; s1 = s2; o1info = o2info;
-            next = 3;
-
-        } else if (!s3.isDirect()) {
-            // move third into first place
-            o1 = o3; s1 = s3; o1info = o3info;
-            next = 4;
-
-        } else {
-            // move fourth into first place
-            o1 = o4; s1 = s4; o1info = o4info;
-            next = 5;
+        switch (next) {
+            case 1: next++; if (!s1.isDirect()) break;
+            case 2: next++; if (!s2.isDirect()) { o1 = o2; s1 = s2; o1info = o2info; break; }
+            case 3: next++; if (!s3.isDirect()) { o1 = o3; s1 = s3; o1info = o3info; break; }
+            case 4: next++; if (!s4.isDirect()) { o1 = o4; s1 = s4; o1info = o4info; break; }
+            default: throw newInsufficientObjectCountError(objCount);
         }
 
         if (objCount == 1) {
@@ -1131,38 +1164,23 @@ public abstract class Invoker {
                     s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1));
         }
 
-        // Sort out which is the second non-direct object
-        if (next <= 2 && !s2.isDirect()) {
-            // do nothing, use the second param as-is
-            next = 3;
-
-        } else if (next <= 3 && !s3.isDirect()) {
-            // move third param into second place
-            o2 = o3; s2 = s3; o2info = o3info;
-            next = 4;
-
-        } else if (next <= 4) {
-            // move fourth param into second place
-            o2 = o4; s2 = s4; o2info = o4info;
-            next = 5;
+        switch (next) {
+            case 2: next++; if (!s2.isDirect()) break;
+            case 3: next++; if (!s3.isDirect()) { o2 = o3; s2 = s3; o2info = o3info; break; }
+            case 4: next++; if (!s4.isDirect()) { o2 = o4; s2 = s4; o2info = o4info; break; }
+            default: throw newInsufficientObjectCountError(objCount);
         }
-        
+
         if (objCount == 2) {
             return foreign.invokeN4O2(ctx.getAddress(), function, n1, n2, n3, n4,
                     s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1),
                     s2.object(o2), s2.objectInfo(o2info), s2.offset(o2), s2.length(o2));
         }
-        
-        // Sort out third parameter
-        if (next <= 3 && !s3.isDirect()) {
-            // do nothing, use the third param as-is
 
-        } else if (next <= 4) {
-            // move fourth param into third place
-            o3 = o4; s3 = s4; o3info = o4info;
-
-        } else {
-            throw newHeapObjectCountError(objCount);
+        switch (next) {
+            case 3: if (!s3.isDirect()) break;
+            case 4: if (!s4.isDirect()) { o3 = o4; s3 = s4; o3info = o4info; break; }
+            default: throw newInsufficientObjectCountError(objCount);
         }
 
         if (objCount == 3) {
@@ -1170,15 +1188,18 @@ public abstract class Invoker {
                     s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1),
                     s2.object(o2), s2.objectInfo(o2info), s2.offset(o2), s2.length(o2),
                     s3.object(o3), s3.objectInfo(o3info), s3.offset(o3), s3.length(o3));
-
-        } else {
-            throw newObjectCountError(objCount);
         }
+
+        throw newObjectCountError(objCount);
     }
 
     public final long invokeN5(CallContext ctx, long function,
                                long n1, long n2, long n3, long n4, long n5, int objCount,
                                Object o1, ObjectParameterStrategy s1, ObjectParameterInfo o1info) {
+
+        if (objCount == 0) {
+            return foreign.invokeN5(ctx.getAddress(), function, n1, n2, n3, n4, n5);
+        }
 
         if (objCount == 1) {
             return foreign.invokeN5O1(ctx.getAddress(), function, n1, n2, n3, n4, n5,
@@ -1193,6 +1214,10 @@ public abstract class Invoker {
                                long n1, long n2, long n3, long n4, long n5, int objCount,
                                Object o1, ObjectParameterStrategy s1, ObjectParameterInfo o1info,
                                Object o2, ObjectParameterStrategy s2, ObjectParameterInfo o2info) {
+
+        if (objCount == 0) {
+            return foreign.invokeN5(ctx.getAddress(), function, n1, n2, n3, n4, n5);
+        }
 
         if (objCount == 1) {
             // only one object is to be passed down as a a heap object - figure out which one
@@ -1224,57 +1249,170 @@ public abstract class Invoker {
                                Object o2, ObjectParameterStrategy s2, ObjectParameterInfo o2info,
                                Object o3, ObjectParameterStrategy s3, ObjectParameterInfo o3info) {
 
-        if (objCount < 3) {
-            int next;
-            // Sort out which is the first non-direct object
-            if (!s1.isDirect()) {
-                // do nothing, use the first param as-is
-                next = 2;
-
-            } else if (!s2.isDirect()) {
-                // move second into first place
-                o1 = o2; s1 = s2; o1info = o2info;
-                next = 3;
-
-            } else {
-                // move third into first place
-                o1 = o3; s1 = s3; o1info = o3info;
-                next = 4;
-            }
-
-
-            if (objCount == 1) {
-                return foreign.invokeN5O1(ctx.getAddress(), function, n1, n2, n3, n4, n5,
-                        s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1));
-
-            } else if (objCount == 2) {
-                // Sort out which is the second non-direct object
-
-                if (next <= 2 && !s2.isDirect()) {
-                    // do nothing, use the second param as-is
-
-                } else if (next <= 3 && !s3.isDirect()) {
-                    // move third param into second  place
-                    o2 = o3; s2 = s3; o2info = o3info;
-
-                } else {
-                    throw newInsufficientObjectCountError(objCount);
-                }
-
-                return foreign.invokeN5O2(ctx.getAddress(), function, n1, n2, n3, n4, n5,
-                        s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1),
-                        s2.object(o2), s2.objectInfo(o2info), s2.offset(o2), s2.length(o2));
-            } else {
-                throw newObjectCountError(objCount);
-            }
+        if (objCount == 0) {
+            return foreign.invokeN5(ctx.getAddress(), function, n1, n2, n3, n4, n5);
         }
 
-        // Three objects to be passed as heap objects, just use all arguments as-is
-        return foreign.invokeN5O3(ctx.getAddress(), function, n1, n2, n3, n4, n5,
-                s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1),
-                s2.object(o2), s2.objectInfo(o2info), s2.offset(o2), s2.length(o2),
-                s3.object(o3), s3.objectInfo(o3info), s3.offset(o3), s3.length(o3));
+        int next = 1;
+
+        // Sort out which is the first non-direct object
+        switch (next) {
+            case 1: next++; if (!s1.isDirect()) break;
+            case 2: next++; if (!s2.isDirect()) { o1 = o2; s1 = s2; o1info = o2info; break; }
+            case 3: next++; if (!s3.isDirect()) { o1 = o3; s1 = s3; o1info = o3info; break; }
+            default: throw newInsufficientObjectCountError(objCount);
+        }
+
+        if (objCount == 1) {
+            return foreign.invokeN5O1(ctx.getAddress(), function, n1, n2, n3, n4, n5,
+                    s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1));
+        }
+
+        switch (next) {
+            case 2: next++; if (!s2.isDirect()) break;
+            case 3: next++; if (!s3.isDirect()) { o2 = o3; s2 = s3; o2info = o3info; break; }
+            default: throw newInsufficientObjectCountError(objCount);
+        }
+
+        if (objCount == 2) {
+            return foreign.invokeN5O2(ctx.getAddress(), function, n1, n2, n3, n4, n5,
+                    s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1),
+                    s2.object(o2), s2.objectInfo(o2info), s2.offset(o2), s2.length(o2));
+        }
+
+        switch (next) {
+            case 3: if (!s3.isDirect()) break;
+            default: throw newInsufficientObjectCountError(objCount);
+        }
+
+        if (objCount == 3) {
+            return foreign.invokeN5O3(ctx.getAddress(), function, n1, n2, n3, n4, n5,
+                    s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1),
+                    s2.object(o2), s2.objectInfo(o2info), s2.offset(o2), s2.length(o2),
+                    s3.object(o3), s3.objectInfo(o3info), s3.offset(o3), s3.length(o3));
+        }
+
+        throw newObjectCountError(objCount);
     }
+
+
+    public final long invokeN5(CallContext ctx, long function,
+                               long n1, long n2, long n3, long n4, long n5, int objCount,
+                               Object o1, ObjectParameterStrategy s1, ObjectParameterInfo o1info,
+                               Object o2, ObjectParameterStrategy s2, ObjectParameterInfo o2info,
+                               Object o3, ObjectParameterStrategy s3, ObjectParameterInfo o3info,
+                               Object o4, ObjectParameterStrategy s4, ObjectParameterInfo o4info) {
+        if (objCount == 0) {
+            return foreign.invokeN5(ctx.getAddress(), function, n1, n2, n3, n4, n5);
+        }
+
+        int next = 1;
+
+        // Sort out which is the first non-direct object
+        switch (next) {
+            case 1: next++; if (!s1.isDirect()) break;
+            case 2: next++; if (!s2.isDirect()) { o1 = o2; s1 = s2; o1info = o2info; break; }
+            case 3: next++; if (!s3.isDirect()) { o1 = o3; s1 = s3; o1info = o3info; break; }
+            case 4: next++; if (!s4.isDirect()) { o1 = o4; s1 = s4; o1info = o4info; break; }
+            default: throw newInsufficientObjectCountError(objCount);
+        }
+
+        if (objCount == 1) {
+            return foreign.invokeN5O1(ctx.getAddress(), function, n1, n2, n3, n4, n5,
+                    s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1));
+        }
+
+        switch (next) {
+            case 2: next++; if (!s2.isDirect()) break;
+            case 3: next++; if (!s3.isDirect()) { o2 = o3; s2 = s3; o2info = o3info; break; }
+            case 4: next++; if (!s4.isDirect()) { o2 = o4; s2 = s4; o2info = o4info; break; }
+            default: throw newInsufficientObjectCountError(objCount);
+        }
+
+        if (objCount == 2) {
+            return foreign.invokeN5O2(ctx.getAddress(), function, n1, n2, n3, n4, n5,
+                    s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1),
+                    s2.object(o2), s2.objectInfo(o2info), s2.offset(o2), s2.length(o2));
+        }
+
+        switch (next) {
+            case 3: if (!s3.isDirect()) break;
+            case 4: if (!s4.isDirect()) { o3 = o4; s3 = s4; o3info = o4info; break; }
+            default: throw newInsufficientObjectCountError(objCount);
+        }
+
+        if (objCount == 3) {
+            return foreign.invokeN5O3(ctx.getAddress(), function, n1, n2, n3, n4, n5,
+                    s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1),
+                    s2.object(o2), s2.objectInfo(o2info), s2.offset(o2), s2.length(o2),
+                    s3.object(o3), s3.objectInfo(o3info), s3.offset(o3), s3.length(o3));
+        }
+
+        throw newObjectCountError(objCount);
+    }
+
+
+
+
+    public final long invokeN5(CallContext ctx, long function,
+                               long n1, long n2, long n3, long n4, long n5, int objCount,
+                               Object o1, ObjectParameterStrategy s1, ObjectParameterInfo o1info,
+                               Object o2, ObjectParameterStrategy s2, ObjectParameterInfo o2info,
+                               Object o3, ObjectParameterStrategy s3, ObjectParameterInfo o3info,
+                               Object o4, ObjectParameterStrategy s4, ObjectParameterInfo o4info,
+                               Object o5, ObjectParameterStrategy s5, ObjectParameterInfo o5info) {
+        if (objCount == 0) {
+            return foreign.invokeN5(ctx.getAddress(), function, n1, n2, n3, n4, n5);
+        }
+
+        int next = 1;
+
+        // Sort out which is the first non-direct object
+        switch (next) {
+            case 1: next++; if (!s1.isDirect()) break;
+            case 2: next++; if (!s2.isDirect()) { o1 = o2; s1 = s2; o1info = o2info; break; }
+            case 3: next++; if (!s3.isDirect()) { o1 = o3; s1 = s3; o1info = o3info; break; }
+            case 4: next++; if (!s4.isDirect()) { o1 = o4; s1 = s4; o1info = o4info; break; }
+            case 5: next++; if (!s5.isDirect()) { o1 = o5; s1 = s5; o1info = o5info; break; }
+            default: throw newInsufficientObjectCountError(objCount);
+        }
+
+        if (objCount == 1) {
+            return foreign.invokeN5O1(ctx.getAddress(), function, n1, n2, n3, n4, n5,
+                    s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1));
+        }
+
+        switch (next) {
+            case 2: next++; if (!s2.isDirect()) break;
+            case 3: next++; if (!s3.isDirect()) { o2 = o3; s2 = s3; o2info = o3info; break; }
+            case 4: next++; if (!s4.isDirect()) { o2 = o4; s2 = s4; o2info = o4info; break; }
+            case 5: next++; if (!s5.isDirect()) { o2 = o5; s2 = s5; o2info = o5info; break; }
+            default: throw newInsufficientObjectCountError(objCount);
+        }
+
+        if (objCount == 2) {
+            return foreign.invokeN5O2(ctx.getAddress(), function, n1, n2, n3, n4, n5,
+                    s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1),
+                    s2.object(o2), s2.objectInfo(o2info), s2.offset(o2), s2.length(o2));
+        }
+
+        switch (next) {
+            case 3: if (!s3.isDirect()) break;
+            case 4: if (!s4.isDirect()) { o3 = o4; s3 = s4; o3info = o4info; break; }
+            case 5: if (!s5.isDirect()) { o3 = o5; s3 = s5; o3info = o5info; break; }
+            default: throw newInsufficientObjectCountError(objCount);
+        }
+
+        if (objCount == 3) {
+            return foreign.invokeN5O3(ctx.getAddress(), function, n1, n2, n3, n4, n5,
+                    s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1),
+                    s2.object(o2), s2.objectInfo(o2info), s2.offset(o2), s2.length(o2),
+                    s3.object(o3), s3.objectInfo(o3info), s3.offset(o3), s3.length(o3));
+        }
+
+        throw newObjectCountError(objCount);
+    }
+
 
     public final long invokeN6(CallContext ctx, long function,
                                long n1, long n2, long n3, long n4, long n5, long n6, int objCount,
@@ -1293,6 +1431,10 @@ public abstract class Invoker {
                                long n1, long n2, long n3, long n4, long n5, long n6, int objCount,
                                Object o1, ObjectParameterStrategy s1, ObjectParameterInfo o1info,
                                Object o2, ObjectParameterStrategy s2, ObjectParameterInfo o2info) {
+
+        if (objCount == 0) {
+            return foreign.invokeN6(ctx.getAddress(), function, n1, n2, n3, n4, n5, n6);
+        }
 
         if (objCount == 1) {
             // only one object is to be passed down as a a heap object - figure out which one
@@ -1324,58 +1466,221 @@ public abstract class Invoker {
                                Object o2, ObjectParameterStrategy s2, ObjectParameterInfo o2info,
                                Object o3, ObjectParameterStrategy s3, ObjectParameterInfo o3info) {
 
-        if (objCount < 3) {
-            int next;
-            // Sort out which is the first non-direct object
-            if (!s1.isDirect()) {
-                // do nothing, use the first param as-is
-                next = 2;
-
-            } else if (!s2.isDirect()) {
-                // move second into first place
-                o1 = o2; s1 = s2; o1info = o2info;
-                next = 3;
-
-            } else {
-                // move third into first place
-                o1 = o3; s1 = s3; o1info = o3info;
-                next = 4;
-            }
-
-
-            if (objCount == 1) {
-                return foreign.invokeN6O1(ctx.getAddress(), function, n1, n2, n3, n4, n5, n6,
-                        s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1));
-
-            } else if (objCount == 2) {
-                // Sort out which is the second non-direct object
-
-                if (next <= 2 && !s2.isDirect()) {
-                    // do nothing, use the second param as-is
-
-                } else if (next <= 3 && !s3.isDirect()) {
-                    // move third param into second  place
-                    o2 = o3; s2 = s3; o2info = o3info;
-
-                } else {
-                    throw newInsufficientObjectCountError(objCount);
-                }
-
-                return foreign.invokeN6O2(ctx.getAddress(), function, n1, n2, n3, n4, n5, n6,
-                        s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1),
-                        s2.object(o2), s2.objectInfo(o2info), s2.offset(o2), s2.length(o2));
-            } else {
-                throw newObjectCountError(objCount);
-            }
+        if (objCount == 0) {
+            return foreign.invokeN6(ctx.getAddress(), function, n1, n2, n3, n4, n5, n6);
         }
 
-        // Three objects to be passed as heap objects, just use all arguments as-is
-        return foreign.invokeN6O3(ctx.getAddress(), function, n1, n2, n3, n4, n5, n6,
-                s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1),
-                s2.object(o2), s2.objectInfo(o2info), s2.offset(o2), s2.length(o2),
-                s3.object(o3), s3.objectInfo(o3info), s3.offset(o3), s3.length(o3));
+        int next = 1;
+
+        // Sort out which is the first non-direct object
+        switch (next) {
+            case 1: next++; if (!s1.isDirect()) break;
+            case 2: next++; if (!s2.isDirect()) { o1 = o2; s1 = s2; o1info = o2info; break; }
+            case 3: next++; if (!s3.isDirect()) { o1 = o3; s1 = s3; o1info = o3info; break; }
+        }
+
+        if (objCount == 1) {
+            return foreign.invokeN6O1(ctx.getAddress(), function, n1, n2, n3, n4, n5, n6,
+                    s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1));
+        }
+
+        switch (next) {
+            case 2: next++; if (!s2.isDirect()) break;
+            case 3: next++; if (!s3.isDirect()) { o2 = o3; s2 = s3; o2info = o3info; break; }
+        }
+        if (objCount == 2) {
+            return foreign.invokeN6O2(ctx.getAddress(), function, n1, n2, n3, n4, n5, n6,
+                    s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1),
+                    s2.object(o2), s2.objectInfo(o2info), s2.offset(o2), s2.length(o2));
+        }
+
+        switch (next) {
+            case 3: if (!s3.isDirect()) break;
+        }
+
+        if (objCount == 3) {
+            return foreign.invokeN6O3(ctx.getAddress(), function, n1, n2, n3, n4, n5, n6,
+                    s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1),
+                    s2.object(o2), s2.objectInfo(o2info), s2.offset(o2), s2.length(o2),
+                    s3.object(o3), s3.objectInfo(o3info), s3.offset(o3), s3.length(o3));
+        }
+
+        throw newObjectCountError(objCount);
     }
 
+    public final long invokeN6(CallContext ctx, long function,
+                               long n1, long n2, long n3, long n4, long n5, long n6, int objCount,
+                               Object o1, ObjectParameterStrategy s1, ObjectParameterInfo o1info,
+                               Object o2, ObjectParameterStrategy s2, ObjectParameterInfo o2info,
+                               Object o3, ObjectParameterStrategy s3, ObjectParameterInfo o3info,
+                               Object o4, ObjectParameterStrategy s4, ObjectParameterInfo o4info) {
+        if (objCount == 0) {
+            return foreign.invokeN6(ctx.getAddress(), function, n1, n2, n3, n4, n5, n6);
+        }
+
+        int next = 1;
+
+        // Sort out which is the first non-direct object
+        switch (next) {
+            case 1: next++; if (!s1.isDirect()) break;
+            case 2: next++; if (!s2.isDirect()) { o1 = o2; s1 = s2; o1info = o2info; break; }
+            case 3: next++; if (!s3.isDirect()) { o1 = o3; s1 = s3; o1info = o3info; break; }
+            case 4: next++; if (!s4.isDirect()) { o1 = o4; s1 = s4; o1info = o4info; break; }
+        }
+
+        if (objCount == 1) {
+            return foreign.invokeN6O1(ctx.getAddress(), function, n1, n2, n3, n4, n5, n6,
+                    s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1));
+        }
+
+        switch (next) {
+            case 2: next++; if (!s2.isDirect()) break;
+            case 3: next++; if (!s3.isDirect()) { o2 = o3; s2 = s3; o2info = o3info; break; }
+            case 4: next++; if (!s4.isDirect()) { o2 = o4; s2 = s4; o2info = o4info; break; }
+        }
+        if (objCount == 2) {
+            return foreign.invokeN6O2(ctx.getAddress(), function, n1, n2, n3, n4, n5, n6,
+                    s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1),
+                    s2.object(o2), s2.objectInfo(o2info), s2.offset(o2), s2.length(o2));
+        }
+
+        switch (next) {
+            case 3: if (!s3.isDirect()) break;
+            case 4: if (!s4.isDirect()) { o3 = o4; s3 = s4; o3info = o4info; break; }
+        }
+
+        if (objCount == 3) {
+            return foreign.invokeN6O3(ctx.getAddress(), function, n1, n2, n3, n4, n5, n6,
+                    s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1),
+                    s2.object(o2), s2.objectInfo(o2info), s2.offset(o2), s2.length(o2),
+                    s3.object(o3), s3.objectInfo(o3info), s3.offset(o3), s3.length(o3));
+        }
+
+        throw newObjectCountError(objCount);
+    }
+
+
+    public final long invokeN6(CallContext ctx, long function,
+                               long n1, long n2, long n3, long n4, long n5, long n6, int objCount,
+                               Object o1, ObjectParameterStrategy s1, ObjectParameterInfo o1info,
+                               Object o2, ObjectParameterStrategy s2, ObjectParameterInfo o2info,
+                               Object o3, ObjectParameterStrategy s3, ObjectParameterInfo o3info,
+                               Object o4, ObjectParameterStrategy s4, ObjectParameterInfo o4info,
+                               Object o5, ObjectParameterStrategy s5, ObjectParameterInfo o5info) {
+        if (objCount == 0) {
+            return foreign.invokeN6(ctx.getAddress(), function, n1, n2, n3, n4, n5, n6);
+        }
+
+        int next = 1;
+
+        // Sort out which is the first non-direct object
+        switch (next) {
+            case 1: next++; if (!s1.isDirect()) break;
+            case 2: next++; if (!s2.isDirect()) { o1 = o2; s1 = s2; o1info = o2info; break; }
+            case 3: next++; if (!s3.isDirect()) { o1 = o3; s1 = s3; o1info = o3info; break; }
+            case 4: next++; if (!s4.isDirect()) { o1 = o4; s1 = s4; o1info = o4info; break; }
+            case 5: next++; if (!s5.isDirect()) { o1 = o5; s1 = s5; o1info = o5info; break; }
+            default: throw newInsufficientObjectCountError(objCount);
+        }
+
+        if (objCount == 1) {
+            return foreign.invokeN6O1(ctx.getAddress(), function, n1, n2, n3, n4, n5, n6,
+                    s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1));
+        }
+
+        switch (next) {
+            case 2: next++; if (!s2.isDirect()) break;
+            case 3: next++; if (!s3.isDirect()) { o2 = o3; s2 = s3; o2info = o3info; break; }
+            case 4: next++; if (!s4.isDirect()) { o2 = o4; s2 = s4; o2info = o4info; break; }
+            case 5: next++; if (!s5.isDirect()) { o2 = o5; s2 = s5; o2info = o5info; break; }
+            default: throw newInsufficientObjectCountError(objCount);
+        }
+        if (objCount == 2) {
+            return foreign.invokeN6O2(ctx.getAddress(), function, n1, n2, n3, n4, n5, n6,
+                    s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1),
+                    s2.object(o2), s2.objectInfo(o2info), s2.offset(o2), s2.length(o2));
+        }
+
+        switch (next) {
+            case 3: if (!s3.isDirect()) break;
+            case 4: if (!s4.isDirect()) { o3 = o4; s3 = s4; o3info = o4info; break; }
+            case 5: if (!s5.isDirect()) { o3 = o5; s3 = s5; o3info = o5info; break; }
+            default: throw newInsufficientObjectCountError(objCount);
+        }
+
+        if (objCount == 3) {
+            return foreign.invokeN6O3(ctx.getAddress(), function, n1, n2, n3, n4, n5, n6,
+                    s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1),
+                    s2.object(o2), s2.objectInfo(o2info), s2.offset(o2), s2.length(o2),
+                    s3.object(o3), s3.objectInfo(o3info), s3.offset(o3), s3.length(o3));
+        }
+
+        throw newObjectCountError(objCount);
+    }
+
+
+    public final long invokeN6(CallContext ctx, long function,
+                               long n1, long n2, long n3, long n4, long n5, long n6, int objCount,
+                               Object o1, ObjectParameterStrategy s1, ObjectParameterInfo o1info,
+                               Object o2, ObjectParameterStrategy s2, ObjectParameterInfo o2info,
+                               Object o3, ObjectParameterStrategy s3, ObjectParameterInfo o3info,
+                               Object o4, ObjectParameterStrategy s4, ObjectParameterInfo o4info,
+                               Object o5, ObjectParameterStrategy s5, ObjectParameterInfo o5info,
+                               Object o6, ObjectParameterStrategy s6, ObjectParameterInfo o6info) {
+        if (objCount == 0) {
+            return foreign.invokeN6(ctx.getAddress(), function, n1, n2, n3, n4, n5, n6);
+        }
+
+        int next = 1;
+
+        // Sort out which is the first non-direct object
+        switch (next) {
+            case 1: next++; if (!s1.isDirect()) break;
+            case 2: next++; if (!s2.isDirect()) { o1 = o2; s1 = s2; o1info = o2info; break; }
+            case 3: next++; if (!s3.isDirect()) { o1 = o3; s1 = s3; o1info = o3info; break; }
+            case 4: next++; if (!s4.isDirect()) { o1 = o4; s1 = s4; o1info = o4info; break; }
+            case 5: next++; if (!s5.isDirect()) { o1 = o5; s1 = s5; o1info = o5info; break; }
+            case 6: next++; if (!s6.isDirect()) { o1 = o6; s1 = s6; o1info = o6info; break; }
+            default: throw newInsufficientObjectCountError(objCount);
+        }
+
+        if (objCount == 1) {
+            return foreign.invokeN6O1(ctx.getAddress(), function, n1, n2, n3, n4, n5, n6,
+                    s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1));
+        }
+
+        switch (next) {
+            case 2: next++; if (!s2.isDirect()) break;
+            case 3: next++; if (!s3.isDirect()) { o2 = o3; s2 = s3; o2info = o3info; break; }
+            case 4: next++; if (!s4.isDirect()) { o2 = o4; s2 = s4; o2info = o4info; break; }
+            case 5: next++; if (!s5.isDirect()) { o2 = o5; s2 = s5; o2info = o5info; break; }
+            case 6: next++; if (!s6.isDirect()) { o2 = o6; s2 = s6; o2info = o6info; break; }
+            default: throw newInsufficientObjectCountError(objCount);
+        }
+
+        if (objCount == 2) {
+            return foreign.invokeN6O2(ctx.getAddress(), function, n1, n2, n3, n4, n5, n6,
+                    s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1),
+                    s2.object(o2), s2.objectInfo(o2info), s2.offset(o2), s2.length(o2));
+        }
+
+        switch (next) {
+            case 3: if (!s3.isDirect()) break;
+            case 4: if (!s4.isDirect()) { o3 = o4; s3 = s4; o3info = o4info; break; }
+            case 5: if (!s5.isDirect()) { o3 = o5; s3 = s5; o3info = o5info; break; }
+            case 6: if (!s6.isDirect()) { o3 = o6; s3 = s6; o3info = o6info; break; }
+            default: throw newInsufficientObjectCountError(objCount);
+        }
+
+        if (objCount == 3) {
+            return foreign.invokeN6O3(ctx.getAddress(), function, n1, n2, n3, n4, n5, n6,
+                    s1.object(o1), s1.objectInfo(o1info), s1.offset(o1), s1.length(o1),
+                    s2.object(o2), s2.objectInfo(o2info), s2.offset(o2), s2.length(o2),
+                    s3.object(o3), s3.objectInfo(o3info), s3.offset(o3), s3.length(o3));
+        }
+
+        throw newObjectCountError(objCount);
+    }
 
     /**
      * Invokes a function and returns a native memory address.
