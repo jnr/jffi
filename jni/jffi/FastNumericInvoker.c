@@ -105,7 +105,7 @@ static jlong call6(CallContext* ctx, void* function,
         jlong n1, jlong n2, jlong n3, jlong n4, jlong n5, jlong n6);
 static bool pin_arrays(JNIEnv* env, Pinned* pinned, int pinnedCount, 
         Array* arrays, int *arrayCount, jlong* v);
-static bool object_to_ptr(JNIEnv* env, jobject obj, int off, int len, int f, void** pptr, 
+static bool object_to_ptr(JNIEnv* env, jobject obj, int off, int len, int f, jlong* vp, 
         Array* arrays, int* arrayCount, Pinned* pinned, int* pinnedCount);
 
 /*
@@ -372,7 +372,7 @@ pin_arrays(JNIEnv* env, Pinned* pinned, int pinnedCount,
 }
 
 static bool 
-object_to_ptr(JNIEnv* env, jobject obj, int off, int len, int f, void** pptr, 
+object_to_ptr(JNIEnv* env, jobject obj, int off, int len, int f, jlong* vp, 
         Array* arrays, int* arrayCount, Pinned* pinned, int* pinnedCount)
 {
     if (unlikely(obj == NULL)) {
@@ -385,10 +385,11 @@ object_to_ptr(JNIEnv* env, jobject obj, int off, int len, int f, void** pptr,
         p->offset = off;
         p->length = len;
         p->flags = f;
+	*vp = 0LL;
     
     } else if (IS_ARRAY(f)) {
-        *pptr = jffi_getArrayHeap(env, obj, off, len, f, &arrays[*arrayCount]);
-        if (unlikely(*pptr == NULL)) {
+        *vp = p2j(jffi_getArrayHeap(env, obj, off, len, f, &arrays[*arrayCount]));
+        if (unlikely(*vp == 0L)) {
             return false;
         }
         (*arrayCount)++;
@@ -400,7 +401,7 @@ object_to_ptr(JNIEnv* env, jobject obj, int off, int len, int f, void** pptr,
                     "could not get direct buffer address for parameter %d", OBJIDX(f));
             return false;
         }
-        *pptr = addr + off;
+        *vp = p2j(addr + off);
     
     } else {
         throwException(env, IllegalArgument, "unsupported object type for parameter %d: %#x", OBJIDX(f), f);
@@ -446,7 +447,7 @@ object_to_ptr(JNIEnv* env, jobject obj, int off, int len, int f, void** pptr,
         } \
         v[idx] = p2j(ptr); \
         arrayCount++; \
-    } else if (!object_to_ptr(env, obj, off, len, flags, (void **) ARGPTR(&v[idx], ctx->cif.arg_types[idx]), arrays, &arrayCount, pinned, &pinnedCount)) { \
+    } else if (!object_to_ptr(env, obj, off, len, flags, &v[idx], arrays, &arrayCount, pinned, &pinnedCount)) { \
         goto error; \
     } \
 } while (0)
@@ -469,31 +470,6 @@ object_to_ptr(JNIEnv* env, jobject obj, int off, int len, int f, void** pptr,
 #define CALL5 CALL(5, v[0], v[1], v[2], v[3], v[4])
 #define CALL6 CALL(6, v[0], v[1], v[2], v[3], v[4], v[5])
 
-#if defined(__OPTIMIZE_SIZE__) || 1
-
-#define OBJPARAM1 \
-    ObjectParam objects[] = { \
-        { o1, o1off, o1len, o1flags } \
-    }
-
-#define OBJPARAM2 \
-    ObjectParam objects[] = { \
-        { o1, o1off, o1len, o1flags }, \
-        { o2, o2off, o2len, o2flags } \
-    }
-
-#define OBJPARAM3 \
-    ObjectParam objects[] = { \
-        { o1, o1off, o1len, o1flags }, \
-        { o2, o2off, o2len, o2flags }, \
-        { o3, o3off, o3len, o3flags } \
-    }
-
-#define INVOKE(n, o) \
-    OBJPARAM##o; \
-    return invoke##n(env, ctxAddress, function, N##n, objects, o);
-
-  
 #define IMPL(n) \
     INIT(n); \
     int objIdx; \
@@ -503,280 +479,83 @@ object_to_ptr(JNIEnv* env, jobject obj, int off, int len, int f, void** pptr,
     } \
     CALL##n;
 
-static jlong 
-invoke1(JNIEnv* env, jlong ctxAddress, jlong function, 
-        jlong n1,
-        ObjectParam* objects, int nobjects)
-{
-    IMPL(1);
+
+#define DEF_N(x) jlong n##x
+#define DEF_N1 DEF_N(1)
+#define DEF_N2 DEF_N1, DEF_N(2)
+#define DEF_N3 DEF_N2, DEF_N(3)
+#define DEF_N4 DEF_N3, DEF_N(4)
+#define DEF_N5 DEF_N4, DEF_N(5)
+#define DEF_N6 DEF_N5, DEF_N(6)
+
+#define DEFINVOKE(n) \
+static jlong invoke##n(JNIEnv* env, jobject self, jlong ctxAddress, jlong function, DEF_N##n, ObjectParam* objects, int nobjects) \
+{ \
+    IMPL(n); \
 }
 
-static jlong 
-invoke2(JNIEnv* env, jlong ctxAddress, jlong function, 
-        jlong n1, jlong n2,
-        ObjectParam* objects, int nobjects)
-{
-    IMPL(2);
+DEFINVOKE(1)
+DEFINVOKE(2)
+DEFINVOKE(3)
+DEFINVOKE(4)
+DEFINVOKE(5)
+DEFINVOKE(6)
+
+#define DEF_O(x) jobject o##x, jint o##x##flags, jint o##x##off, jint o##x##len
+#define DEF_O1 DEF_O(1)
+#define DEF_O2 DEF_O1, DEF_O(2)
+#define DEF_O3 DEF_O2, DEF_O(3)
+#define DEF_O4 DEF_O3, DEF_O(4)
+#define DEF_O5 DEF_O4, DEF_O(5)
+#define DEF_O6 DEF_O5, DEF_O(6)
+
+#define DEF_N(x) jlong n##x
+#define DEF_N1 DEF_N(1)
+#define DEF_N2 DEF_N1, DEF_N(2)
+#define DEF_N3 DEF_N2, DEF_N(3)
+#define DEF_N4 DEF_N3, DEF_N(4)
+#define DEF_N5 DEF_N4, DEF_N(5)
+#define DEF_N6 DEF_N5, DEF_N(6)
+
+#define OBJ(x) { o##x, o##x##off, o##x##len, o##x##flags }
+#define OBJ1 OBJ(1)
+#define OBJ2 OBJ1, OBJ(2)
+#define OBJ3 OBJ2, OBJ(3)
+#define OBJ4 OBJ3, OBJ(4)
+#define OBJ5 OBJ4, OBJ(5)
+#define OBJ6 OBJ5, OBJ(6)
+
+#define DEFJNI(n, o) \
+JNIEXPORT jlong JNICALL \
+Java_com_kenai_jffi_Foreign_invokeN##n##O##o(JNIEnv* env, jobject self, jlong ctxAddress, jlong function, DEF_N##n, DEF_O##o) \
+{ \
+    ObjectParam objects[] = { OBJ##o };			   \
+    return invoke##n(env, self, ctxAddress, function, N##n, objects, o); \
 }
 
-static jlong 
-invoke3(JNIEnv* env, jlong ctxAddress, jlong function, 
-        jlong n1, jlong n2, jlong n3,
-        ObjectParam* objects, int nobjects)
-{
-    IMPL(3);
-}
+DEFJNI(1, 1)
 
-static jlong 
-invoke4(JNIEnv* env, jlong ctxAddress, jlong function, 
-        jlong n1, jlong n2, jlong n3, jlong n4,
-        ObjectParam* objects, int nobjects)
-{
-    IMPL(4);
-}
+DEFJNI(2, 1)
+DEFJNI(2, 2)
 
-static jlong 
-invoke5(JNIEnv* env, jlong ctxAddress, jlong function, 
-        jlong n1, jlong n2, jlong n3, jlong n4, jlong n5,
-        ObjectParam* objects, int nobjects)
-{
-    IMPL(5);
-}
+DEFJNI(3, 1)
+DEFJNI(3, 2)
+DEFJNI(3, 3)
 
-static jlong 
-invoke6(JNIEnv* env, jlong ctxAddress, jlong function, 
-        jlong n1, jlong n2, jlong n3, jlong n4, jlong n5, jlong n6,
-        ObjectParam* objects, int nobjects)
-{
-    IMPL(6);
-}
+DEFJNI(4, 1)
+DEFJNI(4, 2)
+DEFJNI(4, 3)
+DEFJNI(4, 4)
 
-#else
+DEFJNI(5, 1)
+DEFJNI(5, 2)
+DEFJNI(5, 3)
+DEFJNI(5, 4)
+DEFJNI(5, 5)
 
-#define ADDOBJ1 \
-    ADDOBJ(o1, o1off, o1len, o1flags)
-
-#define ADDOBJ2 \
-    ADDOBJ1; ADDOBJ(o2, o2off, o2len, o2flags)
-
-#define ADDOBJ3 \
-    ADDOBJ2; ADDOBJ(o3, o3off, o3len, o3flags)
-
-
-# define INVOKE(n, o) \
-    INIT(n); \
-    ADDOBJ##o; \
-    CALL##n
-
-#endif
-
-/*
- * Class:     com_kenai_jffi_Foreign
- * Method:    invokeNO1rN
- * Signature: (JJJLjava/lang/Object;III)J
- */
-JNIEXPORT jlong JNICALL 
-Java_com_kenai_jffi_Foreign_invokeN1O1(JNIEnv* env, jobject self, jlong ctxAddress, jlong function, 
-        jlong n1,
-        jobject o1, jint o1flags, jint o1off, jint o1len)
-{
-    INVOKE(1, 1);
-}
-
-/*
- * Class:     com_kenai_jffi_Foreign
- * Method:    invokeNNO1rN
- * Signature: (JJJJLjava/lang/Object;III)J
- */
-JNIEXPORT jlong JNICALL 
-Java_com_kenai_jffi_Foreign_invokeN2O1(JNIEnv* env, jobject self, jlong ctxAddress, jlong function, 
-        jlong n1, jlong n2,
-        jobject o1, jint o1flags, jint o1off, jint o1len)
-{
-    INVOKE(2, 1);
-}
-
-/*
- * Class:     com_kenai_jffi_Foreign
- * Method:    invokeNNO2rN
- * Signature: (JJJJLjava/lang/Object;IIILjava/lang/Object;III)J
- */
-JNIEXPORT jlong JNICALL 
-Java_com_kenai_jffi_Foreign_invokeN2O2(JNIEnv* env, jobject self, jlong ctxAddress, jlong function,
-        jlong n1, jlong n2,
-        jobject o1, jint o1flags, jint o1off, jint o1len,
-        jobject o2, jint o2flags, jint o2off, jint o2len)
-{
-    INVOKE(2, 2);
-}
-
-/*
- * Class:     com_kenai_jffi_Foreign
- * Method:    invokeNNNO1rN
- * Signature: (JJJJJLjava/lang/Object;III)J
- */
-JNIEXPORT jlong JNICALL 
-Java_com_kenai_jffi_Foreign_invokeN3O1(JNIEnv* env, jobject self, 
-        jlong ctxAddress, jlong function, 
-        jlong n1, jlong n2, jlong n3, 
-        jobject o1, jint o1flags, jint o1off, jint o1len)
-{
-    INVOKE(3, 1);
-}
-
-/*
- * Class:     com_kenai_jffi_Foreign
- * Method:    invokeNNNO2rN
- * Signature: (JJJJJLjava/lang/Object;IIILjava/lang/Object;III)J
- */
-JNIEXPORT jlong JNICALL 
-Java_com_kenai_jffi_Foreign_invokeN3O2(JNIEnv* env, jobject self, jlong ctxAddress, jlong function, 
-        jlong n1, jlong n2, jlong n3,
-        jobject o1, jint o1flags, jint o1off, jint o1len,
-        jobject o2, jint o2flags, jint o2off, jint o2len)
-{
-    INVOKE(3, 2);
-}
-
-/*
- * Class:     com_kenai_jffi_Foreign
- * Method:    invokeNNNO3rN
- * Signature: (JJLjava/lang/Object;IIILjava/lang/Object;IIILjava/lang/Object;III)J
- */
-JNIEXPORT jlong JNICALL 
-Java_com_kenai_jffi_Foreign_invokeN3O3(JNIEnv* env, jobject self, jlong ctxAddress, jlong function,
-        jlong n1, jlong n2, jlong n3,
-        jobject o1, jint o1flags, jint o1off, jint o1len,
-        jobject o2, jint o2flags, jint o2off, jint o2len,
-        jobject o3, jint o3flags, jint o3off, jint o3len)
-{
-    INVOKE(3, 3);
-}
-
-/*
- * Class:     com_kenai_jffi_Foreign
- * Method:    invokeNNNNO1rN
- * Signature: (JJJJJJLjava/lang/Object;III)J
- */
-JNIEXPORT jlong JNICALL 
-Java_com_kenai_jffi_Foreign_invokeN4O1(JNIEnv* env, jobject self, jlong ctxAddress, jlong function, 
-        jlong n1, jlong n2, jlong n3, jlong n4,
-        jobject o1, jint o1flags, jint o1off, jint o1len)
-{
-    INVOKE(4, 1);
-}
-
-/*
- * Class:     com_kenai_jffi_Foreign
- * Method:    invokeNNNNO2rN
- * Signature: (JJJJJJLjava/lang/Object;IIILjava/lang/Object;III)J
- */
-JNIEXPORT jlong JNICALL 
-Java_com_kenai_jffi_Foreign_invokeN4O2(JNIEnv* env, jobject self, jlong ctxAddress, jlong function, 
-        jlong n1, jlong n2, jlong n3, jlong n4,
-        jobject o1, jint o1flags, jint o1off, jint o1len,
-        jobject o2, jint o2flags, jint o2off, jint o2len)
-{
-    INVOKE(4, 2);
-}
-
-/*
- * Class:     com_kenai_jffi_Foreign
- * Method:    invokeNNNNO3rN
- * Signature: (JJJJJJLjava/lang/Object;IIILjava/lang/Object;IIILjava/lang/Object;III)J
- */
-JNIEXPORT jlong JNICALL 
-Java_com_kenai_jffi_Foreign_invokeN4O3(JNIEnv* env, jobject self, jlong ctxAddress, jlong function, 
-        jlong n1, jlong n2, jlong n3, jlong n4,
-        jobject o1, jint o1flags, jint o1off, jint o1len,
-        jobject o2, jint o2flags, jint o2off, jint o2len,
-        jobject o3, jint o3flags, jint o3off, jint o3len)
-{
-    INVOKE(4, 3);
-}
-
-
-/*
- * Class:     com_kenai_jffi_Foreign
- * Method:    invokeNNNNNO1rN
- * Signature: (JJJJJJJLjava/lang/Object;III)J
- */
-JNIEXPORT jlong JNICALL 
-Java_com_kenai_jffi_Foreign_invokeN5O1(JNIEnv* env, jobject self, jlong ctxAddress, jlong function, 
-        jlong n1, jlong n2, jlong n3, jlong n4, jlong n5,
-        jobject o1, jint o1flags, jint o1off, jint o1len)
-{
-    INVOKE(5, 1);
-}
-
-/*
- * Class:     com_kenai_jffi_Foreign
- * Method:    invokeNNNNNO2rN
- * Signature: (JJJJJJJLjava/lang/Object;IIILjava/lang/Object;III)J
- */
-JNIEXPORT jlong JNICALL 
-Java_com_kenai_jffi_Foreign_invokeN5O2(JNIEnv* env, jobject self, jlong ctxAddress, jlong function, 
-        jlong n1, jlong n2, jlong n3, jlong n4, jlong n5,
-        jobject o1, jint o1flags, jint o1off, jint o1len,
-        jobject o2, jint o2flags, jint o2off, jint o2len)
-{
-    INVOKE(5, 2);
-}
-
-/*
- * Class:     com_kenai_jffi_Foreign
- * Method:    invokeNNNNNO3rN
- * Signature: (JJJJJJJLjava/lang/Object;IIILjava/lang/Object;IIILjava/lang/Object;III)J
- */
-JNIEXPORT jlong JNICALL 
-Java_com_kenai_jffi_Foreign_invokeN5O3(JNIEnv* env, jobject self, jlong ctxAddress, jlong function, 
-        jlong n1, jlong n2, jlong n3, jlong n4, jlong n5,
-        jobject o1, jint o1flags, jint o1off, jint o1len,
-        jobject o2, jint o2flags, jint o2off, jint o2len,
-        jobject o3, jint o3flags, jint o3off, jint o3len)
-{
-    INVOKE(5, 3);
-}
-
-/*
- * Class:     com_kenai_jffi_Foreign
- * Method:    invokeNNNNNNO1rN
- * Signature: (JJJJJJJJLjava/lang/Object;III)J
- */
-JNIEXPORT jlong JNICALL 
-Java_com_kenai_jffi_Foreign_invokeN6O1(JNIEnv* env, jobject self, jlong ctxAddress, jlong function, 
-        jlong n1, jlong n2, jlong n3, jlong n4, jlong n5, jlong n6,
-        jobject o1, jint o1flags, jint o1off, jint o1len)
-{
-    INVOKE(6, 1);
-}
-
-/*
- * Class:     com_kenai_jffi_Foreign
- * Method:    invokeNNNNNNO2rN
- * Signature: (JJJJJJJJLjava/lang/Object;IIILjava/lang/Object;III)J
- */
-JNIEXPORT jlong JNICALL 
-Java_com_kenai_jffi_Foreign_invokeN6O2(JNIEnv* env, jobject self, jlong ctxAddress, jlong function, 
-        jlong n1, jlong n2, jlong n3, jlong n4, jlong n5, jlong n6,
-        jobject o1, jint o1flags, jint o1off, jint o1len,
-        jobject o2, jint o2flags, jint o2off, jint o2len)
-{
-    INVOKE(6, 2);
-}
-
-/*
- * Class:     com_kenai_jffi_Foreign
- * Method:    invokeNNNNNNO3rN
- * Signature: (JJJJJJJJLjava/lang/Object;IIILjava/lang/Object;IIILjava/lang/Object;III)J
- */
-JNIEXPORT jlong JNICALL 
-Java_com_kenai_jffi_Foreign_invokeN6O3(JNIEnv* env, jobject self, jlong ctxAddress, jlong function, 
-        jlong n1, jlong n2, jlong n3, jlong n4, jlong n5, jlong n6,
-        jobject o1, jint o1flags, jint o1off, jint o1len,
-        jobject o2, jint o2flags, jint o2off, jint o2len,
-        jobject o3, jint o3flags, jint o3off, jint o3len)
-{
-    INVOKE(6, 3);
-}
-
+DEFJNI(6, 1)
+DEFJNI(6, 2)
+DEFJNI(6, 3)
+DEFJNI(6, 4)
+DEFJNI(6, 5)
+DEFJNI(6, 6)
