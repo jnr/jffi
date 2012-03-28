@@ -380,7 +380,7 @@ final class Foreign {
      */
     final native void setLastError(int error);
 
-    final native long newClosureMagazine(long contextAddress, Method closureMethod);
+    final native long newClosureMagazine(long contextAddress, Method closureMethod, boolean callWithPrimitiveParameters);
     final native void freeClosureMagazine(long closurePool);
     final native long closureMagazineGet(long closurePool, Object proxy);
 

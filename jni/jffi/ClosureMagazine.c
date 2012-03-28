@@ -63,6 +63,7 @@ typedef struct ClosureMagazine {
     struct Closure* closures;
     int nclosures;
     int nextclosure;
+    int callWithPrimitiveParameters;
 } Magazine;
 
 typedef struct Closure {
@@ -74,7 +75,8 @@ typedef struct Closure {
 static bool closure_prep(ffi_cif* cif, void* code, Closure* closure, char* errbuf, size_t errbufsize);
 
 JNIEXPORT jlong JNICALL
-Java_com_kenai_jffi_Foreign_newClosureMagazine(JNIEnv *env, jobject self, jlong ctxAddress, jobject closureMethod)
+Java_com_kenai_jffi_Foreign_newClosureMagazine(JNIEnv *env, jobject self, jlong ctxAddress, jobject closureMethod,
+    jboolean callWithPrimitiveParameters)
 {
     CallContext* ctx = (CallContext *) j2p(ctxAddress);
     Closure* list = NULL;
@@ -125,6 +127,7 @@ Java_com_kenai_jffi_Foreign_newClosureMagazine(JNIEnv *env, jobject self, jlong 
     magazine->nextclosure = 0;
     magazine->nclosures = nclosures;
     magazine->code = code;
+    magazine->callWithPrimitiveParameters = callWithPrimitiveParameters;
     (*env)->GetJavaVM(env, &magazine->jvm);
 
     return p2j(magazine);
@@ -235,20 +238,132 @@ static void
 closure_invoke(ffi_cif* cif, void* retval, void** parameters, void* user_data)
 {
     Closure* closure = (Closure *) user_data;
-    
     JNIEnv* env;
-    jvalue javaParams[3];
+    int i;
     bool detach;
 
     closure_begin(closure, &env, &detach);
 
-    javaParams[0].j = p2j(retval);
-    javaParams[1].j = p2j(parameters);
+    if (closure->magazine->callWithPrimitiveParameters) {
+        // allocate one more than the parameter count (for the struct return value)
+        jvalue* jparams = alloca((cif->nargs + 1) * sizeof(jvalue));
+        for (i = 0; i < (int) cif->nargs; i++) {
+            jvalue* vp = &jparams[i];
+            switch (cif->arg_types[i]->type) {
+                case FFI_TYPE_SINT8:
+                case FFI_TYPE_UINT8:
+                    vp->b = *(jbyte *) parameters[i];
+                    break;
 
-    //
-    // Do the actual invoke - the java code will unmarshal the arguments
-    //
-    (*env)->CallVoidMethodA(env, closure->javaObject, closure->magazine->methodID, &javaParams[0]);
+                case FFI_TYPE_SINT16:
+                case FFI_TYPE_UINT16:
+                    vp->s = *(jshort *) parameters[i];
+                    break;
+
+                case FFI_TYPE_SINT32:
+                case FFI_TYPE_UINT32:
+                case FFI_TYPE_INT:
+                    vp->i = *(jint *) parameters[i];
+                    break;
+
+                case FFI_TYPE_SINT64:
+                case FFI_TYPE_UINT64:
+                    vp->j = *(jlong *) parameters[i];
+                    break;
+
+                case FFI_TYPE_FLOAT:
+                    vp->i = *(jfloat *) parameters[i];
+                    break;
+
+                case FFI_TYPE_DOUBLE:
+                    vp->i = *(jdouble *) parameters[i];
+                    break;
+
+                case FFI_TYPE_POINTER:
+                    vp->j = p2j(*(void **) parameters[i]);
+                    break;
+
+                case FFI_TYPE_STRUCT:
+                    vp->j = p2j(parameters[i]);
+                    break;
+
+                default:
+                    memset(vp, 0, sizeof(*vp));
+                    break;
+
+            }
+        }
+
+        switch (cif->rtype->type) {
+            case FFI_TYPE_SINT8:
+                *((ffi_sarg *) retval) = (*env)->CallByteMethodA(env, closure->javaObject, closure->magazine->methodID, jparams);
+                break;
+
+            case FFI_TYPE_SINT16:
+                *((ffi_sarg *) retval) = (*env)->CallShortMethodA(env, closure->javaObject, closure->magazine->methodID, jparams);
+                break;
+
+            case FFI_TYPE_SINT32:
+            case FFI_TYPE_INT:
+                *((ffi_sarg *) retval) = (*env)->CallIntMethodA(env, closure->javaObject, closure->magazine->methodID, jparams);
+                break;
+
+            case FFI_TYPE_UINT8:
+                *((ffi_arg *) retval) = (*env)->CallByteMethodA(env, closure->javaObject, closure->magazine->methodID, jparams);
+                break;
+
+            case FFI_TYPE_UINT16:
+                *((ffi_arg *) retval) = (*env)->CallShortMethodA(env, closure->javaObject, closure->magazine->methodID, jparams);
+                break;
+
+            case FFI_TYPE_UINT32:
+                *((ffi_arg *) retval) = (*env)->CallIntMethodA(env, closure->javaObject, closure->magazine->methodID, jparams);
+                break;
+
+            case FFI_TYPE_SINT64:
+                *((int64_t *) retval) = (*env)->CallLongMethodA(env, closure->javaObject, closure->magazine->methodID, jparams);
+                break;
+
+            case FFI_TYPE_UINT64:
+                *((uint64_t *) retval) = (*env)->CallLongMethodA(env, closure->javaObject, closure->magazine->methodID, jparams);
+                break;
+
+            case FFI_TYPE_POINTER:
+                *((uint64_t *) retval) = (*env)->CallLongMethodA(env, closure->javaObject, closure->magazine->methodID, jparams);
+                break;
+
+            case FFI_TYPE_FLOAT:
+                *((float *) retval) = (*env)->CallFloatMethodA(env, closure->javaObject, closure->magazine->methodID, jparams);
+                break;
+
+            case FFI_TYPE_DOUBLE:
+                *((double *) retval) = (*env)->CallDoubleMethodA(env, closure->javaObject, closure->magazine->methodID, jparams);
+                break;
+
+            case FFI_TYPE_STRUCT:
+                // stuff the retval in as the last parameter passed to the java method
+                jparams[cif->nargs].j = p2j(retval);
+                (*env)->CallVoidMethodA(env, closure->javaObject, closure->magazine->methodID, jparams);
+                break;
+
+            default:
+                memset(retval, 0, cif->rtype->size);
+        }
+
+    } else {
+        jvalue jparams[2];
+        jparams[0].j = p2j(retval);
+        jparams[1].j = p2j(parameters);
+        //
+        // Do the actual invoke - the java code will unmarshal the arguments
+        //
+        (*env)->CallVoidMethodA(env, closure->javaObject, closure->magazine->methodID, jparams);
+    }
+
+
+    if ((*env)->ExceptionCheck(env)) {
+        memset(retval, 0, cif->rtype->size);
+    }
 
     closure_end(closure, env, detach);
 }

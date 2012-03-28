@@ -174,7 +174,7 @@ public final class ClosurePool {
 
         Magazine(CallContext ctx) {
             this.ctx = ctx;
-            this.magazine = foreign.newClosureMagazine(ctx.getAddress(), Proxy.METHOD);
+            this.magazine = foreign.newClosureMagazine(ctx.getAddress(), Proxy.METHOD, false);
             ArrayList<Slot> slots = new ArrayList<Slot>();
 
             for (;;) {
