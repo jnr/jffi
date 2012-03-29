@@ -247,8 +247,11 @@ closure_invoke(ffi_cif* cif, void* retval, void** parameters, void* user_data)
     if (closure->magazine->callWithPrimitiveParameters) {
         // allocate one more than the parameter count (for the struct return value)
         jvalue* jparams = alloca((cif->nargs + 1) * sizeof(jvalue));
+
         for (i = 0; i < (int) cif->nargs; i++) {
             jvalue* vp = &jparams[i];
+
+            vp->j = 0LL; // zero out any bits not filled below
             switch (cif->arg_types[i]->type) {
                 case FFI_TYPE_SINT8:
                 case FFI_TYPE_UINT8:
@@ -280,10 +283,17 @@ closure_invoke(ffi_cif* cif, void* retval, void** parameters, void* user_data)
                     break;
 
                 case FFI_TYPE_POINTER:
-                    vp->j = p2j(*(void **) parameters[i]);
+                    if (cif->arg_types[i]->size == 4) {
+                        vp->i = (uintptr_t) *(void **) parameters[i];
+                    } else {
+                        vp->j = p2j(*(void **) parameters[i]);
+                    }
                     break;
 
                 case FFI_TYPE_STRUCT:
+#if FFI_TYPE_LONGDOUBLE != FFI_TYPE_DOUBLE
+                case FFI_TYPE_LONGDOUBLE:
+#endif
                     vp->j = p2j(parameters[i]);
                     break;
 
@@ -329,7 +339,11 @@ closure_invoke(ffi_cif* cif, void* retval, void** parameters, void* user_data)
                 break;
 
             case FFI_TYPE_POINTER:
-                *((uint64_t *) retval) = (*env)->CallLongMethodA(env, closure->javaObject, closure->magazine->methodID, jparams);
+                if (cif->rtype->size == 4) {
+                    *((ffi_arg *) retval) = (*env)->CallIntMethodA(env, closure->javaObject, closure->magazine->methodID, jparams);
+                } else {
+                    *((ffi_arg *) retval) = (*env)->CallLongMethodA(env, closure->javaObject, closure->magazine->methodID, jparams);
+                }
                 break;
 
             case FFI_TYPE_FLOAT:
@@ -341,6 +355,9 @@ closure_invoke(ffi_cif* cif, void* retval, void** parameters, void* user_data)
                 break;
 
             case FFI_TYPE_STRUCT:
+#if FFI_TYPE_LONGDOUBLE != FFI_TYPE_DOUBLE
+                case FFI_TYPE_LONGDOUBLE:
+#endif
                 // stuff the retval in as the last parameter passed to the java method
                 jparams[cif->nargs].j = p2j(retval);
                 (*env)->CallVoidMethodA(env, closure->javaObject, closure->magazine->methodID, jparams);
