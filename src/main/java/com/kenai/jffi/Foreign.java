@@ -819,6 +819,13 @@ final class Foreign {
             Object o1, int o1flags, int o1off, int o1len,
             Object o2, int o2flags, int o2off, int o2len,
             Object o3, int o3flags, int o3off, int o3len);
+
+    final native long invokeN4O4(long callContext, long functionAddress,
+                                 long n1, long n2, long n3, long n4,
+                                 Object o1, int o1flags, int o1off, int o1len,
+                                 Object o2, int o2flags, int o2off, int o2len,
+                                 Object o3, int o3flags, int o3off, int o3len,
+                                 Object o4, int o4flags, int o4off, int o4len);
     
     final native long invokeN5O1(long callContext, long functionAddress,
             long n1, long n2, long n3, long n4, long n5,
@@ -834,6 +841,21 @@ final class Foreign {
             Object o1, int o1flags, int o1off, int o1len,
             Object o2, int o2flags, int o2off, int o2len,
             Object o3, int o3flags, int o3off, int o3len);
+
+    final native long invokeN5O4(long callContext, long functionAddress,
+                                 long n1, long n2, long n3, long n4, long n5,
+                                 Object o1, int o1flags, int o1off, int o1len,
+                                 Object o2, int o2flags, int o2off, int o2len,
+                                 Object o3, int o3flags, int o3off, int o3len,
+                                 Object o4, int o4flags, int o4off, int o4len);
+
+    final native long invokeN5O5(long callContext, long functionAddress,
+                                 long n1, long n2, long n3, long n4, long n5,
+                                 Object o1, int o1flags, int o1off, int o1len,
+                                 Object o2, int o2flags, int o2off, int o2len,
+                                 Object o3, int o3flags, int o3off, int o3len,
+                                 Object o4, int o4flags, int o4off, int o4len,
+                                 Object o5, int o5flags, int o5off, int o5len);
     
     final native long invokeN6O1(long callContext, long functionAddress,
             long n1, long n2, long n3, long n4, long n5, long n6,
@@ -849,6 +871,30 @@ final class Foreign {
             Object o1, int o1flags, int o1off, int o1len,
             Object o2, int o2flags, int o2off, int o2len,
             Object o3, int o3flags, int o3off, int o3len);
+
+    final native long invokeN6O4(long callContext, long functionAddress,
+                                 long n1, long n2, long n3, long n4, long n5, long n6,
+                                 Object o1, int o1flags, int o1off, int o1len,
+                                 Object o2, int o2flags, int o2off, int o2len,
+                                 Object o3, int o3flags, int o3off, int o3len,
+                                 Object o4, int o4flags, int o4off, int o4len);
+
+    final native long invokeN6O5(long callContext, long functionAddress,
+                                 long n1, long n2, long n3, long n4, long n5, long n6,
+                                 Object o1, int o1flags, int o1off, int o1len,
+                                 Object o2, int o2flags, int o2off, int o2len,
+                                 Object o3, int o3flags, int o3off, int o3len,
+                                 Object o4, int o4flags, int o4off, int o4len,
+                                 Object o5, int o5flags, int o5off, int o5len);
+
+    final native long invokeN6O6(long callContext, long functionAddress,
+                                 long n1, long n2, long n3, long n4, long n5, long n6,
+                                 Object o1, int o1flags, int o1off, int o1len,
+                                 Object o2, int o2flags, int o2off, int o2len,
+                                 Object o3, int o3flags, int o3off, int o3len,
+                                 Object o4, int o4flags, int o4off, int o4len,
+                                 Object o5, int o5flags, int o5off, int o5len,
+                                 Object o6, int o6flags, int o6off, int o6len);
     
     
     /**
