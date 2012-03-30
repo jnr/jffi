@@ -34,13 +34,14 @@ package com.kenai.jffi;
 
 import java.lang.ref.Reference;
 import java.lang.ref.SoftReference;
+import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.WeakHashMap;
 
 /**
  * Allocates and manages the lifecycle of native closures (aka callbacks)
  */
-public class ClosureManager {
+public final class ClosureManager {
 
     /**
      * ClosurePool instances are linked via a SoftReference in the lookup map, so
@@ -106,5 +107,16 @@ public class ClosureManager {
         poolMap.put(callContext, new SoftReference<ClosurePool>(pool = new ClosurePool(callContext)));
 
         return pool;
+    }
+
+    public ClosureMagazine newClosureMagazine(CallContext callContext, Method method) {
+        Foreign foreign = Foreign.getInstance();
+        long magazine = foreign.newClosureMagazine(callContext.getAddress(), method,
+                !Closure.Buffer.class.isAssignableFrom(method.getParameterTypes()[0]));
+        if (magazine == 0L) {
+            throw new RuntimeException("could not allocate new closure magazine");
+        }
+
+        return new ClosureMagazine(foreign, callContext, magazine);
     }
 }

@@ -36,21 +36,21 @@ package com.kenai.jffi;
  */
 abstract public class DirectObjectParameterStrategy extends ObjectParameterStrategy {
 
-    public DirectObjectParameterStrategy(boolean isDirect) {
-        super(isDirect);
+    public DirectObjectParameterStrategy(boolean isDirect, ObjectParameterType parameterType) {
+        super(isDirect, parameterType);
     }
     
     abstract public long getAddress(Object parameter);
 
     public final Object object(Object parameter) {
-        throw new RuntimeException("direct object has no array");
+        throw new RuntimeException("direct object " + (parameter != null ? parameter.getClass() : "null") + " has no array");
     }
     
     public final int offset(Object parameter) {
-        throw new RuntimeException("direct object has no offset");
+        throw new RuntimeException("direct object " + (parameter != null ? parameter.getClass() : "null") + "has no offset");
     }
     
     public final int length(Object parameter) {
-        throw new RuntimeException("direct object has no length");
+        throw new RuntimeException("direct object " + (parameter != null ? parameter.getClass() : "null") + "has no length");
     }
 }

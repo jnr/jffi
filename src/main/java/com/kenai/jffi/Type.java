@@ -219,6 +219,26 @@ public abstract class Type {
         public final int alignment() {
             return BuiltinTypeInfo.find(nativeType).alignment;
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            if (!super.equals(o)) return false;
+
+            Builtin builtin = (Builtin) o;
+
+            if (nativeType != builtin.nativeType) return false;
+
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = super.hashCode();
+            result = 31 * result + nativeType.hashCode();
+            return result;
+        }
     }
 
     /**

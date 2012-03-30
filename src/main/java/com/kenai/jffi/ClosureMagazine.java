@@ -1,6 +1,5 @@
 package com.kenai.jffi;
 
-import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -17,18 +16,7 @@ public final class ClosureMagazine {
     private final long magazineAddress;
     private final AtomicBoolean disposed = new AtomicBoolean(false);
 
-    public static ClosureMagazine newClosureMagazine(CallContext callContext, Method method) {
-        Foreign foreign = Foreign.getInstance();
-        long magazine = foreign.newClosureMagazine(callContext.getAddress(), method,
-                !Closure.Buffer.class.isAssignableFrom(method.getParameterTypes()[0]));
-        if (magazine == 0L) {
-            throw new RuntimeException("could not allocate new closure magazine");
-        }
-
-        return new ClosureMagazine(foreign, callContext, magazine);
-    }
-
-    private ClosureMagazine(Foreign foreign, CallContext callContext, long magazineAddress) {
+    ClosureMagazine(Foreign foreign, CallContext callContext, long magazineAddress) {
         this.foreign = foreign;
         this.callContext = callContext;
         this.magazineAddress = magazineAddress;

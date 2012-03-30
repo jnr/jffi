@@ -37,7 +37,7 @@ package com.kenai.jffi;
  */
 public final class ArrayFlags {
 
-    /* Stop ArrayFlags from being intantiated */
+    /* Stop ArrayFlags from being instantiated */
     private ArrayFlags() {}
 
     /** Copy the array contents to native memory before calling the function */

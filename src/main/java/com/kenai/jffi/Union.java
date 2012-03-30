@@ -32,20 +32,46 @@
 
 package com.kenai.jffi;
 
+import java.util.Arrays;
+
 /**
  * Describes the layout of a C union
  */
 public final class Union extends Aggregate {
     /* Keep a strong reference to the field types so they do not GCed */
+    @SuppressWarnings({"UnusedDeclaration", "FieldCanBeLocal"})
     private final Type[] fields;
+
+
+    public static Union newUnion(Type... fields) {
+        return new Union(fields);
+    }
 
     /**
      * Creates a new C union layout description.
      *
-     * @param fields The fields contained in the struct.
+     * @param fields The fields contained in the union.
      */
     public Union(Type... fields) {
         super(Foreign.getInstance(), Foreign.getInstance().newStruct(Type.nativeHandles(fields), true));
-        this.fields = (Type[]) fields.clone();
+        this.fields = fields.clone();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+
+        Union union = (Union) o;
+
+        return Arrays.equals(fields, union.fields);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (fields != null ? Arrays.hashCode(fields) : 0);
+        return result;
     }
 }

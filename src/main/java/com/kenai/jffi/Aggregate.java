@@ -47,15 +47,9 @@ public abstract class Aggregate extends Type {
     /** The address of this type's ffi_type structure */
     private final long handle;
 
-    private volatile boolean disposed = false;
-
     /** A handle to the foreign interface to keep it alive as long as this object is alive */
     private final Foreign foreign;
 
-    public Aggregate(long handle) {
-        this(Foreign.getInstance(), handle);
-    }
-    
     Aggregate(Foreign foreign, long handle) {
         if (handle == 0L) {
             throw new NullPointerException("Invalid ffi_type handle");
@@ -83,21 +77,12 @@ public abstract class Aggregate extends Type {
         return align;
     }
 
-    public synchronized final void dispose() {
-        if (disposed) {
-            throw new RuntimeException("native handle already freed");
-        }
-
-        disposed = true;
-        foreign.freeAggregate(handle);
-    }
+    public synchronized final void dispose() {}
 
     @Override
     protected void finalize() throws Throwable {
         try {
-            if (!disposed) {
-                dispose();
-            }
+            foreign.freeAggregate(handle);
         } catch (Throwable t) {
             Logger.getLogger(getClass().getName()).log(Level.WARNING, 
                     "Exception when freeing FFI aggregate: %s", t.getLocalizedMessage());
