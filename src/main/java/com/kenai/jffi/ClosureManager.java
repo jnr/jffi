@@ -111,8 +111,10 @@ public final class ClosureManager {
 
     public ClosureMagazine newClosureMagazine(CallContext callContext, Method method) {
         Foreign foreign = Foreign.getInstance();
-        long magazine = foreign.newClosureMagazine(callContext.getAddress(), method,
-                !Closure.Buffer.class.isAssignableFrom(method.getParameterTypes()[0]));
+        Class[] methodParameterTypes = method.getParameterTypes();
+        boolean callWithPrimitiveArgs = methodParameterTypes.length < 1 ||
+                !Closure.Buffer.class.isAssignableFrom(method.getParameterTypes()[0]);
+        long magazine = foreign.newClosureMagazine(callContext.getAddress(), method, callWithPrimitiveArgs);
         if (magazine == 0L) {
             throw new RuntimeException("could not allocate new closure magazine");
         }

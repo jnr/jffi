@@ -305,6 +305,11 @@ closure_invoke(ffi_cif* cif, void* retval, void** parameters, void* user_data)
         }
 
         switch (cif->rtype->type) {
+            case FFI_TYPE_VOID:
+                (*env)->CallVoidMethodA(env, closure->javaObject, closure->magazine->methodID, jparams);
+                *((ffi_sarg *) retval) = 0;
+                break;
+
             case FFI_TYPE_SINT8:
                 *((ffi_sarg *) retval) = (*env)->CallByteMethodA(env, closure->javaObject, closure->magazine->methodID, jparams);
                 break;

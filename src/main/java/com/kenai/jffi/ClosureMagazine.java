@@ -22,14 +22,38 @@ public final class ClosureMagazine {
         this.magazineAddress = magazineAddress;
     }
 
-    public long allocate(Object proxy) {
-        return foreign.closureMagazineGet(magazineAddress, proxy);
+    public Closure.Handle allocate(Object proxy) {
+        long closureAddress = foreign.closureMagazineGet(magazineAddress, proxy);
+        return closureAddress != 0L
+            ? new Handle(this, closureAddress, MemoryIO.getInstance().getAddress(closureAddress))
+            : null;
     }
 
     public void dispose() {
         if (magazineAddress != 0L && !disposed.getAndSet(true)) {
             foreign.freeClosureMagazine(magazineAddress);
         }
+    }
+
+    private static final class Handle implements Closure.Handle {
+        private final ClosureMagazine magazine;
+        private final long closureAddress, codeAddress;
+
+        private Handle(ClosureMagazine magazine, long closureAddress, long codeAddress) {
+            this.magazine = magazine;
+            this.closureAddress = closureAddress;
+            this.codeAddress = codeAddress;
+        }
+
+        public long getAddress() {
+            return codeAddress;
+        }
+
+        public void setAutoRelease(boolean autorelease) {}
+
+        public void dispose() { }
+
+        public void free() {}
     }
 
     @Override
