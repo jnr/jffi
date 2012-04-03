@@ -43,7 +43,7 @@ import java.util.logging.Logger;
  */
 public final class CallContext {
     /** The native address of the context */
-    private final long contextAddress;
+    final long contextAddress;
 
     /** The number of parameters this function takes */
     private final int parameterCount;

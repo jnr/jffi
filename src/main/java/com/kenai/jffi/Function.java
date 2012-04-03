@@ -42,9 +42,9 @@ public final class Function {
     private final CallContext callContext;
 
     /** The address of the function */
-    private final long functionAddress;
+    final long functionAddress;
 
-    private final long contextAddress;
+    final long contextAddress;
 
     /**
      * Creates a new instance of <tt>Function</tt> with default calling convention.
