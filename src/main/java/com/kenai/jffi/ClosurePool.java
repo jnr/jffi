@@ -164,6 +164,7 @@ public final class ClosurePool {
         /** Store a reference to the MemoryIO accessor here for easy access */
         private static final com.kenai.jffi.MemoryIO IO = com.kenai.jffi.MemoryIO.getInstance();
         /** A handle to the foreign interface to keep it alive as long as this object is alive */
+        @SuppressWarnings({"FieldCanBeLocal", "UnusedDeclaration"})
         private final Foreign foreign = Foreign.getInstance();
 
         private final CallContext ctx;

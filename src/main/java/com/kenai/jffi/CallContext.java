@@ -62,6 +62,7 @@ public final class CallContext {
     final int flags;
 
     /** A handle to the foreign interface to keep it alive as long as this object is alive */
+    @SuppressWarnings({"FieldCanBeLocal", "UnusedDeclaration"})
     private final Foreign foreign = Foreign.getInstance();
 
     /**
@@ -72,7 +73,7 @@ public final class CallContext {
      * @param parameterTypes The parameter types the function accepts.
      * @param convention The calling convention of the function.
      * @param saveErrno Indicates that the errno should be saved
-     * @return
+     * @return An instance of CallContext
      */
     public static CallContext getCallContext(Type returnType, Type[] parameterTypes, CallingConvention convention, boolean saveErrno) {
         return CallContextCache.getInstance().getCallContext(returnType, parameterTypes, convention, saveErrno);

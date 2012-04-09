@@ -272,7 +272,7 @@ public final class HeapInvocationBuffer extends InvocationBuffer {
         Foreign foreign = Foreign.getInstance();
         Platform platform = Platform.getPlatform();
 
-        if (platform.getCPU() == Platform.CPU.I386 && Foreign.getInstance().isRawParameterPackingEnabled()) {
+        if (platform.getCPU() == Platform.CPU.I386 && foreign.isRawParameterPackingEnabled()) {
             return newI386RawEncoder();
         }
 

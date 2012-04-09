@@ -48,6 +48,7 @@ public abstract class Aggregate extends Type {
     private final long handle;
 
     /** A handle to the foreign interface to keep it alive as long as this object is alive */
+    @SuppressWarnings({"FieldCanBeLocal", "UnusedDeclaration"})
     private final Foreign foreign;
 
     Aggregate(Foreign foreign, long handle) {

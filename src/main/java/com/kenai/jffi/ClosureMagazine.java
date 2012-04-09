@@ -9,6 +9,7 @@ import java.util.logging.Logger;
  */
 public final class ClosureMagazine {
     /** A handle to the foreign interface to keep it alive as long as this object is alive */
+    @SuppressWarnings({"FieldCanBeLocal", "UnusedDeclaration"})
     private final Foreign foreign;
     /** keep a reference to the call context, to avoid GC whilst the magazine is in use */
     @SuppressWarnings({"FieldCanBeLocal", "UnusedDeclaration"})

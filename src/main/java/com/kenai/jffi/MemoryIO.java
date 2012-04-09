@@ -40,6 +40,7 @@ import java.lang.reflect.Method;
  */
 public abstract class MemoryIO {
     /** A handle to the JNI accessor */
+    @SuppressWarnings({"FieldCanBeLocal", "UnusedDeclaration"})
     final Foreign foreign = Foreign.getInstance();
 
     /** The address mask used to truncate 32bit addresses contained in long values */
@@ -67,7 +68,7 @@ public abstract class MemoryIO {
      *
      * @return An instance of <tt>MemoryIO</tt>
      */
-    private static final MemoryIO newMemoryIO() {
+    private static MemoryIO newMemoryIO() {
         try {
             // Use sun.misc.Unsafe unless explicitly disabled by the user, or not available
             return !Boolean.getBoolean("jffi.unsafe.disabled") && isUnsafeAvailable()
@@ -83,7 +84,7 @@ public abstract class MemoryIO {
      * is ever loaded, and hotspot can inline non-final functions implemented
      * in the subclass.
      */
-    private static final MemoryIO newNativeImpl() {
+    private static MemoryIO newNativeImpl() {
         return Platform.getPlatform().addressSize() == 32
                 ? newNativeImpl32() : newNativeImpl64();
     }
@@ -93,21 +94,21 @@ public abstract class MemoryIO {
      *
      * @return An instance of <tt>MemoryIO</tt>
      */
-    private static final MemoryIO newNativeImpl32() { return new NativeImpl32();}
+    private static MemoryIO newNativeImpl32() { return new NativeImpl32();}
 
     /**
      * Creates a new JNI implementation of <tt>MemoryIO</tt> optimized for 64 bit platforms
      *
      * @return An instance of <tt>MemoryIO</tt>
      */
-    private static final MemoryIO newNativeImpl64() { return new NativeImpl64();}
+    private static MemoryIO newNativeImpl64() { return new NativeImpl64();}
 
     /**
      * Creates a new sun.misc.Unsafe implementation of <tt>MemoryIO</tt>
      *
      * @return An instance of <tt>MemoryIO</tt>
      */
-    private static final MemoryIO newUnsafeImpl() {
+    private static MemoryIO newUnsafeImpl() {
         return Platform.getPlatform().addressSize() == 32
                 ? newUnsafeImpl32() : newUnsafeImpl64();
     }
@@ -117,14 +118,14 @@ public abstract class MemoryIO {
      *
      * @return An instance of <tt>MemoryIO</tt>
      */
-    private static final MemoryIO newUnsafeImpl32() { return new UnsafeImpl32(); }
+    private static MemoryIO newUnsafeImpl32() { return new UnsafeImpl32(); }
 
     /**
      * Creates a new sun.misc.Unsafe implementation of <tt>MemoryIO</tt> optimized for 64 bit platforms
      *
      * @return An instance of <tt>MemoryIO</tt>
      */
-    private static final MemoryIO newUnsafeImpl64() { return new UnsafeImpl64(); }
+    private static MemoryIO newUnsafeImpl64() { return new UnsafeImpl64(); }
 
     /**
      * Reads an 8 bit integer from a native memory location.
@@ -283,7 +284,7 @@ public abstract class MemoryIO {
      * @param size The number of bytes to copy.
      */
     public final void memcpy(long dst, long src, long size) {
-        foreign.memcpy(dst, src, size);
+        Foreign.memcpy(dst, src, size);
     }
 
     /**
@@ -294,7 +295,7 @@ public abstract class MemoryIO {
      * @param size The number of bytes to copy.
      */
     public final void memmove(long dst, long src, long size) {
-        foreign.memmove(dst, src, size);
+        Foreign.memmove(dst, src, size);
     }
 
     /**
@@ -317,7 +318,7 @@ public abstract class MemoryIO {
      * @param length The number of array elements to copy.
      */
     public final void putByteArray(long address, byte[] data, int offset, int length) {
-        foreign.putByteArray(address, data, offset, length);
+        Foreign.putByteArray(address, data, offset, length);
     }
 
     /**
@@ -329,7 +330,7 @@ public abstract class MemoryIO {
      * @param length The number of array elements to copy.
      */
     public final void getByteArray(long address, byte[] data, int offset, int length) {
-        foreign.getByteArray(address, data, offset, length);
+        Foreign.getByteArray(address, data, offset, length);
     }
 
     /**
@@ -341,7 +342,7 @@ public abstract class MemoryIO {
      * @param length The number of array elements to copy.
      */
     public final void putCharArray(long address, char[] data, int offset, int length) {
-        foreign.putCharArray(address, data, offset, length);
+        Foreign.putCharArray(address, data, offset, length);
     }
     
     /**
@@ -353,7 +354,7 @@ public abstract class MemoryIO {
      * @param length The number of array elements to copy.
      */
     public final void getCharArray(long address, char[] data, int offset, int length) {
-        foreign.getCharArray(address, data, offset, length);
+        Foreign.getCharArray(address, data, offset, length);
     }
 
     /**
@@ -365,7 +366,7 @@ public abstract class MemoryIO {
      * @param length The number of array elements to copy.
      */
     public final void putShortArray(long address, short[] data, int offset, int length) {
-        foreign.putShortArray(address, data, offset, length);
+        Foreign.putShortArray(address, data, offset, length);
     }
     
     /**
@@ -377,7 +378,7 @@ public abstract class MemoryIO {
      * @param length The number of array elements to copy.
      */
     public final void getShortArray(long address, short[] data, int offset, int length) {
-        foreign.getShortArray(address, data, offset, length);
+        Foreign.getShortArray(address, data, offset, length);
     }
 
     /**
@@ -389,7 +390,7 @@ public abstract class MemoryIO {
      * @param length The number of array elements to copy.
      */
     public final void putIntArray(long address, int[] data, int offset, int length) {
-        foreign.putIntArray(address, data, offset, length);
+        Foreign.putIntArray(address, data, offset, length);
     }
 
     /**
@@ -401,7 +402,7 @@ public abstract class MemoryIO {
      * @param length The number of array elements to copy.
      */
     public final void getIntArray(long address, int[] data, int offset, int length) {
-        foreign.getIntArray(address, data, offset, length);
+        Foreign.getIntArray(address, data, offset, length);
     }
 
     /**
@@ -413,7 +414,7 @@ public abstract class MemoryIO {
      * @param length The number of array elements to copy.
      */
     public final void putLongArray(long address, long[] data, int offset, int length) {
-        foreign.putLongArray(address, data, offset, length);
+        Foreign.putLongArray(address, data, offset, length);
     }
 
     /**
@@ -425,7 +426,7 @@ public abstract class MemoryIO {
      * @param length The number of array elements to copy.
      */
     public final void getLongArray(long address, long[] data, int offset, int length) {
-        foreign.getLongArray(address, data, offset, length);
+        Foreign.getLongArray(address, data, offset, length);
     }
 
     /**
@@ -437,7 +438,7 @@ public abstract class MemoryIO {
      * @param length The number of array elements to copy.
      */
     public final void putFloatArray(long address, float[] data, int offset, int length) {
-        foreign.putFloatArray(address, data, offset, length);
+        Foreign.putFloatArray(address, data, offset, length);
     }
   
     /**
@@ -449,7 +450,7 @@ public abstract class MemoryIO {
      * @param length The number of array elements to copy.
      */
     public final void getFloatArray(long address, float[] data, int offset, int length) {
-        foreign.getFloatArray(address, data, offset, length);
+        Foreign.getFloatArray(address, data, offset, length);
     }
 
     /**
@@ -461,7 +462,7 @@ public abstract class MemoryIO {
      * @param length The number of array elements to copy.
      */
     public final void putDoubleArray(long address, double[] data, int offset, int length) {
-        foreign.putDoubleArray(address, data, offset, length);
+        Foreign.putDoubleArray(address, data, offset, length);
     }
 
     /**
@@ -473,7 +474,7 @@ public abstract class MemoryIO {
      * @param length The number of array elements to copy.
      */
     public final void getDoubleArray(long address, double[] data, int offset, int length) {
-        foreign.getDoubleArray(address, data, offset, length);
+        Foreign.getDoubleArray(address, data, offset, length);
     }
 
     /**
@@ -484,7 +485,7 @@ public abstract class MemoryIO {
      * @return The native address of the allocated memory.
      */
     public final long allocateMemory(long size, boolean clear) {
-        return foreign.allocateMemory(size, clear) & ADDRESS_MASK;
+        return Foreign.allocateMemory(size, clear) & ADDRESS_MASK;
     }
 
     /**
@@ -493,7 +494,7 @@ public abstract class MemoryIO {
      * @param address The address of the memory to release.
      */
     public final void freeMemory(long address) {
-        foreign.freeMemory(address);
+        Foreign.freeMemory(address);
     }
 
     /**
@@ -503,7 +504,7 @@ public abstract class MemoryIO {
      * @return The length of the string, in bytes.
      */
     public final long getStringLength(long address) {
-        return foreign.strlen(address);
+        return Foreign.strlen(address);
     }
 
     /**
@@ -516,7 +517,7 @@ public abstract class MemoryIO {
      * byte is stripped from the end.
      */
     public final byte[] getZeroTerminatedByteArray(long address) {
-        return foreign.getZeroTerminatedByteArray(address);
+        return Foreign.getZeroTerminatedByteArray(address);
     }
 
     /**
@@ -531,12 +532,12 @@ public abstract class MemoryIO {
      * byte is stripped from the end.
      */
     public final byte[] getZeroTerminatedByteArray(long address, int maxlen) {
-        return foreign.getZeroTerminatedByteArray(address, maxlen);
+        return Foreign.getZeroTerminatedByteArray(address, maxlen);
     }
 
     @Deprecated
     public final byte[] getZeroTerminatedByteArray(long address, long maxlen) {
-        return foreign.getZeroTerminatedByteArray(address, (int) maxlen);
+        return Foreign.getZeroTerminatedByteArray(address, (int) maxlen);
     }
 
     /**
@@ -550,7 +551,7 @@ public abstract class MemoryIO {
      * @param length The number of bytes to copy to native memory
      */
     public final void putZeroTerminatedByteArray(long address, byte[] data, int offset, int length) {
-        foreign.putZeroTerminatedByteArray(address, data, offset, length);
+        Foreign.putZeroTerminatedByteArray(address, data, offset, length);
     }
 
     /**
@@ -561,7 +562,7 @@ public abstract class MemoryIO {
      * @return The offset from the memory address of the value, if found, else -1 (minus one).
      */
     public final long indexOf(long address, byte value) {
-        final long location = foreign.memchr(address, value, Integer.MAX_VALUE);
+        final long location = Foreign.memchr(address, value, Integer.MAX_VALUE);
         return location != 0 ? location - address : -1;
     }
 
@@ -574,7 +575,7 @@ public abstract class MemoryIO {
      * @return The offset from the memory address of the value, if found, else -1 (minus one).
      */
     public final long indexOf(long address, byte value, int maxlen) {
-        final long location = foreign.memchr(address, value, maxlen);
+        final long location = Foreign.memchr(address, value, maxlen);
         return location != 0 ? location - address : -1;
     }
 
@@ -606,46 +607,46 @@ public abstract class MemoryIO {
     private static abstract class NativeImpl extends MemoryIO {
 
         public final byte getByte(long address) {
-            return foreign.getByte(address);
+            return Foreign.getByte(address);
         }
         public final short getShort(long address) {
-            return foreign.getShort(address);
+            return Foreign.getShort(address);
         }
         public final int getInt(long address) {
-            return foreign.getInt(address);
+            return Foreign.getInt(address);
         }
         public final long getLong(long address) {
-            return foreign.getLong(address);
+            return Foreign.getLong(address);
         }
         public final float getFloat(long address) {
-            return foreign.getFloat(address);
+            return Foreign.getFloat(address);
         }
         public final double getDouble(long address) {
-            return foreign.getDouble(address);
+            return Foreign.getDouble(address);
         }
         public final void putByte(long address, byte value) {
-            foreign.putByte(address, value);
+            Foreign.putByte(address, value);
         }
         public final void putShort(long address, short value) {
-            foreign.putShort(address, value);
+            Foreign.putShort(address, value);
         }
         public final void putInt(long address, int value) {
-            foreign.putInt(address, value);
+            Foreign.putInt(address, value);
         }
         public final void putLong(long address, long value) {
-            foreign.putLong(address, value);
+            Foreign.putLong(address, value);
         }
         public final void putFloat(long address, float value) {
-            foreign.putFloat(address, value);
+            Foreign.putFloat(address, value);
         }
         public final void putDouble(long address, double value) {
-            foreign.putDouble(address, value);
+            Foreign.putDouble(address, value);
         }
         public final void setMemory(long address, long size, byte value) {
-            foreign.setMemory(address, size, value);
+            Foreign.setMemory(address, size, value);
         }
         public final void _copyMemory(long src, long dst, long size) {
-            foreign.copyMemory(src, dst, size);
+            Foreign.copyMemory(src, dst, size);
         }
     }
 
@@ -655,10 +656,10 @@ public abstract class MemoryIO {
     private static final class NativeImpl32 extends NativeImpl {
         public final long getAddress(long address) {
             // Mask with ADDRESS_MASK to cancel out any sign extension
-            return ((long) foreign.getInt(address)) & ADDRESS_MASK;
+            return ((long) Foreign.getInt(address)) & ADDRESS_MASK;
         }
         public final void putAddress(long address, long value) {
-            foreign.putInt(address, (int) value);
+            Foreign.putInt(address, (int) value);
         }
     }
 
@@ -667,10 +668,10 @@ public abstract class MemoryIO {
      */
     private static final class NativeImpl64 extends NativeImpl {
         public final long getAddress(long address) {
-            return foreign.getLong(address);
+            return Foreign.getLong(address);
         }
         public final void putAddress(long address, long value) {
-            foreign.putLong(address, value);
+            Foreign.putLong(address, value);
         }
     }
 
@@ -679,7 +680,7 @@ public abstract class MemoryIO {
      */
     private static abstract class UnsafeImpl extends MemoryIO {
         protected static sun.misc.Unsafe unsafe = sun.misc.Unsafe.class.cast(getUnsafe());
-        private static final Object getUnsafe() {
+        private static Object getUnsafe() {
             try {
                 Class sunUnsafe = Class.forName("sun.misc.Unsafe");
                 Field f = sunUnsafe.getDeclaredField("theUnsafe");
@@ -736,7 +737,7 @@ public abstract class MemoryIO {
     /**
      * A 32 bit optimized implementation of <tt>MemoryIO</tt> using sun.misc.Unsafe
      */
-    private static final class UnsafeImpl32 extends UnsafeImpl {
+    private static class UnsafeImpl32 extends UnsafeImpl {
         public final long getAddress(long address) {
             return ((long) unsafe.getInt(address)) & ADDRESS_MASK;
         }
@@ -748,7 +749,7 @@ public abstract class MemoryIO {
     /**
      * A 64 bit optimized implementation of <tt>MemoryIO</tt> using sun.misc.Unsafe
      */
-    private static final class UnsafeImpl64 extends UnsafeImpl {
+    private static class UnsafeImpl64 extends UnsafeImpl {
         public final long getAddress(long address) {
             return unsafe.getLong(address);
         }
@@ -767,7 +768,7 @@ public abstract class MemoryIO {
      * @throws NoSuchMethodException If no accessors for that primitive type exist.
      */
     @SuppressWarnings("unchecked")
-    private static final void verifyAccessor(Class unsafeClass, Class primitive) throws NoSuchMethodException {
+    private static void verifyAccessor(Class unsafeClass, Class primitive) throws NoSuchMethodException {
         String primitiveName = primitive.getSimpleName();
         String typeName = primitiveName.substring(0, 1).toUpperCase() + primitiveName.substring(1);
         Method get = unsafeClass.getDeclaredMethod("get" + typeName, new Class[] { long.class });
@@ -783,10 +784,10 @@ public abstract class MemoryIO {
      *
      * This also handles the case where sun.misc.Unsafe vanishes from future versions
      * of the JVM.
-     * @return
+     * @return true if sun.misc.Unsafe is available and usable
      */
     @SuppressWarnings("unchecked")
-    static final boolean isUnsafeAvailable() {
+    static boolean isUnsafeAvailable() {
         try {
             Class sunClass = Class.forName("sun.misc.Unsafe");
 

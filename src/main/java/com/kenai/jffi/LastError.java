@@ -36,6 +36,7 @@ package com.kenai.jffi;
  * Provides access to the value of errno on unix, or GetLastError on windows.
  */
 public final class LastError {
+    @SuppressWarnings({"FieldCanBeLocal", "UnusedDeclaration"})
     private final Foreign foreign = Foreign.getInstance();
 
     /** Lazy-initialization singleton holder */
@@ -62,7 +63,7 @@ public final class LastError {
      */
     @Deprecated
     public final int getError() {
-        return foreign.getLastError();
+        return Foreign.getLastError();
     }
 
     /**
@@ -71,7 +72,7 @@ public final class LastError {
      * @return The value of errno/GetLastError()
      */
     public final int get() {
-        return foreign.getLastError();
+        return Foreign.getLastError();
     }
 
     /**
@@ -80,6 +81,6 @@ public final class LastError {
      * @param value The value to set errno to.
      */
     public final void set(int value) {
-        foreign.setLastError(value);
+        Foreign.setLastError(value);
     }
 }

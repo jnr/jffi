@@ -45,13 +45,11 @@ abstract public class PageManager {
     /** The memory should be writable */
     public static final int PROT_WRITE = Foreign.PROT_WRITE;
 
+
+    @SuppressWarnings("UnusedDeclaration") // loads the native lib
     private final Foreign foreign = Foreign.getInstance();
     
     private int pageSize;
-
-    final Foreign getForeign() {
-        return foreign;
-    }
 
     private static final class SingletonHolder {
         public static final PageManager INSTANCE = Platform.getPlatform().getOS() == Platform.OS.WINDOWS
@@ -63,7 +61,7 @@ abstract public class PageManager {
      *
      * @return An instance of <tt>PageManager</tt>
      */
-    public static final PageManager getInstance() {
+    public static PageManager getInstance() {
         return SingletonHolder.INSTANCE;
     }
 
@@ -77,7 +75,7 @@ abstract public class PageManager {
     }
 
     private long calculatePageSize() {
-        long pgSize = getForeign().pageSize();
+        long pgSize = Foreign.pageSize();
         return pgSize < Integer.MAX_VALUE ? this.pageSize = (int) pgSize : pgSize;
     }
 
@@ -117,7 +115,7 @@ abstract public class PageManager {
         @Override
         public long allocatePages(int npages, int protection) {
             long sz = npages * pageSize();
-            long memory = getForeign().mmap(0, sz, protection,
+            long memory = Foreign.mmap(0, sz, protection,
                     Foreign.MAP_ANON | Foreign.MAP_PRIVATE, -1, 0);
 
             return memory != -1L ? memory : 0L;
@@ -125,12 +123,12 @@ abstract public class PageManager {
 
         @Override
         public void freePages(long address, int npages) {
-            getForeign().munmap(address, npages * pageSize());
+            Foreign.munmap(address, npages * pageSize());
         }
 
         @Override
         public void protectPages(long address, int npages, int protection) {
-            getForeign().mprotect(address, npages * pageSize(), protection);
+            Foreign.mprotect(address, npages * pageSize(), protection);
         }
     }
 
@@ -141,17 +139,17 @@ abstract public class PageManager {
 
         @Override
         public long allocatePages(int pageCount, int protection) {
-            return getForeign().VirtualAlloc(0, (int) pageSize() * pageCount, Foreign.MEM_COMMIT | Foreign.MEM_RESERVE, w32prot(protection));
+            return Foreign.VirtualAlloc(0, (int) pageSize() * pageCount, Foreign.MEM_COMMIT | Foreign.MEM_RESERVE, w32prot(protection));
         }
 
         @Override
         public void freePages(long address, int pageCount) {
-            getForeign().VirtualFree(address, (int) pageSize() * pageCount, Foreign.MEM_RELEASE);
+            Foreign.VirtualFree(address, (int) pageSize() * pageCount, Foreign.MEM_RELEASE);
         }
 
         @Override
         public void protectPages(long address, int pageCount, int protection) {
-            getForeign().VirtualProtect(address, (int) pageSize() * pageCount, w32prot(protection));
+            Foreign.VirtualProtect(address, (int) pageSize() * pageCount, w32prot(protection));
         }
 
         private static int w32prot(int p) {

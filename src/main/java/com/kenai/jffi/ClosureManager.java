@@ -62,7 +62,7 @@ public final class ClosureManager {
      *
      * @return An instance of a <tt>ClosureManager</tt>
      */
-    public static final ClosureManager getInstance() {
+    public static ClosureManager getInstance() {
         return SingletonHolder.INSTANCE;
     }
 
