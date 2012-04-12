@@ -226,7 +226,7 @@ public class StubLoader {
         loadFromJar();
     }
 
-    private static final String getBootPath() {
+    private static String getBootPath() {
         
         String bootPath = System.getProperty(bootLibraryPropertyName);
         if (bootPath != null) {
@@ -260,7 +260,7 @@ public class StubLoader {
         }
     }
 
-    private static final boolean loadFromBootPath(String libName, String bootPath) {
+    private static boolean loadFromBootPath(String libName, String bootPath) {
         String[] dirs = bootPath.split(File.pathSeparator);
         for (int i = 0; i < dirs.length; ++i) {
             String path = new File(new File(dirs[i]), System.mapLibraryName(libName)).getAbsolutePath();
@@ -273,9 +273,7 @@ public class StubLoader {
                 try {
                     System.load(getAlternateLibraryPath(path));
                     return true;
-                } catch (UnsatisfiedLinkError ex) {
-                    ex.printStackTrace();
-                }
+                } catch (UnsatisfiedLinkError ex) {}
             }
         }
         return false;
