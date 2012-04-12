@@ -230,3 +230,42 @@ Java_com_kenai_jffi_Foreign_invokeI3NoErrno(JNIEnv*env, jobject self, jlong ctxA
 
     return (int) retval;
 }
+
+
+JNIEXPORT jint JNICALL
+Java_com_kenai_jffi_Foreign_invokeI4NoErrno(JNIEnv*env, jobject self, jlong ctxAddress, jlong function,
+        jint arg1, jint arg2, jint arg3, jint arg4)
+{
+    CallContext *ctx = (CallContext *) j2p(ctxAddress);
+    ffi_sarg retval;
+
+    invokeI4(ctx, j2p(function), &retval, arg1, arg2, arg3, arg4);
+
+    return (jint) retval;
+}
+
+
+JNIEXPORT jint JNICALL
+Java_com_kenai_jffi_Foreign_invokeI5NoErrno(JNIEnv*env, jobject self, jlong ctxAddress, jlong function,
+        jint arg1, jint arg2, jint arg3, jint arg4, jint arg5)
+{
+    CallContext *ctx = (CallContext *) j2p(ctxAddress);
+    ffi_sarg retval;
+
+    invokeI5(ctx, j2p(function), &retval, arg1, arg2, arg3, arg4, arg5);
+
+    return (jint) retval;
+}
+
+
+JNIEXPORT jint JNICALL
+Java_com_kenai_jffi_Foreign_invokeI6NoErrno(JNIEnv*env, jobject self, jlong ctxAddress, jlong function,
+        jint arg1, jint arg2, jint arg3, jint arg4, jint arg5, jint arg6)
+{
+    CallContext *ctx = (CallContext *) j2p(ctxAddress);
+    ffi_sarg retval;
+
+    invokeI6(ctx, j2p(function), &retval, arg1, arg2, arg3, arg4, arg5, arg6);
+
+    return (jint) retval;
+}

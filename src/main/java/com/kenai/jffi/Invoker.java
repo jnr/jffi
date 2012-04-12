@@ -173,6 +173,34 @@ public abstract class Invoker {
         return Foreign.invokeI6(context.contextAddress, function, arg1, arg2, arg3, arg4, arg5, arg6);
     }
 
+    public final int invokeI0NoErrno(CallContext context, long function) {
+        return Foreign.invokeI0NoErrno(context.contextAddress, function);
+    }
+
+    public final int invokeI1NoErrno(CallContext context, long function, int arg1) {
+        return Foreign.invokeI1NoErrno(context.contextAddress, function, arg1);
+    }
+
+    public final int invokeI2NoErrno(CallContext context, long function, int arg1, int arg2) {
+        return Foreign.invokeI2NoErrno(context.contextAddress, function, arg1, arg2);
+    }
+
+    public final int invokeI3NoErrno(CallContext context, long function, int arg1, int arg2, int arg3) {
+        return Foreign.invokeI3NoErrno(context.contextAddress, function, arg1, arg2, arg3);
+    }
+
+    public final int invokeI4NoErrno(CallContext context, long function, int arg1, int arg2, int arg3, int arg4) {
+        return Foreign.invokeI4NoErrno(context.contextAddress, function, arg1, arg2, arg3, arg4);
+    }
+
+    public final int invokeI5NoErrno(CallContext context, long function, int arg1, int arg2, int arg3, int arg4, int arg5) {
+        return Foreign.invokeI5NoErrno(context.contextAddress, function, arg1, arg2, arg3, arg4, arg5);
+    }
+
+    public final int invokeI6NoErrno(CallContext context, long function, int arg1, int arg2, int arg3, int arg4, int arg5, int arg6) {
+        return Foreign.invokeI6NoErrno(context.contextAddress, function, arg1, arg2, arg3, arg4, arg5, arg6);
+    }
+
     /**
      * Invokes a function with no arguments, and returns a 32 bit integer.
      *
@@ -425,6 +453,34 @@ public abstract class Invoker {
      */
     public final long invokeL6(CallContext context, long function, long arg1, long arg2, long arg3, long arg4, long arg5, long arg6) {
         return Foreign.invokeL6(context.contextAddress, function, arg1, arg2, arg3, arg4, arg5, arg6);
+    }
+
+    public final long invokeL0NoErrno(CallContext context, long function) {
+        return Foreign.invokeL0NoErrno(context.contextAddress, function);
+    }
+
+    public final long invokeL1NoErrno(CallContext context, long function, long arg1) {
+        return Foreign.invokeL1NoErrno(context.contextAddress, function, arg1);
+    }
+
+    public final long invokeL2NoErrno(CallContext context, long function, long arg1, long arg2) {
+        return Foreign.invokeL2NoErrno(context.contextAddress, function, arg1, arg2);
+    }
+
+    public final long invokeL3NoErrno(CallContext context, long function, long arg1, long arg2, long arg3) {
+        return Foreign.invokeL3NoErrno(context.contextAddress, function, arg1, arg2, arg3);
+    }
+
+    public final long invokeL4NoErrno(CallContext context, long function, long arg1, long arg2, long arg3, long arg4) {
+        return Foreign.invokeL4NoErrno(context.contextAddress, function, arg1, arg2, arg3, arg4);
+    }
+
+    public final long invokeL5NoErrno(CallContext context, long function, long arg1, long arg2, long arg3, long arg4, long arg5) {
+        return Foreign.invokeL5NoErrno(context.contextAddress, function, arg1, arg2, arg3, arg4, arg5);
+    }
+
+    public final long invokeL6NoErrno(CallContext context, long function, long arg1, long arg2, long arg3, long arg4, long arg5, long arg6) {
+        return Foreign.invokeL6NoErrno(context.contextAddress, function, arg1, arg2, arg3, arg4, arg5, arg6);
     }
 
 

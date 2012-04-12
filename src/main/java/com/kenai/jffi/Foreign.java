@@ -566,6 +566,9 @@ final class Foreign {
      * @return A 32 bit integer value.
      */
     static native int invokeI3NoErrno(long ctx, long function, int arg1, int arg2, int arg3);
+    static native int invokeI4NoErrno(long ctx, long function, int arg1, int arg2, int arg3, int arg4);
+    static native int invokeI5NoErrno(long ctx, long function, int arg1, int arg2, int arg3, int arg4, int arg5);
+    static native int invokeI6NoErrno(long ctx, long function, int arg1, int arg2, int arg3, int arg4, int arg5, int arg6);
     
     /**
      * Invokes a function with no arguments, and returns a 64 bit integer.
@@ -644,6 +647,14 @@ final class Foreign {
      * @return A 64 bit integer value.
      */
     static native long invokeL6(long ctx, long function, long arg1, long arg2, long arg3, long arg4, long arg5, long arg6);
+
+    static native long invokeL0NoErrno(long ctx, long function);
+    static native long invokeL1NoErrno(long ctx, long function, long arg1);
+    static native long invokeL2NoErrno(long ctx, long function, long arg1, long arg2);
+    static native long invokeL3NoErrno(long ctx, long function, long arg1, long arg2, long arg3);
+    static native long invokeL4NoErrno(long ctx, long function, long arg1, long arg2, long arg3, long arg4);
+    static native long invokeL5NoErrno(long ctx, long function, long arg1, long arg2, long arg3, long arg4, long arg5);
+    static native long invokeL6NoErrno(long ctx, long function, long arg1, long arg2, long arg3, long arg4, long arg5, long arg6);
 
     /**
      * Invokes a function with zero numeric arguments, and returns a numeric value.

@@ -48,7 +48,7 @@
 
 
 /* for return values <= sizeof(long), need to use an ffi_sarg sized return value */
-#if (BYTE_ORDER == BIG_ENDIAN) || defined(__i386__)
+#if BYTE_ORDER == BIG_ENDIAN
 # define RETVAL(retval, ctx) ((ctx->cif.rtype)->size > sizeof(ffi_sarg) ? (retval).j : (retval).sarg)
 #else
 # define RETVAL(retval, ctx) ((retval).j)

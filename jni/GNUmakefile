@@ -257,6 +257,9 @@ $(LIBJFFI):  $(OBJS) $(LIBFFI_LIBS)
 	$(CC) -o $@ $(LDFLAGS) $(SOFLAGS) $(OBJS) $(LIBFFI_LIBS) $(LIBS)
 	$(STRIP) $@
 
+$(JFFI_BUILD_DIR)/Fast%.o: $(JFFI_SRC_DIR)/Fast%.c $(wildcard $(JFFI_SRC_DIR)/*.h)
+	@mkdir -p $(@D)
+	@$(CCACHE) $(CC) $(CFLAGS) -fomit-frame-pointer -c $< -o $@
 
 $(BUILD_DIR)/%.o : $(SRC_DIR)/%.c $(wildcard $(JFFI_SRC_DIR)/*.h)
 	@mkdir -p $(@D)

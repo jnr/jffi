@@ -47,14 +47,55 @@
 
 
 /* for return values <= sizeof(long), need to use an ffi_sarg sized return value */
-#if (BYTE_ORDER == BIG_ENDIAN) || defined(__i386__)
+#if BYTE_ORDER == BIG_ENDIAN
 # define RETVAL(retval, ctx) ((ctx->cif.rtype)->size > sizeof(ffi_sarg) ? (retval).j : (retval).sarg)
 #else
-# define RETVAL(retval, ctx) ((retval).j & ctx->resultMask)
+# define RETVAL(retval, ctx) ((retval).j)
 #endif
 
 #if defined(__x86_64__)
 # define LONG_BYPASS_FFI
+#endif
+
+#if defined(LONG_BYPASS_FFI)
+# define invokeL0(ctx, fn, retval) do { \
+            (retval)->j = ((jlong (*)()) (fn))(); \
+    } while (0)
+
+# define invokeL1(ctx, fn, retval, arg1) do { \
+            (retval)->j = ((jlong (*)(jlong)) (fn))(arg1); \
+    } while (0)
+
+# define invokeL2(ctx, fn, retval, arg1, arg2) do { \
+            (retval)->j = ((jlong (*)(jlong, jlong)) (fn))((arg1), (arg2)); \
+    } while (0)
+
+# define invokeL3(ctx, fn, retval, arg1, arg2, arg3) do { \
+            (retval)->j = ((jlong (*)(jlong, jlong, jlong)) (fn))(arg1, arg2, arg3); \
+    } while (0)
+
+# define invokeL4(ctx, fn, retval, arg1, arg2, arg3, arg4) do { \
+            (retval)->j = ((jlong (*)(jlong, jlong, jlong, jlong)) (fn))(arg1, arg2, arg3, arg4); \
+    } while (0)
+
+# define invokeL5(ctx, fn, retval, arg1, arg2, arg3, arg4, arg5) do { \
+            (retval)->j = ((jlong (*)(jlong, jlong, jlong, jlong, jlong)) (fn))(arg1, arg2, arg3, arg4, arg5); \
+    } while (0)
+
+# define invokeL6(ctx, fn, retval, arg1, arg2, arg3, arg4, arg5, arg6) do { \
+            (retval)->j = ((jlong (*)(jlong, jlong, jlong, jlong, jlong, jlong)) (fn))(arg1, arg2, arg3, arg4, arg5, arg6); \
+    } while (0)
+
+#else /* non-i386, non-x86_64 */
+
+# define invokeL0 ffi_call0
+# define invokeL1 ffi_call1
+# define invokeL2 ffi_call2
+# define invokeL3 ffi_call3
+# define invokeL4 ffi_call4
+# define invokeL5 ffi_call5
+# define invokeL6 ffi_call6
+
 #endif
 
 /*
@@ -66,93 +107,106 @@ JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_invokeL0(JNIEnv* env, jobject self, jlong ctxAddress, jlong function)
 {
     CallContext* ctx = (CallContext *) j2p(ctxAddress);
-
-#ifdef LONG_BYPASS_FFI
-    jlong retval = ((jlong (*)(void)) (j2p(function)))(); \
-    SAVE_ERRNO(ctx);
-    return retval;
-#else
     FFIValue retval;
-    
-    ffi_call0(ctx, j2p(function), &retval);
-    SAVE_ERRNO(ctx);
 
+    invokeL0(ctx, j2p(function), &retval);
+    SAVE_ERRNO(ctx);
     return RETVAL(retval, ctx);
-#endif
 }
+
 
 /*
  * Class:     com_kenai_jffi_Foreign
- * Method:    invokeLrL
- * Signature: (JJ)J
+ * Method:    invokeVrL
+ * Signature: (J)J
  */
 JNIEXPORT jlong JNICALL
-Java_com_kenai_jffi_Foreign_invokeL1(JNIEnv* env, jobject self, jlong ctxAddress, jlong function, jlong arg1)
+Java_com_kenai_jffi_Foreign_invokeL0NoErrno(JNIEnv* env, jobject self, jlong ctxAddress, jlong function)
 {
     CallContext* ctx = (CallContext *) j2p(ctxAddress);
-
-#ifdef LONG_BYPASS_FFI
-    jlong retval = ((jlong (*)(jlong)) (j2p(function)))(arg1); \
-    SAVE_ERRNO(ctx);
-    return retval;
-#else
     FFIValue retval;
 
-    ffi_call1(ctx, j2p(function), &retval, arg1);
+    invokeL0(ctx, j2p(function), &retval);
+
+    return RETVAL(retval, ctx);
+}
+
+JNIEXPORT jlong JNICALL
+Java_com_kenai_jffi_Foreign_invokeL1(JNIEnv* env, jobject self, jlong ctxAddress, jlong function,
+        jlong arg1)
+{
+    CallContext* ctx = (CallContext *) j2p(ctxAddress);
+    FFIValue retval;
+
+    invokeL1(ctx, j2p(function), &retval, arg1);
     SAVE_ERRNO(ctx);
 
     return RETVAL(retval, ctx);
-#endif
 }
 
-/*
- * Class:     com_kenai_jffi_Foreign
- * Method:    invokeLLrL
- * Signature: (JJJ)J
- */
+JNIEXPORT jlong JNICALL
+Java_com_kenai_jffi_Foreign_invokeL1NoErrno(JNIEnv* env, jobject self, jlong ctxAddress, jlong function,
+        jlong arg1)
+{
+    CallContext* ctx = (CallContext *) j2p(ctxAddress);
+    FFIValue retval;
+
+    invokeL1(ctx, j2p(function), &retval, arg1);
+
+    return RETVAL(retval, ctx);
+}
+
+
 JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_invokeL2(JNIEnv* env, jobject self, jlong ctxAddress, jlong function,
         jlong arg1, jlong arg2)
 {
     CallContext* ctx = (CallContext *) j2p(ctxAddress);
-#ifdef LONG_BYPASS_FFI
-    jlong retval = ((jlong (*)(jlong, jlong)) (j2p(function)))(arg1, arg2); \
-    SAVE_ERRNO(ctx);
-    return retval;
-#else
     FFIValue retval;
 
-    ffi_call2(ctx, j2p(function), &retval, arg1, arg2);
+    invokeL2(ctx, j2p(function), &retval, arg1, arg2);
     SAVE_ERRNO(ctx);
 
     return RETVAL(retval, ctx);
-#endif
 }
 
-/*
- * Class:     com_kenai_jffi_Foreign
- * Method:    invokeLLLrL
- * Signature: (JJJJ)J
- */
+JNIEXPORT jlong JNICALL
+Java_com_kenai_jffi_Foreign_invokeL2NoErrno(JNIEnv* env, jobject self, jlong ctxAddress, jlong function,
+        jlong arg1, jlong arg2)
+{
+    CallContext* ctx = (CallContext *) j2p(ctxAddress);
+    FFIValue retval;
+
+    invokeL2(ctx, j2p(function), &retval, arg1, arg2);
+
+    return RETVAL(retval, ctx);
+}
+
 JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_invokeL3(JNIEnv* env, jobject self, jlong ctxAddress, jlong function,
         jlong arg1, jlong arg2, jlong arg3)
 {
     CallContext* ctx = (CallContext *) j2p(ctxAddress);
-
-#ifdef LONG_BYPASS_FFI
-    jlong retval = ((jlong (*)(jlong, jlong, jlong)) (j2p(function)))(arg1, arg2, arg3);
-    SAVE_ERRNO(ctx);
-    return retval;
-#else
     FFIValue retval;
 
-    ffi_call3(ctx, j2p(function), &retval, arg1, arg2, arg3);
+    invokeL3(ctx, j2p(function), &retval, arg1, arg2, arg3);
     SAVE_ERRNO(ctx);
 
     return RETVAL(retval, ctx);
-#endif
 }
+
+JNIEXPORT jlong JNICALL
+Java_com_kenai_jffi_Foreign_invokeL3NoErrno(JNIEnv* env, jobject self, jlong ctxAddress, jlong function,
+        jlong arg1, jlong arg2, jlong arg3)
+{
+    CallContext* ctx = (CallContext *) j2p(ctxAddress);
+    FFIValue retval;
+
+    invokeL3(ctx, j2p(function), &retval, arg1, arg2, arg3);
+
+    return RETVAL(retval, ctx);
+}
+
 
 JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_invokeL4(JNIEnv* env, jobject self, jlong ctxAddress, jlong function,
@@ -160,56 +214,75 @@ Java_com_kenai_jffi_Foreign_invokeL4(JNIEnv* env, jobject self, jlong ctxAddress
 {
     CallContext* ctx = (CallContext *) j2p(ctxAddress);
 
-#ifdef LONG_BYPASS_FFI
-    jlong retval = ((jlong (*)(jlong, jlong, jlong, jlong)) (j2p(function)))(arg1, arg2, arg3, arg4);
-    SAVE_ERRNO(ctx);
-    return retval;
-#else
     FFIValue retval;
 
-    ffi_call4(ctx, j2p(function), &retval, arg1, arg2, arg3, arg4);
+    invokeL4(ctx, j2p(function), &retval, arg1, arg2, arg3, arg4);
     SAVE_ERRNO(ctx);
 
     return RETVAL(retval, ctx);
-#endif
 }
+
+JNIEXPORT jlong JNICALL
+Java_com_kenai_jffi_Foreign_invokeL4NoErrno(JNIEnv* env, jobject self, jlong ctxAddress, jlong function,
+        jlong arg1, jlong arg2, jlong arg3, jlong arg4)
+{
+    CallContext* ctx = (CallContext *) j2p(ctxAddress);
+
+    FFIValue retval;
+
+    invokeL4(ctx, j2p(function), &retval, arg1, arg2, arg3, arg4);
+
+    return RETVAL(retval, ctx);
+}
+
 
 JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_invokeL5(JNIEnv* env, jobject self, jlong ctxAddress, jlong function,
         jlong arg1, jlong arg2, jlong arg3, jlong arg4, jlong arg5)
 {
     CallContext* ctx = (CallContext *) j2p(ctxAddress);
-
-#ifdef LONG_BYPASS_FFI
-    jlong retval = ((jlong (*)(jlong, jlong, jlong, jlong, jlong)) (j2p(function)))(arg1, arg2, arg3, arg4, arg5);
-    SAVE_ERRNO(ctx);
-    return retval;
-#else
     FFIValue retval;
 
-    ffi_call5(ctx, j2p(function), &retval, arg1, arg2, arg3, arg4, arg5);
+    invokeL5(ctx, j2p(function), &retval, arg1, arg2, arg3, arg4, arg5);
     SAVE_ERRNO(ctx);
 
     return RETVAL(retval, ctx);
-#endif
 }
+
+JNIEXPORT jlong JNICALL
+Java_com_kenai_jffi_Foreign_invokeL5NoErrno(JNIEnv* env, jobject self, jlong ctxAddress, jlong function,
+        jlong arg1, jlong arg2, jlong arg3, jlong arg4, jlong arg5)
+{
+    CallContext* ctx = (CallContext *) j2p(ctxAddress);
+    FFIValue retval;
+
+    invokeL5(ctx, j2p(function), &retval, arg1, arg2, arg3, arg4, arg5);
+
+    return RETVAL(retval, ctx);
+}
+
 
 JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_invokeL6(JNIEnv* env, jobject self, jlong ctxAddress, jlong function,
         jlong arg1, jlong arg2, jlong arg3, jlong arg4, jlong arg5, jlong arg6)
 {
     CallContext* ctx = (CallContext *) j2p(ctxAddress);
-
-#ifdef LONG_BYPASS_FFI
-    jlong retval = ((jlong (*)(jlong, jlong, jlong, jlong, jlong, jlong)) (j2p(function)))(arg1, arg2, arg3, arg4, arg5, arg6);
-    SAVE_ERRNO(ctx);
-    return retval;
-#else
     FFIValue retval;
 
-    ffi_call6(ctx, j2p(function), &retval, arg1, arg2, arg3, arg4, arg5, arg6);
+    invokeL6(ctx, j2p(function), &retval, arg1, arg2, arg3, arg4, arg5, arg6);
     SAVE_ERRNO(ctx);
 
     return RETVAL(retval, ctx);
-#endif
+}
+
+JNIEXPORT jlong JNICALL
+Java_com_kenai_jffi_Foreign_invokeL6NoErrno(JNIEnv* env, jobject self, jlong ctxAddress, jlong function,
+        jlong arg1, jlong arg2, jlong arg3, jlong arg4, jlong arg5, jlong arg6)
+{
+    CallContext* ctx = (CallContext *) j2p(ctxAddress);
+    FFIValue retval;
+
+    invokeL6(ctx, j2p(function), &retval, arg1, arg2, arg3, arg4, arg5, arg6);
+
+    return RETVAL(retval, ctx);
 }
