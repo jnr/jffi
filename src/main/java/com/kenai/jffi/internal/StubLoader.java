@@ -166,7 +166,7 @@ public class StubLoader {
         }
     }
     
-    public static final CPU getCPU() {
+    public static CPU getCPU() {
         return CPU_;
     }
     
@@ -179,7 +179,7 @@ public class StubLoader {
      *
      * @return The name of the stub library as a <tt>String</tt>
      */
-    private static final String getStubLibraryName() {
+    private static String getStubLibraryName() {
         return stubLibraryName;
     }
 
@@ -202,7 +202,7 @@ public class StubLoader {
      *
      * @return The path of the jar file.
      */
-    private static final String getStubLibraryPath() {
+    private static String getStubLibraryPath() {
         return "jni/" + getPlatformName() + "/"+ System.mapLibraryName(stubLibraryName);
     }
     
@@ -211,17 +211,17 @@ public class StubLoader {
     /**
      * Loads the stub library
      */
-    static final void load() {
+    static void load() {
         final String libName = getStubLibraryName();
         String bootPath = getBootPath();
         if (bootPath != null && loadFromBootPath(libName, bootPath)) {
             return;
         }
-        
-        try {
-            System.loadLibrary(libName);
+
+        String libraryPath = System.getProperty("java.library.path");
+        if (libraryPath != null && loadFromBootPath(libName, libraryPath)) {
             return;
-        } catch (UnsatisfiedLinkError ex) {}
+        }
 
         loadFromJar();
     }
@@ -252,6 +252,14 @@ public class StubLoader {
         return null;
     }
 
+    private static String getAlternateLibraryPath(String path) {
+        if (path.endsWith("dylib")) {
+            return path.substring(0, path.lastIndexOf("dylib")) + "jnilib";
+        } else {
+            return path.substring(0, path.lastIndexOf("jnilib")) + "dylib";
+        }
+    }
+
     private static final boolean loadFromBootPath(String libName, String bootPath) {
         String[] dirs = bootPath.split(File.pathSeparator);
         for (int i = 0; i < dirs.length; ++i) {
@@ -262,25 +270,18 @@ public class StubLoader {
             } catch (UnsatisfiedLinkError ex) {
             }
             if (getOS() == OS.DARWIN) {
-                String orig, ext;
-                if (path.endsWith("dylib")) {
-                    orig = "dylib";
-                    ext = "jnilib";
-                } else {
-                    orig = "jnilib";
-                    ext = "dylib";
-                }
                 try {
-                    System.load(path.substring(0, path.lastIndexOf(orig)) + ext);
+                    System.load(getAlternateLibraryPath(path));
                     return true;
                 } catch (UnsatisfiedLinkError ex) {
+                    ex.printStackTrace();
                 }
             }
         }
         return false;
     }
 
-    private static final void loadFromJar() {
+    private static void loadFromJar() {
         InputStream is = getStubLibraryStream();
         File dstFile = null;
         FileOutputStream os = null;
@@ -318,7 +319,7 @@ public class StubLoader {
      *
      * @return A new <tt>InputStream</tt>
      */
-    private static final InputStream getStubLibraryStream() {
+    private static InputStream getStubLibraryStream() {
         String stubPath = getStubLibraryPath();
         String[] paths = { stubPath, "/" + stubPath };
 
@@ -327,7 +328,7 @@ public class StubLoader {
 
             // On MacOS, the stub might be named .dylib or .jnilib - cater for both
             if (is == null && getOS() == OS.DARWIN) {
-                is = getResourceAsStream(path.replaceAll("dylib", "jnilib"));
+                is = getResourceAsStream(getAlternateLibraryPath(path));
             }
             if (is != null) {
                 return is;
@@ -338,10 +339,10 @@ public class StubLoader {
                 + " in jar file.  Tried " + Arrays.deepToString(paths));
     }
 
-    private static final InputStream getResourceAsStream(String resourceName) {
+    private static InputStream getResourceAsStream(String resourceName) {
         // try both our classloader and context classloader
         ClassLoader[] cls = new ClassLoader[] {
-            StubLoader.class.getClassLoader().getSystemClassLoader(),
+            ClassLoader.getSystemClassLoader(),
             StubLoader.class.getClassLoader(),
             Thread.currentThread().getContextClassLoader()
         };
@@ -361,7 +362,7 @@ public class StubLoader {
         return null;
     }
     
-    private final static int getVersionField(String name) {
+    private static int getVersionField(String name) {
         try {
         Class c = Class.forName(versionClassName);
             return (Integer) c.getField(name).get(c);
