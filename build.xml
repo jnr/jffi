@@ -75,39 +75,39 @@
       <jar destfile="${dist.jar}" basedir="${build.classes.dir}" compress="true"/>
     </target>
 
-    <target name="test" depends="compile,-compile-test">
-      <mkdir dir="${build.test.dir}/results"/>
-      <junit fork="yes" printsummary="yes" haltonfailure="false">
-	<jvmarg value="${run.jvm.model}"/>
-	<classpath>
-	  <pathelement location="${build.classes.dir}"/>
-	  <pathelement location="${build.test.dir}/classes"/>
-	  <pathelement location="lib/junit_4/junit-4.5.jar"/>
-	</classpath>
-	<sysproperty key="java.library.path" value="${build.native.dir}"/>
+  <target name="test" depends="compile,-compile-test">
+    <mkdir dir="${build.test.dir}/results"/>
+    <junit fork="yes" printsummary="yes" haltonfailure="false">
+      <jvmarg value="${run.jvm.model}"/>
+      <classpath>
+        <pathelement location="${build.classes.dir}"/>
+        <pathelement location="${build.test.dir}/classes"/>
+        <pathelement location="lib/junit_4/junit-4.5.jar"/>
+      </classpath>
+      <sysproperty key="java.library.path" value="${build.native.dir}"/>
 
-        <formatter type="plain" /> <!-- to file -->
-	<batchtest fork="yes" todir="${build.test.dir}/results">
-	  <fileset dir="${src.test.dir}">
-	    <include name="**/*Test*.java"/>
-	  </fileset>
-	</batchtest>
+      <formatter type="plain" /> <!-- to file -->
+      <batchtest fork="yes" todir="${build.test.dir}/results">
+        <fileset dir="${src.test.dir}">
+          <include name="**/*Test*.java"/>
+        </fileset>
+      </batchtest>
 
-      </junit>
-    </target>
+    </junit>
+  </target>
 
-    <target name="-compile-test" depends="-pre-compile-test,-do-compile-test,-post-compile-test"/>
+  <target name="-compile-test" depends="-pre-compile-test,-do-compile-test,-post-compile-test"/>
 
 
-    <target name="-do-compile-test" depends="-init">
-      <mkdir dir="${build.test.dir}/classes"/>
-      <!-- Compile the java code from ${src} into ${build} -->
-      <javac srcdir="${src.test.dir}" destdir="${build.test.dir}/classes" includeantruntime="false" classpathref="classpath.test">
-	<classpath>
-	  <pathelement location="${build.classes.dir}"/>
-	  <pathelement location="lib/junit_4/junit-4.5.jar"/>
-	</classpath>
-      </javac>
-    </target>
+  <target name="-do-compile-test" depends="-init">
+    <mkdir dir="${build.test.dir}/classes"/>
+    <!-- Compile the java code from ${src} into ${build} -->
+    <javac srcdir="${src.test.dir}" destdir="${build.test.dir}/classes" includeantruntime="false" classpathref="classpath.test">
+      <classpath>
+        <pathelement location="${build.classes.dir}"/>
+        <pathelement location="lib/junit_4/junit-4.5.jar"/>
+      </classpath>
+    </javac>
+  </target>
 
 </project>
