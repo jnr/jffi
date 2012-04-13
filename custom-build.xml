@@ -150,7 +150,7 @@
 
     </target>
 
-    <target name="cross-mingw32" depends="-init, -generate-native-headers">
+    <target name="cross-win32" depends="-init, -generate-native-headers">
         <mkdir dir="${build.native.dir}"/>
 
         <exec executable="${make.exe}" failonerror="true">
@@ -175,8 +175,34 @@
             </zipfileset>
         </jar>
     </target>
-    
-    <target name="-build-native-testlib" depends="-init-vars">
+
+  <target name="cross-win64" depends="-init, -generate-native-headers">
+    <mkdir dir="${build.native.dir}"/>
+
+    <exec executable="${make.exe}" failonerror="true">
+      <arg value="JAVA_HOME=${java.home}"/>
+      <arg value="OS=cross-win64"/>
+      <arg value="SRC_DIR=${src.native.dir}"/>
+      <arg value="JNI_DIR=${src.native.dir}"/>
+      <arg value="BUILD_DIR=${build.native.dir}"/>
+      <arg value="VERSION=${jffi.version.major}.${jffi.version.minor}"/>
+      <arg value="CPU=x86_64"/>
+      <arg value="-f"/>
+      <arg value="jni/GNUmakefile"/>
+    </exec>
+    <exec executable="x86_64-w64-mingw32-strip" failonerror="true">
+      <arg value="--strip-debug"/> <!-- Strip debug symbols only -->
+      <arg value="${build.native.dir}/jffi-${jffi.version.major}.${jffi.version.minor}.dll"/>
+    </exec>
+    <mkdir dir="${dist.dir}"/>
+    <jar jarfile="${dist.dir}/jffi-x86_64-Windows.jar">
+      <zipfileset prefix="jni/x86_64-Windows" dir="${build.native.dir}">
+        <include name="jffi*.dll"/>
+      </zipfileset>
+    </jar>
+  </target>
+
+  <target name="-build-native-testlib" depends="-init-vars">
         <mkdir dir="${build.native.dir}"/>
 
         <exec executable="${make.exe}" failonerror="true">

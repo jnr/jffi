@@ -116,6 +116,27 @@ ifeq ($(OS),cross-mingw32)
   CROSS_COMPILE=1
 endif
 
+
+ifeq ($(OS),cross-win64)
+  JDK_INCLUDES=-I$(JNI_DIR)/win32/include -I$(JNI_DIR)/win32/include/win32
+  CC = x86_64-w64-mingw32-gcc
+  LD = x86_64-w64-mingw32-ld
+  STRIP = x86_64-w64-mingw32-strip --strip-debug
+  AR = x86_64-w64-mingw32-ar
+  LD = x86_64-w64-mingw32-ld
+  export RANLIB = x86_64-w64-mingw32-ranlib
+  CONFIGURE_HOST = x86_64-w64-mingw32
+  PICFLAGS =
+  CROSS_COMPILE=1
+  CFLAGS += -mwin32 -D_JNI_IMPLEMENTATION_
+  LDFLAGS += -Wl,--add-stdcall-alias
+  PICFLAGS=
+  SOFLAGS += -shared -static-libgcc
+  PREFIX =
+  JNIEXT=dll
+endif
+
+
 ifneq ($(findstring cygwin,$(BUILD_OS)),)
   OS = win32
   JAVA_HOME := $(shell cygpath -u $(JAVA_HOME))
