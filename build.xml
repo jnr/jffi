@@ -1,79 +1,79 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="jffi" default="default" basedir=".">
-    <description>Builds, tests, and runs the project jffi.</description>
-    <path id="classpath.test">
-      <pathelement location="lib/junit_4/junit-4.5.jar"/>
-      <pathelement location="lib/junit_4/junit-4.5-api.jar"/>
-    </path>
+<project name="jffi" default="jar" basedir=".">
+  <description>Builds, tests, and runs the project jffi.</description>
+  <path id="classpath.test">
+    <pathelement location="lib/junit_4/junit-4.5.jar"/>
+    <pathelement location="lib/junit_4/junit-4.5-api.jar"/>
+  </path>
 
-    <target name="-pre-init">
-        <!-- d32/d64 options are not supported on Windows -->
-        <condition property="run.jvm.model" value="">
-            <os family="Windows"/>
-        </condition>
-        <condition property="run.jvm.model" value="-d64">
-          <or>
-            <os arch="amd64"/>
-            <os arch="x86_64"/>
-            <os arch="sparcv9"/>
-            <os arch="s390x"/>
-          </or>
-        </condition>
-        <condition property="run.jvm.model" value="-d32">
-          <or>
-            <os arch="i386"/>
-            <os arch="x86"/>
-            <os arch="powerpc"/>
-            <os arch="sparc"/>
-          </or>
-        </condition>
-        <condition property="run.jvm.model" value="">
-            <not><isset property="run.jvm.model"/></not>
-        </condition>
-        <property name="run.jvmargs" value="${run.jvm.model} -Djffi.library.path=build/jni -Djffi.boot.library.path=build/jni"/>
-    </target>
-
-
-    <target name="-init" depends="-pre-init,-init-vars,-post-init">
-      <!-- Create the time stamp -->
-      <tstamp/>
-      <!-- Create the build directory structure used by compile -->
-      <mkdir dir="${build.dir}"/>
-    </target>
-
-    <import file="custom-build.xml"/>
-    <import file="version.xml"/>
+  <target name="-pre-init">
+    <!-- d32/d64 options are not supported on Windows -->
+    <condition property="run.jvm.model" value="">
+      <os family="Windows"/>
+    </condition>
+    <condition property="run.jvm.model" value="-d64">
+      <or>
+        <os arch="amd64"/>
+        <os arch="x86_64"/>
+        <os arch="sparcv9"/>
+        <os arch="s390x"/>
+      </or>
+    </condition>
+    <condition property="run.jvm.model" value="-d32">
+      <or>
+        <os arch="i386"/>
+        <os arch="x86"/>
+        <os arch="powerpc"/>
+        <os arch="sparc"/>
+      </or>
+    </condition>
+    <condition property="run.jvm.model" value="">
+      <not><isset property="run.jvm.model"/></not>
+    </condition>
+    <property name="run.jvmargs" value="${run.jvm.model} -Djffi.library.path=build/jni -Djffi.boot.library.path=build/jni"/>
+  </target>
 
 
-    <target name="-pre-jar"/>
-    <target name="-post-init" depends="-init-vars"/>
-    <target name="-pre-compile" depends="-init"/>
-    <target name="-post-compile" depends="-build-native-library"/>
-    <target name="-pre-compile-test" depends="-init"/>
-    <target name="-post-compile-test" depends="-build-native-testlib"/>
-    <target name="-post-jar" depends="-assemble-final-jar"/>
+  <target name="-init" depends="-pre-init,-init-vars,-post-init">
+    <!-- Create the time stamp -->
+    <tstamp/>
+    <!-- Create the build directory structure used by compile -->
+    <mkdir dir="${build.dir}"/>
+  </target>
 
-    <target name="-do-compile" depends="-init">
-      <mkdir dir="${build.classes.dir}"/>
-      <!-- Compile the java code from ${src} into ${build} -->
-      <javac srcdir="${src.dir}" destdir="${build.classes.dir}" includeantruntime="false"/>
-    </target>
+  <import file="custom-build.xml"/>
+  <import file="version.xml"/>
 
-    <target name="-compile-java" depends="-do-compile"/>
-    <target name="compile" depends="-init,-pre-compile,-do-compile,-post-compile">
-    </target>
 
-    <target name="clean" depends="-init">
-      <delete dir="${build.dir}"/>
-      <delete dir="${dist.dir}"/>
-    </target>
+  <target name="-pre-jar"/>
+  <target name="-post-init" depends="-init-vars"/>
+  <target name="-pre-compile" depends="-init"/>
+  <target name="-post-compile" depends="-build-native-library"/>
+  <target name="-pre-compile-test" depends="-init"/>
+  <target name="-post-compile-test" depends="-build-native-testlib"/>
+  <target name="-post-jar" depends="-assemble-final-jar"/>
 
-    <target name="jar" depends="-init,-pre-jar,-do-jar,-post-jar"/>
+  <target name="-do-compile" depends="-init">
+    <mkdir dir="${build.classes.dir}"/>
+    <!-- Compile the java code from ${src} into ${build} -->
+    <javac srcdir="${src.dir}" destdir="${build.classes.dir}" includeantruntime="false"/>
+  </target>
 
-    <target name="-do-jar" depends="-init,compile">
-      <mkdir dir="${dist.dir}"/>
-      <jar destfile="${dist.jar}" basedir="${build.classes.dir}" compress="true"/>
-    </target>
+  <target name="-compile-java" depends="-do-compile"/>
+  <target name="compile" depends="-init,-pre-compile,-do-compile,-post-compile">
+  </target>
+
+  <target name="clean" depends="-init">
+    <delete dir="${build.dir}"/>
+    <delete dir="${dist.dir}"/>
+  </target>
+
+  <target name="jar" depends="-init,-pre-jar,-do-jar,-post-jar"/>
+
+  <target name="-do-jar" depends="-init,compile">
+    <mkdir dir="${dist.dir}"/>
+    <jar destfile="${dist.jar}" basedir="${build.classes.dir}" compress="true"/>
+  </target>
 
   <target name="test" depends="compile,-compile-test">
     <mkdir dir="${build.test.dir}/results"/>
