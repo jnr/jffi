@@ -242,8 +242,8 @@ ifneq ($(findstring $(CPU), x86_64 amd64 sparcv9 ppc64 powerpc64 s390x),)
   MODEL = 64
 endif
 
-# On platforms (linux, solaris) that support both 32bit and 64bit, force building for one or the other
-ifneq ($(strip $(findstring $(OS), solaris)),)
+# On platforms (solaris, aix) that support both 32bit and 64bit, force building for one or the other
+ifneq ($(strip $(findstring $(OS), solaris aix)),)
   # Change the CC/LD instead of CFLAGS/LDFLAGS, incase other things in the flags
   # makes the libffi build choke
   CC += -m$(MODEL)
