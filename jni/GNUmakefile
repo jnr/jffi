@@ -95,7 +95,7 @@ ifeq ($(OS), win64)
   CFLAGS += -mwin32 -D_JNI_IMPLEMENTATION_
   LDFLAGS += -Wl,--add-stdcall-alias
   PICFLAGS=
-  SOFLAGS += -shared -mimpure-text -static-libgcc
+  SOFLAGS += -shared -static-libgcc
   PREFIX =
   JNIEXT=dll  
   AR = x86_64-w64-mingw32-ar
@@ -156,7 +156,7 @@ ifeq ($(OS), win32)
   endif
   LDFLAGS += -Wl,--add-stdcall-alias $(CRTMT.O)
   PICFLAGS=
-  SOFLAGS += -shared -mimpure-text -static-libgcc
+  SOFLAGS += -shared -static-libgcc
   PREFIX =
   JNIEXT=dll
 endif
@@ -204,7 +204,7 @@ ifeq ($(OS), darwin)
 endif
 
 ifeq ($(OS), linux)
-  SOFLAGS = -shared -mimpure-text -static-libgcc -Wl,-soname,$(@F) -Wl,-O1
+  SOFLAGS = -shared -static-libgcc -Wl,-soname,$(@F) -Wl,-O1
   CFLAGS += -pthread
 endif
 
@@ -212,7 +212,7 @@ ifeq ($(OS), solaris)
   CC = gcc
   CFLAGS += -D__EXTENSIONS__ -std=c99
   LD = /usr/ccs/bin/ld
-  SOFLAGS = -shared -static-libgcc -mimpure-text
+  SOFLAGS = -shared -static-libgcc
   LIBS += -ldl
   STRIP = strip
 endif
