@@ -169,15 +169,15 @@ invokeArrayWithObjects_(JNIEnv* env, jlong ctxAddress, jlong function, jbyteArra
     int i, arrayCount = 0, pinnedCount = 0, paramBytes = 0;
 
     if (unlikely(objectCount > 0)) {
-	arrays = alloca(objectCount * sizeof(Array));
-	pinned = alloca(objectCount * sizeof(Pinned));
+        arrays = alloca(objectCount * sizeof(Array));
+        pinned = alloca(objectCount * sizeof(Pinned));
     }
 
     if (ctx->cif.nargs > 0) {
-	jbyte* tmpBuffer = alloca(ARG_BUFFER_SIZE(ctx));
-	(*env)->GetByteArrayRegion(env, paramBuffer, 0, ARG_BUFFER_SIZE(ctx), tmpBuffer);
-	ffiArgs = alloca(ctx->cif.nargs * sizeof(void *));
-	COPY_ARGS(ctx, tmpBuffer, ffiArgs);
+        jbyte* tmpBuffer = alloca(ARG_BUFFER_SIZE(ctx));
+        (*env)->GetByteArrayRegion(env, paramBuffer, 0, ARG_BUFFER_SIZE(ctx), tmpBuffer);
+        ffiArgs = alloca(ctx->cif.nargs * sizeof(void *));
+        COPY_ARGS(ctx, tmpBuffer, ffiArgs);
     }
     
     for (i = 0; i < objectCount; ++i) {
