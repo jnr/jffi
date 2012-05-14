@@ -118,6 +118,8 @@ endif
 
 
 ifeq ($(OS),cross-win64)
+  override CPU = x86_64
+  override OS = win64
   JDK_INCLUDES=-I$(JNI_DIR)/win32/include -I$(JNI_DIR)/win32/include/win32
   CC = x86_64-w64-mingw32-gcc
   LD = x86_64-w64-mingw32-ld
@@ -128,9 +130,6 @@ ifeq ($(OS),cross-win64)
   CONFIGURE_HOST = x86_64-w64-mingw32
   PICFLAGS =
   CROSS_COMPILE=1
-  CFLAGS += -mwin32 -D_JNI_IMPLEMENTATION_
-  LDFLAGS += -Wl,--add-stdcall-alias
-  PICFLAGS=
   SOFLAGS += -shared -static-libgcc
   PREFIX =
   JNIEXT=dll
