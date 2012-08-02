@@ -150,23 +150,29 @@ public class StubLoader {
      * @return A member of the <tt>CPU</tt> enum.
      */
     private static final CPU determineCPU() {
-        String archString = System.getProperty("os.arch", "unknown").toUpperCase(LOCALE).toLowerCase(LOCALE);
-        if ("x86".equals(archString) || "i386".equals(archString) || "i86pc".equals(archString)) {
+        String archString = System.getProperty("os.arch", "unknown");
+        if ("x86".equalsIgnoreCase(archString) || "i386".equalsIgnoreCase(archString) || "i86pc".equalsIgnoreCase(archString)) {
             return CPU.I386;
-        } else if ("x86_64".equals(archString) || "amd64".equals(archString)) {
+        } else if ("x86_64".equalsIgnoreCase(archString) || "amd64".equalsIgnoreCase(archString)) {
             return CPU.X86_64;
-        } else if ("ppc".equals(archString) || "powerpc".equals(archString)) {
+        } else if ("ppc".equalsIgnoreCase(archString) || "powerpc".equalsIgnoreCase(archString)) {
             return CPU.PPC;
-        } else if ("powerpc64".equals(archString)) {
+        } else if ("ppc64".equalsIgnoreCase(archString) || "powerpc64".equalsIgnoreCase(archString)) {
             return CPU.PPC64;
+        } else if ("s390".equalsIgnoreCase(archString) || "s390x".equalsIgnoreCase(archString)) {
+            return CPU.S390X;
+        } else if ("arm".equalsIgnoreCase(archString)) {
+            return CPU.ARM;
         }
-        
+
         // Try to find by lookup up in the CPU list
-        try {
-            return CPU.valueOf(archString.toUpperCase(LOCALE));
-        } catch (IllegalArgumentException ex) {
-            return CPU.UNKNOWN;
+        for (CPU cpu : CPU.values()) {
+            if (cpu.name().equalsIgnoreCase(archString)) {
+                return cpu;
+            }
         }
+
+        return CPU.UNKNOWN;
     }
     
     public static CPU getCPU() {
