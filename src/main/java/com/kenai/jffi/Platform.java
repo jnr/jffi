@@ -36,6 +36,7 @@ package com.kenai.jffi;
  * Convenience class to interrogate the system about various platform-specific details.
  */
 public abstract class Platform {
+    private static final java.util.Locale LOCALE = java.util.Locale.ENGLISH;
     private final OS os;
     private final int javaVersionMajor;
 
@@ -69,7 +70,7 @@ public abstract class Platform {
         UNKNOWN;
 
         @Override
-        public String toString() { return name().toLowerCase(); }
+        public String toString() { return name().toLowerCase(LOCALE); }
     }
 
     /**
@@ -106,7 +107,7 @@ public abstract class Platform {
         public final int dataModel;
         public final long addressMask;
         @Override
-        public String toString() { return name().toLowerCase(); }
+        public String toString() { return name().toLowerCase(LOCALE); }
     }
 
     /**
@@ -122,26 +123,26 @@ public abstract class Platform {
      * @return An member of the <tt>OS</tt> enum.
      */
     private static final OS determineOS() {
-        String osName = System.getProperty("os.name").split(" ")[0].toLowerCase();
-        if (osName.startsWith("mac") || osName.startsWith("darwin")) {
+        String osName = System.getProperty("os.name").split(" ")[0];
+        if (startsWithIgnoreCase(osName, "mac") || startsWithIgnoreCase(osName, "darwin")) {
             return OS.DARWIN;
         
-        } else if (osName.startsWith("linux")) {
+        } else if (startsWithIgnoreCase(osName, "linux")) {
             return OS.LINUX;
         
-        } else if (osName.startsWith("sunos") || osName.startsWith("solaris")) {
+        } else if (startsWithIgnoreCase(osName, "sunos") || startsWithIgnoreCase(osName, "solaris")) {
             return OS.SOLARIS;
         
-        } else if (osName.startsWith("aix")) {
+        } else if (startsWithIgnoreCase(osName, "aix")) {
             return OS.AIX; 
         
-        } else if (osName.startsWith("openbsd")) {
+        } else if (startsWithIgnoreCase(osName, "openbsd")) {
             return OS.OPENBSD;
         
-        } else if (osName.startsWith("freebsd")) {
+        } else if (startsWithIgnoreCase(osName, "freebsd")) {
             return OS.FREEBSD;
         
-        } else if (osName.startsWith("windows")) {
+        } else if (startsWithIgnoreCase(osName, "windows")) {
             return OS.WINDOWS;
         
         } else {
@@ -182,7 +183,7 @@ public abstract class Platform {
     
     
     private static final class ArchHolder {
-        public static final CPU CPU = determineCPU();
+        public static final CPU cpu = determineCPU();
         
         /**
          * Determines the CPU architecture the JVM is running on.
@@ -195,11 +196,11 @@ public abstract class Platform {
         private static CPU determineCPU() {
             String archString = null;
             try {
-                archString = Foreign.getInstance().getArch().toLowerCase();
+                archString = Foreign.getInstance().getArch().toUpperCase(LOCALE).toLowerCase(LOCALE);
             } catch (UnsatisfiedLinkError ex) {}
             
             if (archString == null || "unknown".equals(archString)) {
-                archString = System.getProperty("os.arch", "unknown").toLowerCase();
+                archString = System.getProperty("os.arch", "unknown").toUpperCase(LOCALE).toLowerCase(LOCALE);
             }
 
             if ("x86".equals(archString) || "i386".equals(archString) || "i86pc".equals(archString)) {
@@ -224,7 +225,7 @@ public abstract class Platform {
 
             // Try to find by lookup up in the CPU list
             try {
-                return CPU.valueOf(archString.toUpperCase());
+                return CPU.valueOf(archString.toUpperCase(LOCALE));
 
             } catch (IllegalArgumentException ex) {
                 return CPU.UNKNOWN;
@@ -279,7 +280,7 @@ public abstract class Platform {
      * @return A <tt>CPU</tt> value representing the current processor architecture.
      */
     public final CPU getCPU() {
-        return ArchHolder.CPU;
+        return ArchHolder.cpu;
     }
     
     /**
@@ -323,7 +324,7 @@ public abstract class Platform {
      */
     public String getName() {
         String osName = System.getProperty("os.name").split(" ")[0];
-        return getCPU().name().toLowerCase() + "-" + osName;
+        return getCPU().name().toLowerCase(LOCALE) + "-" + osName;
     }
 
     /**
@@ -430,6 +431,12 @@ public abstract class Platform {
         public final int longSize() {
             return 32;
         }
+    }
+
+    private static boolean startsWithIgnoreCase(String s1, String s2) {
+        return s1.startsWith(s2)
+            || s1.toUpperCase(LOCALE).startsWith(s2.toUpperCase(LOCALE))
+            || s1.toLowerCase(LOCALE).startsWith(s2.toLowerCase(LOCALE));
     }
 }
 

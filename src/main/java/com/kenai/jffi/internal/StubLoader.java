@@ -34,6 +34,7 @@ public class StubLoader {
     public final static int VERSION_MAJOR = getVersionField("MAJOR");
     public final static int VERSION_MINOR = getVersionField("MINOR");
     private static final String versionClassName = "com.kenai.jffi.Version";
+    private static final java.util.Locale LOCALE = java.util.Locale.ENGLISH;
     
     private static final String bootPropertyFilename = "boot.properties";
     private static final String bootLibraryPropertyName = "jffi.boot.library.path";
@@ -42,8 +43,10 @@ public class StubLoader {
 
     private static final OS OS_ = determineOS();
     private static final CPU CPU_ = determineCPU();
+
     private static volatile Throwable failureCause = null;
     private static volatile boolean loaded = false;
+
     
     
     public static final boolean isLoaded() {
@@ -79,7 +82,7 @@ public class StubLoader {
         UNKNOWN;
 
         @Override
-        public String toString() { return name().toLowerCase(); }
+        public String toString() { return name().toLowerCase(LOCALE); }
     }
 
     /**
@@ -109,7 +112,7 @@ public class StubLoader {
         UNKNOWN;
 
         @Override
-        public String toString() { return name().toLowerCase(); }
+        public String toString() { return name().toLowerCase(LOCALE); }
     }
 
     /**
@@ -117,21 +120,21 @@ public class StubLoader {
      *
      * @return An member of the <tt>OS</tt> enum.
      */
-    private static final OS determineOS() {
-        String osName = System.getProperty("os.name").split(" ")[0].toLowerCase();
-        if (osName.startsWith("mac") || osName.startsWith("darwin")) {
+    private static OS determineOS() {
+        String osName = System.getProperty("os.name").split(" ")[0];
+        if (startsWithIgnoreCase(osName, "mac") || startsWithIgnoreCase(osName, "darwin")) {
             return OS.DARWIN;
-        } else if (osName.startsWith("linux")) {
+        } else if (startsWithIgnoreCase(osName, "linux")) {
             return OS.LINUX;
-        } else if (osName.startsWith("sunos") || osName.startsWith("solaris")) {
+        } else if (startsWithIgnoreCase(osName, "sunos") || startsWithIgnoreCase(osName, "solaris")) {
             return OS.SOLARIS;
-        } else if (osName.startsWith("aix")) {
+        } else if (startsWithIgnoreCase(osName, "aix")) {
             return OS.AIX; 
-        } else if (osName.startsWith("openbsd")) {
+        } else if (startsWithIgnoreCase(osName, "openbsd")) {
             return OS.OPENBSD;
-        } else if (osName.startsWith("freebsd")) {
+        } else if (startsWithIgnoreCase(osName, "freebsd")) {
             return OS.FREEBSD;
-        } else if (osName.startsWith("windows")) {
+        } else if (startsWithIgnoreCase(osName, "windows")) {
             return OS.WINDOWS;
         } else {
             return OS.UNKNOWN;
@@ -147,7 +150,7 @@ public class StubLoader {
      * @return A member of the <tt>CPU</tt> enum.
      */
     private static final CPU determineCPU() {
-        String archString = System.getProperty("os.arch", "unknown").toLowerCase();
+        String archString = System.getProperty("os.arch", "unknown").toUpperCase(LOCALE).toLowerCase(LOCALE);
         if ("x86".equals(archString) || "i386".equals(archString) || "i86pc".equals(archString)) {
             return CPU.I386;
         } else if ("x86_64".equals(archString) || "amd64".equals(archString)) {
@@ -160,7 +163,7 @@ public class StubLoader {
         
         // Try to find by lookup up in the CPU list
         try {
-            return CPU.valueOf(archString.toUpperCase());
+            return CPU.valueOf(archString.toUpperCase(LOCALE));
         } catch (IllegalArgumentException ex) {
             return CPU.UNKNOWN;
         }
@@ -195,7 +198,7 @@ public class StubLoader {
 
        
         String osName = System.getProperty("os.name").split(" ")[0];
-        return getCPU().name().toLowerCase() + "-" + osName;
+        return getCPU().name().toLowerCase(LOCALE) + "-" + osName;
     }
     /**
      * Gets the path within the jar file of the stub native library.
@@ -367,6 +370,12 @@ public class StubLoader {
         } catch (Throwable t) {
             throw new RuntimeException(t);
         }
+    }
+
+    private static boolean startsWithIgnoreCase(String s1, String s2) {
+        return s1.startsWith(s2)
+            || s1.toUpperCase(LOCALE).startsWith(s2.toUpperCase(LOCALE))
+            || s1.toLowerCase(LOCALE).startsWith(s2.toLowerCase(LOCALE));
     }
 
     static {
