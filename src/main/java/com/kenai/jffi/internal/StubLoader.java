@@ -151,23 +151,23 @@ public class StubLoader {
      */
     private static final CPU determineCPU() {
         String archString = System.getProperty("os.arch", "unknown");
-        if ("x86".equalsIgnoreCase(archString) || "i386".equalsIgnoreCase(archString) || "i86pc".equalsIgnoreCase(archString)) {
+        if (equalsIgnoreCase("x86", archString) || equalsIgnoreCase("i386", archString) || equalsIgnoreCase("i86pc", archString)) {
             return CPU.I386;
-        } else if ("x86_64".equalsIgnoreCase(archString) || "amd64".equalsIgnoreCase(archString)) {
+        } else if (equalsIgnoreCase("x86_64", archString) || equalsIgnoreCase("amd64", archString)) {
             return CPU.X86_64;
-        } else if ("ppc".equalsIgnoreCase(archString) || "powerpc".equalsIgnoreCase(archString)) {
+        } else if (equalsIgnoreCase("ppc", archString) || equalsIgnoreCase("powerpc", archString)) {
             return CPU.PPC;
-        } else if ("ppc64".equalsIgnoreCase(archString) || "powerpc64".equalsIgnoreCase(archString)) {
+        } else if (equalsIgnoreCase("ppc64", archString) || equalsIgnoreCase("powerpc64", archString)) {
             return CPU.PPC64;
-        } else if ("s390".equalsIgnoreCase(archString) || "s390x".equalsIgnoreCase(archString)) {
+        } else if (equalsIgnoreCase("s390", archString) || equalsIgnoreCase("s390x", archString)) {
             return CPU.S390X;
-        } else if ("arm".equalsIgnoreCase(archString)) {
+        } else if (equalsIgnoreCase("arm", archString)) {
             return CPU.ARM;
         }
 
         // Try to find by lookup up in the CPU list
         for (CPU cpu : CPU.values()) {
-            if (cpu.name().equalsIgnoreCase(archString)) {
+            if (equalsIgnoreCase(cpu.name(), archString)) {
                 return cpu;
             }
         }
@@ -382,6 +382,12 @@ public class StubLoader {
         return s1.startsWith(s2)
             || s1.toUpperCase(LOCALE).startsWith(s2.toUpperCase(LOCALE))
             || s1.toLowerCase(LOCALE).startsWith(s2.toLowerCase(LOCALE));
+    }
+
+    private static boolean equalsIgnoreCase(String s1, String s2) {
+        return s1.equalsIgnoreCase(s2)
+            || s1.toUpperCase(LOCALE).equals(s2.toUpperCase(LOCALE))
+            || s1.toLowerCase(LOCALE).equals(s2.toLowerCase(LOCALE));
     }
 
     static {
