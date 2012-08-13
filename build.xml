@@ -57,6 +57,7 @@
     <property name="ant.build.javac.target" value="1.5"/>
     <property name="ant.build.javac.source" value="1.5"/>
     <property name="ant.build.javac.includeantruntime" value="false"/>
+    <property name="test.fork" value="no"/>
 
     <mkdir dir="${build.native.dir}"/>
 
@@ -156,7 +157,7 @@
 
   <target name="test" depends="compile,-compile-test">
     <mkdir dir="${build.test.dir}/results"/>
-    <junit fork="yes" printsummary="yes" haltonfailure="false">
+    <junit fork="${test.fork}" printsummary="withOutAndErr" haltonfailure="false">
       <jvmarg value="${run.jvm.model}"/>
       <classpath>
         <pathelement location="${build.classes.dir}"/>
@@ -166,12 +167,35 @@
       <sysproperty key="java.library.path" value="${build.native.dir}"/>
 
       <formatter type="plain" /> <!-- to file -->
-      <batchtest fork="yes" todir="${build.test.dir}/results">
+      <batchtest fork="${test.fork}" todir="${build.test.dir}/results">
         <fileset dir="${src.test.dir}">
           <include name="**/*Test*.java"/>
         </fileset>
       </batchtest>
 
+    </junit>
+  </target>
+
+  <target name="ensure-test-name" unless="test">
+    <fail message="You must run this target with -Dtest=TestName"/>
+  </target>
+
+  <target name="runtest" description="Runs the test you specify on the command 
+    line with -Dtest=" depends="compile, -compile-test, ensure-test-name">
+    <junit printsummary="withOutAndErr" fork="${test.fork}"> 
+      <jvmarg value="${run.jvm.model}"/>
+      <classpath>
+        <pathelement location="${build.classes.dir}"/>
+        <pathelement location="${build.test.dir}/classes"/>
+        <pathelement location="lib/junit_4/junit-4.5.jar"/>
+      </classpath>
+      <sysproperty key="java.library.path" value="${build.native.dir}"/>
+      <formatter type="plain" usefile="false"/>
+      <batchtest>
+        <fileset dir="${src.test.dir}">
+          <include name="**/${test}.java"/>
+        </fileset>
+      </batchtest>
     </junit>
   </target>
 
