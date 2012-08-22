@@ -53,37 +53,44 @@
 # define RETVAL(retval, ctx) ((retval).j)
 #endif
 
-#if defined(__x86_64__)
+#if defined(__x86_64__) && defined(__GNUC__)
 # define LONG_BYPASS_FFI
 #endif
 
 #if defined(LONG_BYPASS_FFI)
+
+# if defined(__x86_64) || defined(__amd64)
+#  define CLEAR_VARARGS ({__asm__ __volatile__("xorq %%rax, %%rax" ::: "rax");})
+# else
+#  define CLEAR_VARARGS do { } while(0)
+# endif
+
 # define invokeL0(ctx, fn, retval) do { \
-            (retval)->j = ((jlong (*)()) (fn))(); \
+            CLEAR_VARARGS; (retval)->j = ((jlong (*)()) (fn))(); \
     } while (0)
 
 # define invokeL1(ctx, fn, retval, arg1) do { \
-            (retval)->j = ((jlong (*)(jlong)) (fn))(arg1); \
+            CLEAR_VARARGS; (retval)->j = ((jlong (*)(jlong)) (fn))(arg1); \
     } while (0)
 
 # define invokeL2(ctx, fn, retval, arg1, arg2) do { \
-            (retval)->j = ((jlong (*)(jlong, jlong)) (fn))((arg1), (arg2)); \
+            CLEAR_VARARGS; (retval)->j = ((jlong (*)(jlong, jlong)) (fn))((arg1), (arg2)); \
     } while (0)
 
 # define invokeL3(ctx, fn, retval, arg1, arg2, arg3) do { \
-            (retval)->j = ((jlong (*)(jlong, jlong, jlong)) (fn))(arg1, arg2, arg3); \
+            CLEAR_VARARGS; (retval)->j = ((jlong (*)(jlong, jlong, jlong)) (fn))(arg1, arg2, arg3); \
     } while (0)
 
 # define invokeL4(ctx, fn, retval, arg1, arg2, arg3, arg4) do { \
-            (retval)->j = ((jlong (*)(jlong, jlong, jlong, jlong)) (fn))(arg1, arg2, arg3, arg4); \
+            CLEAR_VARARGS; (retval)->j = ((jlong (*)(jlong, jlong, jlong, jlong)) (fn))(arg1, arg2, arg3, arg4); \
     } while (0)
 
 # define invokeL5(ctx, fn, retval, arg1, arg2, arg3, arg4, arg5) do { \
-            (retval)->j = ((jlong (*)(jlong, jlong, jlong, jlong, jlong)) (fn))(arg1, arg2, arg3, arg4, arg5); \
+            CLEAR_VARARGS; (retval)->j = ((jlong (*)(jlong, jlong, jlong, jlong, jlong)) (fn))(arg1, arg2, arg3, arg4, arg5); \
     } while (0)
 
 # define invokeL6(ctx, fn, retval, arg1, arg2, arg3, arg4, arg5, arg6) do { \
-            (retval)->j = ((jlong (*)(jlong, jlong, jlong, jlong, jlong, jlong)) (fn))(arg1, arg2, arg3, arg4, arg5, arg6); \
+            CLEAR_VARARGS; (retval)->j = ((jlong (*)(jlong, jlong, jlong, jlong, jlong, jlong)) (fn))(arg1, arg2, arg3, arg4, arg5, arg6); \
     } while (0)
 
 #else /* non-i386, non-x86_64 */

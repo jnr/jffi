@@ -42,38 +42,45 @@
 #include "LastError.h"
 #include "com_kenai_jffi_Foreign.h"
 
-#if defined(__i386__) || defined(__x86_64__)
+#if (defined(__i386__) || defined(__x86_64__)) && defined(__GNUC__)
 # define INT_BYPASS_FFI
 #endif
 
 
 #if defined(INT_BYPASS_FFI)
+
+# if defined(__x86_64) || defined(__amd64)
+#  define CLEAR_VARARGS ({__asm__ __volatile__("xorq %%rax, %%rax" ::: "rax");})
+# else
+#  define CLEAR_VARARGS do { } while(0)
+# endif
+
 # define invokeI0(ctx, fn, retval) do { \
-            *(retval) = ((jint (*)()) (fn))(); \
+            CLEAR_VARARGS; *(retval) = ((jint (*)()) (fn))(); \
     } while (0)
 
 # define invokeI1(ctx, fn, retval, arg1) do { \
-            *(retval) = ((jint (*)(jint)) (fn))(arg1); \
+            CLEAR_VARARGS; *(retval) = ((jint (*)(jint)) (fn))(arg1); \
     } while (0)
 
 # define invokeI2(ctx, fn, retval, arg1, arg2) do { \
-            *(retval) = ((jint (*)(jint, jint)) (fn))((arg1), (arg2)); \
+            CLEAR_VARARGS; *(retval) = ((jint (*)(jint, jint)) (fn))((arg1), (arg2)); \
     } while (0)
 
 # define invokeI3(ctx, fn, retval, arg1, arg2, arg3) do { \
-            *(retval) = ((jint (*)(jint, jint, jint)) (fn))(arg1, arg2, arg3); \
+            CLEAR_VARARGS; *(retval) = ((jint (*)(jint, jint, jint)) (fn))(arg1, arg2, arg3); \
     } while (0)
 
 # define invokeI4(ctx, fn, retval, arg1, arg2, arg3, arg4) do { \
-            *(retval) = ((jint (*)(jint, jint, jint, jint)) (fn))(arg1, arg2, arg3, arg4); \
+            CLEAR_VARARGS; *(retval) = ((jint (*)(jint, jint, jint, jint)) (fn))(arg1, arg2, arg3, arg4); \
     } while (0)
 
 # define invokeI5(ctx, fn, retval, arg1, arg2, arg3, arg4, arg5) do { \
-            *(retval) = ((jint (*)(jint, jint, jint, jint, jint)) (fn))(arg1, arg2, arg3, arg4, arg5); \
+            CLEAR_VARARGS; *(retval) = ((jint (*)(jint, jint, jint, jint, jint)) (fn))(arg1, arg2, arg3, arg4, arg5); \
     } while (0)
 
 # define invokeI6(ctx, fn, retval, arg1, arg2, arg3, arg4, arg5, arg6) do { \
-            *(retval) = ((jint (*)(jint, jint, jint, jint, jint, jint)) (fn))(arg1, arg2, arg3, arg4, arg5, arg6); \
+            CLEAR_VARARGS; *(retval) = ((jint (*)(jint, jint, jint, jint, jint, jint)) (fn))(arg1, arg2, arg3, arg4, arg5, arg6); \
     } while (0)
 
 #else /* non-i386, non-x86_64 */

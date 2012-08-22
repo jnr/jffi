@@ -54,14 +54,19 @@
 # define RETVAL(retval, ctx) ((retval).j)
 #endif
 
-#if defined(__i386__)
-# define INT_BYPASS_FFI
-#endif
-
-#if defined(__x86_64__)
+#if defined(__x86_64__) && defined(__GNUC__)
 # define INT_BYPASS_FFI
 # define LONG_BYPASS_FFI
+# define CLEAR_VARARGS ({__asm__ __volatile__("xorq %%rax, %%rax" ::: "rax");})
+
+#elif defined(__i386__) && defined(__GNUC__)
+# define INT_BYPASS_FFI
+# define CLEAR_VARARGS do { } while(0)
+
+#else
+# define CLEAR_VARARGS do { } while(0)
 #endif
+
 
 #define MAX_STACK_ARRAY (1024)
 
@@ -122,12 +127,12 @@ Java_com_kenai_jffi_Foreign_invokeN0(JNIEnv* env, jobject self, jlong ctxAddress
     if (0) {
 #if defined(LONG_BYPASS_FFI)
     } else if (likely(ctx->isFastLong)) {
-        retval.j = ((jlong (*)(void)) j2p(function))();
+        CLEAR_VARARGS; retval.j = ((jlong (*)(void)) j2p(function))();
 #endif    
 
 #if defined(INT_BYPASS_FFI)
     } else if (likely(ctx->isFastInt)) {
-        retval.sarg = ((jint (*)(void)) j2p(function))();
+        CLEAR_VARARGS; retval.sarg = ((jint (*)(void)) j2p(function))();
 #endif
     } else {
         ffi_call0(ctx, j2p(function), &retval);
@@ -200,12 +205,12 @@ call1(CallContext* ctx, void* function, jlong n1)
     if (0) {
 #if defined(LONG_BYPASS_FFI)
     } else if (likely(ctx->isFastLong)) {
-        retval = ((jlong (*)(jlong)) function)(n1);
+        CLEAR_VARARGS; retval = ((jlong (*)(jlong)) function)(n1);
 #endif    
 
 #if defined(INT_BYPASS_FFI)
     } else if (likely(ctx->isFastInt)) {
-        retval = ((jint (*)(jint)) function)((jint) n1);
+        CLEAR_VARARGS; retval = ((jint (*)(jint)) function)((jint) n1);
 #endif
 
     } else {
@@ -225,12 +230,12 @@ call2(CallContext* ctx, void* function, jlong n1, jlong n2)
     if (0) {
 #if defined(LONG_BYPASS_FFI)
     } else if (likely(ctx->isFastLong)) {
-        retval = ((jlong (*)(jlong, jlong)) function)(n1, n2);
+        CLEAR_VARARGS; retval = ((jlong (*)(jlong, jlong)) function)(n1, n2);
 #endif    
 
 #if defined(INT_BYPASS_FFI)
     } else if (likely(ctx->isFastInt)) {
-        retval = ((jint (*)(jint, jint)) function)((jint) n1, (jint) n2);
+        CLEAR_VARARGS; retval = ((jint (*)(jint, jint)) function)((jint) n1, (jint) n2);
 #endif
 
     } else {
@@ -250,12 +255,12 @@ call3(CallContext* ctx, void* function, jlong n1, jlong n2, jlong n3)
     if (0) {
 #if defined(LONG_BYPASS_FFI)
     } else if (likely(ctx->isFastLong)) {
-        retval = ((jlong (*)(jlong, jlong, jlong)) function)(n1, n2, n3);
+        CLEAR_VARARGS; retval = ((jlong (*)(jlong, jlong, jlong)) function)(n1, n2, n3);
 #endif    
 
 #if defined(INT_BYPASS_FFI)
     } else if (likely(ctx->isFastInt)) {
-        retval = ((jint (*)(jint, jint, jint)) function)((jint) n1, (jint) n2, (jint) n3);
+        CLEAR_VARARGS; retval = ((jint (*)(jint, jint, jint)) function)((jint) n1, (jint) n2, (jint) n3);
 #endif
 
     } else {
@@ -277,12 +282,12 @@ call4(CallContext* ctx, void* function, jlong n1, jlong n2, jlong n3, jlong n4)
     if (0) {
 #if defined(LONG_BYPASS_FFI)
     } else if (likely(ctx->isFastLong)) {
-        retval = ((jlong (*)(jlong, jlong, jlong, jlong)) function)(n1, n2, n3, n4);
+        CLEAR_VARARGS; retval = ((jlong (*)(jlong, jlong, jlong, jlong)) function)(n1, n2, n3, n4);
 #endif    
 
 #if defined(INT_BYPASS_FFI)
     } else if (likely(ctx->isFastInt)) {
-        retval = ((jint (*)(jint, jint, jint, jint)) function)((jint) n1, (jint) n2, (jint) n3, (jint) n4);
+        CLEAR_VARARGS; retval = ((jint (*)(jint, jint, jint, jint)) function)((jint) n1, (jint) n2, (jint) n3, (jint) n4);
 #endif
 
     } else {
@@ -304,12 +309,12 @@ call5(CallContext* ctx, void* function,
     if (0) {
 #if defined(LONG_BYPASS_FFI)
     } else if (likely(ctx->isFastLong)) {
-        retval = ((jlong (*)(jlong, jlong, jlong, jlong, jlong)) function)(n1, n2, n3, n4, n5);
+        CLEAR_VARARGS; retval = ((jlong (*)(jlong, jlong, jlong, jlong, jlong)) function)(n1, n2, n3, n4, n5);
 #endif    
 
 #if defined(INT_BYPASS_FFI)
     } else if (likely(ctx->isFastInt)) {
-        retval = ((jint (*)(jint, jint, jint, jint, jint)) function)((jint) n1, (jint) n2, (jint) n3, (jint) n4, (jint) n5);
+        CLEAR_VARARGS; retval = ((jint (*)(jint, jint, jint, jint, jint)) function)((jint) n1, (jint) n2, (jint) n3, (jint) n4, (jint) n5);
 #endif
 
     } else {
@@ -330,13 +335,13 @@ call6(CallContext* ctx, void* function,
     if (0) {
 #if defined(LONG_BYPASS_FFI)
     } else if (likely(ctx->isFastLong)) {
-        retval = ((jlong (*)(jlong, jlong, jlong, jlong, jlong, jlong)) function)(
+        CLEAR_VARARGS; retval = ((jlong (*)(jlong, jlong, jlong, jlong, jlong, jlong)) function)(
                 n1, n2, n3, n4, n5, n6);
 #endif    
 
 #if defined(INT_BYPASS_FFI)
     } else if (likely(ctx->isFastInt)) {
-        retval = ((jint (*)(jint, jint, jint, jint, jint, jint)) function)(
+        CLEAR_VARARGS; retval = ((jint (*)(jint, jint, jint, jint, jint, jint)) function)(
                             (jint) n1, (jint) n2, (jint) n3, (jint) n4, (jint) n5, (jint) n6);
 #endif
 
