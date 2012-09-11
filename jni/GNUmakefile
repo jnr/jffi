@@ -173,12 +173,12 @@ ifeq ($(OS), darwin)
   ifneq ($(realpath $(wildcard /Xcode3/usr/bin/gcc)),)
     XCODE=/Xcode3
   else
-    XCODE=/Developer
+    XCODE=$(shell xcode-select -print-path)
   endif
   ifneq ($(realpath $(wildcard $(XCODE)/usr/bin/gcc-4.0)),)
     CC = $(XCODE)/usr/bin/gcc-4.0
   else
-    CC = gcc
+    CC = $(XCODE)/usr/bin/gcc
   endif
   UNIVERSAL_SDK = $(firstword $(strip $(realpath $(XCODE)/SDKs/MacOSX10.4u.sdk) $(realpath $(XCODE)/SDKs/MacOSX10.5.sdk)))
   ifneq ($(UNIVERSAL_SDK),)
@@ -187,16 +187,17 @@ ifeq ($(OS), darwin)
       ARCHES += ppc
     endif
   else
-    MACSDK = $(firstword $(strip $(wildcard $(XCODE)/SDKs/MacOSX10.*.sdk)))
+    MACSDK = $(firstword $(strip $(wildcard $(XCODE)/SDKs/MacOSX10.*.sdk)) $(strip $(wildcard $(XCODE)/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.*.sdk)))
   endif
 
   CFLAGS += -isysroot $(MACSDK) -DTARGET_RT_MAC_CFM=0
   CFLAGS += -I$(MACSDK)/System/Library/Frameworks/JavaVM.framework/Headers
   CFLAGS += $(foreach arch, $(ARCHES),-arch $(arch))
   LDFLAGS = $(foreach arch, $(ARCHES),-arch $(arch)) -dynamiclib -framework JavaVM \
-	-Wl,-syslibroot,$(MACSDK) -mmacosx-version-min=10.4
+	-Wl,-syslibroot,$(MACSDK) -mmacosx-version-min=10.6
   JNIEXT = jnilib
   #CFLAGS += -I$(MACSDK)/System/Library/Frameworks/Kernel.framework/Versions/A/Headers
+  CFLAGS += -fexceptions
   FFI_CFLAGS += -isysroot $(MACSDK) -I$(MACSDK)/usr/include
   PICFLAGS =
   SOFLAGS =
