@@ -37,8 +37,8 @@
 // WARNING! Do not change the layout of this struct, it may be used from assembler
 //
 typedef struct Array {
-    void (*copyin)(JNIEnv* env, jobject array, jsize start, jsize len, void *buf);
-    void (*copyout)(JNIEnv* env, jobject array, jsize start, jsize len, const void *buf);
+    void (JNICALL *copyin)(JNIEnv* env, jobject array, jsize start, jsize len, void *buf);
+    void (JNICALL *copyout)(JNIEnv* env, jobject array, jsize start, jsize len, const void *buf);
     void (*release)(JNIEnv *env, struct Array *);
     jobject array;
     void* elems;    
@@ -72,7 +72,7 @@ extern void jffi_releaseArrays(JNIEnv* env, Array* arrays, int arrayCount);
         (((flags) & (com_kenai_jffi_ObjectBuffer_ARRAY | com_kenai_jffi_ObjectBuffer_PINNED)) == com_kenai_jffi_ObjectBuffer_ARRAY)
 
 #define IS_OUT_ARRAY(flags) (((flags) & (com_kenai_jffi_ObjectBuffer_ARRAY | ARRAY_IN | ARRAY_OUT)) != (com_kenai_jffi_ObjectBuffer_ARRAY | ARRAY_IN))
-#define IS_IN_ARRAY(flags) (((flags) & (com_kenai_jffi_ObjectBuffer_ARRAY | ARRAY_IN | ARRAY_OUT)) != (com_kenai_jffi_ObjectBuffer_ARRAY | ARRAY_IN))
+#define IS_IN_ARRAY(flags) (((flags) & (com_kenai_jffi_ObjectBuffer_ARRAY | ARRAY_IN | ARRAY_OUT)) != (com_kenai_jffi_ObjectBuffer_ARRAY | ARRAY_OUT))
 
 #define RELEASE_ARRAYS(env, arrays, arrayCount) do { if (unlikely(arrayCount > 0)) jffi_releaseArrays(env, arrays, arrayCount); } while (0)
 

@@ -53,11 +53,8 @@ releaseHeapArray(JNIEnv* env, Array* array)
     free(array->elems);
 }
 
-#define isOut(flags) (((flags) & (ARRAY_IN | ARRAY_OUT)) != ARRAY_IN)
-#define isIn(flags) (((flags) & (ARRAY_IN | ARRAY_OUT)) != ARRAY_OUT)
-
 #define COPY_DATA(JTYPE, NTYPE, flags, obj, offset, length, array) do { \
-    if (isIn(flags)) { \
+    if (IS_IN_ARRAY(flags)) { \
         (*env)->Get##JTYPE##ArrayRegion(env, obj, offset, length, (NTYPE *) array->elems); \
         if (unlikely((*env)->ExceptionCheck(env) != JNI_FALSE)) return NULL; \
     } else if (unlikely((flags & ARRAY_CLEAR) != 0)) { \
@@ -66,12 +63,12 @@ releaseHeapArray(JNIEnv* env, Array* array)
 } while (0)
 
 #define SET_COPYOUT(JTYPE, array, flags) \
-    (array)->copyout = isOut(flags) \
+    (array)->copyout = IS_OUT_ARRAY(flags) \
         ? (void (*)(JNIEnv*, jobject, jsize, jsize, const void *))(*env)->Set##JTYPE##ArrayRegion \
         : NULL
 
 #define SET_COPYIN(JTYPE, array, flags) \
-    (array)->copyin = isIn(flags) \
+    (array)->copyin = IS_IN_ARRAY(flags) \
         ? (void (*)(JNIEnv*, jobject, jsize, jsize, void *))(*env)->Get##JTYPE##ArrayRegion \
         : NULL
 
@@ -229,8 +226,15 @@ jffi_arraySize(int length, int type)
 
         case com_kenai_jffi_ObjectBuffer_DOUBLE:
             return length * sizeof(jdouble);
+
+        case com_kenai_jffi_ObjectBuffer_BOOLEAN:
+            return length * sizeof(jboolean);
+
+        case com_kenai_jffi_ObjectBuffer_CHAR:
+            return length * sizeof(jchar);
+
         default:
-            return 0;
+            return length * 8;
     }
 }
 
@@ -250,7 +254,6 @@ jffi_getArrayCritical(JNIEnv* env, jobject buf, jsize offset, jsize length, int 
     array->type = type;
     array->copyin = NULL;
     array->copyout = NULL;
-    array->release = jffi_releaseCriticalArray;
     array->elems = (*env)->GetPrimitiveArrayCritical(env, array->array, NULL);
 
     if (unlikely(array->elems == NULL)) {
@@ -259,6 +262,7 @@ jffi_getArrayCritical(JNIEnv* env, jobject buf, jsize offset, jsize length, int 
         }
         return NULL;
     }
+    array->release = jffi_releaseCriticalArray;
 
     return (char *) array->elems + offset;
 }
@@ -280,62 +284,4 @@ jffi_releaseArrays(JNIEnv *env, Array* arrays, int arrayCount)
             (*array->release)(env, array);
         }
     }
-}
-
-#define INIT_ARRAY(array, JTYPE, componentSize_) do { \
-    array->copyin = (void (*)(JNIEnv*, jobject, jsize, jsize, void *))(*env)->Get##JTYPE##ArrayRegion; \
-    array->copyout = (void (*)(JNIEnv*, jobject, jsize, jsize, const void *))(*env)->Set##JTYPE##ArrayRegion; \
-    array->bytesize = componentSize_ * array->length; \
-    if ((array->type & ARRAY_NULTERMINATE) != 0) array->bytesize += componentSize_; \
-} while(0)
-
-bool
-jffi_initArray(JNIEnv* env, jobject buf, jint offset, jint length, int type, struct Array* array)
-{
-    array->array = buf;
-    array->offset = offset;
-    array->length = length;
-    array->type = type;
-    array->release = NULL;
-    array->elems = NULL;
-
-    switch (type & ARGPRIM_MASK) {
-        case com_kenai_jffi_ObjectBuffer_BYTE:
-            INIT_ARRAY(array, Byte, sizeof(jbyte));
-            break;
-            
-        case com_kenai_jffi_ObjectBuffer_SHORT:
-            INIT_ARRAY(array, Short, sizeof(jshort));
-            break;
-
-        case com_kenai_jffi_ObjectBuffer_INT:
-            INIT_ARRAY(array, Int, sizeof(jint));
-            break;
-
-        case com_kenai_jffi_ObjectBuffer_LONG:
-            INIT_ARRAY(array, Long, sizeof(jlong));
-            break;
-
-        case com_kenai_jffi_ObjectBuffer_FLOAT:
-            INIT_ARRAY(array, Float, sizeof(jfloat));
-            break;
-
-        case com_kenai_jffi_ObjectBuffer_DOUBLE:
-            INIT_ARRAY(array, Double, sizeof(jdouble));
-            break;
-        
-        case com_kenai_jffi_ObjectBuffer_BOOLEAN:
-            INIT_ARRAY(array, Boolean, sizeof(jboolean));
-            break;
-            
-        case com_kenai_jffi_ObjectBuffer_CHAR:
-            INIT_ARRAY(array, Char, sizeof(jchar));
-            break;
-        
-        default:
-            throwException(env, IllegalArgument, "invalid array type: %#x\n", type);
-            return false;
-    }
-
-    return true;
 }
