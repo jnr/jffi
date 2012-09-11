@@ -64,12 +64,12 @@ releaseHeapArray(JNIEnv* env, Array* array)
 
 #define SET_COPYOUT(JTYPE, array, flags) \
     (array)->copyout = IS_OUT_ARRAY(flags) \
-        ? (void (*)(JNIEnv*, jobject, jsize, jsize, const void *))(*env)->Set##JTYPE##ArrayRegion \
+        ? (void (JNICALL *)(JNIEnv*, jobject, jsize, jsize, const void *))(*env)->Set##JTYPE##ArrayRegion \
         : NULL
 
 #define SET_COPYIN(JTYPE, array, flags) \
     (array)->copyin = IS_IN_ARRAY(flags) \
-        ? (void (*)(JNIEnv*, jobject, jsize, jsize, void *))(*env)->Get##JTYPE##ArrayRegion \
+        ? (void (JNICALL *)(JNIEnv*, jobject, jsize, jsize, void *))(*env)->Get##JTYPE##ArrayRegion \
         : NULL
 
 #define GET_ARRAY_BUFFER(JTYPE, NTYPE, flags, obj, offset, length, array) do { \
