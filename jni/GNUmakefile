@@ -237,8 +237,11 @@ ifeq ($(CPU), i386)
   endif
 endif
 
+ifeq ($(CPU), sparcv9)
+  MODEL=64
+endif
 
-ifneq ($(findstring $(CPU), x86_64 amd64 sparcv9 ppc64 powerpc64 s390x),)
+ifneq ($(findstring $(CPU), x86_64 amd64 ppc64 powerpc64 s390x),)
   MODEL = 64
 endif
 
