@@ -60,11 +60,17 @@ public class CallContextCache {
     private CallContextCache() { }
 
     public final CallContext getCallContext(Type returnType, Type[] parameterTypes, CallingConvention convention) {
-        return getCallContext(returnType, parameterTypes, convention, true);
+        return getCallContext(returnType, parameterTypes, convention, true, false);
     }
 
-    public final CallContext getCallContext(Type returnType, Type[] parameterTypes, CallingConvention convention, boolean saveErrno) {
-        Signature signature = new Signature(returnType, parameterTypes, convention, saveErrno);
+    public final CallContext getCallContext(Type returnType, Type[] parameterTypes, CallingConvention convention,
+                                            boolean saveErrno) {
+        return getCallContext(returnType, parameterTypes, convention, saveErrno, false);
+    }
+
+    public final CallContext getCallContext(Type returnType, Type[] parameterTypes, CallingConvention convention,
+                                            boolean saveErrno, boolean faultProtect) {
+        Signature signature = new Signature(returnType, parameterTypes, convention, saveErrno, faultProtect);
         CallContextRef ref = contextCache.get(signature);
         CallContext ctx;
 
@@ -77,7 +83,7 @@ public class CallContextCache {
             contextCache.remove(ref.signature);
         }
 
-        ctx = new CallContext(returnType, parameterTypes.clone(), convention, saveErrno);
+        ctx = new CallContext(returnType, parameterTypes.clone(), convention, saveErrno, faultProtect);
         contextCache.put(signature, new CallContextRef(signature, ctx, contextReferenceQueue));
 
         return ctx;
@@ -103,9 +109,11 @@ public class CallContextCache {
         private final Type[] parameterTypes;
         private final CallingConvention convention;
         private final boolean saveErrno;
+        private final boolean faultProtect;
         private int hashCode = 0;
 
-        public Signature(Type returnType, Type[] parameterTypes, CallingConvention convention, boolean saveErrno) {
+        public Signature(Type returnType, Type[] parameterTypes, CallingConvention convention, boolean saveErrno,
+                         boolean faultProtect) {
             if (returnType == null || parameterTypes == null) {
                 throw new NullPointerException("null return type or parameter types array");
             }
@@ -113,6 +121,7 @@ public class CallContextCache {
             this.parameterTypes = parameterTypes;
             this.convention = convention;
             this.saveErrno = saveErrno;
+            this.faultProtect = faultProtect;
         }
 
         @Override
@@ -123,7 +132,7 @@ public class CallContextCache {
 
             final Signature other = (Signature) obj;
 
-            if (this.convention != other.convention || this.saveErrno != other.saveErrno) {
+            if (convention != other.convention || saveErrno != other.saveErrno || faultProtect != other.faultProtect) {
                 return false;
             }
 
@@ -154,6 +163,7 @@ public class CallContextCache {
             hash = 53 * hash + paramHash;
             hash = 53 * hash + this.convention.hashCode();
             hash = 53 * hash + (this.saveErrno ? 1 : 0);
+            hash = 53 * hash + (this.faultProtect ? 1 : 0);
             return hash;
         }
 

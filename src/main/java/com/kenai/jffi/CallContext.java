@@ -32,6 +32,7 @@
 
 package com.kenai.jffi;
 
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -79,6 +80,11 @@ public final class CallContext {
         return CallContextCache.getInstance().getCallContext(returnType, parameterTypes, convention, saveErrno);
     }
 
+    public static CallContext getCallContext(Type returnType, Type[] parameterTypes, CallingConvention convention,
+                                             boolean saveErrno, boolean faultProtect) {
+        return CallContextCache.getInstance().getCallContext(returnType, parameterTypes, convention, saveErrno, faultProtect);
+    }
+
     /**
      * Creates a new instance of <tt>Function</tt> with default calling convention.
      *
@@ -103,6 +109,10 @@ public final class CallContext {
         this(returnType, parameterTypes, convention, true);
     }
 
+    public CallContext(Type returnType, Type[] parameterTypes, CallingConvention convention, boolean saveErrno) {
+        this(returnType, parameterTypes, convention, saveErrno, false);
+    }
+
     /**
      * Creates a new instance of <tt>Function</tt>.
      *
@@ -111,10 +121,12 @@ public final class CallContext {
      * @param convention The calling convention of the function.
      * @param saveErrno Whether the errno should be saved or not
      */
-    public CallContext(Type returnType, Type[] parameterTypes, CallingConvention convention, boolean saveErrno) {
+    CallContext(Type returnType, Type[] parameterTypes, CallingConvention convention,
+                       boolean saveErrno, boolean faultProtect) {
 
         final int flags = (!saveErrno ? Foreign.F_NOERRNO : 0)
-                | (convention == CallingConvention.STDCALL ? Foreign.F_STDCALL : Foreign.F_DEFAULT);
+                | (convention == CallingConvention.STDCALL ? Foreign.F_STDCALL : Foreign.F_DEFAULT)
+                | (faultProtect || true ? Foreign.F_PROTECT : 0);
 
         final long h = foreign.newCallContext(returnType.handle(),
                 Type.nativeHandles(parameterTypes), flags);
@@ -183,6 +195,30 @@ public final class CallContext {
         return parameterTypes[index];
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        CallContext that = (CallContext) o;
+
+        if (flags != that.flags) return false;
+        if (parameterCount != that.parameterCount) return false;
+        if (rawParameterSize != that.rawParameterSize) return false;
+        if (!Arrays.equals(parameterTypes, that.parameterTypes)) return false;
+        if (!returnType.equals(that.returnType)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = parameterCount;
+        result = 31 * result + returnType.hashCode();
+        result = 31 * result + Arrays.hashCode(parameterTypes);
+        result = 31 * result + flags;
+        return result;
+    }
 
     @Deprecated
     public final void dispose() {}

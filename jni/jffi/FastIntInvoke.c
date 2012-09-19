@@ -35,11 +35,13 @@
 #include <errno.h>
 #include <ffi.h>
 #include <jni.h>
+#include <setjmp.h>
 #include "endian.h"
 #include "jffi.h"
 #include "Exception.h"
 #include "CallContext.h"
 #include "LastError.h"
+#include "FaultProtect.h"
 #include "com_kenai_jffi_Foreign.h"
 
 #if (defined(__i386__) || defined(__x86_64__)) && defined(__GNUC__)
@@ -95,7 +97,12 @@
 
 #endif
 
-#define CALL(ctx, stmt) do { stmt; SAVE_ERRNO(ctx); } while(0)
+#if !FAULT_PROTECT_ENABLED
+# define CALL(ctx, stmt) do { stmt; SAVE_ERRNO(ctx); } while(0)
+#else
+# define CALL(ctx, stmt) FAULTPROT_CTX(env, ctx, stmt, return 0)
+#endif
+
 
 /*
  * Class:     com_kenai_jffi_Foreign

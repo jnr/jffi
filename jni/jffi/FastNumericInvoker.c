@@ -44,6 +44,7 @@
 #include "CallContext.h"
 #include "Array.h"
 #include "LastError.h"
+#include "FaultProtect.h"
 #include "com_kenai_jffi_Foreign.h"
 
 
@@ -96,17 +97,17 @@ typedef struct ObjectParam {
 } ObjectParam;
 
 
-static jlong call1(CallContext* ctx, void* function, 
+static jlong call1(JNIEnv* env, CallContext* ctx, void* function,
         jlong n1);
-static jlong call2(CallContext* ctx, void* function, 
+static jlong call2(JNIEnv* env, CallContext* ctx, void* function,
         jlong n1, jlong n2);
-static jlong call3(CallContext* ctx, void* function, 
+static jlong call3(JNIEnv* env, CallContext* ctx, void* function,
         jlong n1, jlong n2, jlong n3);
-static jlong call4(CallContext* ctx, void* function, 
+static jlong call4(JNIEnv* env, CallContext* ctx, void* function,
         jlong n1, jlong n2, jlong n3, jlong n4);
-static jlong call5(CallContext* ctx, void* function, 
+static jlong call5(JNIEnv* env, CallContext* ctx, void* function,
         jlong n1, jlong n2, jlong n3, jlong n4, jlong n5);
-static jlong call6(CallContext* ctx, void* function, 
+static jlong call6(JNIEnv* env, CallContext* ctx, void* function,
         jlong n1, jlong n2, jlong n3, jlong n4, jlong n5, jlong n6);
 static bool pin_arrays(JNIEnv* env, Pinned* pinned, int pinnedCount, 
         Array* arrays, int *arrayCount, jlong* v);
@@ -123,8 +124,8 @@ Java_com_kenai_jffi_Foreign_invokeN0(JNIEnv* env, jobject self, jlong ctxAddress
 {
     CallContext* ctx = (CallContext *) j2p(ctxAddress);
     FFIValue retval;
-    
-    if (0) {
+
+    FAULTPROT_CTX(env, ctx, if (0) {
 #if defined(LONG_BYPASS_FFI)
     } else if (likely(ctx->isFastLong)) {
         CLEAR_VARARGS; retval.j = ((jlong (*)(void)) j2p(function))();
@@ -136,9 +137,7 @@ Java_com_kenai_jffi_Foreign_invokeN0(JNIEnv* env, jobject self, jlong ctxAddress
 #endif
     } else {
         ffi_call0(ctx, j2p(function), &retval);
-    }
-
-    SAVE_ERRNO(ctx);
+    }, return 0);
 
     return RETVAL(retval, ctx);
 }
@@ -151,7 +150,7 @@ Java_com_kenai_jffi_Foreign_invokeN0(JNIEnv* env, jobject self, jlong ctxAddress
 JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_invokeN1(JNIEnv* env, jobject self, jlong ctxAddress, jlong function, jlong arg1)
 {
-    return call1((CallContext *) j2p(ctxAddress), j2p(function), arg1);
+    return call1(env, (CallContext *) j2p(ctxAddress), j2p(function), arg1);
 }
 
 /*
@@ -162,7 +161,7 @@ Java_com_kenai_jffi_Foreign_invokeN1(JNIEnv* env, jobject self, jlong ctxAddress
 JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_invokeN2(JNIEnv* env, jobject self, jlong ctxAddress, jlong function, jlong arg1, jlong arg2)
 {
-    return call2((CallContext *) j2p(ctxAddress), j2p(function), arg1, arg2);
+    return call2(env, (CallContext *) j2p(ctxAddress), j2p(function), arg1, arg2);
 }
 
 /*
@@ -174,35 +173,36 @@ JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_invokeN3(JNIEnv* env, jobject self, jlong ctxAddress, jlong function,
         jlong arg1, jlong arg2, jlong arg3)
 {
-    return call3((CallContext *) j2p(ctxAddress), j2p(function), arg1, arg2, arg3);
+    return call3(env, (CallContext *) j2p(ctxAddress), j2p(function), arg1, arg2, arg3);
 }
 
 JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_invokeN4(JNIEnv* env, jobject self, jlong ctxAddress, jlong function,
         jlong arg1, jlong arg2, jlong arg3, jlong arg4)
 {
-    return call4((CallContext *) j2p(ctxAddress), j2p(function), arg1, arg2, arg3, arg4);
+    return call4(env, (CallContext *) j2p(ctxAddress), j2p(function), arg1, arg2, arg3, arg4);
 }
 
 JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_invokeN5(JNIEnv* env, jobject self, jlong ctxAddress, jlong function,
         jlong arg1, jlong arg2, jlong arg3, jlong arg4, jlong arg5)
 {
-    return call5((CallContext *) j2p(ctxAddress), j2p(function), arg1, arg2, arg3, arg4, arg5);
+    return call5(env, (CallContext *) j2p(ctxAddress), j2p(function), arg1, arg2, arg3, arg4, arg5);
 }
 
 JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_invokeN6(JNIEnv* env, jobject self, jlong ctxAddress, jlong function,
         jlong arg1, jlong arg2, jlong arg3, jlong arg4, jlong arg5, jlong arg6)
 {
-    return call6((CallContext *) j2p(ctxAddress), j2p(function), arg1, arg2, arg3, arg4, arg5, arg6);
+    return call6(env, (CallContext *) j2p(ctxAddress), j2p(function), arg1, arg2, arg3, arg4, arg5, arg6);
 }
 
 static jlong
-call1(CallContext* ctx, void* function, jlong n1)
+call1(JNIEnv* env, CallContext* ctx, void* function, jlong n1)
 {
     jlong retval;
-    if (0) {
+
+    FAULTPROT_CTX(env, ctx, if (0) {
 #if defined(LONG_BYPASS_FFI)
     } else if (likely(ctx->isFastLong)) {
         CLEAR_VARARGS; retval = ((jlong (*)(jlong)) function)(n1);
@@ -214,20 +214,20 @@ call1(CallContext* ctx, void* function, jlong n1)
 #endif
 
     } else {
-	FFIValue ffiReturn;
+        FFIValue ffiReturn;
         ffi_call1(ctx, function, &ffiReturn, n1);
-	retval = RETVAL(ffiReturn, ctx);
-    }
-    
-    SAVE_ERRNO(ctx);
+        retval = RETVAL(ffiReturn, ctx);
+    }, return 0);
+
     return retval;
 }
 
 static jlong 
-call2(CallContext* ctx, void* function, jlong n1, jlong n2)
+call2(JNIEnv* env, CallContext* ctx, void* function, jlong n1, jlong n2)
 {
     jlong retval;
-    if (0) {
+
+    FAULTPROT_CTX(env, ctx, if (0) {
 #if defined(LONG_BYPASS_FFI)
     } else if (likely(ctx->isFastLong)) {
         CLEAR_VARARGS; retval = ((jlong (*)(jlong, jlong)) function)(n1, n2);
@@ -239,20 +239,20 @@ call2(CallContext* ctx, void* function, jlong n1, jlong n2)
 #endif
 
     } else {
-	FFIValue ffiReturn;
+        FFIValue ffiReturn;
         ffi_call2(ctx, function, &ffiReturn, n1, n2);
-	retval = RETVAL(ffiReturn, ctx);
-    }
-    
-    SAVE_ERRNO(ctx);
+        retval = RETVAL(ffiReturn, ctx);
+    }, return 0);
+
     return retval;
 }
 
 static jlong
-call3(CallContext* ctx, void* function, jlong n1, jlong n2, jlong n3)
+call3(JNIEnv* env, CallContext* ctx, void* function, jlong n1, jlong n2, jlong n3)
 {
     jlong retval;
-    if (0) {
+
+    FAULTPROT_CTX(env, ctx, if (0) {
 #if defined(LONG_BYPASS_FFI)
     } else if (likely(ctx->isFastLong)) {
         CLEAR_VARARGS; retval = ((jlong (*)(jlong, jlong, jlong)) function)(n1, n2, n3);
@@ -264,22 +264,22 @@ call3(CallContext* ctx, void* function, jlong n1, jlong n2, jlong n3)
 #endif
 
     } else {
-	FFIValue ffiReturn;
+        FFIValue ffiReturn;
         ffi_call3(ctx, function, &ffiReturn, n1, n2, n3);
-	retval = RETVAL(ffiReturn, ctx);
-    }
-    
-    SAVE_ERRNO(ctx);
+        retval = RETVAL(ffiReturn, ctx);
+    }, return 0);
+
     return retval;
 }
 
 
 
 static jlong 
-call4(CallContext* ctx, void* function, jlong n1, jlong n2, jlong n3, jlong n4)
+call4(JNIEnv* env, CallContext* ctx, void* function, jlong n1, jlong n2, jlong n3, jlong n4)
 {
     jlong retval;
-    if (0) {
+
+    FAULTPROT_CTX(env, ctx, if (0) {
 #if defined(LONG_BYPASS_FFI)
     } else if (likely(ctx->isFastLong)) {
         CLEAR_VARARGS; retval = ((jlong (*)(jlong, jlong, jlong, jlong)) function)(n1, n2, n3, n4);
@@ -291,22 +291,22 @@ call4(CallContext* ctx, void* function, jlong n1, jlong n2, jlong n3, jlong n4)
 #endif
 
     } else {
-	FFIValue ffiReturn;
+        FFIValue ffiReturn;
         ffi_call4(ctx, function, &ffiReturn, n1, n2, n3, n4);
-	retval = RETVAL(ffiReturn, ctx);
-    }
-    
-    SAVE_ERRNO(ctx);
+        retval = RETVAL(ffiReturn, ctx);
+    }, return 0);
+
     return retval;
 }
 
 
 static jlong 
-call5(CallContext* ctx, void* function, 
+call5(JNIEnv* env, CallContext* ctx, void* function,
         jlong n1, jlong n2, jlong n3, jlong n4, jlong n5)
 {
     jlong retval;
-    if (0) {
+
+    FAULTPROT_CTX(env, ctx, if (0) {
 #if defined(LONG_BYPASS_FFI)
     } else if (likely(ctx->isFastLong)) {
         CLEAR_VARARGS; retval = ((jlong (*)(jlong, jlong, jlong, jlong, jlong)) function)(n1, n2, n3, n4, n5);
@@ -318,21 +318,21 @@ call5(CallContext* ctx, void* function,
 #endif
 
     } else {
-	FFIValue ffiReturn;
+        FFIValue ffiReturn;
         ffi_call5(ctx, function, &ffiReturn, n1, n2, n3, n4, n5);
-	retval = RETVAL(ffiReturn, ctx);
-    }
-    
-    SAVE_ERRNO(ctx);
+        retval = RETVAL(ffiReturn, ctx);
+    }, return 0);
+
     return retval;
 }
 
 static jlong 
-call6(CallContext* ctx, void* function, 
+call6(JNIEnv* env, CallContext* ctx, void* function,
         jlong n1, jlong n2, jlong n3, jlong n4, jlong n5, jlong n6)
 {
     jlong retval;
-    if (0) {
+
+    FAULTPROT_CTX(env, ctx, if (0) {
 #if defined(LONG_BYPASS_FFI)
     } else if (likely(ctx->isFastLong)) {
         CLEAR_VARARGS; retval = ((jlong (*)(jlong, jlong, jlong, jlong, jlong, jlong)) function)(
@@ -346,12 +346,11 @@ call6(CallContext* ctx, void* function,
 #endif
 
     } else {
-	FFIValue ffiReturn;
+        FFIValue ffiReturn;
         ffi_call6(ctx, function, &ffiReturn, n1, n2, n3, n4, n5, n6);
-	retval = RETVAL(ffiReturn, ctx);
-    }
-    
-    SAVE_ERRNO(ctx);
+        retval = RETVAL(ffiReturn, ctx);
+    }, return 0);
+
     return retval;
 }
 
@@ -363,16 +362,16 @@ pin_arrays(JNIEnv* env, Pinned* pinned, int pinnedCount,
     for (aryIdx = 0; aryIdx < pinnedCount; aryIdx++) {
         Pinned* p = &pinned[aryIdx];
         Array* ary = &arrays[*arrayCount];
-        
+
         void* addr = jffi_getArrayCritical(env, p->object, p->offset, p->length, p->flags, ary);
         if (unlikely(addr == NULL)) {
             return false;
         }
-        
+
         v[OBJIDX(p->flags)] = p2j(addr);
         (*arrayCount)++;
     }
-    
+
     return true;
 }
 
@@ -383,22 +382,22 @@ object_to_ptr(JNIEnv* env, jobject obj, int off, int len, int f, jlong* vp,
     if (unlikely(obj == NULL)) {
         throwException(env, NullPointer, "null object for parameter %d", OBJIDX(f));
         return false;
-                
+
     } else if (unlikely(IS_PINNED_ARRAY(f))) {
         Pinned* p = &pinned[(*pinnedCount)++];
         p->object = obj;
         p->offset = off;
         p->length = len;
         p->flags = f;
-	*vp = 0LL;
-    
+    *vp = 0LL;
+
     } else if (IS_ARRAY(f)) {
         *vp = p2j(jffi_getArrayHeap(env, obj, off, len, f, &arrays[*arrayCount]));
         if (unlikely(*vp == 0L)) {
             return false;
         }
         (*arrayCount)++;
-    
+
     } else if (IS_BUFFER((f))) {
         caddr_t addr = (caddr_t) (*env)->GetDirectBufferAddress(env, obj);
         if (unlikely(addr == NULL)) {
@@ -407,12 +406,12 @@ object_to_ptr(JNIEnv* env, jobject obj, int off, int len, int f, jlong* vp,
             return false;
         }
         *vp = p2j(addr + off);
-    
+
     } else {
         throwException(env, IllegalArgument, "unsupported object type for parameter %d: %#x", OBJIDX(f), f);
         return false;
     }
-    
+
     return true;
 }
 
@@ -465,7 +464,7 @@ object_to_ptr(JNIEnv* env, jobject obj, int off, int len, int f, jlong* vp,
 
 #define CALL(n, args...) \
     PIN_ARRAYS; \
-    retval = call##n(ctx, j2p(function), args); \
+    retval = call##n(env, ctx, j2p(function), args); \
     END
 
 #define CALL1 CALL(1, v[0])

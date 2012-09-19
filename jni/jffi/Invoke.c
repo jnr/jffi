@@ -46,6 +46,7 @@
 #include "CallContext.h"
 #include "Array.h"
 #include "LastError.h"
+#include "FaultProtect.h"
 #include "com_kenai_jffi_Foreign.h"
 
 #define PARAM_SIZE (8)
@@ -294,8 +295,8 @@ invokeArrayWithObjects_(JNIEnv* env, jlong ctxAddress, jlong function, jbyteArra
         ++arrayCount;
     }
 
-    ffi_call(&ctx->cif, FFI_FN(j2p(function)), retval, ffiArgs);
-    SAVE_ERRNO(ctx);
+    FAULTPROT_CTX(env, ctx, ffi_call(&ctx->cif, FFI_FN(j2p(function)), retval, ffiArgs), );
+
 cleanup:
     /* Release any array backing memory */
     RELEASE_ARRAYS(env, arrays, arrayCount);

@@ -204,6 +204,8 @@ Java_com_kenai_jffi_Foreign_newCallContext(JNIEnv* env, jobject self,
     ctx->rawParameterSize = rawOffset;
     /* Save errno unless explicitly told not to do so */
     ctx->saveErrno = (flags & com_kenai_jffi_Foreign_F_NOERRNO) == 0;
+    ctx->flags |= (flags & com_kenai_jffi_Foreign_F_NOERRNO) == 0 ? CALL_CTX_SAVE_ERRNO : 0;
+    ctx->flags |= (flags & com_kenai_jffi_Foreign_F_PROTECT) != 0 ? CALL_CTX_FAULT_PROT : 0;
 
     return p2j(ctx);
 cleanup:

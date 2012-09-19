@@ -51,13 +51,21 @@ public abstract class MemoryIO {
         private static final MemoryIO INSTANCE = newMemoryIO();
     }
 
+    private static final class CheckedMemorySingletonHolder {
+        private static final MemoryIO INSTANCE = newNativeCheckedImpl();
+    }
+
     /**
      * Gets an instance of <tt>MemoryIO</tt> that can be used to access native memory.
      *
      * @return A <tt>MemoryIO</tt> instance.
      */
     public static MemoryIO getInstance() {
-        return SingletonHolder.INSTANCE;
+        return CheckedMemorySingletonHolder.INSTANCE;
+    }
+
+    public static MemoryIO getCheckedInstance() {
+        return CheckedMemorySingletonHolder.INSTANCE;
     }
 
     /* Restrict construction of instances to subclasses defined in this class only */
@@ -70,6 +78,10 @@ public abstract class MemoryIO {
      */
     private static MemoryIO newMemoryIO() {
         try {
+            if (Boolean.getBoolean("jffi.memory.checked")) {
+                return newNativeCheckedImpl();
+            }
+
             // Use sun.misc.Unsafe unless explicitly disabled by the user, or not available
             return !Boolean.getBoolean("jffi.unsafe.disabled") && isUnsafeAvailable()
                     ? newUnsafeImpl() : newNativeImpl();
@@ -87,6 +99,10 @@ public abstract class MemoryIO {
     private static MemoryIO newNativeImpl() {
         return Platform.getPlatform().addressSize() == 32
                 ? newNativeImpl32() : newNativeImpl64();
+    }
+
+    private static MemoryIO newNativeCheckedImpl() {
+        return new CheckedNativeImpl();
     }
 
     /**
@@ -283,9 +299,7 @@ public abstract class MemoryIO {
      * @param src The source memory address.
      * @param size The number of bytes to copy.
      */
-    public final void memcpy(long dst, long src, long size) {
-        Foreign.memcpy(dst, src, size);
-    }
+    public abstract void memcpy(long dst, long src, long size);
 
     /**
      * Copies potentially overlapping memory areas.
@@ -294,9 +308,7 @@ public abstract class MemoryIO {
      * @param src The source memory address.
      * @param size The number of bytes to copy.
      */
-    public final void memmove(long dst, long src, long size) {
-        Foreign.memmove(dst, src, size);
-    }
+    public abstract void memmove(long dst, long src, long size);
 
     /**
      * Sets a region of native memory to a specific byte value.
@@ -309,6 +321,16 @@ public abstract class MemoryIO {
         setMemory(address, size, (byte) value);
     }
 
+     /**
+     * Gets the address of a byte value in a native memory region.
+     *
+     * @param address The native memory address to start searching.
+     * @param value The value to search for.
+     * @param size The size of the native memory region being searched.
+     * @return The address of the value, or 0 (zero) if not found.
+     */
+    public abstract long memchr(long address, int value, long size);
+
     /**
      * Writes a java byte array to native memory.
      *
@@ -317,9 +339,7 @@ public abstract class MemoryIO {
      * @param offset The offset within the array to start copying from.
      * @param length The number of array elements to copy.
      */
-    public final void putByteArray(long address, byte[] data, int offset, int length) {
-        Foreign.putByteArray(address, data, offset, length);
-    }
+    public abstract void putByteArray(long address, byte[] data, int offset, int length);
 
     /**
      * Reads a java byte array from native memory.
@@ -329,9 +349,7 @@ public abstract class MemoryIO {
      * @param offset The offset within the array to start copying to.
      * @param length The number of array elements to copy.
      */
-    public final void getByteArray(long address, byte[] data, int offset, int length) {
-        Foreign.getByteArray(address, data, offset, length);
-    }
+    public abstract void getByteArray(long address, byte[] data, int offset, int length);
 
     /**
      * Writes a java char array to native memory.
@@ -341,9 +359,7 @@ public abstract class MemoryIO {
      * @param offset The offset within the array to start copying from.
      * @param length The number of array elements to copy.
      */
-    public final void putCharArray(long address, char[] data, int offset, int length) {
-        Foreign.putCharArray(address, data, offset, length);
-    }
+    public abstract void putCharArray(long address, char[] data, int offset, int length);
     
     /**
      * Reads a java char array from native memory.
@@ -353,9 +369,7 @@ public abstract class MemoryIO {
      * @param offset The offset within the array to start copying to.
      * @param length The number of array elements to copy.
      */
-    public final void getCharArray(long address, char[] data, int offset, int length) {
-        Foreign.getCharArray(address, data, offset, length);
-    }
+    public abstract void getCharArray(long address, char[] data, int offset, int length);
 
     /**
      * Writes a java short array to native memory.
@@ -365,9 +379,7 @@ public abstract class MemoryIO {
      * @param offset The offset within the array to start copying from.
      * @param length The number of array elements to copy.
      */
-    public final void putShortArray(long address, short[] data, int offset, int length) {
-        Foreign.putShortArray(address, data, offset, length);
-    }
+    public abstract void putShortArray(long address, short[] data, int offset, int length);
     
     /**
      * Reads a java short array from native memory.
@@ -377,9 +389,7 @@ public abstract class MemoryIO {
      * @param offset The offset within the array to start copying to.
      * @param length The number of array elements to copy.
      */
-    public final void getShortArray(long address, short[] data, int offset, int length) {
-        Foreign.getShortArray(address, data, offset, length);
-    }
+    public abstract void getShortArray(long address, short[] data, int offset, int length);
 
     /**
      * Writes a java int array to native memory.
@@ -389,9 +399,7 @@ public abstract class MemoryIO {
      * @param offset The offset within the array to start copying from.
      * @param length The number of array elements to copy.
      */
-    public final void putIntArray(long address, int[] data, int offset, int length) {
-        Foreign.putIntArray(address, data, offset, length);
-    }
+    public abstract void putIntArray(long address, int[] data, int offset, int length);
 
     /**
      * Reads a java int array from native memory.
@@ -401,9 +409,7 @@ public abstract class MemoryIO {
      * @param offset The offset within the array to start copying to.
      * @param length The number of array elements to copy.
      */
-    public final void getIntArray(long address, int[] data, int offset, int length) {
-        Foreign.getIntArray(address, data, offset, length);
-    }
+    public abstract void getIntArray(long address, int[] data, int offset, int length);
 
     /**
      * Writes a java long array to native memory.
@@ -413,9 +419,7 @@ public abstract class MemoryIO {
      * @param offset The offset within the array to start copying from.
      * @param length The number of array elements to copy.
      */
-    public final void putLongArray(long address, long[] data, int offset, int length) {
-        Foreign.putLongArray(address, data, offset, length);
-    }
+    public abstract void putLongArray(long address, long[] data, int offset, int length);
 
     /**
      * Reads a java long array from native memory.
@@ -425,9 +429,7 @@ public abstract class MemoryIO {
      * @param offset The offset within the array to start copying to.
      * @param length The number of array elements to copy.
      */
-    public final void getLongArray(long address, long[] data, int offset, int length) {
-        Foreign.getLongArray(address, data, offset, length);
-    }
+    public abstract void getLongArray(long address, long[] data, int offset, int length);
 
     /**
      * Writes a java double array to native memory.
@@ -437,9 +439,7 @@ public abstract class MemoryIO {
      * @param offset The offset within the array to start copying from.
      * @param length The number of array elements to copy.
      */
-    public final void putFloatArray(long address, float[] data, int offset, int length) {
-        Foreign.putFloatArray(address, data, offset, length);
-    }
+    public abstract void putFloatArray(long address, float[] data, int offset, int length);
   
     /**
      * Reads a java float array from native memory.
@@ -449,9 +449,7 @@ public abstract class MemoryIO {
      * @param offset The offset within the array to start copying to.
      * @param length The number of array elements to copy.
      */
-    public final void getFloatArray(long address, float[] data, int offset, int length) {
-        Foreign.getFloatArray(address, data, offset, length);
-    }
+    public abstract void getFloatArray(long address, float[] data, int offset, int length);
 
     /**
      * Writes a java double array to native memory.
@@ -461,9 +459,7 @@ public abstract class MemoryIO {
      * @param offset The offset within the array to start copying from.
      * @param length The number of array elements to copy.
      */
-    public final void putDoubleArray(long address, double[] data, int offset, int length) {
-        Foreign.putDoubleArray(address, data, offset, length);
-    }
+    public abstract void putDoubleArray(long address, double[] data, int offset, int length);
 
     /**
      * Reads a java double array from native memory.
@@ -473,9 +469,7 @@ public abstract class MemoryIO {
      * @param offset The offset within the array to start copying to.
      * @param length The number of array elements to copy.
      */
-    public final void getDoubleArray(long address, double[] data, int offset, int length) {
-        Foreign.getDoubleArray(address, data, offset, length);
-    }
+    public abstract void getDoubleArray(long address, double[] data, int offset, int length);
 
     /**
      * Allocates native memory.
@@ -503,9 +497,7 @@ public abstract class MemoryIO {
      * @param address The native address of the string.
      * @return The length of the string, in bytes.
      */
-    public final long getStringLength(long address) {
-        return Foreign.strlen(address);
-    }
+    public abstract long getStringLength(long address);
 
     /**
      * Reads a byte array from native memory, stopping when a zero byte is found.
@@ -516,9 +508,7 @@ public abstract class MemoryIO {
      * @return The byte array containing a copy of the native data.  Any zero
      * byte is stripped from the end.
      */
-    public final byte[] getZeroTerminatedByteArray(long address) {
-        return Foreign.getZeroTerminatedByteArray(address);
-    }
+    public abstract byte[] getZeroTerminatedByteArray(long address);
 
     /**
      * Reads a byte array from native memory, stopping when a zero byte is found,
@@ -531,13 +521,11 @@ public abstract class MemoryIO {
      * @return The byte array containing a copy of the native data.  Any zero
      * byte is stripped from the end.
      */
-    public final byte[] getZeroTerminatedByteArray(long address, int maxlen) {
-        return Foreign.getZeroTerminatedByteArray(address, maxlen);
-    }
+    public abstract byte[] getZeroTerminatedByteArray(long address, int maxlen);
 
     @Deprecated
     public final byte[] getZeroTerminatedByteArray(long address, long maxlen) {
-        return Foreign.getZeroTerminatedByteArray(address, (int) maxlen);
+        return getZeroTerminatedByteArray(address, (int) maxlen);
     }
 
     /**
@@ -550,9 +538,7 @@ public abstract class MemoryIO {
      * @param offset The offset within the byte array to begin copying from
      * @param length The number of bytes to copy to native memory
      */
-    public final void putZeroTerminatedByteArray(long address, byte[] data, int offset, int length) {
-        Foreign.putZeroTerminatedByteArray(address, data, offset, length);
-    }
+    public abstract void putZeroTerminatedByteArray(long address, byte[] data, int offset, int length);
 
     /**
      * Finds the location of a byte value in a native memory region.
@@ -562,7 +548,7 @@ public abstract class MemoryIO {
      * @return The offset from the memory address of the value, if found, else -1 (minus one).
      */
     public final long indexOf(long address, byte value) {
-        final long location = Foreign.memchr(address, value, Integer.MAX_VALUE);
+        final long location = memchr(address, value, Integer.MAX_VALUE);
         return location != 0 ? location - address : -1;
     }
 
@@ -575,7 +561,7 @@ public abstract class MemoryIO {
      * @return The offset from the memory address of the value, if found, else -1 (minus one).
      */
     public final long indexOf(long address, byte value, int maxlen) {
-        final long location = Foreign.memchr(address, value, maxlen);
+        final long location = memchr(address, value, maxlen);
         return location != 0 ? location - address : -1;
     }
 
@@ -648,6 +634,70 @@ public abstract class MemoryIO {
         public final void _copyMemory(long src, long dst, long size) {
             Foreign.copyMemory(src, dst, size);
         }
+        public final void memcpy(long dst, long src, long size) {
+            Foreign.memcpy(dst, src, size);
+        }
+        public final void memmove(long dst, long src, long size) {
+            Foreign.memmove(dst, src, size);
+        }
+        public final long memchr(long address, int value, long size) {
+            return Foreign.memchr(address, value, size);
+        }
+        public final void putByteArray(long address, byte[] data, int offset, int length) {
+            Foreign.putByteArray(address, data, offset, length);
+        }
+        public final void getByteArray(long address, byte[] data, int offset, int length) {
+            Foreign.getByteArray(address, data, offset, length);
+        }
+        public final void putCharArray(long address, char[] data, int offset, int length) {
+            Foreign.putCharArray(address, data, offset, length);
+        }
+        public final void getCharArray(long address, char[] data, int offset, int length) {
+            Foreign.getCharArray(address, data, offset, length);
+        }
+        public final void putShortArray(long address, short[] data, int offset, int length) {
+            Foreign.putShortArray(address, data, offset, length);
+        }
+        public final void getShortArray(long address, short[] data, int offset, int length) {
+            Foreign.getShortArray(address, data, offset, length);
+        }
+        public final void putIntArray(long address, int[] data, int offset, int length) {
+            Foreign.putIntArray(address, data, offset, length);
+        }
+        public final void getIntArray(long address, int[] data, int offset, int length) {
+            Foreign.getIntArray(address, data, offset, length);
+        }
+        public final void putLongArray(long address, long[] data, int offset, int length) {
+            Foreign.putLongArray(address, data, offset, length);
+        }
+        public final void getLongArray(long address, long[] data, int offset, int length) {
+            Foreign.getLongArray(address, data, offset, length);
+        }
+        public final void putFloatArray(long address, float[] data, int offset, int length) {
+            Foreign.putFloatArray(address, data, offset, length);
+        }
+        public final void getFloatArray(long address, float[] data, int offset, int length) {
+            Foreign.getFloatArray(address, data, offset, length);
+        }
+        public final void putDoubleArray(long address, double[] data, int offset, int length) {
+            Foreign.putDoubleArray(address, data, offset, length);
+        }
+        public final void getDoubleArray(long address, double[] data, int offset, int length) {
+            Foreign.getDoubleArray(address, data, offset, length);
+        }
+        public final long getStringLength(long address) {
+            return Foreign.strlen(address);
+        }
+        public final byte[] getZeroTerminatedByteArray(long address) {
+            return Foreign.getZeroTerminatedByteArray(address);
+        }
+        public final byte[] getZeroTerminatedByteArray(long address, int maxlen) {
+            return Foreign.getZeroTerminatedByteArray(address, maxlen);
+        }
+        public final void putZeroTerminatedByteArray(long address, byte[] data, int offset, int length) {
+            Foreign.putZeroTerminatedByteArray(address, data, offset, length);
+        }
+
     }
 
     /**
@@ -660,6 +710,121 @@ public abstract class MemoryIO {
         }
         public final void putAddress(long address, long value) {
             Foreign.putInt(address, (int) value);
+        }
+    }
+
+    private static final class CheckedNativeImpl extends MemoryIO {
+
+        public final byte getByte(long address) {
+            return Foreign.getByteChecked(address);
+        }
+        public final short getShort(long address) {
+            return Foreign.getShortChecked(address);
+        }
+        public final int getInt(long address) {
+            return Foreign.getIntChecked(address);
+        }
+        public final long getLong(long address) {
+            return Foreign.getLongChecked(address);
+        }
+        public final float getFloat(long address) {
+            return Foreign.getFloatChecked(address);
+        }
+        public final double getDouble(long address) {
+            return Foreign.getDoubleChecked(address);
+        }
+        public final void putByte(long address, byte value) {
+            Foreign.putByteChecked(address, value);
+        }
+        public final void putShort(long address, short value) {
+            Foreign.putShortChecked(address, value);
+        }
+        public final void putInt(long address, int value) {
+            Foreign.putIntChecked(address, value);
+        }
+        public final void putLong(long address, long value) {
+            Foreign.putLongChecked(address, value);
+        }
+        public final void putFloat(long address, float value) {
+            Foreign.putFloatChecked(address, value);
+        }
+        public final void putDouble(long address, double value) {
+            Foreign.putDoubleChecked(address, value);
+        }
+        public final void setMemory(long address, long size, byte value) {
+            Foreign.setMemoryChecked(address, size, value);
+        }
+        public final void _copyMemory(long src, long dst, long size) {
+            Foreign.copyMemoryChecked(src, dst, size);
+        }
+        public final long getAddress(long address) {
+            return Foreign.getAddressChecked(address) & ADDRESS_MASK;
+        }
+        public final void putAddress(long address, long value) {
+            Foreign.putAddressChecked(address, value);
+        }
+        public final void memcpy(long dst, long src, long size) {
+            Foreign.memcpyChecked(dst, src, size);
+        }
+        public final void memmove(long dst, long src, long size) {
+            Foreign.memmoveChecked(dst, src, size);
+        }
+        public final long memchr(long address, int value, long size) {
+            return Foreign.memchrChecked(address, value, size);
+        }
+        public final void putByteArray(long address, byte[] data, int offset, int length) {
+            Foreign.putByteArrayChecked(address, data, offset, length);
+        }
+        public final void getByteArray(long address, byte[] data, int offset, int length) {
+            Foreign.getByteArrayChecked(address, data, offset, length);
+        }
+        public final void putCharArray(long address, char[] data, int offset, int length) {
+            Foreign.putCharArrayChecked(address, data, offset, length);
+        }
+        public final void getCharArray(long address, char[] data, int offset, int length) {
+            Foreign.getCharArrayChecked(address, data, offset, length);
+        }
+        public final void putShortArray(long address, short[] data, int offset, int length) {
+            Foreign.putShortArrayChecked(address, data, offset, length);
+        }
+        public final void getShortArray(long address, short[] data, int offset, int length) {
+            Foreign.getShortArrayChecked(address, data, offset, length);
+        }
+        public final void putIntArray(long address, int[] data, int offset, int length) {
+            Foreign.putIntArrayChecked(address, data, offset, length);
+        }
+        public final void getIntArray(long address, int[] data, int offset, int length) {
+            Foreign.getIntArrayChecked(address, data, offset, length);
+        }
+        public final void putLongArray(long address, long[] data, int offset, int length) {
+            Foreign.putLongArrayChecked(address, data, offset, length);
+        }
+        public final void getLongArray(long address, long[] data, int offset, int length) {
+            Foreign.getLongArrayChecked(address, data, offset, length);
+        }
+        public final void putFloatArray(long address, float[] data, int offset, int length) {
+            Foreign.putFloatArrayChecked(address, data, offset, length);
+        }
+        public final void getFloatArray(long address, float[] data, int offset, int length) {
+            Foreign.getFloatArrayChecked(address, data, offset, length);
+        }
+        public final void putDoubleArray(long address, double[] data, int offset, int length) {
+            Foreign.putDoubleArrayChecked(address, data, offset, length);
+        }
+        public final void getDoubleArray(long address, double[] data, int offset, int length) {
+            Foreign.getDoubleArrayChecked(address, data, offset, length);
+        }
+        public final long getStringLength(long address) {
+            return Foreign.strlenChecked(address);
+        }
+        public final byte[] getZeroTerminatedByteArray(long address) {
+            return Foreign.getZeroTerminatedByteArrayChecked(address);
+        }
+        public final byte[] getZeroTerminatedByteArray(long address, int maxlen) {
+            return Foreign.getZeroTerminatedByteArrayChecked(address, maxlen);
+        }
+        public final void putZeroTerminatedByteArray(long address, byte[] data, int offset, int length) {
+            Foreign.putZeroTerminatedByteArrayChecked(address, data, offset, length);
         }
     }
 
@@ -731,6 +896,70 @@ public abstract class MemoryIO {
         }
         public final void setMemory(long src, long size, byte value) {
             unsafe.setMemory(src, size, value);
+        }
+
+        public final void memcpy(long dst, long src, long size) {
+            Foreign.memcpy(dst, src, size);
+        }
+        public final void memmove(long dst, long src, long size) {
+            Foreign.memmove(dst, src, size);
+        }
+        public final long memchr(long address, int value, long size) {
+            return Foreign.memchr(address, value, size);
+        }
+        public final void putByteArray(long address, byte[] data, int offset, int length) {
+            Foreign.putByteArray(address, data, offset, length);
+        }
+        public final void getByteArray(long address, byte[] data, int offset, int length) {
+            Foreign.getByteArray(address, data, offset, length);
+        }
+        public final void putCharArray(long address, char[] data, int offset, int length) {
+            Foreign.putCharArray(address, data, offset, length);
+        }
+        public final void getCharArray(long address, char[] data, int offset, int length) {
+            Foreign.getCharArray(address, data, offset, length);
+        }
+        public final void putShortArray(long address, short[] data, int offset, int length) {
+            Foreign.putShortArray(address, data, offset, length);
+        }
+        public final void getShortArray(long address, short[] data, int offset, int length) {
+            Foreign.getShortArray(address, data, offset, length);
+        }
+        public final void putIntArray(long address, int[] data, int offset, int length) {
+            Foreign.putIntArray(address, data, offset, length);
+        }
+        public final void getIntArray(long address, int[] data, int offset, int length) {
+            Foreign.getIntArray(address, data, offset, length);
+        }
+        public final void putLongArray(long address, long[] data, int offset, int length) {
+            Foreign.putLongArray(address, data, offset, length);
+        }
+        public final void getLongArray(long address, long[] data, int offset, int length) {
+            Foreign.getLongArray(address, data, offset, length);
+        }
+        public final void putFloatArray(long address, float[] data, int offset, int length) {
+            Foreign.putFloatArray(address, data, offset, length);
+        }
+        public final void getFloatArray(long address, float[] data, int offset, int length) {
+            Foreign.getFloatArray(address, data, offset, length);
+        }
+        public final void putDoubleArray(long address, double[] data, int offset, int length) {
+            Foreign.putDoubleArray(address, data, offset, length);
+        }
+        public final void getDoubleArray(long address, double[] data, int offset, int length) {
+            Foreign.getDoubleArray(address, data, offset, length);
+        }
+        public final long getStringLength(long address) {
+            return Foreign.strlen(address);
+        }
+        public final byte[] getZeroTerminatedByteArray(long address) {
+            return Foreign.getZeroTerminatedByteArray(address);
+        }
+        public final byte[] getZeroTerminatedByteArray(long address, int maxlen) {
+            return Foreign.getZeroTerminatedByteArray(address, maxlen);
+        }
+        public final void putZeroTerminatedByteArray(long address, byte[] data, int offset, int length) {
+            Foreign.putZeroTerminatedByteArray(address, data, offset, length);
         }
     }
 

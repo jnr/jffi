@@ -57,7 +57,7 @@
     <property name="ant.build.javac.target" value="1.5"/>
     <property name="ant.build.javac.source" value="1.5"/>
     <property name="ant.build.javac.includeantruntime" value="false"/>
-    <property name="test.fork" value="no"/>
+    <property name="test.fork" value="yes"/>
 
     <mkdir dir="${build.native.dir}"/>
 
@@ -173,6 +173,21 @@
         </fileset>
       </batchtest>
 
+    </junit>
+  </target>
+
+  <target name="crash-test" depends="compile,-compile-test">
+    <mkdir dir="${build.test.dir}/results"/>
+    <junit fork="yes" printsummary="yes" haltonfailure="yes">
+      <jvmarg value="${run.jvm.model}"/>
+      <classpath>
+        <pathelement location="${build.classes.dir}"/>
+        <pathelement location="${build.test.dir}/classes"/>
+        <pathelement location="lib/junit_4/junit-4.5.jar"/>
+      </classpath>
+      <sysproperty key="java.library.path" value="${build.native.dir}"/>
+      <formatter type="plain" /> <!-- to file -->
+      <test name="com.kenai.jffi.MemoryTest"/>
     </junit>
   </target>
 

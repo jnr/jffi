@@ -56,7 +56,7 @@ final class Foreign {
                 }
                 
                 foreign.init();
-                
+
                 return new ValidInstanceHolder(foreign);
 
             } catch (UnsatisfiedLinkError ex) {
@@ -224,6 +224,11 @@ final class Foreign {
      * Do not save errno after each call
      */
     public static final int F_NOERRNO = 0x2;
+
+    /**
+     * Do not save errno after each call
+     */
+    public static final int F_PROTECT = 0x4;
 
     /**
      * Gets the native stub library version.
@@ -1331,6 +1336,349 @@ final class Foreign {
      * @param length The number of bytes to copy to native memory
      */
     static native void putZeroTerminatedByteArray(long address, byte[] data, int offset, int length);
+    /**
+     * Reads an 8 bit integer from a native memory location.
+     *
+     * @param address The memory location to get the value from.
+     * @return A byte containing the value.
+     */
+    static native byte getByteChecked(long address);
+
+    /**
+     * Reads a 16 bit integer from a native memory location.
+     *
+     * @param address The memory location to get the value from.
+     * @return A short containing the value.
+     */
+    static native short getShortChecked(long address);
+
+    /**
+     * Reads a 32 bit integer from a native memory location.
+     *
+     * @param address The memory location to get the value from.
+     * @return An int containing the value.
+     */
+    static native int getIntChecked(long address);
+
+    /**
+     * Reads a 64 bit integer from a native memory location.
+     *
+     * @param address The memory location to get the value from.
+     * @return A long containing the value.
+     */
+    static native long getLongChecked(long address);
+
+    /**
+     * Reads a 32 bit floating point value from a native memory location.
+     *
+     * @param address The memory location to get the value from.
+     * @return A float containing the value.
+     */
+    static native float getFloatChecked(long address);
+
+    /**
+     * Reads a 64 bit floating point value from a native memory location.
+     *
+     * @param address The memory location to get the value from.
+     * @return A double containing the value.
+     */
+    static native double getDoubleChecked(long address);
+
+    /**
+     * Reads a native memory address from a native memory location.
+     *
+     * @param address The memory location to get the value from.
+     * @return A long containing the value.
+     */
+    static native long getAddressChecked(long address);
+
+    /**
+     * Writes an 8 bit integer value to a native memory location.
+     *
+     * @param address The memory location to put the value.
+     * @param value The value to write to memory.
+     */
+    static native void putByteChecked(long address, byte value);
+
+    /**
+     * Writes a 16 bit integer value to a native memory location.
+     *
+     * @param address The memory location to put the value.
+     * @param value The value to write to memory.
+     */
+    static native void putShortChecked(long address, short value);
+
+    /**
+     * Writes a 32 bit integer value to a native memory location.
+     *
+     * @param address The memory location to put the value.
+     * @param value The value to write to memory.
+     */
+    static native void putIntChecked(long address, int value);
+
+    /**
+     * Writes a 64 bit integer value to a native memory location.
+     *
+     * @param address The memory location to put the value.
+     * @param value The value to write to memory.
+     */
+    static native void putLongChecked(long address, long value);
+
+    /**
+     * Writes a 32 bit floating point value to a native memory location.
+     *
+     * @param address The memory location to put the value.
+     * @param value The value to write to memory.
+     */
+    static native void putFloatChecked(long address, float value);
+
+    /**
+     * Writes a 64 bit floating point value to a native memory location.
+     *
+     * @param address The memory location to put the value.
+     * @param value The value to write to memory.
+     */
+    static native void putDoubleChecked(long address, double value);
+
+    /**
+     * Writes a native memory address value to a native memory location.
+     *
+     * @param address The memory location to put the value.
+     * @param value The value to write to memory.
+     */
+    static native void putAddressChecked(long address, long value);
+
+    /**
+     * Sets a region of native memory to a specific byte value.
+     *
+     * @param address The address of start of the native memory.
+     * @param size The number of bytes to set.
+     * @param value The value to set the native memory to.
+     */
+    static native void setMemoryChecked(long address, long size, byte value);
+
+    /**
+     * Copies contents of a native memory location to another native memory location.
+     *
+     * @param src The source memory address.
+     * @param dst The destination memory address.
+     * @param size The number of bytes to copy.
+     */
+    static native void copyMemoryChecked(long src, long dst, long size);
+
+    /**
+     * Writes a java byte array to native memory.
+     *
+     * @param address The native memory address to copy the array to.
+     * @param data The java array to copy.
+     * @param offset The offset within the array to start copying from.
+     * @param length The number of array elements to copy.
+     */
+    static native void putByteArrayChecked(long address, byte[] data, int offset, int length);
+
+    /**
+     * Reads a java byte array from native memory.
+     *
+     * @param address The native memory address to copy the array from.
+     * @param data The java array to copy.
+     * @param offset The offset within the array to start copying to.
+     * @param length The number of array elements to copy.
+     */
+    static native void getByteArrayChecked(long address, byte[] data, int offset, int length);
+
+    /**
+     * Writes a java char array to native memory.
+     *
+     * @param address The native memory address to copy the array to.
+     * @param data The java array to copy.
+     * @param offset The offset within the array to start copying from.
+     * @param length The number of array elements to copy.
+     */
+    static native void putCharArrayChecked(long address, char[] data, int offset, int length);
+
+    /**
+     * Reads a java char array from native memory.
+     *
+     * @param address The native memory address to copy the array from.
+     * @param data The java array to copy.
+     * @param offset The offset within the array to start copying to.
+     * @param length The number of array elements to copy.
+     */
+    static native void getCharArrayChecked(long address, char[] data, int offset, int length);
+
+    /**
+     * Writes a java short array to native memory.
+     *
+     * @param address The native memory address to copy the array to.
+     * @param data The java array to copy.
+     * @param offset The offset within the array to start copying from.
+     * @param length The number of array elements to copy.
+     */
+    static native void putShortArrayChecked(long address, short[] data, int offset, int length);
+
+    /**
+     * Reads a java short array from native memory.
+     *
+     * @param address The native memory address to copy the array from.
+     * @param data The java array to copy.
+     * @param offset The offset within the array to start copying to.
+     * @param length The number of array elements to copy.
+     */
+    static native void getShortArrayChecked(long address, short[] data, int offset, int length);
+
+    /**
+     * Writes a java int array to native memory.
+     *
+     * @param address The native memory address to copy the array to.
+     * @param data The java array to copy.
+     * @param offset The offset within the array to start copying from.
+     * @param length The number of array elements to copy.
+     */
+    static native void putIntArrayChecked(long address, int[] data, int offset, int length);
+
+    /**
+     * Reads a java int array from native memory.
+     *
+     * @param address The native memory address to copy the array from.
+     * @param data The java array to copy.
+     * @param offset The offset within the array to start copying to.
+     * @param length The number of array elements to copy.
+     */
+    static native void getIntArrayChecked(long address, int[] data, int offset, int length);
+
+    /**
+     * Writes a java long array to native memory.
+     *
+     * @param address The native memory address to copy the array to.
+     * @param data The java array to copy.
+     * @param offset The offset within the array to start copying from.
+     * @param length The number of array elements to copy.
+     */
+    static native void putLongArrayChecked(long address, long[] data, int offset, int length);
+
+    /**
+     * Reads a java long array from native memory.
+     *
+     * @param address The native memory address to copy the array from.
+     * @param data The java array to copy.
+     * @param offset The offset within the array to start copying to.
+     * @param length The number of array elements to copy.
+     */
+    static native void getLongArrayChecked(long address, long[] data, int offset, int length);
+
+    /**
+     * Writes a java double array to native memory.
+     *
+     * @param address The native memory address to copy the array to.
+     * @param data The java array to copy.
+     * @param offset The offset within the array to start copying from.
+     * @param length The number of array elements to copy.
+     */
+    static native void putFloatArrayChecked(long address, float[] data, int offset, int length);
+
+    /**
+     * Reads a java float array from native memory.
+     *
+     * @param address The native memory address to copy the array from.
+     * @param data The java array to copy.
+     * @param offset The offset within the array to start copying to.
+     * @param length The number of array elements to copy.
+     */
+    static native void getFloatArrayChecked(long address, float[] data, int offset, int length);
+
+    /**
+     * Writes a java double array to native memory.
+     *
+     * @param address The native memory address to copy the array to.
+     * @param data The java array to copy.
+     * @param offset The offset within the array to start copying from.
+     * @param length The number of array elements to copy.
+     */
+    static native void putDoubleArrayChecked(long address, double[] data, int offset, int length);
+
+    /**
+     * Reads a java double array from native memory.
+     *
+     * @param address The native memory address to copy the array from.
+     * @param data The java array to copy.
+     * @param offset The offset within the array to start copying to.
+     * @param length The number of array elements to copy.
+     */
+    static native void getDoubleArrayChecked(long address, double[] data, int offset, int length);
+
+    /**
+     * Gets the address of a byte value in a native memory region.
+     *
+     * @param address The native memory address to start searching.
+     * @param value The value to search for.
+     * @param len The size of the native memory region being searched.
+     * @return The address of the value, or 0 Checked(zero) if not found.
+     */
+    static native long memchrChecked(long address, int value, long len);
+
+    /**
+     * Copies potentially overlapping memory areas.
+     *
+     * @param dst The destination memory address.
+     * @param src The source memory address.
+     * @param size The number of bytes to copy.
+     */
+    static native void memmoveChecked(long dst, long src, long len);
+
+    /**
+     * Copies non-overlapping memory areas.
+     *
+     * @param dst The destination memory address.
+     * @param src The source memory address.
+     * @param size The number of bytes to copy.
+     */
+    static native void memcpyChecked(long dst, long src, long len);
+
+
+    /**
+     * Gets the length of a native ascii or utf-8 string.
+     *
+     * @param address The native address of the string.
+     * @return The length of the string, in bytes.
+     */
+    static native long strlenChecked(long address);
+
+    /**
+     * Copies a zero Checked(nul) terminated by array from native memory.
+     *
+     * This method will search for a zero byte, starting from <tt>address</tt>
+     * and stop once a zero byte is encountered.  The returned byte array does not
+     * contain the terminating zero byte.
+     *
+     * @param address The address to copy the array from
+     * @return A byte array containing the bytes copied from native memory.
+     */
+    static native byte[] getZeroTerminatedByteArrayChecked(long address);
+
+    /**
+     * Copies a zero Checked(nul) terminated by array from native memory.
+     *
+     * This method will search for a zero byte, starting from <tt>address</tt>
+     * and stop once a zero byte is encountered.  The returned byte array does not
+     * contain the terminating zero byte.
+     *
+     * @param address The address to copy the array from
+     * @param maxlen The maximum number of bytes to search for the nul terminator
+     * @return A byte array containing the bytes copied from native memory.
+     */
+    static native byte[] getZeroTerminatedByteArrayChecked(long address, int maxlen);
+
+    /**
+     * Copies a java byte array to native memory and appends a NUL terminating byte.
+     *
+     * <b>Note</b> A total of length + 1 bytes is written to native memory.
+     *
+     * @param address The address to copy to.
+     * @param data The byte array to copy to native memory
+     * @param offset The offset within the byte array to begin copying from
+     * @param length The number of bytes to copy to native memory
+     */
+    static native void putZeroTerminatedByteArrayChecked(long address, byte[] data, int offset, int length);
 
     /**
      * Creates a new Direct ByteBuffer for a native memory region.

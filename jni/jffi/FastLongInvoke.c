@@ -31,6 +31,7 @@
  */
 
 #include <sys/types.h>
+#include <stdio.h>
 #include <stdlib.h>
 #ifdef __sun
 # include <alloca.h>
@@ -43,6 +44,7 @@
 #include "Exception.h"
 #include "CallContext.h"
 #include "LastError.h"
+#include "FaultProtect.h"
 #include "com_kenai_jffi_Foreign.h"
 
 
@@ -105,6 +107,13 @@
 
 #endif
 
+
+#if !FAULT_PROTECT_ENABLED
+# define CALL(env, ctx, stmt) do { stmt; SAVE_ERRNO(ctx); } while(0)
+#else
+# define CALL(env, ctx, stmt) FAULTPROT_CTX(env, ctx, stmt, return 0)
+#endif
+
 /*
  * Class:     com_kenai_jffi_Foreign
  * Method:    invokeVrL
@@ -116,8 +125,7 @@ Java_com_kenai_jffi_Foreign_invokeL0(JNIEnv* env, jobject self, jlong ctxAddress
     CallContext* ctx = (CallContext *) j2p(ctxAddress);
     FFIValue retval;
 
-    invokeL0(ctx, j2p(function), &retval);
-    SAVE_ERRNO(ctx);
+    FAULTPROT_CTX(env, ctx, invokeL0(ctx, j2p(function), &retval), return 0);
     return RETVAL(retval, ctx);
 }
 
@@ -133,7 +141,7 @@ Java_com_kenai_jffi_Foreign_invokeL0NoErrno(JNIEnv* env, jobject self, jlong ctx
     CallContext* ctx = (CallContext *) j2p(ctxAddress);
     FFIValue retval;
 
-    invokeL0(ctx, j2p(function), &retval);
+    FAULTPROT_CTX(env, ctx, invokeL0(ctx, j2p(function), &retval), return 0);
 
     return RETVAL(retval, ctx);
 }
@@ -145,8 +153,7 @@ Java_com_kenai_jffi_Foreign_invokeL1(JNIEnv* env, jobject self, jlong ctxAddress
     CallContext* ctx = (CallContext *) j2p(ctxAddress);
     FFIValue retval;
 
-    invokeL1(ctx, j2p(function), &retval, arg1);
-    SAVE_ERRNO(ctx);
+    FAULTPROT_CTX(env, ctx, invokeL1(ctx, j2p(function), &retval, arg1), return 0);
 
     return RETVAL(retval, ctx);
 }
@@ -158,7 +165,7 @@ Java_com_kenai_jffi_Foreign_invokeL1NoErrno(JNIEnv* env, jobject self, jlong ctx
     CallContext* ctx = (CallContext *) j2p(ctxAddress);
     FFIValue retval;
 
-    invokeL1(ctx, j2p(function), &retval, arg1);
+    FAULTPROT_CTX(env, ctx, invokeL1(ctx, j2p(function), &retval, arg1), return 0);
 
     return RETVAL(retval, ctx);
 }
@@ -171,8 +178,7 @@ Java_com_kenai_jffi_Foreign_invokeL2(JNIEnv* env, jobject self, jlong ctxAddress
     CallContext* ctx = (CallContext *) j2p(ctxAddress);
     FFIValue retval;
 
-    invokeL2(ctx, j2p(function), &retval, arg1, arg2);
-    SAVE_ERRNO(ctx);
+    FAULTPROT_CTX(env, ctx, invokeL2(ctx, j2p(function), &retval, arg1, arg2), return 0);
 
     return RETVAL(retval, ctx);
 }
@@ -184,7 +190,7 @@ Java_com_kenai_jffi_Foreign_invokeL2NoErrno(JNIEnv* env, jobject self, jlong ctx
     CallContext* ctx = (CallContext *) j2p(ctxAddress);
     FFIValue retval;
 
-    invokeL2(ctx, j2p(function), &retval, arg1, arg2);
+    FAULTPROT_CTX(env, ctx, invokeL2(ctx, j2p(function), &retval, arg1, arg2), return 0);
 
     return RETVAL(retval, ctx);
 }
@@ -196,8 +202,7 @@ Java_com_kenai_jffi_Foreign_invokeL3(JNIEnv* env, jobject self, jlong ctxAddress
     CallContext* ctx = (CallContext *) j2p(ctxAddress);
     FFIValue retval;
 
-    invokeL3(ctx, j2p(function), &retval, arg1, arg2, arg3);
-    SAVE_ERRNO(ctx);
+    FAULTPROT_CTX(env, ctx, invokeL3(ctx, j2p(function), &retval, arg1, arg2, arg3), return 0);
 
     return RETVAL(retval, ctx);
 }
@@ -209,7 +214,7 @@ Java_com_kenai_jffi_Foreign_invokeL3NoErrno(JNIEnv* env, jobject self, jlong ctx
     CallContext* ctx = (CallContext *) j2p(ctxAddress);
     FFIValue retval;
 
-    invokeL3(ctx, j2p(function), &retval, arg1, arg2, arg3);
+    FAULTPROT_CTX(env, ctx, invokeL3(ctx, j2p(function), &retval, arg1, arg2, arg3), return 0);
 
     return RETVAL(retval, ctx);
 }
@@ -223,8 +228,7 @@ Java_com_kenai_jffi_Foreign_invokeL4(JNIEnv* env, jobject self, jlong ctxAddress
 
     FFIValue retval;
 
-    invokeL4(ctx, j2p(function), &retval, arg1, arg2, arg3, arg4);
-    SAVE_ERRNO(ctx);
+    FAULTPROT_CTX(env, ctx, invokeL4(ctx, j2p(function), &retval, arg1, arg2, arg3, arg4), return 0);
 
     return RETVAL(retval, ctx);
 }
@@ -237,7 +241,7 @@ Java_com_kenai_jffi_Foreign_invokeL4NoErrno(JNIEnv* env, jobject self, jlong ctx
 
     FFIValue retval;
 
-    invokeL4(ctx, j2p(function), &retval, arg1, arg2, arg3, arg4);
+    FAULTPROT_CTX(env, ctx, invokeL4(ctx, j2p(function), &retval, arg1, arg2, arg3, arg4), return 0);
 
     return RETVAL(retval, ctx);
 }
@@ -250,8 +254,7 @@ Java_com_kenai_jffi_Foreign_invokeL5(JNIEnv* env, jobject self, jlong ctxAddress
     CallContext* ctx = (CallContext *) j2p(ctxAddress);
     FFIValue retval;
 
-    invokeL5(ctx, j2p(function), &retval, arg1, arg2, arg3, arg4, arg5);
-    SAVE_ERRNO(ctx);
+    FAULTPROT_CTX(env, ctx, invokeL5(ctx, j2p(function), &retval, arg1, arg2, arg3, arg4, arg5), return 0);
 
     return RETVAL(retval, ctx);
 }
@@ -263,7 +266,7 @@ Java_com_kenai_jffi_Foreign_invokeL5NoErrno(JNIEnv* env, jobject self, jlong ctx
     CallContext* ctx = (CallContext *) j2p(ctxAddress);
     FFIValue retval;
 
-    invokeL5(ctx, j2p(function), &retval, arg1, arg2, arg3, arg4, arg5);
+    FAULTPROT_CTX(env, ctx, invokeL5(ctx, j2p(function), &retval, arg1, arg2, arg3, arg4, arg5), return 0);
 
     return RETVAL(retval, ctx);
 }
@@ -276,8 +279,7 @@ Java_com_kenai_jffi_Foreign_invokeL6(JNIEnv* env, jobject self, jlong ctxAddress
     CallContext* ctx = (CallContext *) j2p(ctxAddress);
     FFIValue retval;
 
-    invokeL6(ctx, j2p(function), &retval, arg1, arg2, arg3, arg4, arg5, arg6);
-    SAVE_ERRNO(ctx);
+    FAULTPROT_CTX(env, ctx, invokeL6(ctx, j2p(function), &retval, arg1, arg2, arg3, arg4, arg5, arg6), return 0);
 
     return RETVAL(retval, ctx);
 }
@@ -289,7 +291,7 @@ Java_com_kenai_jffi_Foreign_invokeL6NoErrno(JNIEnv* env, jobject self, jlong ctx
     CallContext* ctx = (CallContext *) j2p(ctxAddress);
     FFIValue retval;
 
-    invokeL6(ctx, j2p(function), &retval, arg1, arg2, arg3, arg4, arg5, arg6);
+    FAULTPROT_CTX(env, ctx, invokeL6(ctx, j2p(function), &retval, arg1, arg2, arg3, arg4, arg5, arg6), return 0);
 
     return RETVAL(retval, ctx);
 }

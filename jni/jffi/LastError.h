@@ -34,8 +34,12 @@
 #define JFFI_LASTERRROR_H
 
 #include "jffi.h"
+#include "CallContext.h"
 
 extern void jffi_save_errno(void);
+#ifndef _WIN32
+extern void jffi_save_errno_td(ThreadData* td, CallContext* ctx);
+#endif
 
 #endif /* JFFI_LASTERRROR_H */
 
