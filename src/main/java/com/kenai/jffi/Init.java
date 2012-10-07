@@ -70,7 +70,7 @@ final class Init {
                 loaded |= Boolean.class.cast(isLoaded.invoke(c, new Object[0]));
                 if (!loaded) {
                     Method getFailureCause = c.getDeclaredMethod("getFailureCause", new Class[0]);
-                    throw new RuntimeException(Throwable.class.cast(getFailureCause.invoke(c, new Object[0])));
+                    throw Throwable.class.cast(getFailureCause.invoke(c, new Object[0]));
                 }
 
             } catch (IllegalAccessException ex) {
@@ -82,11 +82,11 @@ final class Init {
             } catch (ClassNotFoundException ex) {
                 failureCauses.add(ex);
             
-            } catch (IllegalArgumentException ex) {
-                throw new RuntimeException(ex);
-            
-            } catch (NoSuchMethodException ex) {
-                throw new RuntimeException(ex);
+            } catch (Throwable throwable) {
+                if (throwable instanceof UnsatisfiedLinkError) {
+                    throw (UnsatisfiedLinkError) throwable;
+                }
+                throw newLoadError(throwable);
             }
         }
 
@@ -97,13 +97,12 @@ final class Init {
                 t.printStackTrace(pw);
             }
 
-            throw new RuntimeException(sw.toString());
+            throw new UnsatisfiedLinkError(sw.toString());
         }
     }
 
     private static List<ClassLoader> getClassLoaders() {
         List<ClassLoader> loaders = new ArrayList<ClassLoader>();
-        ClassLoader cl = Init.class.getClassLoader();
         
         try {
             loaders.add(ClassLoader.getSystemClassLoader());
@@ -127,5 +126,12 @@ final class Init {
         }
         
         return Collections.unmodifiableList(loaders);
+    }
+
+    private static UnsatisfiedLinkError newLoadError(Throwable cause) {
+        UnsatisfiedLinkError error = new UnsatisfiedLinkError();
+        error.initCause(cause);
+
+        return error;
     }
 }

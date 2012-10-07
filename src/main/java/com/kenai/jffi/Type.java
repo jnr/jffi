@@ -241,13 +241,60 @@ public abstract class Type {
         }
     }
 
+    private static abstract class LookupTable {
+        public abstract BuiltinTypeInfo find(NativeType nativeType);
+    }
+
+    private static final class NativeLookupTable extends LookupTable {
+        public final BuiltinTypeInfo[] typeMap;
+
+        NativeLookupTable(Foreign foreign) {
+            NativeType[] nativeTypes = NativeType.values();
+            typeMap = new BuiltinTypeInfo[nativeTypes.length];
+            for (int i = 0; i < typeMap.length; ++i) {
+                long h = foreign.lookupBuiltinType(nativeTypes[i].ffiType);
+                int type, size, alignment;
+                if (h != 0L) {
+                    type = foreign.getTypeType(h);
+                    size = foreign.getTypeSize(h);
+                    alignment = foreign.getTypeAlign(h);
+                } else {
+                    // Don't fail initialization, setup a dummy type
+                    type = nativeTypes[i].ffiType;
+                    size = 0;
+                    alignment = 0;
+                }
+                typeMap[i] = new BuiltinTypeInfo(h, type, size, alignment);
+            }
+        }
+
+        public BuiltinTypeInfo find(NativeType nativeType) {
+            return typeMap[nativeType.ordinal()];
+        }
+    }
+
+    private static final class InvalidLookupTable extends LookupTable {
+        private Throwable error;
+
+        private InvalidLookupTable(Throwable error) {
+            this.error = error;
+        }
+
+        public BuiltinTypeInfo find(NativeType nativeType) {
+            UnsatisfiedLinkError error = new UnsatisfiedLinkError("could not get native definition for type: " + nativeType);
+            error.initCause(this.error);
+
+            throw error;
+        }
+    }
+
     /**
      * This is a lazy loaded cache of builtin type info, so we can still have
      * Type.VOID as a public static variable without it causing the
      * native library to load.
      */
     private static final class BuiltinTypeInfo {
-        public static final BuiltinTypeInfo[] typeMap;
+        private static final LookupTable lookupTable;
 
         /** The FFI type of this type */
         final int type;
@@ -259,27 +306,25 @@ public abstract class Type {
         final long handle;
 
         static {
-            NativeType[] nativeTypes = NativeType.values();
-            typeMap = new BuiltinTypeInfo[nativeTypes.length];
-            for (int i = 0; i < typeMap.length; ++i) {
-                long h = Foreign.getInstance().lookupBuiltinType(nativeTypes[i].ffiType);
-                int type, size, alignment;
-                if (h != 0L) {
-                    type = Foreign.getInstance().getTypeType(h);
-                    size = Foreign.getInstance().getTypeSize(h);
-                    alignment = Foreign.getInstance().getTypeAlign(h);
-                } else {
-                    // Don't fail initialization, setup a dummy type
-                    type = nativeTypes[i].ffiType;
-                    size = 0;
-                    alignment = 0;
-                }
-                typeMap[i] = new BuiltinTypeInfo(h, type, size, alignment);
+            LookupTable table;
+            try {
+                table = new NativeLookupTable(Foreign.getInstance());
+            } catch (Throwable error) {
+                table = new InvalidLookupTable(error);
             }
+            lookupTable = table;
         }
 
         static BuiltinTypeInfo find(NativeType t) {
-            return typeMap[t.ordinal()];
+            return lookupTable.find(t);
+        }
+
+        private static LookupTable newNativeLookupTable(Foreign foreign) {
+            return new NativeLookupTable(foreign);
+        }
+
+        private static LookupTable newInvalidLookupTable(Throwable error) {
+            return new InvalidLookupTable(error);
         }
 
         private BuiltinTypeInfo(long handle, int type, int size, int alignment) {

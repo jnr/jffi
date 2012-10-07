@@ -48,23 +48,31 @@ final class Foreign {
             try {
                 Init.load();
 
-
                 Foreign foreign = new Foreign();
 
                 if ((foreign.getVersion() & 0xffff00) != (VERSION_MAJOR << 16 | VERSION_MINOR << 8)) {
-                    return new InValidInstanceHolder(new UnsatisfiedLinkError("Incorrect native library version"));
+                    String msg = String.format("incorrect native library version %d.%d, expected %d.%d",
+                            (foreign.getVersion() >> 16 & 0xff), (foreign.getVersion() >> 8 & 0xff), VERSION_MAJOR, VERSION_MINOR);
+                    return new InValidInstanceHolder(new UnsatisfiedLinkError(msg));
                 }
-                
+
                 foreign.init();
                 
                 return new ValidInstanceHolder(foreign);
 
-            } catch (UnsatisfiedLinkError ex) {
-                return new InValidInstanceHolder(ex);
+            } catch (Throwable throwable) {
+                return new InValidInstanceHolder(throwable);
             }
         }
 
         abstract Foreign getForeign();
+    }
+
+    private static UnsatisfiedLinkError newLoadError(Throwable cause) {
+        UnsatisfiedLinkError error = new UnsatisfiedLinkError();
+        error.initCause(cause);
+
+        return error;
     }
 
     private static final class ValidInstanceHolder extends InstanceHolder {
@@ -80,14 +88,14 @@ final class Foreign {
     }
 
     private static final class InValidInstanceHolder extends InstanceHolder {
-        private final Error cause;
+        private final Throwable cause;
 
-        public InValidInstanceHolder(Error cause) {
+        public InValidInstanceHolder(Throwable cause) {
             this.cause = cause;
         }
 
         final Foreign getForeign() {
-            throw new RuntimeException(cause);
+            throw newLoadError(cause);
         }
     }
     
