@@ -68,7 +68,7 @@ final class HeapObjectParameterInvoker extends ObjectParameterInvoker {
                              Object o1, int o1off, int o1len, ObjectParameterInfo o1flags) {
 
         return invokeO1(function,
-                new byte[HeapInvocationBuffer.encoder.getBufferSize(function.getCallContext())],
+                new byte[HeapInvocationBuffer.Encoder.getInstance().getBufferSize(function.getCallContext())],
                 o1, o1off, o1len, o1flags);
     }
     
@@ -76,7 +76,7 @@ final class HeapObjectParameterInvoker extends ObjectParameterInvoker {
                              long n1, long n2,
                              Object o1, int o1off, int o1len, ObjectParameterInfo o1flags) {
 
-        HeapInvocationBuffer.Encoder encoder = HeapInvocationBuffer.encoder;
+        HeapInvocationBuffer.Encoder encoder = HeapInvocationBuffer.Encoder.getInstance();
         byte[] paramBuffer = new byte[encoder.getBufferSize(function.getCallContext())];
         
         int poff = 0;
@@ -91,13 +91,13 @@ final class HeapObjectParameterInvoker extends ObjectParameterInvoker {
                              Object o1, int o1off, int o1len, ObjectParameterInfo o1flags,
                              Object o2, int o2off, int o2len, ObjectParameterInfo o2flags) {
 
-        return invokeO2(function, new byte[HeapInvocationBuffer.encoder.getBufferSize(function.getCallContext())],
+        return invokeO2(function, new byte[HeapInvocationBuffer.Encoder.getInstance().getBufferSize(function.getCallContext())],
                 o1, o1off, o1len, o1flags,
                 o2, o2off, o2len, o2flags);
     }
 
     private static byte[] encodeN3(Function function, long n1, long n2, long n3) {
-        HeapInvocationBuffer.Encoder encoder = HeapInvocationBuffer.encoder;
+        HeapInvocationBuffer.Encoder encoder = HeapInvocationBuffer.Encoder.getInstance();
         byte[] paramBuffer = new byte[encoder.getBufferSize(function.getCallContext())];
         int poff = 0;
         poff = encode(encoder, paramBuffer, poff, function.getParameterType(0), n1);
@@ -136,7 +136,7 @@ final class HeapObjectParameterInvoker extends ObjectParameterInvoker {
     }
 
     private static byte[] encodeN4(Function function, long n1, long n2, long n3, long n4) {
-        HeapInvocationBuffer.Encoder encoder = HeapInvocationBuffer.encoder;
+        HeapInvocationBuffer.Encoder encoder = HeapInvocationBuffer.Encoder.getInstance();
         byte[] paramBuffer = new byte[encoder.getBufferSize(function.getCallContext())];
         int poff = 0;
         poff = encode(encoder, paramBuffer, poff, function.getParameterType(0), n1);
@@ -176,7 +176,7 @@ final class HeapObjectParameterInvoker extends ObjectParameterInvoker {
     }
 
     private static byte[] encodeN5(Function function, long n1, long n2, long n3, long n4, long n5) {
-        HeapInvocationBuffer.Encoder encoder = HeapInvocationBuffer.encoder;
+        HeapInvocationBuffer.Encoder encoder = HeapInvocationBuffer.Encoder.getInstance();
         byte[] paramBuffer = new byte[encoder.getBufferSize(function.getCallContext())];
         int poff = 0;
         poff = encode(encoder, paramBuffer, poff, function.getParameterType(0), n1);
@@ -219,7 +219,7 @@ final class HeapObjectParameterInvoker extends ObjectParameterInvoker {
     }
 
     private static byte[] encodeN6(Function function, long n1, long n2, long n3, long n4, long n5, long n6) {
-        HeapInvocationBuffer.Encoder encoder = HeapInvocationBuffer.encoder;
+        HeapInvocationBuffer.Encoder encoder = HeapInvocationBuffer.Encoder.getInstance();
         byte[] paramBuffer = new byte[encoder.getBufferSize(function.getCallContext())];
         int poff = 0;
         poff = encode(encoder, paramBuffer, poff, function.getParameterType(0), n1);
