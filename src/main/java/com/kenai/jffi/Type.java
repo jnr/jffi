@@ -204,7 +204,7 @@ public abstract class Type {
         }
         
         public final int type() {
-            return BuiltinTypeInfo.find(nativeType).type;
+            return getTypeInfo().type;
         }
         
         public final long handle() {
@@ -236,7 +236,7 @@ public abstract class Type {
         }
 
         protected BuiltinTypeInfo getTypeInfo() {
-            return BuiltinTypeInfo.find(nativeType);
+            return LookupTable.getInstance().find(nativeType);
         }
 
         @Override
@@ -261,7 +261,30 @@ public abstract class Type {
     }
 
     private static abstract class LookupTable {
+        private static final LookupTable lookupTable;
         public abstract BuiltinTypeInfo find(NativeType nativeType);
+
+        static {
+            LookupTable table;
+            try {
+                table = newNativeLookupTable(Foreign.getInstance());
+            } catch (Throwable error) {
+                table = newInvalidLookupTable(error);
+            }
+            lookupTable = table;
+        }
+
+        static final LookupTable getInstance() {
+            return lookupTable;
+        }
+
+        private static LookupTable newNativeLookupTable(Foreign foreign) {
+            return new NativeLookupTable(foreign);
+        }
+
+        private static LookupTable newInvalidLookupTable(Throwable error) {
+            return new InvalidLookupTable(error);
+        }
     }
 
     private static final class NativeLookupTable extends LookupTable {
@@ -313,8 +336,6 @@ public abstract class Type {
      * native library to load.
      */
     private static final class BuiltinTypeInfo {
-        private static final LookupTable lookupTable;
-
         /** The FFI type of this type */
         final int type;
         /** The size in bytes of this type */
@@ -323,28 +344,6 @@ public abstract class Type {
         final int alignment;
         /** The address of this type's ffi_type structure */
         final long handle;
-
-        static {
-            LookupTable table;
-            try {
-                table = newNativeLookupTable(Foreign.getInstance());
-            } catch (Throwable error) {
-                table = newInvalidLookupTable(error);
-            }
-            lookupTable = table;
-        }
-
-        static BuiltinTypeInfo find(NativeType t) {
-            return lookupTable.find(t);
-        }
-
-        private static LookupTable newNativeLookupTable(Foreign foreign) {
-            return new NativeLookupTable(foreign);
-        }
-
-        private static LookupTable newInvalidLookupTable(Throwable error) {
-            return new InvalidLookupTable(error);
-        }
 
         private BuiltinTypeInfo(long handle, int type, int size, int alignment) {
             this.handle = handle;
