@@ -195,6 +195,9 @@ public abstract class Type {
      */
     static final class Builtin extends Type {
         private final NativeType nativeType;
+        private int size = 0;
+        private int alignment = 0;
+        private long handle = 0;
 
         private Builtin(NativeType nativeType) {
             this.nativeType = nativeType;
@@ -205,19 +208,35 @@ public abstract class Type {
         }
         
         public final long handle() {
-            long handle = BuiltinTypeInfo.find(nativeType).handle;
-            if (handle != 0L) {
-                return handle;
-            }
-            throw new RuntimeException("invalid handle for native type " + nativeType);
+            return handle != 0 ? handle : resolveHandle();
         }
         
         public final int size() {
-            return BuiltinTypeInfo.find(nativeType).size;
+            return size != 0 ? size : resolveSize();
         }
 
         public final int alignment() {
-            return BuiltinTypeInfo.find(nativeType).alignment;
+            return alignment != 0 ? alignment : resolveAlignment();
+        }
+
+        private int resolveSize() {
+            return size = getTypeInfo().size;
+        }
+
+        private int resolveAlignment() {
+            return alignment = getTypeInfo().alignment;
+        }
+
+        private long resolveHandle() {
+            long handle = getTypeInfo().handle;
+            if (handle == 0L) {
+                throw new RuntimeException("invalid handle for native type " + nativeType);
+            }
+            return this.handle = handle;
+        }
+
+        protected BuiltinTypeInfo getTypeInfo() {
+            return BuiltinTypeInfo.find(nativeType);
         }
 
         @Override
@@ -308,9 +327,9 @@ public abstract class Type {
         static {
             LookupTable table;
             try {
-                table = new NativeLookupTable(Foreign.getInstance());
+                table = newNativeLookupTable(Foreign.getInstance());
             } catch (Throwable error) {
-                table = new InvalidLookupTable(error);
+                table = newInvalidLookupTable(error);
             }
             lookupTable = table;
         }
