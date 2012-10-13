@@ -138,38 +138,6 @@ public class InvokerTest {
         }
     }
 
-    static class NativeInvoker extends Invoker {
-        NativeInvoker() {
-            super(Foreign.getInstance(), NativeObjectParameterInvoker.getInstance());
-        }
-
-        @Override
-        public long invokeAddress(Function function, HeapInvocationBuffer buffer) {
-            return Invoker.getInstance().invokeAddress(function, buffer);
-        }
-
-        @Override
-        public long invokeAddress(CallContext ctx, long function, HeapInvocationBuffer buffer) {
-            return Invoker.getInstance().invokeAddress(ctx, function, buffer);
-        }
-    }
-
-    static class HeapInvoker extends Invoker {
-        HeapInvoker() {
-            super(Foreign.getInstance(), HeapObjectParameterInvoker.getInstance());
-        }
-
-        @Override
-        public long invokeAddress(Function function, HeapInvocationBuffer buffer) {
-            return Invoker.getInstance().invokeAddress(function, buffer);
-        }
-
-        @Override
-        public long invokeAddress(CallContext ctx, long function, HeapInvocationBuffer buffer) {
-            return Invoker.getInstance().invokeAddress(ctx, function, buffer);
-        }
-    }
-
     public static void invokeO(Invoker invoker) {
         Function function = getFunction("invokeO", Type.SLONG, Type.POINTER);
         CallContext ctx = getContext(Type.SLONG, Type.POINTER);
@@ -263,52 +231,52 @@ public class InvokerTest {
 
 
     @Test public void invokeNativeO() {
-        invokeO(new NativeInvoker());
+        invokeO(Invoker.getInstance());
     }
 
     @Test public void invokeHeapO() {
-        invokeO(new HeapInvoker());
+        invokeO(Invoker.getInstance());
     }
 
     @Test public void invokeNativeNO() {
-        invokeNO(new NativeInvoker());
+        invokeNO(Invoker.getInstance());
     }
 
     @Test public void invokeHeapNO() {
-        invokeNO(new HeapInvoker());
+        invokeNO(Invoker.getInstance());
     }
 
     @Test public void invokeNativeON() {
-        invokeON(new NativeInvoker());
+        invokeON(Invoker.getInstance());
     }
 
     @Test public void invokeHeapON() {
-        invokeON(new HeapInvoker());
+        invokeON(Invoker.getInstance());
     }
 
     @Test public void invokeNativeOO() {
-        invokeOO(new NativeInvoker());
+        invokeOO(Invoker.getInstance());
     }
 
     @Test public void invokeHeapOO() {
-        invokeOO(new HeapInvoker());
+        invokeOO(Invoker.getInstance());
     }
 
     @Test public void invokeNativeDO() {
-        invokeDO(new NativeInvoker());
+        invokeDO(Invoker.getInstance());
     }
 
     @Test public void invokeHeapDO() {
-        invokeDO(new HeapInvoker());
+        invokeDO(Invoker.getInstance());
     }
 
 
     @Test public void invokeNativeOD() {
-        invokeOD(new NativeInvoker());
+        invokeOD(Invoker.getInstance());
     }
 
     @Test public void invokeHeapOD() {
-        invokeOD(new HeapInvoker());
+        invokeOD(Invoker.getInstance());
     }
 
     public static boolean string_equals(Invoker invoker, String s1, String s2) {
@@ -330,7 +298,7 @@ public class InvokerTest {
     }
 
     @Test public void string_equals_heap() {
-        assertTrue("strings not equal", string_equals(new NativeInvoker(), "test", "test"));
+        assertTrue("strings not equal", string_equals(Invoker.getInstance(), "test", "test"));
     }
 
 }

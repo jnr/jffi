@@ -39,7 +39,6 @@ import java.math.BigDecimal;
  */
 public abstract class Invoker {
     private final Foreign foreign;
-    private final ObjectParameterInvoker objectParameterInvoker;
 
     /** Lazy initialization singleton holder */
     private static final class SingletonHolder {
@@ -58,21 +57,11 @@ public abstract class Invoker {
 
     /** Creates a new <tt>Invoker</tt> */
     private Invoker() {
-        this(Foreign.getInstance(), ObjectParameterInvoker.getInstance());
+        this(Foreign.getInstance());
     }
 
-    Invoker(Foreign foreign, ObjectParameterInvoker objectParameterInvoker) {
+    Invoker(Foreign foreign) {
         this.foreign = foreign;
-        this.objectParameterInvoker = objectParameterInvoker;
-    }
-
-    /**
-     * Gets the fast-path object parameter invoker.
-     * 
-     * @return An instance of {@link ObjectParameterInvoker}
-     */
-    public final ObjectParameterInvoker getObjectParameterInvoker() {
-        return objectParameterInvoker;
     }
 
     /**
