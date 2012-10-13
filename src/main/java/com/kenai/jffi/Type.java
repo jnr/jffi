@@ -105,33 +105,65 @@ public abstract class Type {
 
     /** The native signed long long integer type */
     public static final Type SLONG_LONG = SINT64;
-    
+
+    private int type = 0;
+    private int size = 0;
+    private int alignment = 0;
+    private volatile long handle = 0;
+
     /**
      * Gets the FFI type enum value for this <tt>Type</tt>
      *
      * @return An integer representing the FFI type.
      */
-    public abstract int type();
+    public final int type() {
+        return type != 0 ? type : resolveType();
+    }
+
     /**
      * Gets the native address of the ffi_type struct for this <tt>Type</tt>
      *
      * @return  The address of the ffi_type structure
      */
-    abstract long handle();
+    final long handle() {
+        return handle != 0 ? handle : resolveHandle();
+    }
 
     /**
      * Gets the size of this type.
      *
      * @return The size of this type, in bytes.
      */
-    public abstract int size();
+    public final int size() {
+        return size != 0 ? size : resolveSize();
+    }
 
     /**
      * Gets the alignment of this type.
      *
      * @return The alignment of this type, in bytes.
      */
-    public abstract int alignment();
+    public final int alignment() {
+        return alignment != 0 ? alignment : resolveAlignment();
+    }
+
+    private int resolveType() {
+        return type = getTypeInfo().type;
+    }
+
+    private int resolveSize() {
+        return size = getTypeInfo().size;
+    }
+
+    private int resolveAlignment() {
+        return alignment = getTypeInfo().alignment;
+    }
+
+    private long resolveHandle() {
+        return handle = getTypeInfo().handle;
+    }
+
+    abstract TypeInfo getTypeInfo();
 
     @Override
     public boolean equals(Object obj) {
@@ -152,7 +184,7 @@ public abstract class Type {
      * @param types An array of <tt>Type</tt>  objects
      * @return An array of native ffi_type handles.
      */
-    final static long[] nativeHandles(Type[] types) {
+    static long[] nativeHandles(Type[] types) {
 
         long[] nativeTypes = new long[types.length];
         for (int i = 0; i < types.length; ++i) {
@@ -169,7 +201,7 @@ public abstract class Type {
      * @param types A list of <tt>Type</tt> objects
      * @return An array of native ffi_type handles.
      */
-    final static long[] nativeHandles(List<Type> types) {
+    static long[] nativeHandles(List<Type> types) {
 
         long[] nativeTypes = new long[types.size()];
         for (int i = 0; i < nativeTypes.length; ++i) {
@@ -186,7 +218,7 @@ public abstract class Type {
      * @param nativeType The builtin type enum.
      * @return A <tt>Type</tt> instance.
      */
-    private static final Type builtin(NativeType nativeType) {
+    private static Type builtin(NativeType nativeType) {
         return new Builtin(nativeType);
     }
 
@@ -195,48 +227,31 @@ public abstract class Type {
      */
     static final class Builtin extends Type {
         private final NativeType nativeType;
-        private int size = 0;
-        private int alignment = 0;
-        private long handle = 0;
+        private TypeInfo typeInfo;
 
         private Builtin(NativeType nativeType) {
             this.nativeType = nativeType;
         }
-        
-        public final int type() {
-            return getTypeInfo().type;
-        }
-        
-        public final long handle() {
-            return handle != 0 ? handle : resolveHandle();
-        }
-        
-        public final int size() {
-            return size != 0 ? size : resolveSize();
+
+        TypeInfo getTypeInfo() {
+            return typeInfo != null ? typeInfo : lookupTypeInfo();
         }
 
-        public final int alignment() {
-            return alignment != 0 ? alignment : resolveAlignment();
-        }
+        private TypeInfo lookupTypeInfo() {
+            try {
+                Foreign foreign = Foreign.getInstance();
+                long handle = foreign.lookupBuiltinType(nativeType.ffiType);
+                if (handle == 0L) {
+                    throw new NullPointerException("invalid handle for native type " + nativeType);
+                }
 
-        private int resolveSize() {
-            return size = getTypeInfo().size;
-        }
+                return typeInfo = new TypeInfo(handle, foreign.getTypeType(handle), foreign.getTypeSize(handle), foreign.getTypeAlign(handle));
 
-        private int resolveAlignment() {
-            return alignment = getTypeInfo().alignment;
-        }
-
-        private long resolveHandle() {
-            long handle = getTypeInfo().handle;
-            if (handle == 0L) {
-                throw new RuntimeException("invalid handle for native type " + nativeType);
+            } catch (Throwable error) {
+                UnsatisfiedLinkError ule = new UnsatisfiedLinkError("could not get native definition for type: " + nativeType);
+                error.initCause(error);
+                throw ule;
             }
-            return this.handle = handle;
-        }
-
-        protected BuiltinTypeInfo getTypeInfo() {
-            return LookupTable.getInstance().find(nativeType);
         }
 
         @Override
@@ -260,82 +275,12 @@ public abstract class Type {
         }
     }
 
-    private static abstract class LookupTable {
-        private static final LookupTable lookupTable;
-        public abstract BuiltinTypeInfo find(NativeType nativeType);
-
-        static {
-            LookupTable table;
-            try {
-                table = newNativeLookupTable(Foreign.getInstance());
-            } catch (Throwable error) {
-                table = newInvalidLookupTable(error);
-            }
-            lookupTable = table;
-        }
-
-        static final LookupTable getInstance() {
-            return lookupTable;
-        }
-
-        private static LookupTable newNativeLookupTable(Foreign foreign) {
-            return new NativeLookupTable(foreign);
-        }
-
-        private static LookupTable newInvalidLookupTable(Throwable error) {
-            return new InvalidLookupTable(error);
-        }
-    }
-
-    private static final class NativeLookupTable extends LookupTable {
-        public final BuiltinTypeInfo[] typeMap;
-
-        NativeLookupTable(Foreign foreign) {
-            NativeType[] nativeTypes = NativeType.values();
-            typeMap = new BuiltinTypeInfo[nativeTypes.length];
-            for (int i = 0; i < typeMap.length; ++i) {
-                long h = foreign.lookupBuiltinType(nativeTypes[i].ffiType);
-                int type, size, alignment;
-                if (h != 0L) {
-                    type = foreign.getTypeType(h);
-                    size = foreign.getTypeSize(h);
-                    alignment = foreign.getTypeAlign(h);
-                } else {
-                    // Don't fail initialization, setup a dummy type
-                    type = nativeTypes[i].ffiType;
-                    size = 0;
-                    alignment = 0;
-                }
-                typeMap[i] = new BuiltinTypeInfo(h, type, size, alignment);
-            }
-        }
-
-        public BuiltinTypeInfo find(NativeType nativeType) {
-            return typeMap[nativeType.ordinal()];
-        }
-    }
-
-    private static final class InvalidLookupTable extends LookupTable {
-        private Throwable error;
-
-        private InvalidLookupTable(Throwable error) {
-            this.error = error;
-        }
-
-        public BuiltinTypeInfo find(NativeType nativeType) {
-            UnsatisfiedLinkError error = new UnsatisfiedLinkError("could not get native definition for type: " + nativeType);
-            error.initCause(this.error);
-
-            throw error;
-        }
-    }
-
     /**
      * This is a lazy loaded cache of builtin type info, so we can still have
      * Type.VOID as a public static variable without it causing the
      * native library to load.
      */
-    private static final class BuiltinTypeInfo {
+    static final class TypeInfo {
         /** The FFI type of this type */
         final int type;
         /** The size in bytes of this type */
@@ -345,7 +290,7 @@ public abstract class Type {
         /** The address of this type's ffi_type structure */
         final long handle;
 
-        private BuiltinTypeInfo(long handle, int type, int size, int alignment) {
+        TypeInfo(long handle, int type, int size, int alignment) {
             this.handle = handle;
             this.type = type;
             this.size = size;

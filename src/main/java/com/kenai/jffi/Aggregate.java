@@ -36,16 +36,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public abstract class Aggregate extends Type {
-    /** The FFI type of this type */
-    private final int type;
-    /** The size in bytes of this type */
-    private final int size;
-
-    /** The minimum alignment of this type */
-    private final int align;
-
-    /** The address of this type's ffi_type structure */
-    private final long handle;
+    private final TypeInfo typeInfo;
 
     /** A handle to the foreign interface to keep it alive as long as this object is alive */
     @SuppressWarnings({"FieldCanBeLocal", "UnusedDeclaration"})
@@ -56,26 +47,11 @@ public abstract class Aggregate extends Type {
             throw new NullPointerException("Invalid ffi_type handle");
         }
         this.foreign = foreign;
-        this.handle = handle;
-        this.type = foreign.getTypeType(handle);
-        this.size = foreign.getTypeSize(handle);
-        this.align = foreign.getTypeAlign(handle);
-    }
-    
-    final long handle() {
-        return handle;
+        this.typeInfo = new TypeInfo(handle, foreign.getTypeType(handle), foreign.getTypeSize(handle), foreign.getTypeAlign(handle));
     }
 
-    public final int type() {
-        return type;
-    }
-
-    public final int size() {
-        return size;
-    }
-
-    public final int alignment() {
-        return align;
+    final TypeInfo getTypeInfo() {
+        return typeInfo;
     }
 
     public synchronized final void dispose() {}
@@ -83,7 +59,7 @@ public abstract class Aggregate extends Type {
     @Override
     protected void finalize() throws Throwable {
         try {
-            foreign.freeAggregate(handle);
+            foreign.freeAggregate(typeInfo.handle);
         } catch (Throwable t) {
             Logger.getLogger(getClass().getName()).log(Level.WARNING, 
                     "Exception when freeing FFI aggregate: %s", t.getLocalizedMessage());
