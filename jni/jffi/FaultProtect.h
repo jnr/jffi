@@ -41,6 +41,8 @@ typedef struct FaultData_ FaultData;
 
 #if defined(__APPLE__) && (defined(__x86_64__) || defined(__i386__))
 # define FAULT_PROTECT_ENABLED (1)
+#else
+# define FAULT_PROTECT_ENABLED (0)
 #endif
 
 extern struct sigaction jffi_sigsegv_chain;
