@@ -284,7 +284,7 @@
 
 
   <target name="-generate-version" depends="-init,-init-vars,-generate-version-source">
-    <javac target="1.5" destdir="${build.classes.dir}" srcdir="${build.dir}/java" includeantruntime="false"/>
+    <javac target="1.6" destdir="${build.classes.dir}" srcdir="${build.dir}/java" includeantruntime="false"/>
   </target>
 
   <target name="-generate-native-headers" depends="-init-vars,-generate-version,-compile-java">
