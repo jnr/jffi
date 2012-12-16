@@ -126,7 +126,7 @@ public final class CallContext {
 
         final int flags = (!saveErrno ? Foreign.F_NOERRNO : 0)
                 | (convention == CallingConvention.STDCALL ? Foreign.F_STDCALL : Foreign.F_DEFAULT)
-                | (faultProtect || true ? Foreign.F_PROTECT : 0);
+                | (faultProtect ? Foreign.F_PROTECT : 0);
 
         final long h = foreign.newCallContext(returnType.handle(),
                 Type.nativeHandles(parameterTypes), flags);
