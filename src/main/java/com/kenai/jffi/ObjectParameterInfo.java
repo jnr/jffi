@@ -1,6 +1,10 @@
 package com.kenai.jffi;
 
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
 public final class ObjectParameterInfo {
+    private static final ConcurrentMap<Integer, ObjectParameterInfo> CACHE = new ConcurrentHashMap<Integer, ObjectParameterInfo>();
     private final int parameterIndex;
     private final int ioflags;
     private final int objectInfo;
@@ -8,20 +12,28 @@ public final class ObjectParameterInfo {
     
     public static ObjectParameterInfo create(int parameterIndex, ObjectType objectType, 
             ComponentType componentType, int ioflags) {
-
-        return new ObjectParameterInfo(parameterIndex, ioflags, objectType.value | componentType.value);
+        return getCachedInfo(ObjectBuffer.makeObjectFlags(ioflags, objectType.value | componentType.value, parameterIndex));
     }
 
     public static ObjectParameterInfo create(int parameterIndex, int ioflags) {
-
-        return new ObjectParameterInfo(parameterIndex, ioflags, 0);
+        return getCachedInfo(ObjectBuffer.makeObjectFlags(ioflags, 0, parameterIndex));
     }
 
-    private ObjectParameterInfo(int parameterIndex, int ioflags, int typeInfo) {
+    private static ObjectParameterInfo getCachedInfo(int objectInfo) {
+        ObjectParameterInfo info = CACHE.get(objectInfo);
+        if (info != null) {
+            return info;
+        }
 
-        this.parameterIndex = parameterIndex;
-        this.ioflags = ioflags & ObjectBuffer.FLAGS_MASK;
-        this.objectInfo = ObjectBuffer.makeObjectFlags(ioflags, typeInfo, parameterIndex);
+        ObjectParameterInfo cachedInfo = CACHE.putIfAbsent(objectInfo, info = new ObjectParameterInfo(objectInfo));
+
+        return cachedInfo != null ? cachedInfo : info;
+    }
+
+    private ObjectParameterInfo(int objectInfo) {
+        this.objectInfo = objectInfo;
+        this.ioflags = objectInfo & ObjectBuffer.FLAGS_MASK;
+        this.parameterIndex = (objectInfo & ObjectBuffer.INDEX_MASK) >> ObjectBuffer.INDEX_SHIFT;
     }
 
     /** Copy the array contents to native memory before calling the function */
@@ -99,11 +111,11 @@ public final class ObjectParameterInfo {
 
         ObjectParameterInfo info = (ObjectParameterInfo) o;
 
-        return objectInfo == info.objectInfo && parameterIndex == info.parameterIndex;
+        return objectInfo == info.objectInfo;
     }
 
     @Override
     public int hashCode() {
-        return 31 * parameterIndex + objectInfo;
+        return 31 * objectInfo;
     }
 }
