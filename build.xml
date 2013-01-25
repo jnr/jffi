@@ -112,6 +112,7 @@
         <os name="FreeBSD"/>
         <os name="OpenBSD"/>
         <os name="AIX"/>
+        <os name="HP-UX"/>
       </or>
     </condition>
     <condition property="make.exe" value="/usr/sfw/bin/gmake">
