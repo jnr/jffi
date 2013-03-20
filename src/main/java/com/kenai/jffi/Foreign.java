@@ -99,13 +99,13 @@ final class Foreign {
         }
     }
     
-    public static final Foreign getInstance() {
+    public static Foreign getInstance() {
         return InstanceHolder.INSTANCE.getForeign();
     }
     
     private Foreign() { }
 
-    private final static int getVersionField(String name) {
+    private static int getVersionField(String name) {
         try {
         Class c = Class.forName(Foreign.class.getPackage().getName() + ".Version");
             return (Integer) c.getField(name).get(c);
@@ -147,7 +147,7 @@ final class Foreign {
     /** Resolve all symbols when loading the library */
     public static final int RTLD_NOW    = 0x00002;
 
-    /** Symbols in this library are not made availabl to other libraries */
+    /** Symbols in this library are not made available to other libraries */
     public static final int RTLD_LOCAL  = 0x00004;
 
     /** All symbols in the library are made available to other libraries */
@@ -252,30 +252,30 @@ final class Foreign {
      *
      * @param name The name of the dynamic library to open.  Pass null to get a
      * handle to the current process.
-     * @param flags The flags to dlopen.  A bitmask of {@link RTLD_LAZY}, {@link RTLD_NOW},
-     * {@link RTLD_LOCAL}, {@link RTLD_GLOBAL}
+     * @param flags The flags to dlopen.  A bit mask of {@link #RTLD_LAZY}, {@link #RTLD_NOW},
+     * {@link #RTLD_LOCAL}, {@link #RTLD_GLOBAL}
      * @return A native handle to the dynamic library.
      */
     static native long dlopen(String name, int flags);
 
     /**
-     * Closes a dynamic library opened by {@link dlopen}.
+     * Closes a dynamic library opened by {@link #dlopen}.
      *
-     * @param handle The dynamic library handle returned by {@dlopen}
+     * @param handle The dynamic library handle returned by {@link #dlopen}
      */
     static native void dlclose(long handle);
 
     /**
      * Locates the memory address of a dynamic library symbol.
      *
-     * @param handle A dynamic library handle obtained from {@dlopen}
+     * @param handle A dynamic library handle obtained from {@link #dlopen}
      * @param name The name of the symbol.
      * @return The address where the symbol in loaded in memory.
      */
     static native long dlsym(long handle, String name);
 
     /**
-     * Gets the last error raised by {@dlopen} or {@dlsym}
+     * Gets the last error raised by {@link #dlopen} or {@link #dlsym}
      *
      * @return The error string.
      */
@@ -291,7 +291,7 @@ final class Foreign {
     static native long allocateMemory(long size, boolean clear);
 
     /**
-     * Releases memory allocated via {@link allocateMemory} back to the system.
+     * Releases memory allocated via {@link #allocateMemory} back to the system.
      *
      * @param address The address of the memory to release.
      */
@@ -351,7 +351,7 @@ final class Foreign {
      *
      * @param returnType The return type of the function
      * @param paramTypes The types of the parameters
-     * @param flags A bitmask of F_DEFAULT, F_STDCALL or F_NOERRNO
+     * @param flags A bitmask of F_DEFAULT, F_STDCALL, F_NOERRNO, F_PROTECT
      *
      * @return The native address of a new function context
      */
@@ -360,14 +360,14 @@ final class Foreign {
     /**
      * Frees a call context created by {@link #newCallContext}
      *
-     * @param handle The native function context to free
+     * @param callContext The native call context to free
      */
     final native void freeCallContext(long callContext);
 
     /**
      * Gets the size required to pack parameters for the function in libffi raw format.
      *
-     * @param functionContext The function context
+     * @param callContext The call context
      * @return The size in bytes required to pack parameters in raw format
      */
     final native int getCallContextRawParameterSize(long callContext);
@@ -427,25 +427,26 @@ final class Foreign {
     /**
      * Allocates a new FFI struct or union layout
      *
-     * @param fields An array of ffi_type pointers desccribing the fields of the struct
+     * @param fields An array of ffi_type pointers describing the fields of the struct
      * @param isUnion If true, then fields are all positioned at offset=0, else
-     * fiels are sequentially positioned.
+     * fields are sequentially positioned.
      * @return The native address of the ffi_type structure for the new struct layout
+     * @see #freeAggregate(long)
      */
     final native long newStruct(long[] fields, boolean isUnion);
 
     /**
-     * Allocates a new FFI array type
+     * Allocates a new FFI array type.
      *
-     * @param fields An array of ffi_type pointers desccribing the fields of the struct
-     * @param isUnion If true, then fields are all positioned at offset=0, else
-     * fiels are sequentially positioned.
-     * @return The native address of the ffi_type structure for the new struct layout
+     * @param elementType the type of each element in the array.
+     * @param length the number of elements in the array.
+     * @return The native address of the ffi_type structure for the new array layout.
+     * @see #freeAggregate(long)
      */
     final native long newArray(long elementType, int length);
 
     /**
-     * Frees a FFI struct or array handle allocated via {@link #newStruct} or {@link #newArray}.
+     * Frees a FFI struct, union or array handle allocated via {@link #newStruct} or {@link #newArray}.
      *
      * @param handle The FFI struct handle
      */
@@ -454,10 +455,11 @@ final class Foreign {
     /**
      * Invokes a function with no arguments, and returns a 32 bit integer.
      *
-     * @param functionContext The address of the function context structure from {@link #newFunction}.
+     * @param callContext The address of the call context structure from {@link #newCallContext}.
+     * @param function The address of the function to invoke.
      * @return A 32 bit integer value.
      */
-    static native int invokeI0(long ctx, long function);
+    static native int invokeI0(long callContext, long function);
 
 
     /**
@@ -465,80 +467,88 @@ final class Foreign {
      *
      * This method does not save the errno value.
      *
-     * @param functionContext The address of the function context structure from {@link #newFunction}.
+     * @param callContext The address of the call context structure from {@link #newCallContext}.
+     * @param function The address of the function to invoke.
      * @return A 32 bit integer value.
      */
-    static native int invokeI0NoErrno(long ctx, long function);
+    static native int invokeI0NoErrno(long callContext, long function);
 
     /**
      * Invokes a function with one integer argument, and returns a 32 bit integer.
      *
-     * @param functionContext The address of the function context structure from {@link #newFunction}.
+     * @param callContext The address of the call context structure from {@link #newCallContext}.
+     * @param function The address of the function to invoke.
      * @param arg1 The 32 bit integer argument.
      * @return A 32 bit integer value.
      */
-    static native int invokeI1(long ctx, long function, int arg1);
+    static native int invokeI1(long callContext, long function, int arg1);
 
     /**
      * Invokes a function with one integer argument, and returns a 32 bit integer.
      *
      * This method does not save the errno value.
      *
-     * @param functionContext The address of the function context structure from {@link #newFunction}.
+     * @param callContext The address of the call context structure from {@link #newCallContext}.
+     * @param function The address of the function to invoke.
      * @param arg1 The 32 bit integer argument.
      * @return A 32 bit integer value.
      */
-    static native int invokeI1NoErrno(long ctx, long function, int arg1);
+    static native int invokeI1NoErrno(long callContext, long function, int arg1);
 
     /**
      * Invokes a function with two integer arguments, and returns a 32 bit integer.
      *
-     * @param functionContext The address of the function context structure from {@link #newFunction}.
+     * @param callContext The address of the call context structure from {@link #newCallContext}.
+     * @param function The address of the function to invoke.
      * @param arg1 The first 32 bit integer argument.
      * @param arg2 The second 32 bit integer argument.
      * @return A 32 bit integer value.
      */
-    static native int invokeI2(long ctx, long function, int arg1, int arg2);
+    static native int invokeI2(long callContext, long function, int arg1, int arg2);
 
     /**
      * Invokes a function with two integer arguments, and returns a 32 bit integer.
      *
      * This method does not save the errno value.
      *
-     * @param functionContext The address of the function context structure from {@link #newFunction}.
+     * @param callContext The address of the call context structure from {@link #newCallContext}.
+     * @param function The address of the function to invoke.
      * @param arg1 The first 32 bit integer argument.
      * @param arg2 The second 32 bit integer argument.
      * @return A 32 bit integer value.
      */
-    static native int invokeI2NoErrno(long ctx, long function, int arg1, int arg2);
+    static native int invokeI2NoErrno(long callContext, long function, int arg1, int arg2);
 
     /**
      * Invokes a function with three integer arguments, and returns a 32 bit integer.
      *
-     * @param functionContext The address of the function context structure from {@link #newFunction}.
+     * @param callContext The address of the call context structure from {@link #newCallContext}.
+     * @param function The address of the function to invoke.
      * @param arg1 The first 32 bit integer argument.
      * @param arg2 The second 32 bit integer argument.
      * @param arg3 The third 32 bit integer argument.
      * @return A 32 bit integer value.
      */
-    static native int invokeI3(long ctx, long function, int arg1, int arg2, int arg3);
+    static native int invokeI3(long callContext, long function, int arg1, int arg2, int arg3);
 
     /**
      * Invokes a function with four integer arguments, and returns a 32 bit integer.
      *
-     * @param functionContext The address of the function context structure from {@link #newFunction}.
+     * @param callContext The address of the call context structure from {@link #newCallContext}.
+     * @param function The address of the function to invoke.
      * @param arg1 The first 32 bit integer argument.
      * @param arg2 The second 32 bit integer argument.
      * @param arg3 The third 32 bit integer argument.
      * @param arg4 The third 32 bit integer argument.
      * @return A 32 bit integer value.
      */
-    static native int invokeI4(long ctx, long function, int arg1, int arg2, int arg3, int arg4);
+    static native int invokeI4(long callContext, long function, int arg1, int arg2, int arg3, int arg4);
 
     /**
      * Invokes a function with five integer arguments, and returns a 32 bit integer.
      *
-     * @param functionContext The address of the function context structure from {@link #newFunction}.
+     * @param callContext The address of the call context structure from {@link #newCallContext}.
+     * @param function The address of the function to invoke.
      * @param arg1 The first 32 bit integer argument.
      * @param arg2 The second 32 bit integer argument.
      * @param arg3 The third 32 bit integer argument.
@@ -546,12 +556,13 @@ final class Foreign {
      * @param arg5 The fifth 32 bit integer argument.
      * @return A 32 bit integer value.
      */
-    static native int invokeI5(long ctx, long function, int arg1, int arg2, int arg3, int arg4, int arg5);
+    static native int invokeI5(long callContext, long function, int arg1, int arg2, int arg3, int arg4, int arg5);
 
     /**
      * Invokes a function with six integer arguments, and returns a 32 bit integer.
      *
-     * @param functionContext The address of the function context structure from {@link #newFunction}.
+     * @param callContext The address of the call context structure from {@link #newCallContext}.
+     * @param function The address of the function to invoke.
      * @param arg1 The first 32 bit integer argument.
      * @param arg2 The second 32 bit integer argument.
      * @param arg3 The third 32 bit integer argument.
@@ -560,28 +571,29 @@ final class Foreign {
      * @param arg6 The sixth 32 bit integer argument.
      * @return A 32 bit integer value.
      */
-    static native int invokeI6(long ctx, long function, int arg1, int arg2, int arg3, int arg4, int arg5, int arg6);
+    static native int invokeI6(long callContext, long function, int arg1, int arg2, int arg3, int arg4, int arg5, int arg6);
 
     /**
      * Invokes a function with three integer arguments, and returns a 32 bit integer.
      *
      * This method does not save the errno value.
      *
-     * @param functionContext The address of the function context structure from {@link #newFunction}.
+     * @param callContext The address of the call context structure from {@link #newCallContext}.
+     * @param function The address of the function to invoke.
      * @param arg1 The first 32 bit integer argument.
      * @param arg2 The second 32 bit integer argument.
      * @param arg3 The third 32 bit integer argument.
      * @return A 32 bit integer value.
      */
-    static native int invokeI3NoErrno(long ctx, long function, int arg1, int arg2, int arg3);
-    static native int invokeI4NoErrno(long ctx, long function, int arg1, int arg2, int arg3, int arg4);
-    static native int invokeI5NoErrno(long ctx, long function, int arg1, int arg2, int arg3, int arg4, int arg5);
-    static native int invokeI6NoErrno(long ctx, long function, int arg1, int arg2, int arg3, int arg4, int arg5, int arg6);
+    static native int invokeI3NoErrno(long callContext, long function, int arg1, int arg2, int arg3);
+    static native int invokeI4NoErrno(long callContext, long function, int arg1, int arg2, int arg3, int arg4);
+    static native int invokeI5NoErrno(long callContext, long function, int arg1, int arg2, int arg3, int arg4, int arg5);
+    static native int invokeI6NoErrno(long callContext, long function, int arg1, int arg2, int arg3, int arg4, int arg5, int arg6);
     
     /**
      * Invokes a function with no arguments, and returns a 64 bit integer.
      *
-     * @param function The address of the function context structure from {@link #newFunction}.
+     * @param function The address of the function context structure from {@link #newCallContext}.
      * @return A 64 bit integer value.
      */
     static native long invokeL0(long ctx, long function);
@@ -589,7 +601,7 @@ final class Foreign {
     /**
      * Invokes a function with one 64 bit integer argument, and returns a 64 bit integer.
      *
-     * @param function The address of the function context structure from {@link #newFunction}.
+     * @param function The address of the function context structure from {@link #newCallContext}.
      * @param arg1 The 64 bit integer argument.
      * @return A 64 bit integer value.
      */
@@ -599,7 +611,7 @@ final class Foreign {
     /**
      * Invokes a function with two 64 bit integer arguments, and returns a 64 bit integer.
      *
-     * @param function The address of the function context structure from {@link #newFunction}.
+     * @param function The address of the function context structure from {@link #newCallContext}.
      * @param arg1 The first 64 bit integer argument.
      * @param arg2 The second 64 bit integer argument.
      * @return A 64 bit integer value.
@@ -609,7 +621,7 @@ final class Foreign {
     /**
      * Invokes a function with three 64 bit integer arguments, and returns a 64 bit integer.
      *
-     * @param function The address of the function context structure from {@link #newFunction}.
+     * @param function The address of the function context structure from {@link #newCallContext}.
      * @param arg1 The first 64 bit integer argument.
      * @param arg2 The second 64 bit integer argument.
      * @param arg3 The third 64 bit integer argument.
@@ -620,7 +632,7 @@ final class Foreign {
     /**
      * Invokes a function with four 64 bit integer arguments, and returns a 64 bit integer.
      *
-     * @param function The address of the function context structure from {@link #newFunction}.
+     * @param function The address of the function context structure from {@link #newCallContext}.
      * @param arg1 The first 64 bit integer argument.
      * @param arg2 The second 64 bit integer argument.
      * @param arg3 The third 64 bit integer argument.
@@ -632,7 +644,7 @@ final class Foreign {
     /**
      * Invokes a function with five 64 bit integer arguments, and returns a 64 bit integer.
      *
-     * @param function The address of the function context structure from {@link #newFunction}.
+     * @param function The address of the function context structure from {@link #newCallContext}.
      * @param arg1 The first 64 bit integer argument.
      * @param arg2 The second 64 bit integer argument.
      * @param arg3 The third 64 bit integer argument.
@@ -645,7 +657,7 @@ final class Foreign {
     /**
      * Invokes a function with six 64 bit integer arguments, and returns a 64 bit integer.
      *
-     * @param function The address of the function context structure from {@link #newFunction}.
+     * @param function The address of the function context structure from {@link #newCallContext}.
      * @param arg1 The first 64 bit integer argument.
      * @param arg2 The second 64 bit integer argument.
      * @param arg3 The third 64 bit integer argument.
@@ -667,7 +679,7 @@ final class Foreign {
     /**
      * Invokes a function with zero numeric arguments, and returns a numeric value.
      *
-     * @param function The address of the function context structure from {@link #newFunction}.
+     * @param function The address of the function context structure from {@link #newCallContext}.
      * @return A numeric value.
      */
     static native long invokeN0(long ctx, long function);
@@ -675,7 +687,7 @@ final class Foreign {
     /**
      * Invokes a function with one numeric arguments, and returns a numeric value.
      *
-     * @param function The address of the function context structure from {@link #newFunction}.
+     * @param function The address of the function context structure from {@link #newCallContext}.
      * @param arg1 The first numeric argument.
      * @return A numeric value.
      */
@@ -684,7 +696,7 @@ final class Foreign {
     /**
      * Invokes a function with two numeric arguments, and returns a numeric value.
      *
-     * @param function The address of the function context structure from {@link #newFunction}.
+     * @param function The address of the function context structure from {@link #newCallContext}.
      * @param arg1 The first numeric argument.
      * @param arg2 The second numeric argument.
      * @return A numeric value.
@@ -694,7 +706,7 @@ final class Foreign {
     /**
      * Invokes a function with three numeric arguments, and returns a numeric value.
      *
-     * @param function The address of the function context structure from {@link #newFunction}.
+     * @param function The address of the function context structure from {@link #newCallContext}.
      * @param arg1 The first numeric argument.
      * @param arg2 The second numeric argument.
      * @param arg3 The third numeric argument.
@@ -705,7 +717,7 @@ final class Foreign {
     /**
      * Invokes a function with four numeric arguments, and returns a numeric value.
      *
-     * @param function The address of the function context structure from {@link #newFunction}.
+     * @param function The address of the function context structure from {@link #newCallContext}.
      * @param arg1 The first numeric argument.
      * @param arg2 The second numeric argument.
      * @param arg3 The third numeric argument.
@@ -717,7 +729,7 @@ final class Foreign {
     /**
      * Invokes a function with five numeric arguments, and returns a numeric value.
      *
-     * @param function The address of the function context structure from {@link #newFunction}.
+     * @param function The address of the function context structure from {@link #newCallContext}.
      * @param arg1 The first numeric argument.
      * @param arg2 The second numeric argument.
      * @param arg3 The third numeric argument.
@@ -730,7 +742,7 @@ final class Foreign {
     /**
      * Invokes a function with six numeric arguments, and returns a numeric value.
      *
-     * @param function The address of the function context structure from {@link #newFunction}.
+     * @param function The address of the function context structure from {@link #newCallContext}.
      * @param arg1 The first numeric argument.
      * @param arg2 The second numeric argument.
      * @param arg3 The third numeric argument.
@@ -918,7 +930,7 @@ final class Foreign {
     
     /**
      * Invokes a function that returns a 32 bit integer.
-     * @param function The address of the function context structure from {@link #newFunction}.
+     * @param callContext The address of the call context structure from {@link #newCallContext}.
      * @param buffer A byte array containing the arguments to the function.
      * @return A 32 bit integer value.
      */
@@ -926,32 +938,36 @@ final class Foreign {
 
     /**
      * Invokes a function that returns a 64 bit integer.
-     * @param function The address of the function context structure from {@link #newFunction}.
-     * @param buffer A byte array containing the aguments to the function.
+     * @param callContext The address of the call context structure from {@link #newCallContext}.
+     * @param function The address of the function to invoke.
+     * @param buffer A byte array containing the arguments to the function.
      * @return A 64 bit integer value.
      */
     static native long invokeArrayReturnLong(long callContext, long function, byte[] buffer);
 
     /**
      * Invokes a function that returns a 32 bit floating point value.
-     * @param function The address of the function context structure from {@link #newFunction}.
-     * @param buffer A byte array containing the aguments to the function.
+     * @param callContext The address of the call context structure from {@link #newCallContext}.
+     * @param function The address of the function to invoke.
+     * @param buffer A byte array containing the arguments to the function.
      * @return A 32 bit floating point value.
      */
     static native float invokeArrayReturnFloat(long callContext, long function, byte[] buffer);
 
     /**
      * Invokes a function that returns a 64 bit floating point value.
-     * @param function The address of the function context structure from {@link #newFunction}.
-     * @param buffer A byte array containing the aguments to the function.
+     * @param callContext The address of the call context structure from {@link #newCallContext}.
+     * @param function The address of the function to invoke.
+     * @param buffer A byte array containing the arguments to the function.
      * @return A 64 bit floating point value.
      */
     static native double invokeArrayReturnDouble(long callContext, long function, byte[] buffer);
 
     /**
      * Invokes a function and pack the return value into a byte array.
-     * @param function The address of the function context structure from {@link #newFunction}.
-     * @param buffer A byte array containing the aguments to the function.
+     * @param callContext The address of the call context structure from {@link #newCallContext}.
+     * @param function The address of the function to invoke.
+     * @param paramBuffer A byte array containing the arguments to the function.
      */
     static native void invokeArrayReturnStruct(long callContext, long function, byte[] paramBuffer, byte[] returnBuffer, int offset);
 
@@ -960,8 +976,9 @@ final class Foreign {
      *
      * This is only useful when calling JNI functions directly.
      *
-     * @param function The address of the function context structure from {@link #newFunction}.
-     * @param buffer A byte array containing the aguments to the function.
+     * @param callContext The address of the call context structure from {@link #newCallContext}.
+     * @param function The address of the function to invoke.
+     * @param paramBuffer A byte array containing the arguments to the function.
      */
     static native Object invokeArrayWithObjectsReturnObject(long callContext, long function, byte[] paramBuffer,
             int objectCount, int[] objectInfo, Object[] objects);
@@ -988,7 +1005,7 @@ final class Foreign {
      * Invokes a function, with the parameters loaded into native memory buffers,
      * and the function result is stored in a native memory buffer.
      *
-     * @param functionContext The address of the function context structure from {@link #newFunction}.
+     * @param functionContext The address of the function context structure from {@link #newCallContext}.
      * @param returnBuffer The address of the native buffer to place the result
      * of the function call in.
      * @param parameters An array of addresses of the function parameters.
@@ -1281,7 +1298,7 @@ final class Foreign {
      *
      * @param dst The destination memory address.
      * @param src The source memory address.
-     * @param size The number of bytes to copy.
+     * @param len The number of bytes to copy.
      */
     static native void memmove(long dst, long src, long len);
 
@@ -1290,7 +1307,7 @@ final class Foreign {
      *
      * @param dst The destination memory address.
      * @param src The source memory address.
-     * @param size The number of bytes to copy.
+     * @param len The number of bytes to copy.
      */
     static native void memcpy(long dst, long src, long len);
 
