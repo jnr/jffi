@@ -102,7 +102,7 @@ public abstract class MemoryIO {
     }
 
     private static MemoryIO newNativeCheckedImpl() {
-        return Foreign.isFaultProtectEnabled() ? new CheckedNativeImpl() : newNativeImpl();
+        return Foreign.isMemoryProtectionEnabled() ? new CheckedNativeImpl() : newNativeImpl();
     }
 
     /**

@@ -273,3 +273,8 @@ Java_com_kenai_jffi_Foreign_getArch(JNIEnv *env, jobject self)
     return (*env)->NewStringUTF(env, CPU);
 }
 
+JNIEXPORT jboolean JNICALL 
+Java_com_kenai_jffi_Foreign_isFaultProtectionEnabled(JNIEnv *env , jclass klass)
+{
+    return FAULT_PROTECT_ENABLED ? JNI_TRUE : JNI_FALSE; 
+}

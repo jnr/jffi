@@ -250,6 +250,17 @@ final class Foreign {
      */
     private native void init();
 
+    private static native boolean isFaultProtectionEnabled();
+    
+    static boolean isMemoryProtectionEnabled() {
+        try {
+            return isFaultProtectionEnabled();
+        
+        } catch (UnsatisfiedLinkError e) {
+            return false;
+        }
+    }
+
     /**
      * Opens a dynamic library.
      *
@@ -1362,10 +1373,6 @@ final class Foreign {
      */
     static native void putZeroTerminatedByteArray(long address, byte[] data, int offset, int length);
     
-    static boolean isFaultProtectEnabled() {
-        return false;
-    }
-
     /**
      * Reads an 8 bit integer from a native memory location.
      *
