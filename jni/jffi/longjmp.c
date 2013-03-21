@@ -25,7 +25,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.  */
 
 #undef _FORTIFY_SOURCE
 #include <assert.h>
-#include <libunwind.h>
 #include <setjmp.h>
 #include <signal.h>
 #include <stdlib.h>
@@ -36,6 +35,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.  */
 #include "FaultProtect.h"
 
 #if FAULT_PROTECT_ENABLED
+#include <libunwind.h>
 
 #ifdef __APPLE__
 #if defined(__x86_64__)

@@ -239,11 +239,12 @@ static void
 closure_invoke(ffi_cif* cif, void* retval, void** parameters, void* user_data)
 {
     Closure* closure = (Closure *) user_data;
-    ThreadData* td = thread_data_get();
+    
     JNIEnv* env;
     int i;
     bool detach;
 #if FAULT_PROTECT_ENABLED
+    ThreadData* td = thread_data_get();
     FaultData* fdp;
 #endif
 

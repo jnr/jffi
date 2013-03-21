@@ -61,6 +61,10 @@
 # define PROT(stmt, rval) do { stmt; } while(0)
 #endif
 
+#ifndef MIN
+# define MIN(a, b) ((a) < (b) ? (a) : (b))
+#endif
+
 static void putArrayChecked(JNIEnv* env, jlong address, jobject obj, jint offset, jint length, int typeSize,
     void (JNICALL *get)(JNIEnv *env, jobject array, jsize start, jsize l, void *buf));
 static void getArrayChecked(JNIEnv* env, jlong address, jobject obj, jint offset, jint length, int typeSize,
