@@ -34,11 +34,13 @@
 #ifndef _WIN32
 #  include <pthread.h>
 #endif
+#include <signal.h>
 #include <jni.h>
 #include "Exception.h"
 #include "com_kenai_jffi_Foreign.h"
 #include "com_kenai_jffi_Version.h"
 #include "jffi.h"
+#include "FaultProtect.h"
 
 #ifndef _WIN32
 pthread_key_t jffi_threadDataKey;
@@ -49,7 +51,18 @@ JNIEXPORT jint JNICALL
 JNI_OnLoad(JavaVM *vm, void *reserved)
 {
 #ifndef _WIN32
+    struct sigaction sa;
     pthread_key_create(&jffi_threadDataKey, thread_data_free);
+
+#if FAULT_PROTECT_ENABLED
+    memset(&sa, 0, sizeof(sa));
+    sa.sa_sigaction = jffi_sigsegv;
+    sa.sa_flags = SA_SIGINFO;
+    sigaction(SIGSEGV, &sa, &jffi_sigsegv_chain);
+    sa.sa_sigaction = jffi_sigbus;
+    sigaction(SIGBUS, &sa, &jffi_sigbus_chain);
+#endif
+
 #endif
     return JNI_VERSION_1_4;
 }

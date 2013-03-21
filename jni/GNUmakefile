@@ -201,6 +201,8 @@ ifeq ($(OS), darwin)
   FFI_CFLAGS += -isysroot $(MACSDK) -I$(MACSDK)/usr/include
   PICFLAGS =
   SOFLAGS =
+  #LIBS += $(JAVA_HOME)/jre/lib/libjsig.dylib
+  OBJS += $(JFFI_BUILD_DIR)/darwin-longjmp.o $(JFFI_BUILD_DIR)/darwin-trampoline.o
 endif
 
 ifeq ($(OS), linux)
@@ -281,13 +283,13 @@ $(LIBJFFI):  $(OBJS) $(LIBFFI_LIBS)
 	$(CC) -o $@ $(LDFLAGS) $(SOFLAGS) $(OBJS) $(LIBFFI_LIBS) $(LIBS)
 	$(STRIP) $@
 
-$(JFFI_BUILD_DIR)/Fast%.o: $(JFFI_SRC_DIR)/Fast%.c $(wildcard $(JFFI_SRC_DIR)/*.h)
-	@mkdir -p $(@D)
-	@$(CCACHE) $(CC) $(CFLAGS) -fomit-frame-pointer -c $< -o $@
-
 $(BUILD_DIR)/%.o : $(SRC_DIR)/%.c $(wildcard $(JFFI_SRC_DIR)/*.h)
 	@mkdir -p $(@D)
 	@$(CCACHE) $(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/%.o : $(SRC_DIR)/%.S $(wildcard $(JFFI_SRC_DIR)/*.h)
+	@mkdir -p $(@D)
+	@$(CC) $(CFLAGS) -o $@ -c $<
 
 $(OBJS) : $(LIBFFI_LIBS)
 

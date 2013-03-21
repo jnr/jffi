@@ -42,19 +42,24 @@ typedef struct CallContext {
     ffi_type** ffiParamTypes;
     int* rawParamOffsets;
     bool saveErrno;
-    bool isFastInt;
-    bool isFastLong;
+    int flags;
     long resultMask;
     int (*error_fn)(void);
 } CallContext;
 
 extern void jffi_save_errno_ctx(CallContext* ctx);
 
+#define CALL_CTX_SAVE_ERRNO (0x1)
+#define CALL_CTX_FAST_INT   (0x2)
+#define CALL_CTX_FAST_LONG  (0x4)
+#define CALL_CTX_FAULT_PROT (0x8)
+
 #define SAVE_ERRNO(ctx) do { \
-    if (unlikely(ctx->saveErrno)) { \
+    if (unlikely((ctx->flags & CALL_CTX_SAVE_ERRNO) != 0)) { \
         jffi_save_errno_ctx(ctx); \
     } \
 } while(0)
+
 
 #endif /* JFFI_CALLCONTEXT_H */
 
