@@ -272,7 +272,15 @@ public class StubLoader {
     private static boolean loadFromBootPath(String libName, String bootPath) {
         String[] dirs = bootPath.split(File.pathSeparator);
         for (int i = 0; i < dirs.length; ++i) {
-            String path = new File(new File(dirs[i]), System.mapLibraryName(libName)).getAbsolutePath();
+            String soname = System.mapLibraryName(libName);
+            
+            // First try to load <dir>/${cpu}-${os}/libjffi-x.y.so, then fallback to <dir>/libjffi-x.y.so 
+            File stub = new File(new File(dirs[i], getPlatformName()), soname);
+            if (!stub.isFile()) {
+                stub = new File(new File(dirs[i]), soname);
+            }
+            
+            String path = stub.getAbsolutePath();
             try {
                 System.load(path);
                 return true;
