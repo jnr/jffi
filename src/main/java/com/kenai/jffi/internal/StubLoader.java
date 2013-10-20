@@ -17,13 +17,20 @@
  */
 package com.kenai.jffi.internal;
 
+import java.io.ByteArrayOutputStream;
+import java.io.CharArrayWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -41,8 +48,8 @@ public class StubLoader {
     private static final String stubLibraryName
             = String.format("jffi-%d.%d", VERSION_MAJOR, VERSION_MINOR);
 
-    private static final OS OS_ = determineOS();
-    private static final CPU CPU_ = determineCPU();
+    private static volatile OS os = null;
+    private static volatile CPU cpu = null;
 
     private static volatile Throwable failureCause = null;
     private static volatile boolean loaded = false;
@@ -137,7 +144,7 @@ public class StubLoader {
         } else if (startsWithIgnoreCase(osName, "windows")) {
             return OS.WINDOWS;
         } else {
-            return OS.UNKNOWN;
+            throw new RuntimeException("cannot determine operating system");
         }
     }
     
@@ -149,7 +156,7 @@ public class StubLoader {
      *
      * @return A member of the <tt>CPU</tt> enum.
      */
-    private static final CPU determineCPU() {
+    private static CPU determineCPU() {
         String archString = System.getProperty("os.arch", "unknown");
         if (equalsIgnoreCase("x86", archString) || equalsIgnoreCase("i386", archString) || equalsIgnoreCase("i86pc", archString)) {
             return CPU.I386;
@@ -172,15 +179,15 @@ public class StubLoader {
             }
         }
 
-        return CPU.UNKNOWN;
+        throw new RuntimeException("cannot determine CPU");
     }
     
     public static CPU getCPU() {
-        return CPU_;
+        return cpu != null ? cpu : (cpu = determineCPU());
     }
     
     public static OS getOS() {
-        return OS_;
+        return os != null ? os : (os = determineOS());
     }
 
     /**
@@ -222,17 +229,32 @@ public class StubLoader {
      */
     static void load() {
         final String libName = getStubLibraryName();
+        List<Throwable> errors = new ArrayList<Throwable>();
         String bootPath = getBootPath();
-        if (bootPath != null && loadFromBootPath(libName, bootPath)) {
+        if (bootPath != null && loadFromBootPath(libName, bootPath, errors)) {
             return;
         }
 
         String libraryPath = System.getProperty("java.library.path");
-        if (libraryPath != null && loadFromBootPath(libName, libraryPath)) {
+        if (libraryPath != null && loadFromBootPath(libName, libraryPath, errors)) {
             return;
         }
 
-        loadFromJar();
+        try {
+            loadFromJar();
+            return;
+        } catch (Throwable t) {
+            errors.add(t);
+        }
+        if (!errors.isEmpty()) {
+            Collections.reverse(errors);
+            CharArrayWriter caw = new CharArrayWriter();
+            PrintWriter pw = new PrintWriter(caw);
+            for (Throwable t : errors) {
+                t.printStackTrace(pw);
+            }
+            throw new UnsatisfiedLinkError(new String(caw.toCharArray()));
+        }
     }
 
     private static String getBootPath() {
@@ -248,13 +270,12 @@ public class StubLoader {
             try {
                 p.load(is);
                 return p.getProperty(bootLibraryPropertyName);
-            } catch (IOException ex) { 
+            } catch (IOException ex) {
+                return null;
             } finally {
                 try {
                     is.close();
-                } catch (IOException ex) {
-                    throw new RuntimeException(ex);
-                }
+                } catch (IOException ex) {}
             }
         }
 
@@ -269,7 +290,7 @@ public class StubLoader {
         }
     }
 
-    private static boolean loadFromBootPath(String libName, String bootPath) {
+    private static boolean loadFromBootPath(String libName, String bootPath, Collection<Throwable> errors) {
         String[] dirs = bootPath.split(File.pathSeparator);
         for (int i = 0; i < dirs.length; ++i) {
             String soname = System.mapLibraryName(libName);
@@ -285,24 +306,26 @@ public class StubLoader {
                 System.load(path);
                 return true;
             } catch (UnsatisfiedLinkError ex) {
+                errors.add(ex);
             }
             if (getOS() == OS.DARWIN) {
                 try {
                     System.load(getAlternateLibraryPath(path));
                     return true;
-                } catch (UnsatisfiedLinkError ex) {}
+                } catch (UnsatisfiedLinkError ex) {
+                    errors.add(ex);
+                }
             }
         }
         return false;
     }
 
-    private static void loadFromJar() {
+    private static void loadFromJar() throws IOException, UnsatisfiedLinkError {
         InputStream is = getStubLibraryStream();
-        File dstFile = null;
         FileOutputStream os = null;
 
         try {
-            dstFile = File.createTempFile("jffi", null);
+            File dstFile = File.createTempFile("jffi", null);
             dstFile.deleteOnExit();
             os = new FileOutputStream(dstFile);
             ReadableByteChannel srcChannel = Channels.newChannel(is);
@@ -311,21 +334,16 @@ public class StubLoader {
                 pos += os.getChannel().transferFrom(srcChannel, pos, Math.max(4096, is.available()));
             }
 
+            System.load(dstFile.getAbsolutePath());
         } catch (IOException ex) {
             throw new UnsatisfiedLinkError(ex.getMessage());
 
         } finally {
-            try {
-                if (os != null) {
-                    os.close();
-                }
-                is.close();
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
+            if (os != null) {
+                os.close();
             }
+            is.close();
         }
-        
-        System.load(dstFile.getAbsolutePath());
     }
     
     /**

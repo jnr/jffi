@@ -69,7 +69,7 @@ final class Foreign {
     }
 
     private static UnsatisfiedLinkError newLoadError(Throwable cause) {
-        UnsatisfiedLinkError error = new UnsatisfiedLinkError();
+        UnsatisfiedLinkError error = new UnsatisfiedLinkError(cause.getMessage());
         error.initCause(cause);
 
         return error;
