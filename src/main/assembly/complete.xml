@@ -1,9 +1,17 @@
 <assembly>
-  <id>native</id>
+  <id>complete</id>
   <formats>
     <format>jar</format>
   </formats>
   <includeBaseDirectory>false</includeBaseDirectory>
+  <dependencySets>
+    <dependencySet>
+      <outputDirectory>/</outputDirectory>
+      <useProjectArtifact>true</useProjectArtifact>
+      <unpack>true</unpack>
+      <scope>runtime</scope>
+    </dependencySet>
+  </dependencySets>
   <fileSets>
     <fileSet>
       <directory>${project.build.directory}/jni</directory>
