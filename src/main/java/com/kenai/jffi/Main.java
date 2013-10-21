@@ -3,7 +3,6 @@ package com.kenai.jffi;
 
 public class Main {
     public static void main(String[] args) {
-        System.out.println("Hello, World");
         try {
             System.out.printf("jffi jar version=%d.%d.%d\n", Foreign.VERSION_MAJOR, Foreign.VERSION_MINOR, Foreign.VERSION_MICRO);
             Foreign f = Foreign.getInstance();
