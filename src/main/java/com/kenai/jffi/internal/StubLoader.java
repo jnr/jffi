@@ -319,13 +319,24 @@ public class StubLoader {
         }
         return false;
     }
+    
+    private static String dlExtension() {
+        switch (getOS()) {
+            case WINDOWS:
+                return "dll";
+            case DARWIN:
+                return "dylib";
+            default:
+                return "so";
+        }
+    } 
 
     private static void loadFromJar() throws IOException, UnsatisfiedLinkError {
         InputStream is = getStubLibraryStream();
         FileOutputStream os = null;
 
         try {
-            File dstFile = File.createTempFile("jffi", null);
+            File dstFile = File.createTempFile("jffi", "." + dlExtension());
             dstFile.deleteOnExit();
             os = new FileOutputStream(dstFile);
             ReadableByteChannel srcChannel = Channels.newChannel(is);
@@ -333,6 +344,9 @@ public class StubLoader {
             for (long pos = 0; is.available() > 0; ) {
                 pos += os.getChannel().transferFrom(srcChannel, pos, Math.max(4096, is.available()));
             }
+
+            os.close();
+            os = null;
 
             System.load(dstFile.getAbsolutePath());
         } catch (IOException ex) {
