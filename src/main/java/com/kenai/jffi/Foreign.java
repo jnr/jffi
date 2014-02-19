@@ -1,8 +1,9 @@
 /*
  * Copyright (C) 2007, 2008, 2009 Wayne Meissner
+ * Copyright (C) 2014 Timur Duehr
  *
  * This file is part of jffi.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * 
+ *
  * Alternatively, you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -40,7 +41,23 @@ import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
 final class Foreign {
-    
+    /** Perform  lazy  binding. Only resolve symbols as needed */
+    public static native int getRtldLazy();
+    /** Resolve all symbols when loading the library */
+    public static native int getRtldNow();
+    /** Symbols in this library are not made available to other libraries */
+    public static native int getRtldLocal();
+    /** All symbols in the library are made available to other libraries */
+    public static native int getRtldGlobal();
+    public static native int getRtldNoLoad();
+    public static native int getRtldNoDelete();
+    public static native int getRtldFirst();
+    public static native int getRtldDeepBind();
+    public static native int getMember(); // For AIX
+    public static native int getBindingMask();
+    public static native int getLocationMask();
+    public static native int getAllMask();
+
     private static abstract class InstanceHolder {
         static final InstanceHolder INSTANCE = getInstanceHolder();
 
@@ -57,7 +74,7 @@ final class Foreign {
                 }
 
                 foreign.init();
-                
+
                 return new ValidInstanceHolder(foreign);
 
             } catch (Throwable throwable) {
@@ -98,11 +115,11 @@ final class Foreign {
             throw newLoadError(cause);
         }
     }
-    
+
     public static Foreign getInstance() {
         return InstanceHolder.INSTANCE.getForeign();
     }
-    
+
     private Foreign() { }
 
     private static int getVersionField(String name) {
@@ -140,18 +157,6 @@ final class Foreign {
     public final static int TYPE_SINT = 106;
     public final static int TYPE_ULONG = 107;
     public final static int TYPE_SLONG = 108;
-
-    /** Perform  lazy  binding. Only resolve symbols as needed */
-    public static final int RTLD_LAZY   = 0x00001;
-
-    /** Resolve all symbols when loading the library */
-    public static final int RTLD_NOW    = 0x00002;
-
-    /** Symbols in this library are not made available to other libraries */
-    public static final int RTLD_LOCAL  = 0x00004;
-
-    /** All symbols in the library are made available to other libraries */
-    public static final int RTLD_GLOBAL = 0x00008;
 
     /** Pages can be read */
     public static final int PROT_READ  = 0x1;
@@ -251,11 +256,11 @@ final class Foreign {
     private native void init();
 
     private static native boolean isFaultProtectionEnabled();
-    
+
     static boolean isMemoryProtectionEnabled() {
         try {
             return isFaultProtectionEnabled();
-        
+
         } catch (UnsatisfiedLinkError e) {
             return false;
         }
@@ -361,7 +366,6 @@ final class Foreign {
 
     static native boolean VirtualProtect(long addr, int size, int prot);
 
-
     /**
      * Creates a new native call context.
      *
@@ -372,7 +376,7 @@ final class Foreign {
      * @return The native address of a new function context
      */
     final native long newCallContext(long returnType, long[] paramTypes, int flags);
-    
+
     /**
      * Frees a call context created by {@link #newCallContext}
      *
@@ -396,10 +400,10 @@ final class Foreign {
      * @return An integer.
      */
     static native int getLastError();
-    
+
     /**
      * Sets the native errno value
-     * 
+     *
      * @param error The value to set errno to.
      */
     static native void setLastError(int error);
@@ -605,7 +609,7 @@ final class Foreign {
     static native int invokeI4NoErrno(long callContext, long function, int arg1, int arg2, int arg3, int arg4);
     static native int invokeI5NoErrno(long callContext, long function, int arg1, int arg2, int arg3, int arg4, int arg5);
     static native int invokeI6NoErrno(long callContext, long function, int arg1, int arg2, int arg3, int arg4, int arg5, int arg6);
-    
+
     /**
      * Invokes a function with no arguments, and returns a 64 bit integer.
      *
@@ -783,7 +787,7 @@ final class Foreign {
     static native long invokeN1O1(long callContext, long functionAddress,
             long n1,
             Object o1, int o1flags, int o1off, int o1len);
-    
+
     /**
      * Invokes a function with two numeric arguments, and returns a numeric value.
      *
@@ -798,9 +802,9 @@ final class Foreign {
      * @return A numeric value.
      */
     static native long invokeN2O1(long callContext, long functionAddress,
-            long n1, long n2, 
+            long n1, long n2,
             Object o1, int o1flags, int o1off, int o1len);
-    
+
     /**
      * Invokes a function with two numeric arguments, and returns a numeric value.
      *
@@ -822,7 +826,7 @@ final class Foreign {
             long n1, long n2,
             Object o1, int o1flags, int o1off, int o1len,
             Object o2, int o2flags, int o2off, int o2len);
-    
+
     /**
      * Invokes a function with three numeric arguments, and returns a numeric value.
      *
@@ -942,8 +946,8 @@ final class Foreign {
                                  Object o4, int o4flags, int o4off, int o4len,
                                  Object o5, int o5flags, int o5off, int o5len,
                                  Object o6, int o6flags, int o6off, int o6len);
-    
-    
+
+
     /**
      * Invokes a function that returns a 32 bit integer.
      * @param callContext The address of the call context structure from {@link #newCallContext}.
@@ -1372,7 +1376,7 @@ final class Foreign {
      * @param length The number of bytes to copy to native memory
      */
     static native void putZeroTerminatedByteArray(long address, byte[] data, int offset, int length);
-    
+
     /**
      * Reads an 8 bit integer from a native memory location.
      *
@@ -1747,7 +1751,7 @@ final class Foreign {
     final native long compileNativeMethods(long[] methods);
     final native void freeCompiledMethods(long handle);
     /**
-     * 
+     *
      * @param clazz The java class to register the native methods on
      * @param handle The handle returned from compileNativeMethods
      * @return true if successful
@@ -1769,7 +1773,7 @@ final class Foreign {
 
     final native int registerNatives(Class clazz, long methods,  int methodCount);
     final native int unregisterNatives(Class clazz);
-    
+
     final native String getArch();
-    
+
 }
