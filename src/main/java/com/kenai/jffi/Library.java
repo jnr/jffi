@@ -71,9 +71,11 @@ public final class Library {
     public static final int NODELETE = Foreign.getInstance().getRtldNoDelete();
     public static final int FIRST = Foreign.getInstance().getRtldFirst();
     public static final int DEEPBIND = Foreign.getInstance().getRtldDeepBind();
+    public static final int MEMBER = Foreign.getInstance().getRtldMember();
 
-    public static final int BINDING_MASK = LAZY | NOW;
-    public static final int LOCATION_MASK = LOCAL | GLOBAL;
+    public static final int BINDING_MASK = Foreign.getInstance().getRtldBindingMask();
+    public static final int LOCATION_MASK = Foreign.getInstance().getRtldLocationMask();
+    public static final int ALL_MASK = Foreign.getInstance().getRtldAllMask();
 
     /** The native dl/LoadLibrary handle */
     private final long handle;

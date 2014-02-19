@@ -8,9 +8,8 @@
 
   <target name="clean-java" depends="-init">
     <delete dir="${build.dir}/classes"/>
-    <delete dir="${build.dir}/classes"/>
-    <delete dir="${build.dir}/classes"/>
-    <delete dir="${build.dir}/classes"/>
+    <delete dir="${build.dir}/java"/>
+    <delete dir="${build.test.dir}"/>
     <delete dir="${dist.dir}"/>
   </target>
 
