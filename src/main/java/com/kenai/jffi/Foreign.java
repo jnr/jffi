@@ -53,10 +53,10 @@ final class Foreign {
     public static native int getRtldNoDelete();
     public static native int getRtldFirst();
     public static native int getRtldDeepBind();
-    public static native int getMember(); // For AIX
-    public static native int getBindingMask();
-    public static native int getLocationMask();
-    public static native int getAllMask();
+    public static native int getRtldMember(); // For AIX
+    public static native int getRtldBindingMask();
+    public static native int getRtldLocationMask();
+    public static native int getRtldAllMask();
 
     private static abstract class InstanceHolder {
         static final InstanceHolder INSTANCE = getInstanceHolder();
