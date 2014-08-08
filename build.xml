@@ -26,6 +26,7 @@
         <os arch="x86_64"/>
         <os arch="sparcv9"/>
         <os arch="s390x"/>
+	<os arch="ppc64le"/>
       </or>
     </condition>
     <condition property="run.jvm.model" value="-d32">
