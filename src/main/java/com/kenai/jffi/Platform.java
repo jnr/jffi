@@ -88,6 +88,8 @@ public abstract class Platform {
         PPC(32),
         /** Power PC 64 bit */
         PPC64(64),
+        /** Power PC 64 bit little endian */
+        PPC64LE(64),
         /** Sun sparc 32 bit */
         SPARC(32),
         /** Sun sparc 64 bit */
@@ -212,10 +214,12 @@ public abstract class Platform {
             } else if (Util.equalsIgnoreCase("ppc", archString, LOCALE) || Util.equalsIgnoreCase("powerpc", archString, LOCALE)) {
                 return CPU.PPC;
 
-            } else if (Util.equalsIgnoreCase("ppc64", archString, LOCALE) || Util.equalsIgnoreCase("powerpc64", archString, LOCALE) ||
-                       Util.equalsIgnoreCase("ppc64le", archString, LOCALE) || Util.equalsIgnoreCase("ppc64be", archString, LOCALE)) {
+            } else if (Util.equalsIgnoreCase("ppc64", archString, LOCALE) || Util.equalsIgnoreCase("powerpc64", archString, LOCALE)) {
                 return CPU.PPC64;
             
+            } else if (Util.equalsIgnoreCase("ppc64le", archString, LOCALE) || Util.equalsIgnoreCase("powerpc64le", archString, LOCALE)) {
+                return CPU.PPC64LE;
+
             } else if (Util.equalsIgnoreCase("s390", archString, LOCALE) || Util.equalsIgnoreCase("s390x", archString, LOCALE)) {
                 return CPU.S390X;
                 

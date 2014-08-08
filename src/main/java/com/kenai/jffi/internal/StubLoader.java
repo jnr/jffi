@@ -34,6 +34,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
+import static com.kenai.jffi.Util.equalsIgnoreCase;
+
 /**
  * Loads the native stub library.  This is intended to only ever be called
  * reflectively, so it cannot access other jffi classes.
@@ -108,6 +110,8 @@ public class StubLoader {
         PPC,
         /** Power PC 64 bit */
         PPC64,
+        /** Power PC 64 bit little endian*/
+        PPC64LE,
         /** Sun sparc 32 bit */
         SPARC,
         /** Sun sparc 64 bit */
@@ -165,10 +169,11 @@ public class StubLoader {
             return CPU.X86_64;
         } else if (Util.equalsIgnoreCase("ppc", archString, LOCALE) || Util.equalsIgnoreCase("powerpc", archString, LOCALE)) {
             return CPU.PPC;
-        } else if (Util.equalsIgnoreCase("ppc64", archString, LOCALE) || Util.equalsIgnoreCase("powerpc64", archString, LOCALE) ||
-                   Util.equalsIgnoreCase("ppc64le", archString, LOCALE) || Util.equalsIgnoreCase("ppc64be", archString, LOCALE)) {
+        } else if (Util.equalsIgnoreCase("ppc64", archString, LOCALE) || Util.equalsIgnoreCase("powerpc64", archString, LOCALE)) {
             return CPU.PPC64;
-        } else if (Util.equalsIgnoreCase("s390", archString, LOCALE) || Util.equalsIgnoreCase("s390x", archString, LOCALE)) {
+        } else if (equalsIgnoreCase("ppc64le", archString, LOCALE) || equalsIgnoreCase("powerpc64le", archString, LOCALE)) {
+            return CPU.PPC64LE;
+        } else if (equalsIgnoreCase("s390", archString, LOCALE) || equalsIgnoreCase("s390x", archString, LOCALE)) {
             return CPU.S390X;
         } else if (Util.equalsIgnoreCase("arm", archString, LOCALE)) {
             return CPU.ARM;
