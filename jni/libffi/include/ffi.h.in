@@ -221,7 +221,7 @@ typedef struct {
 #endif
 } ffi_cif;
 
-#if HAVE_LONG_DOUBLE_VARIANT
+#if @HAVE_LONG_DOUBLE_VARIANT@
 /* Used to adjust size/alignment of ffi types.  */
 void ffi_prep_types (ffi_abi abi);
 # endif
