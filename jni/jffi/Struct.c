@@ -59,6 +59,7 @@
 JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_newStruct(JNIEnv* env, jobject self, jlongArray typeArray, jboolean isUnion)
 {
+    (void)(self);
     ffi_type* s = NULL;
     int fieldCount;
     jlong* fieldTypes;
@@ -141,6 +142,7 @@ error:
 JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_newArray(JNIEnv* env, jobject self, jlong type, jint length)
 {
+    (void)(self);
     ffi_type* elem = (ffi_type *) j2p(type);
     ffi_type* s = NULL;
     int i;
@@ -193,6 +195,8 @@ Java_com_kenai_jffi_Foreign_newArray(JNIEnv* env, jobject self, jlong type, jint
 JNIEXPORT void JNICALL
 Java_com_kenai_jffi_Foreign_freeAggregate(JNIEnv* env, jobject self, jlong handle)
 {
+    (void)(env);
+    (void)(self);
     ffi_type* s = (ffi_type *) j2p(handle);
     
     if (s != NULL) {

@@ -74,6 +74,7 @@ JNIEXPORT void JNICALL
 Java_com_kenai_jffi_Foreign_longDoubleFromString(JNIEnv *env, jobject self, jstring str, 
   jbyteArray array, jint arrayOffset, jint arrayLength)
 {
+    (void)(self);
     long double ld;
     char* tmp;
     jsize len;
@@ -104,6 +105,7 @@ JNIEXPORT jstring JNICALL
 Java_com_kenai_jffi_Foreign_longDoubleToEngineeringString(JNIEnv *env, jobject self, 
     jbyteArray array, jint arrayOffset, jint arrayLength)
 {
+    (void)(self);
     return jffi_longDoubleToString(env, array, arrayOffset, arrayLength, "%.35Le");
 }
 
@@ -116,6 +118,7 @@ JNIEXPORT jstring JNICALL
 Java_com_kenai_jffi_Foreign_longDoubleToPlainString(JNIEnv *env, jobject self, 
     jbyteArray array, jint arrayOffset, jint arrayLength)
 {
+    (void)(self);
     return jffi_longDoubleToString(env, array, arrayOffset, arrayLength, "%.35Lf");
 }
 
@@ -128,6 +131,7 @@ JNIEXPORT jstring JNICALL
 Java_com_kenai_jffi_Foreign_longDoubleToString(JNIEnv *env, jobject self, 
     jbyteArray array, jint arrayOffset, jint arrayLength)
 {
+    (void)(self);
     return jffi_longDoubleToString(env, array, arrayOffset, arrayLength, "%.35Lg");
 }
 
@@ -140,6 +144,7 @@ JNIEXPORT void JNICALL
 Java_com_kenai_jffi_Foreign_longDoubleFromDouble(JNIEnv *env, jobject self, jdouble doubleValue, 
     jbyteArray array, jint arrayOffset, jint arrayLength)
 {
+    (void)(self);
     jffi_encodeLongDouble(env, doubleValue, array, arrayOffset, arrayLength);
 }
 
@@ -152,6 +157,7 @@ JNIEXPORT jdouble JNICALL
 Java_com_kenai_jffi_Foreign_longDoubleToDouble(JNIEnv *env, jobject self, 
     jbyteArray array, jint arrayOffset, jint arrayLength)
 {
+    (void)(self);
     return jffi_decodeLongDouble(env, array, arrayOffset, arrayLength);
 }
 

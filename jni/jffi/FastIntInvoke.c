@@ -59,6 +59,8 @@
 JNIEXPORT jint JNICALL
 Java_com_kenai_jffi_Foreign_invokeI0(JNIEnv* env, jclass self, jlong ctxAddress, jlong function)
 {
+    (void)(env);
+    (void)(self);
     CallContext *ctx = (CallContext *) j2p(ctxAddress);
     ffi_sarg retval;
 
@@ -72,6 +74,8 @@ JNIEXPORT jint JNICALL
 Java_com_kenai_jffi_Foreign_invokeI1(JNIEnv* env, jclass self, jlong ctxAddress, jlong function,
         jint arg1)
 {
+    (void)(env);
+    (void)(self);
     CallContext *ctx = (CallContext *) j2p(ctxAddress);
     ffi_sarg retval;
 
@@ -84,6 +88,8 @@ JNIEXPORT jint JNICALL
 Java_com_kenai_jffi_Foreign_invokeI2(JNIEnv*env, jobject self, jlong ctxAddress, jlong function,
         jint arg1, jint arg2)
 {
+    (void)(env);
+    (void)(self);
     CallContext *ctx = (CallContext *) j2p(ctxAddress);
     ffi_sarg retval;
 
@@ -96,6 +102,8 @@ JNIEXPORT jint JNICALL
 Java_com_kenai_jffi_Foreign_invokeI3(JNIEnv*env, jobject self, jlong ctxAddress, jlong function,
         jint arg1, jint arg2, jint arg3)
 {
+    (void)(env);
+    (void)(self);
     CallContext *ctx = (CallContext *) j2p(ctxAddress);
     ffi_sarg retval;
 
@@ -108,6 +116,8 @@ JNIEXPORT jint JNICALL
 Java_com_kenai_jffi_Foreign_invokeI4(JNIEnv*env, jobject self, jlong ctxAddress, jlong function,
         jint arg1, jint arg2, jint arg3, jint arg4)
 {
+    (void)(env);
+    (void)(self);
     CallContext *ctx = (CallContext *) j2p(ctxAddress);
     ffi_sarg retval;
 
@@ -120,6 +130,8 @@ JNIEXPORT jint JNICALL
 Java_com_kenai_jffi_Foreign_invokeI5(JNIEnv*env, jobject self, jlong ctxAddress, jlong function,
         jint arg1, jint arg2, jint arg3, jint arg4, jint arg5)
 {
+    (void)(env);
+    (void)(self);
     CallContext *ctx = (CallContext *) j2p(ctxAddress);
     ffi_sarg retval;
 
@@ -132,6 +144,8 @@ JNIEXPORT jint JNICALL
 Java_com_kenai_jffi_Foreign_invokeI6(JNIEnv*env, jobject self, jlong ctxAddress, jlong function,
         jint arg1, jint arg2, jint arg3, jint arg4, jint arg5, jint arg6)
 {
+    (void)(env);
+    (void)(self);
     CallContext *ctx = (CallContext *) j2p(ctxAddress);
     ffi_sarg retval;
 
@@ -149,6 +163,8 @@ Java_com_kenai_jffi_Foreign_invokeI6(JNIEnv*env, jobject self, jlong ctxAddress,
 JNIEXPORT jint JNICALL
 Java_com_kenai_jffi_Foreign_invokeI0NoErrno(JNIEnv* env, jclass self, jlong ctxAddress, jlong function)
 {
+    (void)(env);
+    (void)(self);
     CallContext *ctx = (CallContext *) j2p(ctxAddress);
     ffi_sarg retval;
     invokeI0(ctx, j2p(function), &retval);
@@ -160,6 +176,8 @@ JNIEXPORT jint JNICALL
 Java_com_kenai_jffi_Foreign_invokeI1NoErrno(JNIEnv* env, jclass self, jlong ctxAddress, jlong function,
         jint arg1)
 {
+    (void)(env);
+    (void)(self);
     CallContext *ctx = (CallContext *) j2p(ctxAddress);
     ffi_sarg retval;
 
@@ -172,6 +190,8 @@ JNIEXPORT jint JNICALL
 Java_com_kenai_jffi_Foreign_invokeI2NoErrno(JNIEnv*env, jobject self, jlong ctxAddress, jlong function,
         jint arg1, jint arg2)
 {
+    (void)(env);
+    (void)(self);
     CallContext *ctx = (CallContext *) j2p(ctxAddress);
     ffi_sarg retval;
 
@@ -184,6 +204,8 @@ JNIEXPORT jint JNICALL
 Java_com_kenai_jffi_Foreign_invokeI3NoErrno(JNIEnv*env, jobject self, jlong ctxAddress, jlong function,
         jint arg1, jint arg2, jint arg3)
 {
+    (void)(env);
+    (void)(self);
     CallContext *ctx = (CallContext *) j2p(ctxAddress);
     ffi_sarg retval;
 
@@ -197,6 +219,8 @@ JNIEXPORT jint JNICALL
 Java_com_kenai_jffi_Foreign_invokeI4NoErrno(JNIEnv*env, jobject self, jlong ctxAddress, jlong function,
         jint arg1, jint arg2, jint arg3, jint arg4)
 {
+    (void)(env);
+    (void)(self);
     CallContext *ctx = (CallContext *) j2p(ctxAddress);
     ffi_sarg retval;
 
@@ -210,6 +234,8 @@ JNIEXPORT jint JNICALL
 Java_com_kenai_jffi_Foreign_invokeI5NoErrno(JNIEnv*env, jobject self, jlong ctxAddress, jlong function,
         jint arg1, jint arg2, jint arg3, jint arg4, jint arg5)
 {
+    (void)(env);
+    (void)(self);
     CallContext *ctx = (CallContext *) j2p(ctxAddress);
     ffi_sarg retval;
 
@@ -223,6 +249,8 @@ JNIEXPORT jint JNICALL
 Java_com_kenai_jffi_Foreign_invokeI6NoErrno(JNIEnv*env, jobject self, jlong ctxAddress, jlong function,
         jint arg1, jint arg2, jint arg3, jint arg4, jint arg5, jint arg6)
 {
+    (void)(env);
+    (void)(self);
     CallContext *ctx = (CallContext *) j2p(ctxAddress);
     ffi_sarg retval;
 

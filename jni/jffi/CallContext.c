@@ -65,6 +65,7 @@ JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_newCallContext(JNIEnv* env, jobject self,
         jlong returnType, jlongArray paramArray, jint flags)
 {
+    (void)(self);
     CallContext* ctx = NULL;
     jlong* paramTypes;
     int paramCount, i, rawOffset = 0;
@@ -230,6 +231,8 @@ cleanup:
 JNIEXPORT void JNICALL
 Java_com_kenai_jffi_Foreign_freeCallContext(JNIEnv* env, jobject self, jlong handle)
 {
+    (void)(env);
+    (void)(self);
     CallContext* ctx = (CallContext *) j2p(handle);
     if (ctx != NULL) {
         if (ctx->rawParamOffsets != NULL) {
@@ -250,6 +253,8 @@ Java_com_kenai_jffi_Foreign_freeCallContext(JNIEnv* env, jobject self, jlong han
 JNIEXPORT jint JNICALL
 Java_com_kenai_jffi_Foreign_getCallContextRawParameterSize(JNIEnv* env, jobject self, jlong handle)
 {
+    (void)(env);
+    (void)(self);
     CallContext* ctx = (CallContext *) j2p(handle);
     return ctx->rawParameterSize;
 }
@@ -257,6 +262,8 @@ Java_com_kenai_jffi_Foreign_getCallContextRawParameterSize(JNIEnv* env, jobject 
 JNIEXPORT void JNICALL 
 Java_com_kenai_jffi_Foreign_setCallContextErrorFunction(JNIEnv* env, jobject self, jlong handle, jlong fn)
 {
+    (void)(env);
+    (void)(self);
     CallContext* ctx = (CallContext *) j2p(handle);
     ctx->error_fn = j2p(fn);
 }

@@ -53,6 +53,8 @@
 JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_pageSize(JNIEnv *env, jobject self)
 {
+    (void)(env);
+    (void)(self);
 #ifndef _WIN32
     return sysconf(_SC_PAGESIZE);
 #else
@@ -76,6 +78,8 @@ JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_mmap(JNIEnv *env, jobject self, jlong addr, jlong len,
         jint prot, jint flags, jint fd, jlong off)
 {
+    (void)(env);
+    (void)(self);
     caddr_t result;
     
     result = mmap(j2p(addr), len, PROT(prot), FLAGS(flags), fd, off);
@@ -95,6 +99,8 @@ Java_com_kenai_jffi_Foreign_mmap(JNIEnv *env, jobject self, jlong addr, jlong le
 JNIEXPORT jint JNICALL
 Java_com_kenai_jffi_Foreign_munmap(JNIEnv *env, jobject self, jlong addr, jlong len)
 {
+    (void)(env);
+    (void)(self);
     int result = munmap(j2p(addr), len);
     if (unlikely(result != 0)) {
         jffi_save_errno();
@@ -112,6 +118,8 @@ Java_com_kenai_jffi_Foreign_munmap(JNIEnv *env, jobject self, jlong addr, jlong 
 JNIEXPORT jint JNICALL
 Java_com_kenai_jffi_Foreign_mprotect(JNIEnv *env, jobject self, jlong addr, jlong len, jint prot)
 {
+    (void)(env);
+    (void)(self);
     int result = mprotect(j2p(addr), len, PROT(prot));
     if (unlikely(result != 0)) {
         jffi_save_errno();

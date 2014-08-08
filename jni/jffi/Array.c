@@ -50,6 +50,7 @@
 static void 
 releaseHeapArray(JNIEnv* env, Array* array) 
 {
+    (void)(env);
     free(array->elems);
 }
 

@@ -46,6 +46,8 @@
 JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_getSaveErrnoFunction(JNIEnv *env, jobject self)
 {
+    (void)(env);
+    (void)(self);
     return p2j(jffi_save_errno);
 }
 
@@ -57,5 +59,7 @@ Java_com_kenai_jffi_Foreign_getSaveErrnoFunction(JNIEnv *env, jobject self)
 JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_getSaveErrnoCtxFunction(JNIEnv *env, jobject self)
 {
+    (void)(env);
+    (void)(self);
     return p2j(jffi_save_errno_ctx);
 }

@@ -63,6 +63,7 @@
 JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_invokeL0(JNIEnv* env, jobject self, jlong ctxAddress, jlong function)
 {
+    (void)(self);
     CallContext* ctx = (CallContext *) j2p(ctxAddress);
     FFIValue retval;
 
@@ -79,6 +80,7 @@ Java_com_kenai_jffi_Foreign_invokeL0(JNIEnv* env, jobject self, jlong ctxAddress
 JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_invokeL0NoErrno(JNIEnv* env, jobject self, jlong ctxAddress, jlong function)
 {
+    (void)(self);
     CallContext* ctx = (CallContext *) j2p(ctxAddress);
     FFIValue retval;
 
@@ -91,6 +93,7 @@ JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_invokeL1(JNIEnv* env, jobject self, jlong ctxAddress, jlong function,
         jlong arg1)
 {
+    (void)(self);
     CallContext* ctx = (CallContext *) j2p(ctxAddress);
     FFIValue retval;
 
@@ -103,6 +106,7 @@ JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_invokeL1NoErrno(JNIEnv* env, jobject self, jlong ctxAddress, jlong function,
         jlong arg1)
 {
+    (void)(self);
     CallContext* ctx = (CallContext *) j2p(ctxAddress);
     FFIValue retval;
 
@@ -116,6 +120,7 @@ JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_invokeL2(JNIEnv* env, jobject self, jlong ctxAddress, jlong function,
         jlong arg1, jlong arg2)
 {
+    (void)(self);
     CallContext* ctx = (CallContext *) j2p(ctxAddress);
     FFIValue retval;
 
@@ -128,6 +133,7 @@ JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_invokeL2NoErrno(JNIEnv* env, jobject self, jlong ctxAddress, jlong function,
         jlong arg1, jlong arg2)
 {
+    (void)(self);
     CallContext* ctx = (CallContext *) j2p(ctxAddress);
     FFIValue retval;
 
@@ -140,6 +146,7 @@ JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_invokeL3(JNIEnv* env, jobject self, jlong ctxAddress, jlong function,
         jlong arg1, jlong arg2, jlong arg3)
 {
+    (void)(self);
     CallContext* ctx = (CallContext *) j2p(ctxAddress);
     FFIValue retval;
 
@@ -152,6 +159,7 @@ JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_invokeL3NoErrno(JNIEnv* env, jobject self, jlong ctxAddress, jlong function,
         jlong arg1, jlong arg2, jlong arg3)
 {
+    (void)(self);
     CallContext* ctx = (CallContext *) j2p(ctxAddress);
     FFIValue retval;
 
@@ -165,6 +173,7 @@ JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_invokeL4(JNIEnv* env, jobject self, jlong ctxAddress, jlong function,
         jlong arg1, jlong arg2, jlong arg3, jlong arg4)
 {
+    (void)(self);
     CallContext* ctx = (CallContext *) j2p(ctxAddress);
 
     FFIValue retval;
@@ -178,6 +187,7 @@ JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_invokeL4NoErrno(JNIEnv* env, jobject self, jlong ctxAddress, jlong function,
         jlong arg1, jlong arg2, jlong arg3, jlong arg4)
 {
+    (void)(self);
     CallContext* ctx = (CallContext *) j2p(ctxAddress);
 
     FFIValue retval;
@@ -192,6 +202,7 @@ JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_invokeL5(JNIEnv* env, jobject self, jlong ctxAddress, jlong function,
         jlong arg1, jlong arg2, jlong arg3, jlong arg4, jlong arg5)
 {
+    (void)(self);
     CallContext* ctx = (CallContext *) j2p(ctxAddress);
     FFIValue retval;
 
@@ -204,6 +215,7 @@ JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_invokeL5NoErrno(JNIEnv* env, jobject self, jlong ctxAddress, jlong function,
         jlong arg1, jlong arg2, jlong arg3, jlong arg4, jlong arg5)
 {
+    (void)(self);
     CallContext* ctx = (CallContext *) j2p(ctxAddress);
     FFIValue retval;
 
@@ -217,6 +229,7 @@ JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_invokeL6(JNIEnv* env, jobject self, jlong ctxAddress, jlong function,
         jlong arg1, jlong arg2, jlong arg3, jlong arg4, jlong arg5, jlong arg6)
 {
+    (void)(self);
     CallContext* ctx = (CallContext *) j2p(ctxAddress);
     FFIValue retval;
 
@@ -229,6 +242,7 @@ JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_invokeL6NoErrno(JNIEnv* env, jobject self, jlong ctxAddress, jlong function,
         jlong arg1, jlong arg2, jlong arg3, jlong arg4, jlong arg5, jlong arg6)
 {
+    (void)(self);
     CallContext* ctx = (CallContext *) j2p(ctxAddress);
     FFIValue retval;
 

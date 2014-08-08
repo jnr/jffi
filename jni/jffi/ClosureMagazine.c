@@ -79,6 +79,7 @@ JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_newClosureMagazine(JNIEnv *env, jobject self, jlong ctxAddress, jobject closureMethod,
     jboolean callWithPrimitiveParameters)
 {
+    (void)(self);
     CallContext* ctx = (CallContext *) j2p(ctxAddress);
     Closure* list = NULL;
     Magazine* magazine = NULL;
@@ -152,6 +153,7 @@ error:
 JNIEXPORT void JNICALL
 Java_com_kenai_jffi_Foreign_freeClosureMagazine(JNIEnv *env, jobject self, jlong magAddress)
 {
+    (void)(self);
     Magazine* magazine = (Magazine *) j2p(magAddress);
     Closure* closure;
     int i;
@@ -174,6 +176,7 @@ Java_com_kenai_jffi_Foreign_freeClosureMagazine(JNIEnv *env, jobject self, jlong
 JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_closureMagazineGet(JNIEnv *env, jobject self, jlong magAddress, jobject closureProxy)
 {
+    (void)(self);
     Magazine* magazine = (Magazine *) j2p(magAddress);
     if (magazine->nextclosure < magazine->nclosures) {
         Closure* closure = &magazine->closures[magazine->nextclosure];
