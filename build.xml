@@ -57,7 +57,7 @@
     <property name="ant.build.javac.target" value="1.5"/>
     <property name="ant.build.javac.source" value="1.5"/>
     <property name="ant.build.javac.includeantruntime" value="false"/>
-    <property name="test.fork" value="no"/>
+    <property name="test.fork" value="yes"/>
 
     <mkdir dir="${build.native.dir}"/>
 
