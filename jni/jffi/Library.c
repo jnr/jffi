@@ -81,6 +81,7 @@ static int getWideString(JNIEnv* env, wchar_t* dst, jstring jstr, int n);
 JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_dlopen(JNIEnv* env, jobject self, jstring jPath, jint jFlags)
 {
+    (void)(self);
 #ifdef _WIN32
     if (jPath == NULL) {
         return p2j(GetModuleHandle(NULL));
@@ -129,12 +130,15 @@ Java_com_kenai_jffi_Foreign_dlopen(JNIEnv* env, jobject self, jstring jPath, jin
 JNIEXPORT void JNICALL
 Java_com_kenai_jffi_Foreign_dlclose(JNIEnv* env, jclass cls, jlong handle)
 {
+    (void)(env);
+    (void)(cls);
     dl_close(j2p(handle));
 }
 
 JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_dlsym(JNIEnv* env, jclass cls, jlong handle, jstring jstr)
 {
+    (void)(cls);
     char sym[1024];
     void* addr;
 
@@ -160,6 +164,7 @@ Java_com_kenai_jffi_Foreign_dlsym(JNIEnv* env, jclass cls, jlong handle, jstring
 JNIEXPORT jstring JNICALL
 Java_com_kenai_jffi_Foreign_dlerror(JNIEnv* env, jobject self)
 {
+    (void)(self);
     char errbuf[1024] = { 0 };
     dl_error(errbuf, sizeof(errbuf) - 1);
     return (*env)->NewStringUTF(env, errbuf);

@@ -107,6 +107,8 @@ public class StubLoader {
         PPC,
         /** Power PC 64 bit */
         PPC64,
+        /** Power PC 64 bit little endian*/
+        PPC64LE,
         /** Sun sparc 32 bit */
         SPARC,
         /** Sun sparc 64 bit */
@@ -166,6 +168,8 @@ public class StubLoader {
             return CPU.PPC;
         } else if (equalsIgnoreCase("ppc64", archString) || equalsIgnoreCase("powerpc64", archString)) {
             return CPU.PPC64;
+        } else if (equalsIgnoreCase("ppc64le", archString) || equalsIgnoreCase("powerpc64le", archString)) {
+            return CPU.PPC64LE;
         } else if (equalsIgnoreCase("s390", archString) || equalsIgnoreCase("s390x", archString)) {
             return CPU.S390X;
         } else if (equalsIgnoreCase("arm", archString)) {

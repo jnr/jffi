@@ -116,6 +116,7 @@ extern void jffi_faultException(JNIEnv* env, struct FaultData_ *, int val);
 struct FaultData_ { long dummy; };
 
 # define FAULTPROT_CTX(env, ctx, stmt, fail) do { \
+    (void)(env); \
     stmt; \
     SAVE_ERRNO(ctx); \
 } while(0)

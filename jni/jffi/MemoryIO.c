@@ -72,39 +72,43 @@ static void getArrayChecked(JNIEnv* env, jlong address, jobject obj, jint offset
 
 #define GET(JTYPE, NTYPE) JNIEXPORT NTYPE JNICALL \
 Java_com_kenai_jffi_Foreign_get##JTYPE(JNIEnv* env, jobject self, jlong address) \
-{ NTYPE tmp; memcpy(&tmp, j2p(address), sizeof(tmp)); return tmp; } \
+{ (void)(env); (void)(self); NTYPE tmp; memcpy(&tmp, j2p(address), sizeof(tmp)); return tmp; } \
 JNIEXPORT NTYPE JNICALL \
 Java_com_kenai_jffi_Foreign_get##JTYPE##Checked(JNIEnv* env, jobject self, jlong address) \
-{ NTYPE tmp; PROT(memcpy(&tmp, j2p(address), sizeof(tmp)), 0); return tmp; }
+{ (void)(env); (void)(self); NTYPE tmp; PROT(memcpy(&tmp, j2p(address), sizeof(tmp)), 0); return tmp; }
 
 #define PUT(JTYPE, NTYPE) \
 JNIEXPORT void JNICALL \
 Java_com_kenai_jffi_Foreign_put##JTYPE(JNIEnv *env, jobject self, jlong address, NTYPE value) \
-{ memcpy(j2p(address), &value, sizeof(value)); } \
+{ (void)(env); (void)(self); memcpy(j2p(address), &value, sizeof(value)); } \
 JNIEXPORT void JNICALL \
 Java_com_kenai_jffi_Foreign_put##JTYPE##Checked(JNIEnv *env, jobject self, jlong address, NTYPE value) \
-{ PROT(memcpy(j2p(address), &value, sizeof(value)),); }
+{ (void)(env); (void)(self); PROT(memcpy(j2p(address), &value, sizeof(value)),); }
 
 #define COPY(JTYPE, NTYPE) \
 JNIEXPORT void JNICALL \
 Java_com_kenai_jffi_Foreign_put##JTYPE##Array(JNIEnv* env, jobject unsafe, jlong address, jobject obj, jint offset, jint length) \
 { \
+    (void)(unsafe); \
     (*env)->Get##JTYPE##ArrayRegion(env, obj, offset, length, (NTYPE *) j2p(address)); \
 } \
 JNIEXPORT void JNICALL \
 Java_com_kenai_jffi_Foreign_put##JTYPE##ArrayChecked(JNIEnv* env, jobject unsafe, jlong address, jobject obj, jint offset, jint length) \
 { \
+    (void)(unsafe); \
     putArrayChecked(env, address, obj, offset, length, sizeof(NTYPE), \
         (void (JNICALL *)(JNIEnv *env, jobject array, jsize start, jsize l, void *buf)) (*env)->Get##JTYPE##ArrayRegion); \
 } \
 JNIEXPORT void JNICALL \
 Java_com_kenai_jffi_Foreign_get##JTYPE##Array(JNIEnv* env, jobject unsafe, jlong address, jobject obj, jint offset, jint length) \
 { \
+    (void)(unsafe); \
     (*env)->Set##JTYPE##ArrayRegion(env, obj, offset, length, (NTYPE *) j2p(address)); \
 } \
 JNIEXPORT void JNICALL \
 Java_com_kenai_jffi_Foreign_get##JTYPE##ArrayChecked(JNIEnv* env, jobject unsafe, jlong address, jobject obj, jint offset, jint length) \
 { \
+    (void)(unsafe); \
     getArrayChecked(env, address, obj, offset, length, sizeof(NTYPE), \
         (void (JNICALL *)(JNIEnv *env, jobject array, jsize start, jsize l, const void *)) (*env)->Set##JTYPE##ArrayRegion); \
 }
@@ -163,6 +167,8 @@ UNSAFE(Double, jdouble);
 JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_getAddress(JNIEnv* ev, jobject self, jlong address)
 {
+    (void)(ev);
+    (void)(self);
     void* tmp;
     memcpy(&tmp, j2p(address), sizeof(tmp));
     return p2j(tmp);
@@ -171,6 +177,8 @@ Java_com_kenai_jffi_Foreign_getAddress(JNIEnv* ev, jobject self, jlong address)
 JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_getAddressChecked(JNIEnv* env, jobject self, jlong address)
 {
+    (void)(env);
+    (void)(self);
     void* tmp;
     PROT(memcpy(&tmp, j2p(address), sizeof(tmp)), 0);
     return p2j(tmp);
@@ -185,6 +193,8 @@ Java_com_kenai_jffi_Foreign_getAddressChecked(JNIEnv* env, jobject self, jlong a
 JNIEXPORT void JNICALL
 Java_com_kenai_jffi_Foreign_putAddress(JNIEnv* env, jobject self, jlong address, jlong value)
 {
+    (void)(env);
+    (void)(self);
     void* tmp = j2p(value);
     memcpy(j2p(address), &tmp, sizeof(tmp));
 }
@@ -192,6 +202,8 @@ Java_com_kenai_jffi_Foreign_putAddress(JNIEnv* env, jobject self, jlong address,
 JNIEXPORT void JNICALL
 Java_com_kenai_jffi_Foreign_putAddressChecked(JNIEnv* env, jobject self, jlong address, jlong value)
 {
+    (void)(env);
+    (void)(self);
     void* tmp = j2p(value);
     PROT(memcpy(j2p(address), &tmp, sizeof(tmp)),);
 }
@@ -204,12 +216,16 @@ Java_com_kenai_jffi_Foreign_putAddressChecked(JNIEnv* env, jobject self, jlong a
 JNIEXPORT void JNICALL
 Java_com_kenai_jffi_Foreign_setMemory(JNIEnv* env, jobject self, jlong address, jlong size, jbyte value)
 {
+    (void)(env);
+    (void)(self);
     memset(j2p(address), value, size);
 }
 
 JNIEXPORT void JNICALL
 Java_com_kenai_jffi_Foreign_setMemoryChecked(JNIEnv* env, jobject self, jlong address, jlong size, jbyte value)
 {
+    (void)(env);
+    (void)(self);
     PROT(memset(j2p(address), value, size),);
 }
 
@@ -221,12 +237,16 @@ Java_com_kenai_jffi_Foreign_setMemoryChecked(JNIEnv* env, jobject self, jlong ad
 JNIEXPORT void JNICALL
 Java_com_kenai_jffi_Foreign_copyMemory(JNIEnv* env, jobject self, jlong src, jlong dst, jlong size)
 {
+    (void)(env);
+    (void)(self);
     memcpy(j2p(dst), j2p(src), size);
 }
 
 JNIEXPORT void JNICALL
 Java_com_kenai_jffi_Foreign_copyMemoryChecked(JNIEnv* env, jobject self, jlong src, jlong dst, jlong size)
 {
+    (void)(env);
+    (void)(self);
     PROT(memcpy(j2p(dst), j2p(src), size),);
 }
 
@@ -238,12 +258,16 @@ Java_com_kenai_jffi_Foreign_copyMemoryChecked(JNIEnv* env, jobject self, jlong s
 JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_memchr(JNIEnv* env, jobject self, jlong address, jint c, jlong maxlen)
 {
+    (void)(env);
+    (void)(self);
     return p2j(memchr(j2p(address), c, maxlen));
 }
 
 JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_memchrChecked(JNIEnv* env, jobject self, jlong address, jint c, jlong maxlen)
 {
+    (void)(env);
+    (void)(self);
     PROT(return p2j(memchr(j2p(address), c, maxlen)), 0);
 }
 
@@ -255,12 +279,16 @@ Java_com_kenai_jffi_Foreign_memchrChecked(JNIEnv* env, jobject self, jlong addre
 JNIEXPORT void JNICALL
 Java_com_kenai_jffi_Foreign_memmove(JNIEnv* env, jobject self, jlong dst, jlong src, jlong size)
 {
+    (void)(env);
+    (void)(self);
       memmove(j2p(dst), j2p(src), size);
 }
 
 JNIEXPORT void JNICALL
 Java_com_kenai_jffi_Foreign_memmoveChecked(JNIEnv* env, jobject self, jlong dst, jlong src, jlong size)
 {
+    (void)(env);
+    (void)(self);
       PROT(memmove(j2p(dst), j2p(src), size),);
 }
 
@@ -272,12 +300,16 @@ Java_com_kenai_jffi_Foreign_memmoveChecked(JNIEnv* env, jobject self, jlong dst,
 JNIEXPORT void JNICALL
 Java_com_kenai_jffi_Foreign_memcpy(JNIEnv* env, jobject self, jlong dst, jlong src, jlong size)
 {
+    (void)(env);
+    (void)(self);
       memcpy(j2p(dst), j2p(src), size);
 }
 
 JNIEXPORT void JNICALL
 Java_com_kenai_jffi_Foreign_memcpyChecked(JNIEnv* env, jobject self, jlong dst, jlong src, jlong size)
 {
+    (void)(env);
+    (void)(self);
       PROT(memcpy(j2p(dst), j2p(src), size), );
 }
 
@@ -289,12 +321,16 @@ Java_com_kenai_jffi_Foreign_memcpyChecked(JNIEnv* env, jobject self, jlong dst, 
 JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_strlen(JNIEnv* env, jobject self, jlong address)
 {
+    (void)(env);
+    (void)(self);
     return (jlong) strlen(j2p(address));
 }
 
 JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_strlenChecked(JNIEnv* env, jobject self, jlong address)
 {
+    (void)(env);
+    (void)(self);
     PROT(return (jlong) strlen(j2p(address)), 0);
 }
 
@@ -306,6 +342,7 @@ Java_com_kenai_jffi_Foreign_strlenChecked(JNIEnv* env, jobject self, jlong addre
 JNIEXPORT jbyteArray JNICALL
 Java_com_kenai_jffi_Foreign_getZeroTerminatedByteArray__J(JNIEnv* env, jobject self, jlong address)
 {
+    (void)(self);
     const char* str = (const char*) j2p(address);
     int len = strlen(str);
 
@@ -318,6 +355,7 @@ Java_com_kenai_jffi_Foreign_getZeroTerminatedByteArray__J(JNIEnv* env, jobject s
 JNIEXPORT jbyteArray JNICALL
 Java_com_kenai_jffi_Foreign_getZeroTerminatedByteArrayChecked__J(JNIEnv* env, jobject self, jlong address)
 {
+    (void)(self);
     const char* str = (const char*) j2p(address);
     int len;
 
@@ -338,6 +376,7 @@ Java_com_kenai_jffi_Foreign_getZeroTerminatedByteArrayChecked__J(JNIEnv* env, jo
 JNIEXPORT jbyteArray JNICALL
 Java_com_kenai_jffi_Foreign_getZeroTerminatedByteArray__JI(JNIEnv* env, jobject self, jlong address, jint maxlen)
 {
+    (void)(self);
     const char *str = (const char*) j2p(address), *zp;
     jsize len = ((zp = memchr(str, 0, maxlen)) != NULL) ? zp - str : maxlen;
     
@@ -350,6 +389,7 @@ Java_com_kenai_jffi_Foreign_getZeroTerminatedByteArray__JI(JNIEnv* env, jobject 
 JNIEXPORT jbyteArray JNICALL
 Java_com_kenai_jffi_Foreign_getZeroTerminatedByteArrayChecked__JI(JNIEnv* env, jobject self, jlong address, jint maxlen)
 {
+    (void)(self);
     const char *str = (const char*) j2p(address), *zp;
     jsize len;
 
@@ -370,6 +410,7 @@ JNIEXPORT void JNICALL
 Java_com_kenai_jffi_Foreign_putZeroTerminatedByteArray(JNIEnv *env, jobject self,
    jlong address, jbyteArray data, jint offset, jint length)
 {
+    (void)(self);
     (*env)->GetByteArrayRegion(env, data, offset, length, (jbyte *)j2p(address));
     *((char *) (uintptr_t) address + length) = '\0';
 }
@@ -378,6 +419,7 @@ JNIEXPORT void JNICALL
 Java_com_kenai_jffi_Foreign_putZeroTerminatedByteArrayChecked(JNIEnv *env, jobject self,
    jlong address, jbyteArray data, jint offset, jint length)
 {
+    (void)(self);
     char* cp = (char *) (uintptr_t) address;
     PROT({ *cp = 0; *(cp + length) ='\0';},);
     (*env)->GetByteArrayRegion(env, data, offset, length, (jbyte *)j2p(address));
@@ -391,6 +433,8 @@ Java_com_kenai_jffi_Foreign_putZeroTerminatedByteArrayChecked(JNIEnv *env, jobje
 JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_allocateMemory(JNIEnv* env, jobject self, jlong size, jboolean clear)
 {
+    (void)(env);
+    (void)(self);
     void* memory = malloc(size);
     if (memory != NULL && clear != JNI_FALSE) {
         memset(memory, 0, size);
@@ -406,6 +450,8 @@ Java_com_kenai_jffi_Foreign_allocateMemory(JNIEnv* env, jobject self, jlong size
 JNIEXPORT void JNICALL
 Java_com_kenai_jffi_Foreign_freeMemory(JNIEnv* env, jobject self, jlong address)
 {
+    (void)(env);
+    (void)(self);
     free(j2p(address));
 }
 
@@ -417,6 +463,7 @@ Java_com_kenai_jffi_Foreign_freeMemory(JNIEnv* env, jobject self, jlong address)
 JNIEXPORT jobject JNICALL
 Java_com_kenai_jffi_Foreign_newDirectByteBuffer(JNIEnv* env, jobject self, jlong address, jint capacity)
 {
+    (void)(self);
     return (*env)->NewDirectByteBuffer(env, j2p(address), capacity);
 }
 
@@ -428,5 +475,6 @@ Java_com_kenai_jffi_Foreign_newDirectByteBuffer(JNIEnv* env, jobject self, jlong
 JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_getDirectBufferAddress(JNIEnv* env, jobject self, jobject buffer)
 {
+    (void)(self);
     return p2j((*env)->GetDirectBufferAddress(env, buffer));
 }

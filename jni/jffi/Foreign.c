@@ -50,6 +50,8 @@ static void thread_data_free(void *ptr);
 JNIEXPORT jint JNICALL
 JNI_OnLoad(JavaVM *vm, void *reserved)
 {
+    (void)(vm);
+    (void)(reserved);
 #ifndef _WIN32
     struct sigaction sa;
     pthread_key_create(&jffi_threadDataKey, thread_data_free);
@@ -70,6 +72,8 @@ JNI_OnLoad(JavaVM *vm, void *reserved)
 JNIEXPORT void JNICALL 
 JNI_OnUnload(JavaVM *jvm, void *reserved)
 {
+    (void)(jvm);
+    (void)(reserved);
 #ifndef _WIN32
     pthread_key_delete(jffi_threadDataKey);
 #endif
@@ -100,6 +104,8 @@ thread_data_free(void *ptr)
 JNIEXPORT jint JNICALL
 Java_com_kenai_jffi_Foreign_getVersion(JNIEnv* env, jobject self)
 {
+    (void)(env);
+    (void)(self);
     return (com_kenai_jffi_Version_MAJOR << 16)
         | (com_kenai_jffi_Version_MINOR << 8)
         | (com_kenai_jffi_Version_MICRO);
@@ -116,18 +122,21 @@ Java_com_kenai_jffi_Foreign_getVersion(JNIEnv* env, jobject self)
 JNIEXPORT void JNICALL
 Java_com_kenai_jffi_Foreign_init(JNIEnv* env, jobject self)
 {
-    
+    (void)(env);
+    (void)(self);
 }
 
 JNIEXPORT jint JNICALL
 Java_com_kenai_jffi_Foreign_getJNIVersion(JNIEnv* env, jobject self)
 {
+    (void)(self);
     return (*env)->GetVersion(env);
 }
 
 JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_getJavaVM(JNIEnv *env, jobject self)
 {
+    (void)(self);
     JavaVM* vm;
     (*env)->GetJavaVM(env, &vm);
     return p2j(vm);
@@ -136,6 +145,7 @@ Java_com_kenai_jffi_Foreign_getJavaVM(JNIEnv *env, jobject self)
 JNIEXPORT void JNICALL
 Java_com_kenai_jffi_Foreign_fatalError(JNIEnv * env, jobject self, jstring msg)
 {
+    (void)(self);
     const char* str = (*env)->GetStringUTFChars(env, msg, NULL);
     (*env)->FatalError(env, str);
     (*env)->ReleaseStringUTFChars(env, msg, str);
@@ -145,6 +155,7 @@ JNIEXPORT jclass JNICALL
 Java_com_kenai_jffi_Foreign_defineClass__Ljava_lang_String_2Ljava_lang_Object_2_3BII(JNIEnv *env,
         jobject self, jstring jname, jobject loader, jbyteArray jbuf, jint off, jint len)
 {
+    (void)(self);
     const char* name = NULL;
     jbyte* buf = NULL;
     jclass retval = NULL;
@@ -177,6 +188,7 @@ JNIEXPORT jclass JNICALL
 Java_com_kenai_jffi_Foreign_defineClass__Ljava_lang_String_2Ljava_lang_Object_2Ljava_nio_ByteBuffer_2(JNIEnv *env,
         jobject self, jstring jname, jobject loader, jobject jbuf)
 {
+    (void)(self);
     const char* name = NULL;
     jclass retval = NULL;
 
@@ -206,6 +218,7 @@ cleanup:
 JNIEXPORT jobject JNICALL
 Java_com_kenai_jffi_Foreign_allocObject(JNIEnv *env, jobject self, jclass klass)
 {
+    (void)(self);
     return (*env)->AllocObject(env, klass);
 }
 
@@ -213,12 +226,14 @@ JNIEXPORT jint JNICALL
 Java_com_kenai_jffi_Foreign_registerNatives(JNIEnv *env, jobject self, jclass clazz,
         jlong methods, jint nmethods)
 {
+    (void)(self);
     return (*env)->RegisterNatives(env, clazz, j2p(methods), nmethods);
 }
 
 JNIEXPORT jint JNICALL
 Java_com_kenai_jffi_Foreign_unregisterNatives(JNIEnv *env, jobject self, jclass clazz)
 {
+    (void)(self);
     return (*env)->UnregisterNatives(env, clazz);
 }
 
@@ -233,8 +248,11 @@ Java_com_kenai_jffi_Foreign_unregisterNatives(JNIEnv *env, jobject self, jclass 
 # define CPU "x86_64"
 
 #elif defined(__ppc64__) || defined(__powerpc64__)
+#if BYTE_ORDER == LITTLE_ENDIAN
+# define CPU "ppc64le"
+#else
 # define CPU "ppc64"
-
+#endif
 #elif defined(__ppc__) || defined(__powerpc__) || defined(__powerpc)
 # define CPU "ppc"
 
@@ -270,11 +288,14 @@ Java_com_kenai_jffi_Foreign_unregisterNatives(JNIEnv *env, jobject self, jclass 
 JNIEXPORT jstring JNICALL 
 Java_com_kenai_jffi_Foreign_getArch(JNIEnv *env, jobject self)
 {
+    (void)(self);
     return (*env)->NewStringUTF(env, CPU);
 }
 
 JNIEXPORT jboolean JNICALL 
 Java_com_kenai_jffi_Foreign_isFaultProtectionEnabled(JNIEnv *env , jclass klass)
 {
+    (void)(env);
+    (void)(klass);
     return FAULT_PROTECT_ENABLED ? JNI_TRUE : JNI_FALSE; 
 }

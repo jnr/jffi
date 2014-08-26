@@ -109,6 +109,7 @@ static bool object_to_ptr(JNIEnv* env, jobject obj, int off, int len, int f, jlo
 JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_invokeN0(JNIEnv* env, jobject self, jlong ctxAddress, jlong function)
 {
+    (void)(self);
     CallContext* ctx = (CallContext *) j2p(ctxAddress);
     FFIValue retval;
     
@@ -137,6 +138,7 @@ Java_com_kenai_jffi_Foreign_invokeN0(JNIEnv* env, jobject self, jlong ctxAddress
 JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_invokeN1(JNIEnv* env, jobject self, jlong ctxAddress, jlong function, jlong arg1)
 {
+    (void)(self);
     return call1(env, (CallContext *) j2p(ctxAddress), j2p(function), arg1);
 }
 
@@ -148,6 +150,7 @@ Java_com_kenai_jffi_Foreign_invokeN1(JNIEnv* env, jobject self, jlong ctxAddress
 JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_invokeN2(JNIEnv* env, jobject self, jlong ctxAddress, jlong function, jlong arg1, jlong arg2)
 {
+    (void)(self);
     return call2(env, (CallContext *) j2p(ctxAddress), j2p(function), arg1, arg2);
 }
 
@@ -160,6 +163,7 @@ JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_invokeN3(JNIEnv* env, jobject self, jlong ctxAddress, jlong function,
         jlong arg1, jlong arg2, jlong arg3)
 {
+    (void)(self);
     return call3(env, (CallContext *) j2p(ctxAddress), j2p(function), arg1, arg2, arg3);
 }
 
@@ -167,6 +171,7 @@ JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_invokeN4(JNIEnv* env, jobject self, jlong ctxAddress, jlong function,
         jlong arg1, jlong arg2, jlong arg3, jlong arg4)
 {
+    (void)(self);
     return call4(env, (CallContext *) j2p(ctxAddress), j2p(function), arg1, arg2, arg3, arg4);
 }
 
@@ -174,6 +179,7 @@ JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_invokeN5(JNIEnv* env, jobject self, jlong ctxAddress, jlong function,
         jlong arg1, jlong arg2, jlong arg3, jlong arg4, jlong arg5)
 {
+    (void)(self);
     return call5(env, (CallContext *) j2p(ctxAddress), j2p(function), arg1, arg2, arg3, arg4, arg5);
 }
 
@@ -181,6 +187,7 @@ JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_invokeN6(JNIEnv* env, jobject self, jlong ctxAddress, jlong function,
         jlong arg1, jlong arg2, jlong arg3, jlong arg4, jlong arg5, jlong arg6)
 {
+    (void)(self);
     return call6(env, (CallContext *) j2p(ctxAddress), j2p(function), arg1, arg2, arg3, arg4, arg5, arg6);
 }
 
@@ -468,6 +475,7 @@ object_to_ptr(JNIEnv* env, jobject obj, int off, int len, int f, jlong* vp,
 #define DEFINVOKE(n) \
 static jlong invoke##n(JNIEnv* env, jobject self, jlong ctxAddress, jlong function, DEF_N##n, ObjectParam* objects, int nobjects) \
 { \
+    (void)(self); \
     IMPL(n); \
 }
 

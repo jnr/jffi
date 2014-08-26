@@ -85,6 +85,8 @@ invokeArrayWithObjects_(JNIEnv* env, jlong ctxAddress, jlong function, jbyteArra
 JNIEXPORT jboolean JNICALL
 Java_com_kenai_jffi_Foreign_isRawParameterPackingEnabled(JNIEnv* env, jobject self)
 {
+    (void)(env);
+    (void)(self);
     return JNI_FALSE;
 }
 
@@ -97,6 +99,7 @@ JNIEXPORT jint JNICALL
 Java_com_kenai_jffi_Foreign_invokeArrayReturnInt(JNIEnv* env, jclass self, jlong ctxAddress, jlong function,
         jbyteArray paramBuffer)
 {
+    (void)(self);
     FFIValue retval;
     invokeArrayWithObjects_(env, ctxAddress, function, paramBuffer, 0, NULL, NULL, &retval);
     return_int(retval);
@@ -111,6 +114,7 @@ JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_invokeArrayReturnLong(JNIEnv* env, jclass self, jlong ctxAddress, jlong function,
         jbyteArray paramBuffer)
 {
+    (void)(self);
     FFIValue retval;
     invokeArrayWithObjects_(env, ctxAddress, function, paramBuffer, 0, NULL, NULL, &retval);
     return retval.s64;
@@ -125,6 +129,7 @@ JNIEXPORT jfloat JNICALL
 Java_com_kenai_jffi_Foreign_invokeArrayReturnFloat(JNIEnv* env, jclass self, jlong ctxAddress, jlong function,
         jbyteArray paramBuffer)
 {
+    (void)(self);
     FFIValue retval;
     invokeArrayWithObjects_(env, ctxAddress, function, paramBuffer, 0, NULL, NULL, &retval);
     return retval.f;
@@ -138,6 +143,7 @@ JNIEXPORT jdouble JNICALL
 Java_com_kenai_jffi_Foreign_invokeArrayReturnDouble(JNIEnv* env, jclass self, jlong ctxAddress, jlong function,
         jbyteArray paramBuffer)
 {
+    (void)(self);
     FFIValue retval;
     invokeArrayWithObjects_(env, ctxAddress, function, paramBuffer, 0, NULL, NULL, &retval);
     return retval.d;
@@ -152,6 +158,7 @@ JNIEXPORT void JNICALL
 Java_com_kenai_jffi_Foreign_invokeArrayReturnStruct(JNIEnv* env, jclass self, jlong ctxAddress, jlong function,
         jbyteArray paramBuffer, jbyteArray returnBuffer, jint offset)
 {
+    (void)(self);
     CallContext* ctx = (CallContext *) j2p(ctxAddress);
     jbyte* retval = alloca(ctx->cif.rtype->size);
 
@@ -327,6 +334,7 @@ JNIEXPORT jint JNICALL
 Java_com_kenai_jffi_Foreign_invokeArrayWithObjectsInt32(JNIEnv* env, jobject self,
         jlong ctxAddress, jlong function, jbyteArray paramBuffer, jint objectCount, jintArray objectInfo, jobjectArray objectArray)
 {
+    (void)(self);
     FFIValue retval;
     invokeArrayWithObjects(env, ctxAddress, function, paramBuffer, objectCount, objectInfo, objectArray, &retval);
     return_int(retval);
@@ -341,6 +349,7 @@ JNIEXPORT jint JNICALL
 Java_com_kenai_jffi_Foreign_invokeArrayO1Int32(JNIEnv* env, jobject self, jlong ctxAddress, jlong function,
         jbyteArray paramBuffer, jobject o1, jint o1info, jint o1off, jint o1len)
 {
+    (void)(self);
     FFIValue retval;
     jint info[] = { o1info, o1off, o1len };
     jobject objects[] = { o1 };
@@ -358,6 +367,7 @@ Java_com_kenai_jffi_Foreign_invokeArrayO2Int32(JNIEnv* env, jobject self, jlong 
         jbyteArray paramBuffer, jobject o1, jint o1info, jint o1off, jint o1len,
         jobject o2, jint o2info, jint o2off, jint o2len)
 {
+    (void)(self);
     FFIValue retval;
     jint info[] = { o1info, o1off, o1len, o2info, o2off, o2len };
     jobject objects[] = { o1, o2 };
@@ -374,6 +384,7 @@ JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_invokeArrayWithObjectsInt64(JNIEnv* env, jobject self,
         jlong ctxAddress, jlong function, jbyteArray paramBuffer, jint objectCount, jintArray objectInfo, jobjectArray objectArray)
 {
+    (void)(self);
     FFIValue retval;
     invokeArrayWithObjects(env, ctxAddress, function, paramBuffer, objectCount, objectInfo, objectArray, &retval);
     return retval.s64;
@@ -388,6 +399,7 @@ JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_invokeArrayO1Int64(JNIEnv* env, jobject self, jlong ctxAddress, jlong function,
         jbyteArray paramBuffer, jobject o1, jint o1info, jint o1off, jint o1len)
 {
+    (void)(self);
     FFIValue retval;
     jint info[] = { o1info, o1off, o1len };
     jobject objects[] = { o1 };
@@ -407,6 +419,7 @@ Java_com_kenai_jffi_Foreign_invokeArrayO2Int64(JNIEnv* env, jobject self, jlong 
         jbyteArray paramBuffer, jobject o1, jint o1info, jint o1off, jint o1len,
         jobject o2, jint o2info, jint o2off, jint o2len)
 {
+    (void)(self);
     FFIValue retval;
     jint info[] = { o1info, o1off, o1len, o2info, o2off, o2len };
     jobject objects[] = { o1, o2 };
@@ -425,6 +438,7 @@ JNIEXPORT jfloat JNICALL
 Java_com_kenai_jffi_Foreign_invokeArrayWithObjectsFloat(JNIEnv* env, jobject self,
         jlong ctxAddress, jlong function, jbyteArray paramBuffer, jint objectCount, jintArray objectInfo, jobjectArray objectArray)
 {
+    (void)(self);
     FFIValue retval;
     invokeArrayWithObjects(env, ctxAddress, function, paramBuffer, objectCount, objectInfo, objectArray, &retval);
     return retval.f;
@@ -439,6 +453,7 @@ JNIEXPORT jdouble JNICALL
 Java_com_kenai_jffi_Foreign_invokeArrayWithObjectsDouble(JNIEnv* env, jobject self,
         jlong ctxAddress, jlong function, jbyteArray paramBuffer, jint objectCount, jintArray objectInfo, jobjectArray objectArray)
 {
+    (void)(self);
     FFIValue retval;
     invokeArrayWithObjects(env, ctxAddress, function, paramBuffer, objectCount, objectInfo, objectArray, &retval);
     return retval.d;
@@ -454,6 +469,7 @@ Java_com_kenai_jffi_Foreign_invokeArrayWithObjectsReturnStruct(JNIEnv* env, jobj
        jlong ctxAddress, jlong function, jbyteArray paramBuffer, jint objectCount, jintArray objectInfo,
        jobjectArray objectArray, jbyteArray returnBuffer, jint returnBufferOffset)
 {
+    (void)(self);
     CallContext* ctx = (CallContext *) j2p(ctxAddress);
     jbyte* retval = alloca(ctx->cif.rtype->size);
     
@@ -470,6 +486,7 @@ JNIEXPORT void JNICALL
 Java_com_kenai_jffi_Foreign_invokePointerParameterArray(JNIEnv *env, jobject self, jlong ctxAddress, jlong function,
         jlong returnBuffer, jlongArray parameterArray)
 {
+    (void)(self);
     CallContext* ctx = (CallContext *) j2p(ctxAddress);
     int parameterCount;
     jlong* params = NULL;

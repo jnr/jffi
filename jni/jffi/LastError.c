@@ -51,6 +51,8 @@ static __thread int last_error = 0;
 JNIEXPORT jint JNICALL
 Java_com_kenai_jffi_Foreign_getLastError(JNIEnv* env, jobject self)
 {
+    (void)(env);
+    (void)(self);
 #ifdef _WIN32
     // printf("Getting ERRNO: %d on thread %d\n", last_error, (int)GetCurrentThreadId());
     return last_error;
@@ -67,6 +69,8 @@ Java_com_kenai_jffi_Foreign_getLastError(JNIEnv* env, jobject self)
 JNIEXPORT void JNICALL
 Java_com_kenai_jffi_Foreign_setLastError(JNIEnv* env, jobject self, jint value)
 {
+    (void)(env);
+    (void)(self);
 #ifdef _WIN32
     // printf("Setting ERRNO: %d on thread %d\n", value, (int)GetCurrentThreadId());
     SetLastError(value);

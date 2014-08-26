@@ -73,6 +73,8 @@ typeToFFI(int type)
 JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_lookupBuiltinType(JNIEnv* env, jobject self, jint type)
 {
+    (void)(env);
+    (void)(self);
     return p2j(typeToFFI(type));
 }
 
@@ -84,6 +86,8 @@ Java_com_kenai_jffi_Foreign_lookupBuiltinType(JNIEnv* env, jobject self, jint ty
 JNIEXPORT jint JNICALL
 Java_com_kenai_jffi_Foreign_getTypeSize(JNIEnv* env, jobject self, jlong handle)
 {
+    (void)(env);
+    (void)(self);
     return ((ffi_type *) j2p(handle))->size;
 }
 
@@ -94,6 +98,8 @@ Java_com_kenai_jffi_Foreign_getTypeSize(JNIEnv* env, jobject self, jlong handle)
  */
 JNIEXPORT jint JNICALL Java_com_kenai_jffi_Foreign_getTypeAlign(JNIEnv* env, jobject self, jlong handle)
 {
+    (void)(env);
+    (void)(self);
     return ((ffi_type *) j2p(handle))->alignment;
 }
 
@@ -105,5 +111,7 @@ JNIEXPORT jint JNICALL Java_com_kenai_jffi_Foreign_getTypeAlign(JNIEnv* env, job
 JNIEXPORT jint JNICALL
 Java_com_kenai_jffi_Foreign_getTypeType(JNIEnv* env, jobject self, jlong handle)
 {
+    (void)(env);
+    (void)(self);
     return ((ffi_type *) j2p(handle))->type;
 }
