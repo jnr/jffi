@@ -68,7 +68,7 @@ WERROR = -Werror
 ifneq ($(OS),darwin)
   WFLAGS += -Wundef $(WERROR)
 endif
-WFLAGS += -W -Wall -Wno-unused -Wno-parentheses
+WFLAGS += -W -Wall -Wno-unused -Wno-parentheses -Wno-unused-parameter
 PICFLAGS = -fPIC
 SOFLAGS = # Filled in for each OS specifically
 FFI_MMAP_EXEC = -DFFI_MMAP_EXEC_WRIT
