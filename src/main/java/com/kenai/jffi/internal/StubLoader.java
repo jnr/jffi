@@ -17,7 +17,8 @@
  */
 package com.kenai.jffi.internal;
 
-import java.io.ByteArrayOutputStream;
+import com.kenai.jffi.Util;
+
 import java.io.CharArrayWriter;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -129,19 +130,19 @@ public class StubLoader {
      */
     private static OS determineOS() {
         String osName = System.getProperty("os.name").split(" ")[0];
-        if (startsWithIgnoreCase(osName, "mac") || startsWithIgnoreCase(osName, "darwin")) {
+        if (Util.startsWithIgnoreCase(osName, "mac", LOCALE) || Util.startsWithIgnoreCase(osName, "darwin", LOCALE)) {
             return OS.DARWIN;
-        } else if (startsWithIgnoreCase(osName, "linux")) {
+        } else if (Util.startsWithIgnoreCase(osName, "linux", LOCALE)) {
             return OS.LINUX;
-        } else if (startsWithIgnoreCase(osName, "sunos") || startsWithIgnoreCase(osName, "solaris")) {
+        } else if (Util.startsWithIgnoreCase(osName, "sunos", LOCALE) || Util.startsWithIgnoreCase(osName, "solaris", LOCALE)) {
             return OS.SOLARIS;
-        } else if (startsWithIgnoreCase(osName, "aix")) {
+        } else if (Util.startsWithIgnoreCase(osName, "aix", LOCALE)) {
             return OS.AIX; 
-        } else if (startsWithIgnoreCase(osName, "openbsd")) {
+        } else if (Util.startsWithIgnoreCase(osName, "openbsd", LOCALE)) {
             return OS.OPENBSD;
-        } else if (startsWithIgnoreCase(osName, "freebsd")) {
+        } else if (Util.startsWithIgnoreCase(osName, "freebsd", LOCALE)) {
             return OS.FREEBSD;
-        } else if (startsWithIgnoreCase(osName, "windows")) {
+        } else if (Util.startsWithIgnoreCase(osName, "windows", LOCALE)) {
             return OS.WINDOWS;
         } else {
             throw new RuntimeException("cannot determine operating system");
@@ -158,23 +159,23 @@ public class StubLoader {
      */
     private static CPU determineCPU() {
         String archString = System.getProperty("os.arch", "unknown");
-        if (equalsIgnoreCase("x86", archString) || equalsIgnoreCase("i386", archString) || equalsIgnoreCase("i86pc", archString)) {
+        if (Util.equalsIgnoreCase("x86", archString, LOCALE) || Util.equalsIgnoreCase("i386", archString, LOCALE) || Util.equalsIgnoreCase("i86pc", archString, LOCALE)) {
             return CPU.I386;
-        } else if (equalsIgnoreCase("x86_64", archString) || equalsIgnoreCase("amd64", archString)) {
+        } else if (Util.equalsIgnoreCase("x86_64", archString, LOCALE) || Util.equalsIgnoreCase("amd64", archString, LOCALE)) {
             return CPU.X86_64;
-        } else if (equalsIgnoreCase("ppc", archString) || equalsIgnoreCase("powerpc", archString)) {
+        } else if (Util.equalsIgnoreCase("ppc", archString, LOCALE) || Util.equalsIgnoreCase("powerpc", archString, LOCALE)) {
             return CPU.PPC;
-        } else if (equalsIgnoreCase("ppc64", archString) || equalsIgnoreCase("powerpc64", archString)) {
+        } else if (Util.equalsIgnoreCase("ppc64", archString, LOCALE) || Util.equalsIgnoreCase("powerpc64", archString, LOCALE)) {
             return CPU.PPC64;
-        } else if (equalsIgnoreCase("s390", archString) || equalsIgnoreCase("s390x", archString)) {
+        } else if (Util.equalsIgnoreCase("s390", archString, LOCALE) || Util.equalsIgnoreCase("s390x", archString, LOCALE)) {
             return CPU.S390X;
-        } else if (equalsIgnoreCase("arm", archString)) {
+        } else if (Util.equalsIgnoreCase("arm", archString, LOCALE)) {
             return CPU.ARM;
         }
 
         // Try to find by lookup up in the CPU list
         for (CPU cpu : CPU.values()) {
-            if (equalsIgnoreCase(cpu.name(), archString)) {
+            if (Util.equalsIgnoreCase(cpu.name(), archString, LOCALE)) {
                 return cpu;
             }
         }
@@ -416,18 +417,6 @@ public class StubLoader {
         } catch (Throwable t) {
             throw new RuntimeException(t);
         }
-    }
-
-    private static boolean startsWithIgnoreCase(String s1, String s2) {
-        return s1.startsWith(s2)
-            || s1.toUpperCase(LOCALE).startsWith(s2.toUpperCase(LOCALE))
-            || s1.toLowerCase(LOCALE).startsWith(s2.toLowerCase(LOCALE));
-    }
-
-    private static boolean equalsIgnoreCase(String s1, String s2) {
-        return s1.equalsIgnoreCase(s2)
-            || s1.toUpperCase(LOCALE).equals(s2.toUpperCase(LOCALE))
-            || s1.toLowerCase(LOCALE).equals(s2.toLowerCase(LOCALE));
     }
 
     static {

@@ -203,22 +203,22 @@ public abstract class Platform {
                 archString = System.getProperty("os.arch", "unknown");
             }
 
-            if ("x86".equalsIgnoreCase(archString) || "i386".equalsIgnoreCase(archString) || "i86pc".equalsIgnoreCase(archString)) {
+            if (Util.equalsIgnoreCase("x86", archString, LOCALE) || Util.equalsIgnoreCase("i386", archString, LOCALE) || Util.equalsIgnoreCase("i86pc", archString, LOCALE)) {
                 return CPU.I386;
 
-            } else if ("x86_64".equalsIgnoreCase(archString) || "amd64".equalsIgnoreCase(archString)) {
+            } else if (Util.equalsIgnoreCase("x86_64", archString, LOCALE) || Util.equalsIgnoreCase("amd64", archString, LOCALE)) {
                 return CPU.X86_64;
 
-            } else if ("ppc".equalsIgnoreCase(archString) || "powerpc".equalsIgnoreCase(archString)) {
+            } else if (Util.equalsIgnoreCase("ppc", archString, LOCALE) || Util.equalsIgnoreCase("powerpc", archString, LOCALE)) {
                 return CPU.PPC;
 
-            } else if ("ppc64".equalsIgnoreCase(archString) || "powerpc64".equalsIgnoreCase(archString)) {
+            } else if (Util.equalsIgnoreCase("ppc64", archString, LOCALE) || Util.equalsIgnoreCase("powerpc64", archString, LOCALE)) {
                 return CPU.PPC64;
             
-            } else if ("s390".equalsIgnoreCase(archString) || "s390x".equalsIgnoreCase(archString)) {
+            } else if (Util.equalsIgnoreCase("s390", archString, LOCALE) || Util.equalsIgnoreCase("s390x", archString, LOCALE)) {
                 return CPU.S390X;
                 
-            } else if ("arm".equalsIgnoreCase(archString)) {
+            } else if (Util.equalsIgnoreCase("arm", archString, LOCALE)) {
                 return CPU.ARM;
                 
             }
