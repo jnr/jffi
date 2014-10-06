@@ -233,7 +233,11 @@ Java_com_kenai_jffi_Foreign_unregisterNatives(JNIEnv *env, jobject self, jclass 
 # define CPU "x86_64"
 
 #elif defined(__ppc64__) || defined(__powerpc64__)
-# define CPU "ppc64"
+# if BYTE_ORDER == LITTLE_ENDIAN
+#  define CPU "ppc64le"
+# else
+#  define CPU "ppc64"
+# endif
 
 #elif defined(__ppc__) || defined(__powerpc__) || defined(__powerpc)
 # define CPU "ppc"
