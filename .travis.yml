@@ -5,4 +5,5 @@ jdk:
   - oraclejdk7
   - oraclejdk8
 script: ant test
-
+before_install:
+  - sudo apt-get install texinfo
