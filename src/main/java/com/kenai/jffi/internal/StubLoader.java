@@ -165,7 +165,8 @@ public class StubLoader {
             return CPU.X86_64;
         } else if (Util.equalsIgnoreCase("ppc", archString, LOCALE) || Util.equalsIgnoreCase("powerpc", archString, LOCALE)) {
             return CPU.PPC;
-        } else if (Util.equalsIgnoreCase("ppc64", archString, LOCALE) || Util.equalsIgnoreCase("powerpc64", archString, LOCALE)) {
+        } else if (Util.equalsIgnoreCase("ppc64", archString, LOCALE) || Util.equalsIgnoreCase("powerpc64", archString, LOCALE) ||
+                   Util.equalsIgnoreCase("ppc64le", archString, LOCALE) || Util.equalsIgnoreCase("ppc64be", archString, LOCALE)) {
             return CPU.PPC64;
         } else if (Util.equalsIgnoreCase("s390", archString, LOCALE) || Util.equalsIgnoreCase("s390x", archString, LOCALE)) {
             return CPU.S390X;
