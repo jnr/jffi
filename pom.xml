@@ -39,13 +39,13 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.8.2</version>
+      <version>4.11</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
 
   <properties>
-    <maven.test.skip>true</maven.test.skip>
+    <!--<maven.test.skip>true</maven.test.skip>-->
     <maven.test.failure.ignore>true</maven.test.failure.ignore>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.6</maven.compiler.source>
@@ -90,6 +90,14 @@
           <debug>true</debug>
           <showDeprecation>true</showDeprecation>
           <target>1.6</target>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <forkMode>once</forkMode>
         </configuration>
       </plugin>
 <!--

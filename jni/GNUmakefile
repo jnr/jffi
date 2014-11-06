@@ -68,7 +68,7 @@ WERROR = -Werror
 ifneq ($(OS),darwin)
   WFLAGS += -Wundef $(WERROR)
 endif
-WFLAGS += -W -Wall -Wno-unused -Wno-parentheses
+WFLAGS += -W -Wall -Wno-unused -Wno-parentheses -Wno-unused-parameter
 PICFLAGS = -fPIC
 SOFLAGS = # Filled in for each OS specifically
 FFI_MMAP_EXEC = -DFFI_MMAP_EXEC_WRIT
@@ -243,7 +243,7 @@ ifeq ($(CPU), sparcv9)
   MODEL=64
 endif
 
-ifneq ($(findstring $(CPU), x86_64 amd64 ppc64 powerpc64 s390x),)
+ifneq ($(findstring $(CPU), x86_64 amd64 ppc64 ppc64le powerpc64 s390x),)
   MODEL = 64
 endif
 

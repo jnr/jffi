@@ -1,5 +1,6 @@
 /* 
  * Copyright (C) 2008-2010 Wayne Meissner
+ * Copyright (C) 2014 Timur Duehr
  * 
  * This file is part of jffi.
  * 
@@ -46,6 +47,28 @@
 pthread_key_t jffi_threadDataKey;
 static void thread_data_free(void *ptr);
 #endif
+
+#include "rtld.h"
+#include <dlfcn.h>
+
+#define FRTLD(x, y) \
+JNIEXPORT jint JNICALL Java_com_kenai_jffi_Foreign_getRtld##x(JNIEnv* env, jclass klass){ \
+     return (jint) RTLD_##y; \
+}
+
+FRTLD(Lazy, LAZY);
+FRTLD(Now, NOW);
+FRTLD(Local, LOCAL);
+FRTLD(Global, GLOBAL);
+FRTLD(NoLoad, NOLOAD);
+FRTLD(NoDelete, NODELETE);
+FRTLD(First, FIRST);
+FRTLD(DeepBind, DEEPBIND);
+FRTLD(Member, MEMBER);
+FRTLD(BindingMask, BINDING_MASK);
+FRTLD(LocationMask, LOCATION_MASK);
+FRTLD(AllMask, ALL_MASK);
+#undef FRTLD
 
 JNIEXPORT jint JNICALL
 JNI_OnLoad(JavaVM *vm, void *reserved)
@@ -233,7 +256,11 @@ Java_com_kenai_jffi_Foreign_unregisterNatives(JNIEnv *env, jobject self, jclass 
 # define CPU "x86_64"
 
 #elif defined(__ppc64__) || defined(__powerpc64__)
-# define CPU "ppc64"
+# if BYTE_ORDER == LITTLE_ENDIAN
+#  define CPU "ppc64le"
+# else
+#  define CPU "ppc64"
+# endif
 
 #elif defined(__ppc__) || defined(__powerpc__) || defined(__powerpc)
 # define CPU "ppc"

@@ -1,8 +1,9 @@
 /*
  * Copyright (C) 2008, 2009 Wayne Meissner
+ * Copyright (C) 2014 Timur Duehr
  *
  * This file is part of jffi.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * 
+ *
  * Alternatively, you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -55,16 +56,26 @@ public final class Library {
     }
 
     /** Perform  lazy  binding. Only resolve symbols as needed */
-    public static final int LAZY   = Foreign.RTLD_LAZY;
+    public static final int LAZY   = Foreign.getInstance().getRtldLazy();
 
     /** Resolve all symbols when loading the library */
-    public static final int NOW    = Foreign.RTLD_NOW;
+    public static final int NOW    = Foreign.getInstance().getRtldNow();
 
     /** Symbols in this library are not made available to other libraries */
-    public static final int LOCAL  = Foreign.RTLD_LOCAL;
+    public static final int LOCAL  = Foreign.getInstance().getRtldLocal();
 
     /** All symbols in the library are made available to other libraries */
-    public static final int GLOBAL = Foreign.RTLD_GLOBAL;
+    public static final int GLOBAL = Foreign.getInstance().getRtldGlobal();
+
+    public static final int NOLOAD = Foreign.getInstance().getRtldNoLoad();
+    public static final int NODELETE = Foreign.getInstance().getRtldNoDelete();
+    public static final int FIRST = Foreign.getInstance().getRtldFirst();
+    public static final int DEEPBIND = Foreign.getInstance().getRtldDeepBind();
+    public static final int MEMBER = Foreign.getInstance().getRtldMember();
+
+    public static final int BINDING_MASK = Foreign.getInstance().getRtldBindingMask();
+    public static final int LOCATION_MASK = Foreign.getInstance().getRtldLocationMask();
+    public static final int ALL_MASK = Foreign.getInstance().getRtldAllMask();
 
     /** The native dl/LoadLibrary handle */
     private final long handle;
@@ -121,20 +132,20 @@ public final class Library {
         if (lib != null) {
             return lib;
         }
-        
+
         lib = openLibrary(name, flags);
         if (lib == null) {
             return null;
         }
         cache.put(name, new WeakReference<Library>(lib));
-        
+
         return lib;
     }
 
     /**
      * Gets a handle for the named library.
      *
-     * <b>Note</b> This will not cache the instance, nor will it return a cached 
+     * <b>Note</b> This will not cache the instance, nor will it return a cached
      * instance.  Only use when you really need a new handle for the library.
      *
      * @param name The name or path of the library to open.
@@ -153,7 +164,7 @@ public final class Library {
 
         return address != 0L ? new Library(foreign, name, address) : null;
     }
-    
+
     private Library(Foreign foreign, String name, long address) {
         this.foreign = foreign;
         this.name = name;
@@ -162,7 +173,7 @@ public final class Library {
 
     /**
      * Gets the address of a symbol within the <tt>Library</tt>.
-     * 
+     *
      * @param name The name of the symbol to locate.
      * @return The address of the symbol within the current address space.
      */
@@ -175,7 +186,7 @@ public final class Library {
             return 0;
         }
     }
-    
+
     /**
      * Gets the current error string from dlopen/LoadLibrary.
      *
@@ -185,7 +196,7 @@ public final class Library {
         String error = lastError.get();
         return error != null ? error : "unknown";
     }
-    
+
     @Override
     protected void finalize() throws Throwable {
         try {
