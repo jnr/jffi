@@ -355,6 +355,7 @@ public class StubLoader {
             os = null;
 
             System.load(dstFile.getAbsolutePath());
+            dstFile.delete();
         } catch (IOException ex) {
             throw new UnsatisfiedLinkError(ex.getMessage());
 
