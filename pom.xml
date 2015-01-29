@@ -92,89 +92,11 @@
           <target>1.6</target>
         </configuration>
       </plugin>
-      <plugin>
-	<artifactId>maven-antrun-plugin</artifactId>
-        <version>1.1</version>
-        <executions>
-            <execution>
-            <id>generate-sources</id>
-            <phase>generate-sources</phase>
-            <configuration>
-              <tasks>
-                <property name="os.name" value="${os.name}" />
-                <property name="os.arch" value="${os.arch}" />
-                <property name="java.home" value="${java.home}" />
-                <property name="dist.dir" value="${project.build.directory}" />
-                <property name="build.dir" value="${project.build.directory}" />
-                <property name="build.classes.dir" value="${project.build.outputDirectory}" />
-                <ant antfile="version.xml" dir="." target="-generate-version-source" />
-              </tasks>
-              <sourceRoot>
-                ${project.build.directory}/java
-              </sourceRoot>
 
-            </configuration>
-            <goals>
-              <goal>run</goal>
-            </goals>
-          </execution>
-            <execution>
-            <id>build-native-testlib</id>
-            <phase>generate-sources</phase>
-            <configuration>
-              <tasks>
-                <property name="os.name" value="${os.name}" />
-                <property name="os.arch" value="${os.arch}" />
-                <property name="java.home" value="${java.home}" />
-                <property name="dist.dir" value="${project.build.directory}" />
-                <!--property name="build.dir" value="${project.build.directory}" /-->
-                <property name="build.classes.dir" value="${project.build.outputDirectory}" />
-                <ant antfile="build.xml" dir="." target="-build-native-testlib" />
-              </tasks>
-              <sourceRoot>
-                ${project.build.directory}/java
-              </sourceRoot>
-
-            </configuration>
-            <goals>
-              <goal>run</goal>
-            </goals>
-          </execution>
-	</executions>
-      </plugin>
-
-      <plugin>
-	<artifactId>maven-clean-plugin</artifactId>
-	<configuration>
-          <filesets>
-	    <fileset>
-	      <directory>${project.basedir}/build</directory>
-	    </fileset>
-	  </filesets>
-	</configuration>
-      </plugin>
-	  
-      <plugin>
-	<groupId>org.codehaus.mojo</groupId>
-	<artifactId>exec-maven-plugin</artifactId>
-	<executions>
-	  <execution>
-	    <phase>process-test-classes</phase>
-	    <goals><goal>exec</goal></goals>
-	    <configuration>
-	      <executable>ant</executable>
-	      <arguments><argument>build-native</argument></arguments>
-	    </configuration>
-	  </execution>
-	</executions>
-      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
-	  <systemPropertyVariables>
-	    <java.library.path>${project.basedir}/build/jni</java.library.path>
-	  </systemPropertyVariables>
           <forkMode>once</forkMode>
         </configuration>
       </plugin>
@@ -205,7 +127,33 @@
         </executions>
       </plugin>
 -->
-<!--
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-antrun-plugin</artifactId>
+          <version>1.6</version>
+          <executions>
+            <execution>
+            <id>build-native-library</id>
+            <phase>generate-sources</phase>
+            <configuration>
+              <tasks>
+                <property name="os.name" value="${os.name}" />
+                <property name="os.arch" value="${os.arch}" />
+                <property name="java.home" value="${java.home}" />
+                <property name="dist.dir" value="${project.build.directory}" />
+                <property name="build.dir" value="${project.build.directory}" />
+                <property name="build.classes.dir" value="${project.build.outputDirectory}" />
+                <ant antfile="version.xml" dir="." target="-generate-version-source" />
+              </tasks>
+              <sourceRoot>
+                ${project.build.directory}/java
+              </sourceRoot>
+
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
             <execution>
                 <phase>process-test-resources</phase>
                 <goals>
@@ -230,7 +178,6 @@
             </execution>
         </executions>
       </plugin>
--->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
