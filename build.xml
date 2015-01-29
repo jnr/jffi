@@ -375,7 +375,7 @@
     </zip>
   </target>
 
-  <target name="-assemble-final-jar" depends="-init-vars, -assemble-native-jar">
+  <target name="-assemble-final-jar" depends="-init-vars, -do-jar, -assemble-native-jar">
     <jar jarfile="${complete.jar}" index="true" update="true" duplicate="preserve"
          filesetmanifest="skip">
       <zipfileset src="${dist.jar}"/>
