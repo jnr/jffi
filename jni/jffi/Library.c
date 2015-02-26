@@ -1,6 +1,5 @@
 /* 
  * Copyright (C) 2008-2010 Wayne Meissner
- * Copyright (C) 2014 Timur Duehr
  * 
  * This file is part of jffi.
  * 
@@ -49,7 +48,6 @@
 #include <ffi.h>
 #include <jni.h>
 #include "jffi.h"
-#include "rtld.h"
 
 #include "Exception.h"
 #include "com_kenai_jffi_Foreign.h"
@@ -59,6 +57,7 @@ static void* dl_open(const char* name, int flags);
 static void dl_error(char* buf, int size);
 #define dl_sym(handle, name) GetProcAddress(handle, name)
 #define dl_close(handle) FreeLibrary(handle)
+enum { RTLD_LAZY=1, RTLD_NOW, RTLD_GLOBAL, RTLD_LOCAL };
 #else
 # define dl_open(name, flags) dlopen(name, flags != 0 ? flags : (RTLD_LAZY | RTLD_LOCAL))
 # define dl_error(buf, size) do { \
@@ -66,6 +65,9 @@ static void dl_error(char* buf, int size);
 } while(0)
 # define dl_sym(handle, name) dlsym(handle, name)
 # define dl_close(handle) dlclose(handle)
+#ifndef RTLD_LOCAL
+# define RTLD_LOCAL 8
+#endif
 #endif
 
 static int getMultibyteString(JNIEnv* env, char* dst, jstring jstr, int n);
@@ -92,8 +94,17 @@ Java_com_kenai_jffi_Foreign_dlopen(JNIEnv* env, jobject self, jstring jPath, jin
     const char* path = NULL; // Handle dlopen(NULL, flags);
     void* handle = NULL;
     int flags = 0;
-    flags = jFlags & RTLD_ALL_MASK;
+#define F(x) (jFlags & com_kenai_jffi_Foreign_RTLD_##x) != 0 ? RTLD_##x : 0;
+    flags |= F(LAZY);
+    flags |= F(GLOBAL);
+    flags |= F(LOCAL);
+    flags |= F(NOW);
+#undef F
 
+#ifdef _AIX
+    flags |= RTLD_MEMBER; //  Needed for AIX
+#endif
+    
     if (jPath != NULL) {
         path = path_;
         getMultibyteString(env, path_, jPath, sizeof(path_));
