@@ -1,6 +1,5 @@
 /*
  * Copyright (C) 2011 Wayne Meissner
- * Copyright (C) 2014 Timur Duehr
  *
  * This file is part of jffi.
  * 
@@ -50,7 +49,7 @@ public class StubLoader {
     private static final String bootPropertyFilename = "boot.properties";
     private static final String bootLibraryPropertyName = "jffi.boot.library.path";
     private static final String stubLibraryName
-            = System.mapLibraryName(String.format("jffi-%d.%d", VERSION_MAJOR, VERSION_MINOR));
+            = String.format("jffi-%d.%d", VERSION_MAJOR, VERSION_MINOR);
 
     private static volatile OS os = null;
     private static volatile CPU cpu = null;
@@ -301,10 +300,12 @@ public class StubLoader {
     private static boolean loadFromBootPath(String libName, String bootPath, Collection<Throwable> errors) {
         String[] dirs = bootPath.split(File.pathSeparator);
         for (int i = 0; i < dirs.length; ++i) {
+            String soname = System.mapLibraryName(libName);
+            
             // First try to load <dir>/${cpu}-${os}/libjffi-x.y.so, then fallback to <dir>/libjffi-x.y.so 
-            File stub = new File(new File(dirs[i], getPlatformName()), libName);
+            File stub = new File(new File(dirs[i], getPlatformName()), soname);
             if (!stub.isFile()) {
-                stub = new File(new File(dirs[i]), libName);
+                stub = new File(new File(dirs[i]), soname);
             }
             
             String path = stub.getAbsolutePath();
