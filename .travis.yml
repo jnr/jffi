@@ -7,3 +7,11 @@ jdk:
 script: ant test
 before_install:
   - sudo apt-get install texinfo
+notifications:
+  irc:
+    channels:
+      - "irc.freenode.org#jnr"
+    on_success: change
+    on_failure: always
+    template:
+      - "%{repository} (%{branch}:%{commit} by %{author}): %{message} (%{build_url})"
