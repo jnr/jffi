@@ -10,3 +10,4 @@ jni/libffi/doc/libffi.info$
 /.settings/
 target
 .idea
+*.iml
