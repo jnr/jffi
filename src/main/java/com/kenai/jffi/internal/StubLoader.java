@@ -170,6 +170,9 @@ public class StubLoader {
         } else if (Util.equalsIgnoreCase("ppc", archString, LOCALE) || Util.equalsIgnoreCase("powerpc", archString, LOCALE)) {
             return CPU.PPC;
         } else if (Util.equalsIgnoreCase("ppc64", archString, LOCALE) || Util.equalsIgnoreCase("powerpc64", archString, LOCALE)) {
+            if ("little".equals(System.getProperty("sun.cpu.endian"))) {
+                return CPU.PPC64LE;
+            }
             return CPU.PPC64;
         } else if (equalsIgnoreCase("ppc64le", archString, LOCALE) || equalsIgnoreCase("powerpc64le", archString, LOCALE)) {
             return CPU.PPC64LE;
