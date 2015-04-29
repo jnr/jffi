@@ -85,7 +85,7 @@ CFLAGS += -D_REENTRANT -D_LARGEFILE64_SOURCE -D_GNU_SOURCE
 
 ifeq ($(OS), win64)
   override CPU = x86_64
-  JDK_INCLUDES=-I$(JNI_DIR)/win32/include -I$(JNI_DIR)/win32/include/win32
+  JDK_INCLUDES=-I$(WIN32_JNI_INCLUDES) -I$(WIN32_JNI_INCLUDES)/win32
   CC = x86_64-w64-mingw32-gcc -m64
   PICFLAGS =
   ifneq ($(findstring cygwin, $(BUILD_OS)),)
