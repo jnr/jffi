@@ -144,7 +144,7 @@ abstract public class PageManager {
 
         @Override
         public void freePages(long address, int pageCount) {
-            Foreign.VirtualFree(address, (int) pageSize() * pageCount, Foreign.MEM_RELEASE);
+            Foreign.VirtualFree(address, 0, Foreign.MEM_RELEASE);
         }
 
         @Override
