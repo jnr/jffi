@@ -26,6 +26,9 @@ public class InvokerTest {
 
     static final long N1 = 0x1eafbeef;
     static final long N2 = 0x1010dead;
+    static final long N3 = 0x10101010;
+    static final long N4 = 0x01010101;
+    static final long N5 = 0x0000beef;
 
     static ObjectParameterInfo.ComponentType NATIVE_LONG = Platform.getPlatform().longSize() == 32
             ? ObjectParameterInfo.INT : ObjectParameterInfo.LONG;
@@ -261,6 +264,122 @@ public class InvokerTest {
         assertEquals("incorrect return value", N1 + N2, unsigned(ret));
     }
 
+    public static void invokeOONOO(Invoker invoker) {
+        Function function = getFunction("invokeOONOO", Type.SLONG, Type.POINTER, Type.POINTER, Type.SLONG, Type.POINTER, Type.POINTER);
+        CallContext ctx = getContext(Type.SLONG, Type.POINTER, Type.POINTER, Type.SLONG, Type.POINTER, Type.POINTER);
+
+        Object o1 = newNativeUnsignedLongArray(N1);
+        Object o2 = newNativeUnsignedLongArray(N2);
+        Object o3 = newNativeUnsignedLongArray(N3);
+        Object o4 = newNativeUnsignedLongArray(N4);
+
+        ObjectParameterStrategy s1 = new HeapArrayStrategy(0, 1);
+        ObjectParameterStrategy s2 = new HeapArrayStrategy(0, 1);
+        ObjectParameterStrategy s3 = new HeapArrayStrategy(0, 1);
+        ObjectParameterStrategy s4 = new HeapArrayStrategy(0, 1);
+
+        ObjectParameterInfo o1info = ObjectParameterInfo.create(0, ObjectParameterInfo.ARRAY,
+                NATIVE_LONG, ObjectParameterInfo.IN | ObjectParameterInfo.OUT);
+        ObjectParameterInfo o2info = ObjectParameterInfo.create(1, ObjectParameterInfo.ARRAY,
+                NATIVE_LONG, ObjectParameterInfo.IN | ObjectParameterInfo.OUT);
+        ObjectParameterInfo o3info = ObjectParameterInfo.create(3, ObjectParameterInfo.ARRAY,
+                NATIVE_LONG, ObjectParameterInfo.IN | ObjectParameterInfo.OUT);
+        ObjectParameterInfo o4info = ObjectParameterInfo.create(4, ObjectParameterInfo.ARRAY,
+                NATIVE_LONG, ObjectParameterInfo.IN | ObjectParameterInfo.OUT);
+
+        long ret = invoker.invokeN5(ctx, function.getFunctionAddress(),
+                0L, 0L, N5, 0L, 0L,
+                4,
+                o1, s1, o1info,
+                o2, s2, o2info,
+                o3, s3, o3info,
+                o4, s4, o4info);
+
+        assertEquals("incorrect value o1", 1, getNativeUnsignedLong(o1));
+        assertEquals("incorrect value o2", 2, getNativeUnsignedLong(o2));
+        assertEquals("incorrect value o3", 3, getNativeUnsignedLong(o3));
+        assertEquals("incorrect value o4", 4, getNativeUnsignedLong(o4));
+        assertEquals("incorrect return value", N1 + N2 + N3 + N4 + N5, unsigned(ret));
+    }
+
+    public static void invokeDONOO(Invoker invoker) {
+        Function function = getFunction("invokeOONOO", Type.SLONG, Type.POINTER, Type.POINTER, Type.SLONG, Type.POINTER, Type.POINTER);
+        CallContext ctx = getContext(Type.SLONG, Type.POINTER, Type.POINTER, Type.SLONG, Type.POINTER, Type.POINTER);
+
+        UnitHelper.Address o1 = new UnitHelper.Address(IO.allocateMemory(8, true));
+        putNativeUnsignedLong(o1, N1);
+        Object o2 = newNativeUnsignedLongArray(N2);
+        Object o3 = newNativeUnsignedLongArray(N3);
+        Object o4 = newNativeUnsignedLongArray(N4);
+
+        ObjectParameterStrategy s1 = new DirectStrategy();
+        ObjectParameterStrategy s2 = new HeapArrayStrategy(0, 1);
+        ObjectParameterStrategy s3 = new HeapArrayStrategy(0, 1);
+        ObjectParameterStrategy s4 = new HeapArrayStrategy(0, 1);
+
+        ObjectParameterInfo o1info = ObjectParameterInfo.create(0, ObjectParameterInfo.ARRAY,
+                NATIVE_LONG, ObjectParameterInfo.IN | ObjectParameterInfo.OUT);
+        ObjectParameterInfo o2info = ObjectParameterInfo.create(1, ObjectParameterInfo.ARRAY,
+                NATIVE_LONG, ObjectParameterInfo.IN | ObjectParameterInfo.OUT);
+        ObjectParameterInfo o3info = ObjectParameterInfo.create(3, ObjectParameterInfo.ARRAY,
+                NATIVE_LONG, ObjectParameterInfo.IN | ObjectParameterInfo.OUT);
+        ObjectParameterInfo o4info = ObjectParameterInfo.create(4, ObjectParameterInfo.ARRAY,
+                NATIVE_LONG, ObjectParameterInfo.IN | ObjectParameterInfo.OUT);
+
+        long ret = invoker.invokeN5(ctx, function.getFunctionAddress(),
+                o1.address, 0L, N5, 0L, 0L,
+                4,
+                o1, s1, o1info,
+                o2, s2, o2info,
+                o3, s3, o3info,
+                o4, s4, o4info);
+
+        assertEquals("incorrect value o1", 1, getNativeUnsignedLong(o1));
+        assertEquals("incorrect value o2", 2, getNativeUnsignedLong(o2));
+        assertEquals("incorrect value o3", 3, getNativeUnsignedLong(o3));
+        assertEquals("incorrect value o4", 4, getNativeUnsignedLong(o4));
+        assertEquals("incorrect return value", N1 + N2 + N3 + N4 + N5, unsigned(ret));
+    }
+
+    public static void invokeOONOD(Invoker invoker) {
+        Function function = getFunction("invokeOONOO", Type.SLONG, Type.POINTER, Type.POINTER, Type.SLONG, Type.POINTER, Type.POINTER);
+        CallContext ctx = getContext(Type.SLONG, Type.POINTER, Type.POINTER, Type.SLONG, Type.POINTER, Type.POINTER);
+
+        Object o1 = newNativeUnsignedLongArray(N1);
+        Object o2 = newNativeUnsignedLongArray(N2);
+        Object o3 = newNativeUnsignedLongArray(N3);
+        UnitHelper.Address o4 = new UnitHelper.Address(IO.allocateMemory(8, true));
+        putNativeUnsignedLong(o4, N4);
+
+        ObjectParameterStrategy s1 = new HeapArrayStrategy(0, 1);
+        ObjectParameterStrategy s2 = new HeapArrayStrategy(0, 1);
+        ObjectParameterStrategy s3 = new HeapArrayStrategy(0, 1);
+        ObjectParameterStrategy s4 = new DirectStrategy();
+
+        ObjectParameterInfo o1info = ObjectParameterInfo.create(0, ObjectParameterInfo.ARRAY,
+                NATIVE_LONG, ObjectParameterInfo.IN | ObjectParameterInfo.OUT);
+        ObjectParameterInfo o2info = ObjectParameterInfo.create(1, ObjectParameterInfo.ARRAY,
+                NATIVE_LONG, ObjectParameterInfo.IN | ObjectParameterInfo.OUT);
+        ObjectParameterInfo o3info = ObjectParameterInfo.create(3, ObjectParameterInfo.ARRAY,
+                NATIVE_LONG, ObjectParameterInfo.IN | ObjectParameterInfo.OUT);
+        ObjectParameterInfo o4info = ObjectParameterInfo.create(4, ObjectParameterInfo.ARRAY,
+                NATIVE_LONG, ObjectParameterInfo.IN | ObjectParameterInfo.OUT);
+
+        long ret = invoker.invokeN5(ctx, function.getFunctionAddress(),
+                0L, 0L, N5, 0L, o4.address,
+                4,
+                o1, s1, o1info,
+                o2, s2, o2info,
+                o3, s3, o3info,
+                o4, s4, o4info);
+
+        assertEquals("incorrect value o1", 1, getNativeUnsignedLong(o1));
+        assertEquals("incorrect value o2", 2, getNativeUnsignedLong(o2));
+        assertEquals("incorrect value o3", 3, getNativeUnsignedLong(o3));
+        assertEquals("incorrect value o4", 4, getNativeUnsignedLong(o4));
+        assertEquals("incorrect return value", N1 + N2 + N3 + N4 + N5, unsigned(ret));
+    }
+
 
     @Test public void invokeNativeO() {
         invokeO(new NativeInvoker());
@@ -302,13 +421,36 @@ public class InvokerTest {
         invokeDO(new HeapInvoker());
     }
 
-
     @Test public void invokeNativeOD() {
         invokeOD(new NativeInvoker());
     }
 
     @Test public void invokeHeapOD() {
         invokeOD(new HeapInvoker());
+    }
+
+    @Test public void invokeNativeOONOO() {
+        invokeOONOO(new NativeInvoker());
+    }
+
+    @Test public void invokeHeapOONOO() {
+        invokeOONOO(new HeapInvoker());
+    }
+
+    @Test public void invokeNativeDONOO() {
+        invokeDONOO(new NativeInvoker());
+    }
+
+    @Test public void invokeHeapDONOO() {
+        invokeDONOO(new HeapInvoker());
+    }
+
+    @Test public void invokeNativeOONOD() {
+        invokeOONOD(new NativeInvoker());
+    }
+
+    @Test public void invokeHeapOONOD() {
+        invokeOONOD(new HeapInvoker());
     }
 
     public static boolean string_equals(Invoker invoker, String s1, String s2) {
@@ -332,5 +474,4 @@ public class InvokerTest {
     @Test public void string_equals_heap() {
         assertTrue("strings not equal", string_equals(new NativeInvoker(), "test", "test"));
     }
-
 }

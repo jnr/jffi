@@ -173,5 +173,16 @@ invokeOOO(unsigned long *p1, unsigned long *p2, unsigned long *p3)
     *p3 = ret;
     return ret;
 }
+
+unsigned long
+invokeOONOO(unsigned long *p1, unsigned long *p2, unsigned long n1, unsigned long *p3, unsigned long *p4)
+{
+    unsigned long ret = *p1 + *p2 + *p3 + *p4 + n1;
+    *p1 = 1;
+    *p2 = 2;
+    *p3 = 3;
+    *p4 = 4;
+    return ret;
+}
 #define N3O1 p1[0] = n1; p1[1] = n2; p1[2] = n3
 #define N3O2 p1[0] = n1; p1[1] = n2; p1[2] = n3
