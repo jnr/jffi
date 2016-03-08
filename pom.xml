@@ -8,7 +8,7 @@
   <groupId>com.github.jnr</groupId>
   <artifactId>jffi</artifactId>
   <packaging>jar</packaging>
-  <version>1.2.11</version>
+  <version>1.2.12-SNAPSHOT</version>
   <name>jffi</name>
   <description>Java Foreign Function Interface</description>
   <url>http://github.com/jnr/jffi</url>
@@ -108,7 +108,7 @@
               <manifestLocation>${project.build.directory}/META-INF-complete</manifestLocation>
               <instructions>
                 <_nouses>true</_nouses>
-                <Import-Package><![CDATA[]]></Import-Package>
+                <Import-Package />
                 <Bundle-SymbolicName>com.github.jnr.jffi</Bundle-SymbolicName>
                 <Main-Class>com.kenai.jffi.Main</Main-Class>
               </instructions>
@@ -125,8 +125,8 @@
               <manifestLocation>${project.build.directory}/META-INF-native</manifestLocation>
               <instructions>
                 <_nouses>true</_nouses>
-                <Import-Package><![CDATA[]]></Import-Package>
-                <Export-Package><![CDATA[]]></Export-Package>
+                <Import-Package />
+                <Export-Package />
                 <Fragment-Host>com.github.jnr.jffi</Fragment-Host>
                 <Bundle-ClassPath>.,jni</Bundle-ClassPath>
                 <Bundle-Description>Java Foreign Function Interface - Native Libraries</Bundle-Description>
