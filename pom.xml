@@ -92,6 +92,51 @@
           <target>1.6</target>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <version>2.4.0</version>
+        <extensions>false</extensions>
+        <executions>
+          <execution>
+            <id>jffi-complete</id>
+            <phase>process-classes</phase>
+            <goals>
+              <goal>manifest</goal>
+            </goals>
+            <configuration>
+              <manifestLocation>${project.build.directory}/META-INF-complete</manifestLocation>
+              <instructions>
+                <_nouses>true</_nouses>
+                <Import-Package><![CDATA[]]></Import-Package>
+                <Bundle-SymbolicName>com.github.jnr.jffi</Bundle-SymbolicName>
+                <Main-Class>com.kenai.jffi.Main</Main-Class>
+              </instructions>
+            </configuration>
+          </execution>
+          <!-- Alternate execution to generate the native JAR's manifest -->
+          <execution>
+            <id>native-assembly</id>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>manifest</goal>
+            </goals>
+            <configuration>
+              <manifestLocation>${project.build.directory}/META-INF-native</manifestLocation>
+              <instructions>
+                <_nouses>true</_nouses>
+                <Import-Package><![CDATA[]]></Import-Package>
+                <Export-Package><![CDATA[]]></Export-Package>
+                <Fragment-Host>com.github.jnr.jffi</Fragment-Host>
+                <Bundle-ClassPath>.,jni</Bundle-ClassPath>
+                <Bundle-Description>Java Foreign Function Interface - Native Libraries</Bundle-Description>
+                <Bundle-SymbolicName>com.github.jnr.jffi.native</Bundle-SymbolicName>
+                <Require-Bundle>com.github.jnr.jffi</Require-Bundle>
+              </instructions>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
 <!--
       <plugin>
         <artifactId>maven-antrun-plugin</artifactId>
@@ -187,10 +232,7 @@
               </descriptors>
               <archive>
                 <index>true</index>
-                <manifest>
-                  <addClasspath>true</addClasspath>
-                  <mainClass>com.kenai.jffi.Main</mainClass>
-                </manifest>
+                <manifestFile>${project.build.directory}/META-INF-complete/MANIFEST.MF</manifestFile>
               </archive>
               <appendAssemblyId>false</appendAssemblyId>
             </configuration>
@@ -207,9 +249,7 @@
               </descriptors>
               <archive>
                 <index>true</index>
-                <manifest>
-                  <addClasspath>true</addClasspath>
-                </manifest>
+                <manifestFile>${project.build.directory}/META-INF-native/MANIFEST.MF</manifestFile>
               </archive>
             </configuration>
           </execution>
