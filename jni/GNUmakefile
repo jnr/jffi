@@ -68,7 +68,7 @@ WERROR = -Werror
 ifneq ($(OS),darwin)
   WFLAGS += -Wundef $(WERROR)
 endif
-WFLAGS += -W -Wall -Wno-unused -Wno-parentheses
+WFLAGS += -W -Wall -Wno-unused -Wno-parentheses -Wno-unused-parameter
 PICFLAGS = -fPIC
 SOFLAGS = # Filled in for each OS specifically
 FFI_MMAP_EXEC = -DFFI_MMAP_EXEC_WRIT
@@ -85,7 +85,7 @@ CFLAGS += -D_REENTRANT -D_LARGEFILE64_SOURCE -D_GNU_SOURCE
 
 ifeq ($(OS), win64)
   override CPU = x86_64
-  JDK_INCLUDES=-I$(JNI_DIR)/win32/include -I$(JNI_DIR)/win32/include/win32
+  JDK_INCLUDES=-I$(WIN32_JNI_INCLUDES) -I$(WIN32_JNI_INCLUDES)/win32
   CC = x86_64-w64-mingw32-gcc -m64
   PICFLAGS =
   ifneq ($(findstring cygwin, $(BUILD_OS)),)
@@ -201,6 +201,8 @@ ifeq ($(OS), darwin)
   FFI_CFLAGS += -isysroot $(MACSDK) -I$(MACSDK)/usr/include
   PICFLAGS =
   SOFLAGS =
+  #LIBS += $(JAVA_HOME)/jre/lib/libjsig.dylib
+  OBJS += $(JFFI_BUILD_DIR)/darwin-longjmp.o $(JFFI_BUILD_DIR)/darwin-trampoline.o
 endif
 
 ifeq ($(OS), linux)
@@ -241,12 +243,12 @@ ifeq ($(CPU), sparcv9)
   MODEL=64
 endif
 
-ifneq ($(findstring $(CPU), x86_64 amd64 ppc64 powerpc64 s390x),)
+ifneq ($(findstring $(CPU), x86_64 amd64 ppc64 ppc64le powerpc64 s390x),)
   MODEL = 64
 endif
 
 # On platforms (linux, solaris) that support both 32bit and 64bit, force building for one or the other
-ifneq ($(strip $(findstring $(OS), solaris linux)),)
+ifneq ($(strip $(findstring $(OS), solaris)),)
   # Change the CC/LD instead of CFLAGS/LDFLAGS, incase other things in the flags
   # makes the libffi build choke
   CC += -m$(MODEL)
@@ -281,13 +283,13 @@ $(LIBJFFI):  $(OBJS) $(LIBFFI_LIBS)
 	$(CC) -o $@ $(LDFLAGS) $(SOFLAGS) $(OBJS) $(LIBFFI_LIBS) $(LIBS)
 	$(STRIP) $@
 
-$(JFFI_BUILD_DIR)/Fast%.o: $(JFFI_SRC_DIR)/Fast%.c $(wildcard $(JFFI_SRC_DIR)/*.h)
-	@mkdir -p $(@D)
-	@$(CCACHE) $(CC) $(CFLAGS) -fomit-frame-pointer -c $< -o $@
-
 $(BUILD_DIR)/%.o : $(SRC_DIR)/%.c $(wildcard $(JFFI_SRC_DIR)/*.h)
 	@mkdir -p $(@D)
 	@$(CCACHE) $(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/%.o : $(SRC_DIR)/%.S $(wildcard $(JFFI_SRC_DIR)/*.h)
+	@mkdir -p $(@D)
+	@$(CC) $(CFLAGS) -o $@ -c $<
 
 $(OBJS) : $(LIBFFI_LIBS)
 

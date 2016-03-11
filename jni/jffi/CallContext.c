@@ -68,6 +68,7 @@ Java_com_kenai_jffi_Foreign_newCallContext(JNIEnv* env, jobject self,
     CallContext* ctx = NULL;
     jlong* paramTypes;
     int paramCount, i, rawOffset = 0;
+    bool isFastInt = false, isFastLong = false;
     ffi_type* ffiParamTypes;
     int ffiStatus;
     int abi;
@@ -94,8 +95,8 @@ Java_com_kenai_jffi_Foreign_newCallContext(JNIEnv* env, jobject self,
 
     ctx->resultMask = (((ffi_type *) j2p(returnType))->size > 4) ? ~0UL : 0xffffffffUL;
 #if defined(__i386__) || defined(__x86_64__) 
-    ctx->isFastInt = true;
-    ctx->isFastLong = true;
+    isFastInt = true;
+    isFastLong = true;
 
     switch (((ffi_type *) j2p(returnType))->type) {
         case FFI_TYPE_INT:
@@ -109,7 +110,7 @@ Java_com_kenai_jffi_Foreign_newCallContext(JNIEnv* env, jobject self,
         case FFI_TYPE_POINTER:
 #endif
 #if !defined(__x86_64__)
-            ctx->isFastLong = false;
+            isFastLong = false;
 #endif
             break;
 
@@ -118,15 +119,15 @@ Java_com_kenai_jffi_Foreign_newCallContext(JNIEnv* env, jobject self,
 #if defined(__x86_64__)
         case FFI_TYPE_POINTER:
 #endif
-            ctx->isFastInt = false;
+            isFastInt = false;
             break;
 
         case FFI_TYPE_VOID:
             break;
 
         default:
-            ctx->isFastInt = false;
-            ctx->isFastLong = false;
+            isFastInt = false;
+            isFastLong = false;
             break;
     }
 #endif
@@ -154,7 +155,7 @@ Java_com_kenai_jffi_Foreign_newCallContext(JNIEnv* env, jobject self,
 #endif
 
 #if !defined(__x86_64__)
-                ctx->isFastLong = false;
+                isFastLong = false;
 #endif
                 break;
 
@@ -163,12 +164,12 @@ Java_com_kenai_jffi_Foreign_newCallContext(JNIEnv* env, jobject self,
 #if defined(__x86_64__)
             case FFI_TYPE_POINTER:
 #endif
-                ctx->isFastInt = false;
+                isFastInt = false;
                 break;
 
             default:
-                ctx->isFastInt = false;
-                ctx->isFastLong = false;
+                isFastInt = false;
+                isFastLong = false;
                 break;
         }
 #endif
@@ -183,8 +184,8 @@ Java_com_kenai_jffi_Foreign_newCallContext(JNIEnv* env, jobject self,
 
     // Cannot bypass FFI unless ABI is cdecl
     if (abi != FFI_DEFAULT_ABI) {
-	ctx->isFastInt = false;
-	ctx->isFastLong = false;
+        isFastInt = false;
+        isFastLong = false;
     }
 
     ffiStatus = ffi_prep_cif(&ctx->cif, abi, paramCount, (ffi_type *) j2p(returnType),
@@ -202,8 +203,10 @@ Java_com_kenai_jffi_Foreign_newCallContext(JNIEnv* env, jobject self,
             throwException(env, Runtime, "Unknown FFI error");
     }
     ctx->rawParameterSize = rawOffset;
-    /* Save errno unless explicitly told not to do so */
-    ctx->saveErrno = (flags & com_kenai_jffi_Foreign_F_NOERRNO) == 0;
+    ctx->flags |= (flags & com_kenai_jffi_Foreign_F_NOERRNO) == 0 ? CALL_CTX_SAVE_ERRNO : 0;
+    ctx->flags |= isFastInt ? CALL_CTX_FAST_INT : 0;
+    ctx->flags |= isFastLong ? CALL_CTX_FAST_LONG : 0;
+    ctx->flags |= (flags & com_kenai_jffi_Foreign_F_PROTECT) != 0 ? CALL_CTX_FAULT_PROT : 0;
 
     return p2j(ctx);
 cleanup:

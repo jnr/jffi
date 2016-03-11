@@ -121,6 +121,7 @@ typedef struct ThreadData {
     int error;
     int attach_count;
     JavaVM* attached_vm;
+    struct FaultData_* fault_data;
 } ThreadData;
 
 extern pthread_key_t jffi_threadDataKey;
@@ -204,6 +205,16 @@ thread_data_get()
         }; \
         ffi_call(&(ctx)->cif, FFI_FN((fn)), (retval), ffiValues); \
     } while (0)
+
+
+#if defined(__APPLE__)
+# define debug(fmt, a...) dprintf(STDERR_FILENO, fmt "\n", ##a)
+#else
+# define debug(fmt, a...) do { \
+       char tmp[1024]; \
+       write(STDERR_FILENO, tmp, snprintf(tmp, sizeof(tmp), fmt "\n", ##a)); \
+   } while(0)
+#endif
 
 #ifdef __cplusplus
 }

@@ -34,7 +34,7 @@ package com.kenai.jffi;
 /**
  *
  */
-abstract public class ObjectParameterStrategy {
+abstract public class ObjectParameterStrategy<T> {
     private final boolean isDirect;
     final int typeInfo;
     protected static enum StrategyType { DIRECT, HEAP }
@@ -73,9 +73,9 @@ abstract public class ObjectParameterStrategy {
         }
     }
 
-    abstract public long address(Object parameter);
+    abstract public long address(T parameter);
 
-    abstract public Object object(Object parameter);
-    abstract public int offset(Object parameter);
-    abstract public int length(Object parameter);
+    abstract public Object object(T parameter);
+    abstract public int offset(T parameter);
+    abstract public int length(T parameter);
 }

@@ -1760,9 +1760,9 @@ public abstract class Invoker {
         }
 
         switch (next) {
-            case 3: if (!s3.isDirect()) break;
-            case 4: if (!s4.isDirect()) { o3 = o4; s3 = s4; o3info = o4info; break; }
-            case 5: if (!s5.isDirect()) { o3 = o5; s3 = s5; o3info = o5info; break; }
+            case 3: next++; if (!s3.isDirect()) break;
+            case 4: next++; if (!s4.isDirect()) { o3 = o4; s3 = s4; o3info = o4info; break; }
+            case 5: next++; if (!s5.isDirect()) { o3 = o5; s3 = s5; o3info = o5info; break; }
         }
 
         if (objCount == 3) {

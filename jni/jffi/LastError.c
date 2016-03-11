@@ -104,3 +104,15 @@ jffi_save_errno_ctx(CallContext* ctx)
     }
 #endif
 }
+
+#ifndef _WIN32
+void
+jffi_save_errno_td(ThreadData* td, CallContext* ctx)
+{
+    if (unlikely(ctx->error_fn != NULL)) {
+	    td->error = (*ctx->error_fn)();
+    } else {
+	    td->error = errno;
+    }
+}
+#endif

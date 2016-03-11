@@ -49,6 +49,7 @@
 #include "Type.h"
 #include "CallContext.h"
 #include "MemoryUtil.h"
+#include "FaultProtect.h"
 #include "com_kenai_jffi_Foreign.h"
 
 #define THREAD_ATTACH_THRESHOLD (1000)
@@ -238,11 +239,20 @@ static void
 closure_invoke(ffi_cif* cif, void* retval, void** parameters, void* user_data)
 {
     Closure* closure = (Closure *) user_data;
+    
     JNIEnv* env;
     int i;
     bool detach;
+#if FAULT_PROTECT_ENABLED
+    ThreadData* td = thread_data_get();
+    FaultData* fdp;
+#endif
 
     closure_begin(closure, &env, &detach);
+#if FAULT_PROTECT_ENABLED
+    fdp = td->fault_data;
+    td->fault_data = NULL;
+#endif
 
     if (closure->magazine->callWithPrimitiveParameters) {
         // allocate one more than the parameter count (for the struct return value)
@@ -387,6 +397,9 @@ closure_invoke(ffi_cif* cif, void* retval, void** parameters, void* user_data)
         memset(retval, 0, cif->rtype->size);
     }
 
+#if FAULT_PROTECT_ENABLED
+    td->fault_data = fdp;
+#endif
     closure_end(closure, env, detach);
 }
 
