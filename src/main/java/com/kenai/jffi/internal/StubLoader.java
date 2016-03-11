@@ -310,20 +310,26 @@ public class StubLoader {
             if (!stub.isFile()) {
                 stub = new File(new File(dirs[i]), soname);
             }
-            
+
             String path = stub.getAbsolutePath();
-            try {
-                System.load(path);
-                return true;
-            } catch (UnsatisfiedLinkError ex) {
-                errors.add(ex);
-            }
-            if (getOS() == OS.DARWIN) {
+            if (stub.isFile()) {
                 try {
-                    System.load(getAlternateLibraryPath(path));
+                    System.load(path);
                     return true;
                 } catch (UnsatisfiedLinkError ex) {
                     errors.add(ex);
+                }
+            }
+
+            if (getOS() == OS.DARWIN) {
+                path = getAlternateLibraryPath(path);
+                if (new File(path).isFile()) {
+                    try {
+                        System.load(path);
+                        return true;
+                    } catch (UnsatisfiedLinkError ex) {
+                        errors.add(ex);
+                    }
                 }
             }
         }
