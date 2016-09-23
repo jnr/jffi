@@ -1,4 +1,5 @@
 language: java
+install: ./mvnw clean package
 script: ant test
 notifications:
   irc:
