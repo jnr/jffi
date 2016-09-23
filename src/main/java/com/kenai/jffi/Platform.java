@@ -98,9 +98,11 @@ public abstract class Platform {
         S390X(64),
         /** ARM */
         ARM(32),
+        /** AARCH64 */
+        AARCH64(64),
         /** Unknown CPU */
         UNKNOWN(64);
-        
+
         CPU(int dataModel) {
             this.dataModel = dataModel;
             this.addressMask = dataModel == 32 ? 0xffffffffL : 0xffffffffffffffffL;
@@ -226,7 +228,10 @@ public abstract class Platform {
             } else if (Util.equalsIgnoreCase("arm", archString, LOCALE)) {
                 return CPU.ARM;
                 
+            } else if (Util.equalsIgnoreCase("aarch64", archString, LOCALE)) {
+                return CPU.AARCH64;
             }
+            
 
             // Try to find by lookup up in the CPU list
             for (CPU cpu : CPU.values()) {
