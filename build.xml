@@ -33,7 +33,8 @@
         <os arch="x86_64"/>
         <os arch="sparcv9"/>
         <os arch="s390x"/>
-	<os arch="ppc64le"/>
+        <os arch="ppc64le"/>
+        <os arch="aarch64"/>
       </or>
     </condition>
     <condition property="run.jvm.model" value="-d32">
@@ -42,6 +43,7 @@
         <os arch="x86"/>
         <os arch="powerpc"/>
         <os arch="sparc"/>
+        <os arch="arm"/>
       </or>
     </condition>
     <condition property="run.jvm.model" value="">
@@ -94,6 +96,11 @@
       <or>
         <os arch="ppc64"/>
         <os arch="powerpc64"/>
+      </or>
+    </condition>
+    <condition property="platform.cpu" value="aarch64">
+      <or>
+        <os arch="aarch64"/>
       </or>
     </condition>
     <condition property="platform.os" value="Windows">
