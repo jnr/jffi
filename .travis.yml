@@ -1,12 +1,5 @@
 language: java
-jdk:
-  - openjdk6
-  - openjdk7
-  - oraclejdk7
-  - oraclejdk8
 script: ant test
-before_install:
-  - sudo apt-get install texinfo
 notifications:
   irc:
     channels:
@@ -15,3 +8,17 @@ notifications:
     on_failure: always
     template:
       - "%{repository} (%{branch}:%{commit} by %{author}): %{message} (%{build_url})"
+matrix:
+  include:
+  - os: linux
+    jdk: openjdk6
+  - os: linux
+    jdk: openjdk7
+  - os: linux
+    jdk: oraclejdk7
+  - os: linux
+    jdk: oraclejdk8
+sudo: false
+cache:
+  directories:
+  - $HOME/.m2
