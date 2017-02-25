@@ -32,11 +32,16 @@
 
 package com.kenai.jffi;
 
+import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public abstract class Aggregate extends Type {
     private final TypeInfo typeInfo;
+    private final long handle;
+    private volatile int disposed;
+
+    private static final AtomicIntegerFieldUpdater<Aggregate> UPDATER = AtomicIntegerFieldUpdater.newUpdater(Aggregate.class, "disposed");
 
     /** A handle to the foreign interface to keep it alive as long as this object is alive */
     @SuppressWarnings({"FieldCanBeLocal", "UnusedDeclaration"})
@@ -47,6 +52,7 @@ public abstract class Aggregate extends Type {
             throw new NullPointerException("Invalid ffi_type handle");
         }
         this.foreign = foreign;
+        this.handle = handle;
         this.typeInfo = new TypeInfo(handle, foreign.getTypeType(handle), foreign.getTypeSize(handle), foreign.getTypeAlign(handle));
     }
 
@@ -59,7 +65,10 @@ public abstract class Aggregate extends Type {
     @Override
     protected void finalize() throws Throwable {
         try {
-            foreign.freeAggregate(typeInfo.handle);
+            int disposed = UPDATER.getAndSet(this, 1);
+            if (disposed == 0) {
+                foreign.freeAggregate(typeInfo.handle);
+            }
         } catch (Throwable t) {
             Logger.getLogger(getClass().getName()).log(Level.WARNING, 
                     "Exception when freeing FFI aggregate: %s", t.getLocalizedMessage());

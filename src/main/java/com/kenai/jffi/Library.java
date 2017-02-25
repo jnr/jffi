@@ -35,6 +35,7 @@ package com.kenai.jffi;
 import java.lang.ref.WeakReference;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 
 /**
  * Represents a native library
@@ -74,6 +75,11 @@ public final class Library {
 
     /** A handle to the foreign interface to keep it alive as long as this object is alive */
     private final Foreign foreign;
+
+    /** Indicates whether this library has been disposed of. */
+    private volatile int disposed;
+
+    private static final AtomicIntegerFieldUpdater<Library> UPDATER = AtomicIntegerFieldUpdater.newUpdater(Library.class, "disposed");
 
     /**
      * Internal wrapper around dlopen.
@@ -189,7 +195,8 @@ public final class Library {
     @Override
     protected void finalize() throws Throwable {
         try {
-            if (handle != 0L) {
+            int disposed = UPDATER.getAndSet(this, 1);
+            if (disposed == 0 && handle != 0L) {
                 foreign.dlclose(handle);
             }
         } finally {

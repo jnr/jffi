@@ -33,6 +33,7 @@
 package com.kenai.jffi;
 
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -61,6 +62,10 @@ public final class CallContext {
     final long[] parameterTypeHandles;
     
     final int flags;
+
+    volatile int disposed;
+
+    final AtomicIntegerFieldUpdater<CallContext> UPDATER = AtomicIntegerFieldUpdater.newUpdater(CallContext.class, "disposed");
 
     /** A handle to the foreign interface to keep it alive as long as this object is alive */
     @SuppressWarnings({"FieldCanBeLocal", "UnusedDeclaration"})
@@ -226,7 +231,8 @@ public final class CallContext {
     @Override
     protected void finalize() throws Throwable {
         try {
-            if (contextAddress != 0) {
+            int disposed = UPDATER.getAndSet(this, 1);
+            if (disposed == 0 && contextAddress != 0) {
                 foreign.freeCallContext(contextAddress);
             }
         } catch (Throwable t) {

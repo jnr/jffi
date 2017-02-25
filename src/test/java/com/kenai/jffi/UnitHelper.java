@@ -8,6 +8,7 @@ import java.lang.reflect.Proxy;
 import java.math.BigDecimal;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 
 public class UnitHelper {
     public enum InvokerType {
@@ -402,6 +403,8 @@ public class UnitHelper {
         }
     }
 
+    private static final AtomicIntegerFieldUpdater<PointerArrayMethodInvoker.MemoryHolder> PAMI_UPDATER =
+            AtomicIntegerFieldUpdater.newUpdater(PointerArrayMethodInvoker.MemoryHolder.class, "disposed");
 
     private static final class PointerArrayMethodInvoker implements MethodInvoker {
         private static final MemoryIO Memory = MemoryIO.getInstance();
@@ -409,6 +412,7 @@ public class UnitHelper {
         private final Function function;
         private final Class returnType;
         private final Class[] parameterTypes;
+        private volatile int disposed;
         public PointerArrayMethodInvoker(Library library, Function function, Class returnType, Class[] parameterTypes) {
             this.library = library;
             this.function = function;
@@ -424,7 +428,10 @@ public class UnitHelper {
 
             @Override
             protected void finalize() throws Throwable {
-                MemoryIO.getInstance().freeMemory(address);
+                int disposed = PAMI_UPDATER.getAndSet(this, 1);
+                if (disposed == 0) {
+                    MemoryIO.getInstance().freeMemory(address);
+                }
             }
 
         }

@@ -1,6 +1,7 @@
 package com.kenai.jffi;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -15,7 +16,8 @@ public final class ClosureMagazine {
     @SuppressWarnings({"FieldCanBeLocal", "UnusedDeclaration"})
     private final CallContext callContext;
     private final long magazineAddress;
-    private final AtomicBoolean disposed = new AtomicBoolean(false);
+    private volatile int disposed;
+    private static final AtomicIntegerFieldUpdater<ClosureMagazine> UPDATER = AtomicIntegerFieldUpdater.newUpdater(ClosureMagazine.class, "disposed");
 
     ClosureMagazine(Foreign foreign, CallContext callContext, long magazineAddress) {
         this.foreign = foreign;
@@ -31,7 +33,8 @@ public final class ClosureMagazine {
     }
 
     public void dispose() {
-        if (magazineAddress != 0L && !disposed.getAndSet(true)) {
+        int disposed = UPDATER.getAndSet(this, 1);
+        if (magazineAddress != 0L && disposed == 0) {
             foreign.freeClosureMagazine(magazineAddress);
         }
     }
@@ -60,7 +63,8 @@ public final class ClosureMagazine {
     @Override
     protected void finalize() throws Throwable {
         try {
-            if (magazineAddress != 0L && !disposed.getAndSet(true)) {
+            int disposed = UPDATER.getAndSet(this, 1);
+            if (magazineAddress != 0L && disposed == 0) {
                 foreign.freeClosureMagazine(magazineAddress);
             }
         } catch (Throwable t) {
