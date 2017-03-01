@@ -54,7 +54,8 @@ public final class Array extends Aggregate {
     /**
      * Creates a new C array layout description.
      *
-     * @param fields The fields contained in the struct.
+     * @param elementType The type of fields contained in the struct.
+     * @param length the number of elements.
      */
     public Array(Type elementType, int length) {
         super(Foreign.getInstance(), Foreign.getInstance().newArray(elementType.handle(), length));
