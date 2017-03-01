@@ -86,8 +86,10 @@ Java_com_kenai_jffi_Foreign_dlopen(JNIEnv* env, jobject self, jstring jPath, jin
         return p2j(GetModuleHandle(NULL));
     } else {
         wchar_t path[PATH_MAX];
+        DWORD dwFlags;
         getWideString(env, path, jPath, sizeof(path) / sizeof(path[0]));
-        return p2j(LoadLibraryExW(path, NULL, LOAD_WITH_ALTERED_SEARCH_PATH));
+        dwFlags = PathIsRelativeW(path) ? 0 : LOAD_WITH_ALTERED_SEARCH_PATH;
+        return p2j(LoadLibraryExW(path, NULL, dwFlags));
     }
 #else
     char path_[PATH_MAX];
@@ -173,7 +175,8 @@ dl_open(const char* name, int flags)
     if (name == NULL) {
         return GetModuleHandle(NULL);
     } else {
-        return LoadLibraryEx(name, NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
+        DWORD dwFlags = PathIsRelative(name) ? 0 : LOAD_WITH_ALTERED_SEARCH_PATH;
+        return LoadLibraryEx(name, NULL, dwFlags);
     }
 }
 
