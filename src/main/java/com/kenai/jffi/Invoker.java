@@ -78,7 +78,7 @@ public abstract class Invoker {
     /**
      * Invokes a function with no arguments, and returns a 32 bit integer.
      *
-     * @param context The <t>CallContext</t> describing how to invoke the function.
+     * @param context The <b>CallContext</b> describing how to invoke the function.
      * @param function Address of the native function to invoke.
      * @return A 32 bit integer value.
      */
@@ -89,7 +89,7 @@ public abstract class Invoker {
     /**
      * Invokes a function with one integer argument, and returns a 32 bit integer.
      *
-     * @param context The <t>CallContext</t> describing how to invoke the function.
+     * @param context The <b>CallContext</b> describing how to invoke the function.
      * @param function Address of the native function to invoke.
      * @param arg1 A 32 bit integer argument.
      * @return A 32 bit integer value.
@@ -101,7 +101,7 @@ public abstract class Invoker {
     /**
      * Invokes a function with two integer arguments, and returns a 32 bit integer.
      *
-     * @param context The <t>CallContext</t> describing how to invoke the function.
+     * @param context The <b>CallContext</b> describing how to invoke the function.
      * @param function Address of the native function to invoke.
      * @param arg1 The first 32 bit integer argument.
      * @param arg2 The second 32 bit integer argument.
@@ -114,7 +114,7 @@ public abstract class Invoker {
     /**
      * Invokes a function with three integer arguments, and returns a 32 bit integer.
      *
-     * @param context The <t>CallContext</t> describing how to invoke the function.
+     * @param context The <b>CallContext</b> describing how to invoke the function.
      * @param function Address of the native function to invoke.
      * @param arg1 The first 32 bit integer argument.
      * @param arg2 The second 32 bit integer argument.
@@ -128,7 +128,7 @@ public abstract class Invoker {
     /**
      * Invokes a function with four integer arguments, and returns a 32 bit integer.
      *
-     * @param context The <t>CallContext</t> describing how to invoke the function.
+     * @param context The <b>CallContext</b> describing how to invoke the function.
      * @param function Address of the native function to invoke.
      * @param arg1 The first 32 bit integer argument.
      * @param arg2 The second 32 bit integer argument.
@@ -143,7 +143,7 @@ public abstract class Invoker {
     /**
      * Invokes a function with five integer arguments, and returns a 32 bit integer.
      *
-     * @param context The <t>CallContext</t> describing how to invoke the function.
+     * @param context The <b>CallContext</b> describing how to invoke the function.
      * @param function Address of the native function to invoke.
      * @param arg1 The first 32 bit integer argument.
      * @param arg2 The second 32 bit integer argument.
@@ -159,7 +159,7 @@ public abstract class Invoker {
     /**
      * Invokes a function with six integer arguments, and returns a 32 bit integer.
      *
-     * @param context The <t>CallContext</t> describing how to invoke the function.
+     * @param context The <b>CallContext</b> describing how to invoke the function.
      * @param function Address of the native function to invoke.
      * @param arg1 The first 32 bit integer argument.
      * @param arg2 The second 32 bit integer argument.
@@ -360,7 +360,7 @@ public abstract class Invoker {
     /**
      * Invokes a function with no arguments, and returns a 64 bit integer.
      *
-     * @param context The <t>CallContext</t> describing how to invoke the function.
+     * @param context The <b>CallContext</b> describing how to invoke the function.
      * @param function Address of the native function to invoke.
      * @return A 64 bit integer value.
      */
@@ -371,7 +371,7 @@ public abstract class Invoker {
     /**
      * Invokes a function with one 64 bit integer argument, and returns a 64 bit integer.
      *
-     * @param context The <t>CallContext</t> describing how to invoke the function.
+     * @param context The <b>CallContext</b> describing how to invoke the function.
      * @param function Address of the native function to invoke.
      * @param arg1 The 64 bit integer argument.
      * @return A 64 bit integer value.
@@ -383,7 +383,7 @@ public abstract class Invoker {
     /**
      * Invokes a function with two 64 bit integer arguments, and returns a 64 bit integer.
      *
-     * @param context The <t>CallContext</t> describing how to invoke the function.
+     * @param context The <b>CallContext</b> describing how to invoke the function.
      * @param function Address of the native function to invoke.
      * @param arg1 The first 64 bit integer argument.
      * @param arg2 The second 64 bit integer argument.
@@ -396,7 +396,7 @@ public abstract class Invoker {
     /**
      * Invokes a function with three 64 bit integer arguments, and returns a 64 bit integer.
      *
-     * @param context The <t>CallContext</t> describing how to invoke the function.
+     * @param context The <b>CallContext</b> describing how to invoke the function.
      * @param function Address of the native function to invoke.
      * @param arg1 The first 64 bit integer argument.
      * @param arg2 The second 64 bit integer argument.
@@ -410,7 +410,7 @@ public abstract class Invoker {
     /**
      * Invokes a function with four 64 bit integer arguments, and returns a 64 bit integer.
      *
-     * @param context The <t>CallContext</t> describing how to invoke the function.
+     * @param context The <b>CallContext</b> describing how to invoke the function.
      * @param function Address of the native function to invoke.
      * @param arg1 The first 64 bit integer argument.
      * @param arg2 The second 64 bit integer argument.
@@ -425,7 +425,7 @@ public abstract class Invoker {
     /**
      * Invokes a function with five 64 bit integer arguments, and returns a 64 bit integer.
      *
-     * @param context The <t>CallContext</t> describing how to invoke the function.
+     * @param context The <b>CallContext</b> describing how to invoke the function.
      * @param function Address of the native function to invoke.
      * @param arg1 The first 64 bit integer argument.
      * @param arg2 The second 64 bit integer argument.
@@ -441,7 +441,7 @@ public abstract class Invoker {
     /**
      * Invokes a function with six 64 bit integer arguments, and returns a 64 bit integer.
      *
-     * @param context The <t>CallContext</t> describing how to invoke the function.
+     * @param context The <b>CallContext</b> describing how to invoke the function.
      * @param function Address of the native function to invoke.
      * @param arg1 The first 64 bit integer argument.
      * @param arg2 The second 64 bit integer argument.
@@ -578,7 +578,7 @@ public abstract class Invoker {
     /**
      * Invokes a function with no arguments, and returns a numeric value.
      *
-     * @param context The <t>CallContext</t> describing how to invoke the function.
+     * @param context The <b>CallContext</b> describing how to invoke the function.
      * @param function Address of the native function to invoke.
      * @return A numeric value.
      */
@@ -589,7 +589,7 @@ public abstract class Invoker {
     /**
      * Invokes a function with one numeric argument, and returns a numeric value.
      *
-     * @param context The <t>CallContext</t> describing how to invoke the function.
+     * @param context The <b>CallContext</b> describing how to invoke the function.
      * @param function Address of the native function to invoke.
      * @param arg1 The numeric argument.
      * @return A numeric value.
@@ -601,7 +601,7 @@ public abstract class Invoker {
     /**
      * Invokes a function with two numeric arguments, and returns a numeric value.
      *
-     * @param context The <t>CallContext</t> describing how to invoke the function.
+     * @param context The <b>CallContext</b> describing how to invoke the function.
      * @param function Address of the native function to invoke.
      * @param arg1 The first numeric argument.
      * @param arg2 The second numeric argument.
@@ -614,7 +614,7 @@ public abstract class Invoker {
     /**
      * Invokes a function with three numeric arguments, and returns a numeric value.
      *
-     * @param context The <t>CallContext</t> describing how to invoke the function.
+     * @param context The <b>CallContext</b> describing how to invoke the function.
      * @param function Address of the native function to invoke.
      * @param arg1 The first numeric argument.
      * @param arg2 The second numeric argument.
@@ -628,7 +628,7 @@ public abstract class Invoker {
     /**
      * Invokes a function with four numeric arguments, and returns a numeric value.
      *
-     * @param context The <t>CallContext</t> describing how to invoke the function.
+     * @param context The <b>CallContext</b> describing how to invoke the function.
      * @param function Address of the native function to invoke.
      * @param arg1 The first numeric argument.
      * @param arg2 The second numeric argument.
@@ -643,7 +643,7 @@ public abstract class Invoker {
     /**
      * Invokes a function with five numeric arguments, and returns a numeric value.
      *
-     * @param context The <t>CallContext</t> describing how to invoke the function.
+     * @param context The <b>CallContext</b> describing how to invoke the function.
      * @param function Address of the native function to invoke.
      * @param arg1 The first numeric argument.
      * @param arg2 The second numeric argument.
@@ -659,7 +659,7 @@ public abstract class Invoker {
     /**
      * Invokes a function with six numeric arguments, and returns a numeric value.
      *
-     * @param context The <t>CallContext</t> describing how to invoke the function.
+     * @param context The <b>CallContext</b> describing how to invoke the function.
      * @param function Address of the native function to invoke.
      * @param arg1 The first numeric argument.
      * @param arg2 The second numeric argument.

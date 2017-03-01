@@ -73,10 +73,10 @@ public class UnitHelper {
                 return "libc.so";
         }
     }
-    public static <T> T loadTestLibrary(Class<T> interfaceClass) {
+    public static <b> T loadTestLibrary(Class<b> interfaceClass) {
         return loadTestLibrary(interfaceClass, InvokerType.Default);
     }
-    public static <T> T loadTestLibrary(Class<T> interfaceClass, InvokerType invokerType) {
+    public static <b> T loadTestLibrary(Class<b> interfaceClass, InvokerType invokerType) {
         String name = Platform.getPlatform().mapLibraryName("test");
 
         return loadLibrary(new File("build", name).getAbsolutePath(), interfaceClass, invokerType);
@@ -85,13 +85,13 @@ public class UnitHelper {
     /**
      * Creates a new InvocationHandler mapping methods in the <tt>interfaceClass</tt>
      * to functions in the native library.
-     * @param <T> the type of <tt>interfaceClass</tt>
+     * @param <b> the type of <tt>interfaceClass</tt>
      * @param libraryName the native library to load
      * @param interfaceClass the interface that contains the native method description
      * @return a new instance of <tt>interfaceClass</tt> that can be used to call
      * functions in the native library.
      */
-    public static <T> T loadLibrary(String name, Class<T> interfaceClass, InvokerType invokerType) {
+    public static <b> T loadLibrary(String name, Class<b> interfaceClass, InvokerType invokerType) {
         Library lib = Library.getCachedInstance(name, Library.LAZY);
         if (lib == null) {
             throw new UnsatisfiedLinkError(String.format("Could not load '%s': %s",
