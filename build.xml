@@ -396,16 +396,12 @@
   <target name="-assemble-native-jar" depends="-init-vars, -build-platform-jar">
     <jar jarfile="${native.jar}" index="true" update="true" duplicate="preserve"
          filesetmanifest="skip">
-      <archives>
-        <zips>
-          <fileset dir="archive" includes="jffi-*.jar"/>
-        </zips>
-      </archives>
+      <zipgroupfileset dir="archive" includes="jffi-*.jar"/>
       <zipfileset src="${dist.dir}/jffi-${platform}.jar"/>
     </jar>
   </target>
 
-  <target name="-archive-platform-jar" depends="-build-platform-jar">
-    <copy file="${dist.dir}/${platform}.jar" todir="archive" flatten="true"/>
+  <target name="archive-platform-jar" depends="-build-platform-jar">
+    <copy file="${dist.dir}/jffi-${platform}.jar" todir="archive" flatten="true"/>
   </target>
 </project>
