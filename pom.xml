@@ -225,7 +225,7 @@
                 <index>true</index>
                 <manifestFile>${project.build.directory}/META-INF-complete/MANIFEST.MF</manifestFile>
               </archive>
-              <appendAssemblyId>false</appendAssemblyId>
+              <!-- <appendAssemblyId>false</appendAssemblyId> -->
             </configuration>
           </execution>
           <execution>
