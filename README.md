@@ -2,6 +2,6 @@
 
 Java bindings for libffi
 
-##Building
+## Building
 
-ant jar && ant archive-platform-jar && maven package
+ant jar && ant archive-platform-jar && mvn package
