@@ -32,7 +32,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef __sun
+#if defined(__sun) || defined(_AIX)
 # include <alloca.h>
 #endif
 #include <stdint.h>

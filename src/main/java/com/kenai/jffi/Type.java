@@ -249,7 +249,7 @@ public abstract class Type {
 
             } catch (Throwable error) {
                 UnsatisfiedLinkError ule = new UnsatisfiedLinkError("could not get native definition for type: " + nativeType);
-                error.initCause(error);
+                ule.initCause(error);
                 throw ule;
             }
         }

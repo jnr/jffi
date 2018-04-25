@@ -66,7 +66,9 @@ OFLAGS = -O2 $(JFLAGS)
 # MacOS headers aren't completely warning free, so turn them off
 WERROR = -Werror
 ifneq ($(OS),darwin)
+ifneq ($(OS),aix)
   WFLAGS += -Wundef $(WERROR)
+endif
 endif
 WFLAGS += -W -Wall -Wno-unused -Wno-parentheses -Wno-unused-parameter
 PICFLAGS = -fPIC
