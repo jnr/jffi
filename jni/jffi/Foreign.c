@@ -240,7 +240,18 @@ Java_com_kenai_jffi_Foreign_unregisterNatives(JNIEnv *env, jobject self, jclass 
 # endif
 
 #elif defined(__ppc__) || defined(__powerpc__) || defined(__powerpc)
-# define CPU "ppc"
+// Need to check if ppc is still 64-bit, as gcc doesn't necessarily define the
+// 64-bit variables
+#include <stdint.h>
+# if INTPTR_MAX == INT64_MAX
+#  if BYTE_ORDER == LITTLE_ENDIAN
+#   define CPU "ppc64le"
+#  else
+#   define CPU "ppc64"
+#  endif
+# else
+#  define CPU "ppc"
+# endif
 
 /*
  * Need to check for __sparcv9 first, because __sparc will be defined either way.
