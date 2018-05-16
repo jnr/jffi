@@ -11,11 +11,7 @@ notifications:
 matrix:
   include:
   - os: linux
-    jdk: openjdk6
-  - os: linux
     jdk: openjdk7
-  - os: linux
-    jdk: oraclejdk7
   - os: linux
     jdk: oraclejdk8
 sudo: false
