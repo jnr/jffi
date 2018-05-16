@@ -355,8 +355,13 @@ public class StubLoader {
         InputStream is = getStubLibraryStream();
         FileOutputStream os = null;
 
+        File dstFile;
         try {
-            File dstFile = File.createTempFile("jffi", "." + dlExtension());
+            dstFile = File.createTempFile("jffi", "." + dlExtension());
+        } catch (IOException ex) {
+            throw new IOException("Failed to create temporary file: jffiXXX." + dlExtension());
+        }
+        try {
             dstFile.deleteOnExit();
             os = new FileOutputStream(dstFile);
             ReadableByteChannel srcChannel = Channels.newChannel(is);
