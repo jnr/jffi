@@ -403,16 +403,12 @@ public class UnitHelper {
         }
     }
 
-    private static final AtomicIntegerFieldUpdater<PointerArrayMethodInvoker.MemoryHolder> PAMI_UPDATER =
-            AtomicIntegerFieldUpdater.newUpdater(PointerArrayMethodInvoker.MemoryHolder.class, "disposed");
-
     private static final class PointerArrayMethodInvoker implements MethodInvoker {
         private static final MemoryIO Memory = MemoryIO.getInstance();
         private final Library library;
         private final Function function;
         private final Class returnType;
         private final Class[] parameterTypes;
-        private volatile int disposed;
         public PointerArrayMethodInvoker(Library library, Function function, Class returnType, Class[] parameterTypes) {
             this.library = library;
             this.function = function;
@@ -421,6 +417,10 @@ public class UnitHelper {
         }
         private static final class MemoryHolder {
             private final long address;
+            private volatile int disposed;
+            
+            private static final AtomicIntegerFieldUpdater<PointerArrayMethodInvoker.MemoryHolder> PAMI_UPDATER =
+                    AtomicIntegerFieldUpdater.newUpdater(PointerArrayMethodInvoker.MemoryHolder.class, "disposed");
 
             public MemoryHolder(long address) {
                 this.address = address;
