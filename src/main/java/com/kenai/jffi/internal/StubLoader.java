@@ -180,7 +180,7 @@ public class StubLoader {
             return CPU.PPC64LE;
         } else if (equalsIgnoreCase("s390", archString, LOCALE) || equalsIgnoreCase("s390x", archString, LOCALE)) {
             return CPU.S390X;
-        } else if (Util.equalsIgnoreCase("arm", archString, LOCALE)) {
+        } else if (Util.equalsIgnoreCase("arm", archString, LOCALE) || Util.equalsIgnoreCase("armv7l", archString, LOCALE)) {
             return CPU.ARM;
         } else if (Util.equalsIgnoreCase("aarch64", archString, LOCALE)) {
             return CPU.AARCH64;
