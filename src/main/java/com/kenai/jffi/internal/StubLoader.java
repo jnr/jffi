@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Properties;
 
 import static com.kenai.jffi.Util.equalsIgnoreCase;
+import java.util.LinkedList;
 
 /**
  * Loads the native stub library.  This is intended to only ever be called
@@ -249,9 +250,9 @@ public class StubLoader {
     /**
      * Loads the stub library
      */
-    static void load() {
+    private static void load() {
         final String libName = getStubLibraryName();
-        List<Throwable> errors = new ArrayList<Throwable>();
+        List<Throwable> errors = new LinkedList<Throwable>();
         String bootPath = getBootPath();
         if (bootPath != null && loadFromBootPath(libName, bootPath, errors)) {
             return;

@@ -39,18 +39,18 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.11</version>
+      <version>4.12</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
 
   <properties>
-    <maven.test.skip>true</maven.test.skip>
-    <maven.test.failure.ignore>true</maven.test.failure.ignore>
+    <maven.test.skip>false</maven.test.skip>
+    <maven.test.failure.ignore>false</maven.test.failure.ignore>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
-    <make.exe>make</make.exe>
+    <make>make</make>
   </properties>
 
   <profiles>
@@ -66,7 +66,7 @@
               <os><name>freebsd</name></os>
           </activation>
           <properties>
-              <make.exe>gmake</make.exe>
+              <make>gmake</make>
           </properties>
       </profile>
   </profiles>
@@ -188,7 +188,7 @@
                 </goals>
                 <configuration>
                     <tasks>
-                      <unzip dest="${project.build.directory}/" overwrite="true">
+                      <unzip dest="${project.build.directory}/test-classes" overwrite="true">
                           <patternset>
                             <include name="**/*.so" />
                             <include name="**/*.dylib" />
@@ -245,6 +245,25 @@
           </execution>
         </executions>
       </plugin>
+                  <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.6.0</version>
+                <executions>
+                  <execution>
+                        <id>compile-c-sources</id>
+                        <phase>test-compile</phase>
+                        <configuration>
+                            <executable>${make}</executable>
+                            <workingDirectory>${basedir}/src/test/native/</workingDirectory>                         
+                        </configuration>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
     </plugins>
   </build>
 </project>

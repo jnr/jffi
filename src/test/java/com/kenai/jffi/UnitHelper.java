@@ -79,7 +79,7 @@ public class UnitHelper {
     public static <T> T loadTestLibrary(Class<T> interfaceClass, InvokerType invokerType) {
         String name = Platform.getPlatform().mapLibraryName("test");
 
-        return loadLibrary(new File("build", name).getAbsolutePath(), interfaceClass, invokerType);
+        return loadLibrary( UnitHelper.class.getClassLoader().getResource(System.mapLibraryName("test")).getFile(), interfaceClass, invokerType);
     }
 
     /**
@@ -102,8 +102,7 @@ public class UnitHelper {
                 new NativeInvocationHandler(lib, invokerType)));
     }
     private static final class LibraryHolder {
-        static final Library libtest = Library.getCachedInstance(
-                new File("build", Platform.getPlatform().mapLibraryName("test")).getAbsolutePath(), Library.LAZY);
+        static final Library libtest = Library.getCachedInstance(UnitHelper.class.getClassLoader().getResource(System.mapLibraryName("test")).getFile(), Library.LAZY);
     }
     public static Address findSymbol(String name) {
         final long address = LibraryHolder.libtest.getSymbolAddress(name);

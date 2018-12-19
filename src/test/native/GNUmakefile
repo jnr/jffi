@@ -25,9 +25,10 @@ ifneq ($(findstring cygwin,$(BUILD_OS)),)
   OS = win32
 endif
 
-SRC_DIR = libtest
-BUILD_DIR ?= build
-TEST_BUILD_DIR = $(BUILD_DIR)/libtest
+SRC_DIR ?= .
+BUILD_DIR ?= ../../../target/test-native/
+OUT_DIR ?= ../../../target/test-classes/
+
 # Set defaults to unix (linux/solaris/bsd)
 PREFIX = lib
 LIBEXT = so
@@ -38,7 +39,7 @@ export MACOSX_DEPLOYMENT_TARGET=10.4
 CCACHE := $(ccache -V >/dev/null 2>&1 && echo ccache)
 
 TEST_SRCS = $(wildcard $(SRC_DIR)/*.c)
-TEST_OBJS := $(patsubst $(SRC_DIR)/%.c, $(TEST_BUILD_DIR)/%.o, $(TEST_SRCS))
+TEST_OBJS := $(patsubst $(SRC_DIR)/%.c, $(BUILD_DIR)/%.o, $(TEST_SRCS))
 
 #
 # Compiler/linker flags from:
@@ -181,11 +182,11 @@ ifneq ($(strip $(findstring $(OS), solaris)),)
   LD += -m$(MODEL)
 endif
 
-LIBTEST = $(BUILD_DIR)/$(LIBNAME)
+LIBTEST = $(OUT_DIR)/$(LIBNAME)
 
 all:	$(LIBTEST)
 
-$(TEST_BUILD_DIR)/%.o : $(SRC_DIR)/%.c
+$(BUILD_DIR)/%.o : $(SRC_DIR)/%.c
 	@mkdir -p $(@D)
 	$(CCACHE) $(CC) $(CFLAGS) -c $< -o $@
 

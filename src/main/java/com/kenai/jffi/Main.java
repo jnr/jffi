@@ -4,6 +4,11 @@ package com.kenai.jffi;
 public class Main {
     public static void main(String[] args) {
         try {
+            System.out.println("Java system properties");
+            for (String name : System.getProperties().stringPropertyNames()) {
+                System.out.printf("\t %s = \"%s\"\n", name, System.getProperty(name));
+            }
+
             System.out.printf("jffi jar version=%d.%d.%d\n", Foreign.VERSION_MAJOR, Foreign.VERSION_MINOR, Foreign.VERSION_MICRO);
             Foreign f = Foreign.getInstance();
             System.out.printf("jffi stub version=%d.%d.%d\n", v(f, 16), v(f, 8), v(f, 0));
