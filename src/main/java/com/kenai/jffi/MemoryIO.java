@@ -34,6 +34,7 @@ package com.kenai.jffi;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import jdk.nashorn.internal.ir.annotations.Ignore;
 
 /**
  * Provides facilities to access native memory from java.

@@ -151,10 +151,18 @@ public class StubLoader {
         } else if (Util.startsWithIgnoreCase(osName, "windows", LOCALE)) {
             return OS.WINDOWS;
         } else {
-            throw new RuntimeException("cannot determine operating system");
+            throw new RuntimeException("cannot determine operating system\n" + listSystemProperties());
         }
     }
     
+    	public static String listSystemProperties() {
+		StringBuilder sb = new StringBuilder();
+		for (String name : System.getProperties().stringPropertyNames()) {
+			sb.append("\t").append(name).append(" = ").append(System.getProperty(name)).append("\n");
+		}
+		return sb.toString();
+	}
+
     /**
      * Determines the CPU architecture the JVM is running on.
      *
@@ -193,7 +201,7 @@ public class StubLoader {
             }
         }
 
-        throw new RuntimeException("cannot determine CPU");
+        throw new RuntimeException("cannot determine CPU\n"+ listSystemProperties());
     }
     
     public static CPU getCPU() {

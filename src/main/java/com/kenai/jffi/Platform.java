@@ -32,6 +32,8 @@
 
 package com.kenai.jffi;
 
+import com.kenai.jffi.internal.StubLoader;
+
 /**
  * Convenience class to interrogate the system about various platform-specific details.
  */
@@ -64,10 +66,7 @@ public abstract class Platform {
         /** IBM AIX */
         AIX,
         /** IBM zOS **/
-        ZLINUX,
-
-        /** No idea what the operating system is */
-        UNKNOWN;
+        ZLINUX;
 
         @Override
         public String toString() { return name().toLowerCase(LOCALE); }
@@ -99,9 +98,7 @@ public abstract class Platform {
         /** ARM */
         ARM(32),
         /** AARCH64 */
-        AARCH64(64),
-        /** Unknown CPU */
-        UNKNOWN(64);
+        AARCH64(64);
 
         CPU(int dataModel) {
             this.dataModel = dataModel;
@@ -150,7 +147,7 @@ public abstract class Platform {
             return OS.WINDOWS;
         
         } else {
-            return OS.UNKNOWN;
+            throw new RuntimeException("Unknown OS\n" + StubLoader.listSystemProperties());
         }
     }
 
@@ -239,8 +236,7 @@ public abstract class Platform {
                     return cpu;
                 }
             }
-
-            return CPU.UNKNOWN;
+            throw new RuntimeException("Unknown CPU\n" + StubLoader.listSystemProperties());
         }
     }
 
