@@ -98,7 +98,11 @@ public abstract class Platform {
         /** ARM */
         ARM(32),
         /** AARCH64 */
-        AARCH64(64);
+        AARCH64(64),
+        /**
+         * MIPS 32bit big endian
+         */
+        MIPS(32);
 
         CPU(int dataModel) {
             this.dataModel = dataModel;
@@ -209,6 +213,9 @@ public abstract class Platform {
 
             } else if (Util.equalsIgnoreCase("x86_64", archString, LOCALE) || Util.equalsIgnoreCase("amd64", archString, LOCALE)) {
                 return CPU.X86_64;
+
+            } else if (Util.equalsIgnoreCase("mips", archString, LOCALE)) {
+                return CPU.MIPS;
 
             } else if (Util.equalsIgnoreCase("ppc", archString, LOCALE) || Util.equalsIgnoreCase("powerpc", archString, LOCALE)) {
                 return CPU.PPC;
