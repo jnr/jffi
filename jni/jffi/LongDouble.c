@@ -42,6 +42,7 @@
 #include "jffi.h"
 #include "Exception.h"
 #include "com_kenai_jffi_Foreign.h"
+#include <locale.h>
 
 static void 
 jffi_encodeLongDouble(JNIEnv *env, long double ld, jbyteArray array, jint arrayOffset, jint arrayLength)
@@ -77,11 +78,15 @@ Java_com_kenai_jffi_Foreign_longDoubleFromString(JNIEnv *env, jobject self, jstr
     long double ld;
     char* tmp;
     jsize len;
-
+  
     len = (*env)->GetStringUTFLength(env, str);
     tmp = alloca(len + 1);
     (*env)->GetStringUTFRegion(env, str, 0, len, tmp);
+    locale_t myLocale = newlocale (LC_ALL, "C", (locale_t) 0);
+    locale_t old_locale = uselocale(myLocale);
     ld = strtold(tmp, NULL);
+    uselocale(old_locale);
+    freelocale(myLocale);
     jffi_encodeLongDouble(env, ld, array, arrayOffset, arrayLength);
 }
 
@@ -91,7 +96,11 @@ jffi_longDoubleToString(JNIEnv *env,
 {
     char tmp[256];
 
+    locale_t myLocale = newlocale (LC_ALL, "C", (locale_t) 0);
+    locale_t old_locale = uselocale(myLocale);
     sprintf(tmp, fmt, jffi_decodeLongDouble(env, array, arrayOffset, arrayLength));
+    uselocale(old_locale);
+    freelocale(myLocale);
     return (*env)->NewStringUTF(env, tmp);
 }
 

@@ -96,21 +96,13 @@ public class ForeignTest {
     }
     
     @Test public void longDoubleFromString() {
-        DecimalFormat nf = new DecimalFormat();
         String strValue = "1.234567890123456789";
         BigDecimal value = new BigDecimal(strValue);
-        nf.setMaximumFractionDigits(35);
         byte[] ld = new byte[Type.LONGDOUBLE.size()];
-        Foreign.getInstance().longDoubleFromString(nf.format(value), ld, 0, Type.LONGDOUBLE.size());
-        nf.setParseBigDecimal(true);
+        Foreign.getInstance().longDoubleFromString(value.toEngineeringString(), ld, 0, Type.LONGDOUBLE.size());
         String strRetValue = Foreign.getInstance().longDoubleToString(ld, 0, Type.LONGDOUBLE.size());
         BigDecimal retValue;
-        try {
-            retValue = (BigDecimal)nf.parse(strRetValue);
-        } catch (ParseException ex) {
-            Logger.getLogger(ForeignTest.class.getName()).log(Level.SEVERE, null, ex);
-            throw new RuntimeException(ex);
-        }
+        retValue = new BigDecimal(strRetValue);
         BigDecimal delta = value.subtract(retValue).abs();
         assertTrue("Not equals, expected: " + value.toEngineeringString() + " but was: " + retValue.toEngineeringString(), delta.compareTo(new BigDecimal("0.0000000000000000001")) < 0);
     }
