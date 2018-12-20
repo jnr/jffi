@@ -155,6 +155,7 @@
             </goals>
           </execution>
             <execution>
+                <id>copy-native-to-test</id>
                 <phase>process-test-resources</phase>
                 <goals>
                     <goal>run</goal>
@@ -162,6 +163,29 @@
                 <configuration>
                     <tasks>
                       <unzip dest="${project.build.directory}/test-classes" overwrite="true">
+                          <patternset>
+                            <include name="**/*.so" />
+                            <include name="**/*.dylib" />
+                            <include name="**/*.jnilib" />
+                            <include name="**/*.dll" />
+                            <include name="**/*.a" />
+                          </patternset>
+                          <fileset dir="archive">
+                            <include name="**/*.jar" />
+                          </fileset>
+                      </unzip>
+                    </tasks>
+                </configuration>
+            </execution>
+            <execution>
+                <id>copy-native-for-jarring</id>
+                <phase>process-resources</phase>
+                <goals>
+                    <goal>run</goal>
+                </goals>
+                <configuration>
+                    <tasks>
+                      <unzip dest="${project.build.directory}" overwrite="true">
                           <patternset>
                             <include name="**/*.so" />
                             <include name="**/*.dylib" />
