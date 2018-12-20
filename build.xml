@@ -44,6 +44,7 @@
         <os arch="powerpc"/>
         <os arch="sparc"/>
         <os arch="arm"/>
+        <os arch="mips"/>
       </or>
     </condition>
     <condition property="run.jvm.model" value="">

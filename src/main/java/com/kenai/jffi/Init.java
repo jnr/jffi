@@ -39,8 +39,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Utility class to load the jffi stub library
@@ -61,9 +63,8 @@ final class Init {
             return;
         }
         List<Throwable> failureCauses = new ArrayList<Throwable>();
-        List<ClassLoader> loaders = getClassLoaders();
         
-        for (ClassLoader cl : loaders) {
+        for (ClassLoader cl : getClassLoaders()) {
             try {
                 Class<?> c = Class.forName(stubLoaderClassName, true, cl);
                 Method isLoaded = c.getDeclaredMethod("isLoaded", new Class[0]);
@@ -101,8 +102,8 @@ final class Init {
         }
     }
 
-    private static List<ClassLoader> getClassLoaders() {
-        List<ClassLoader> loaders = new ArrayList<ClassLoader>();
+    private static Iterable<ClassLoader> getClassLoaders() {
+        Set<ClassLoader> loaders = new HashSet<ClassLoader>();
         
         try {
             loaders.add(ClassLoader.getSystemClassLoader());
@@ -125,7 +126,7 @@ final class Init {
             }
         }
         
-        return Collections.unmodifiableList(loaders);
+        return loaders;
     }
 
     private static UnsatisfiedLinkError newLoadError(Throwable cause) {

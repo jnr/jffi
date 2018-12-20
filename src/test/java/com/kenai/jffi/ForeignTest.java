@@ -2,6 +2,12 @@
 package com.kenai.jffi;
 
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.text.ParseException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -81,6 +87,32 @@ public class ForeignTest {
             assertArrayEquals("Incorrect data read back", MAGIC, tmp);
             assertTrue("Failed to free memory", Foreign.getInstance().munmap(addr, SIZE) == 0);
         }
+    }
+    
+    @Test(expected = RuntimeException.class)
+    public void longDoubleFromStringWrongArraySize() {
+         byte[] expectedLd = new byte[] {(byte)0x8d,(byte)0xdb,(byte)0xcf,(byte)0x62,(byte)0x14,(byte)0x52,(byte)0x06,(byte)0x9e,(byte)0xff,(byte)0x3f,(byte)0x00,(byte)0x10,(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x00};
+        String strRetValue = Foreign.getInstance().longDoubleToString(expectedLd, 0, 2);
+    }
+    
+    @Test public void longDoubleFromString() {
+        DecimalFormat nf = new DecimalFormat();
+        String strValue = "1.234567890123456789";
+        BigDecimal value = new BigDecimal(strValue);
+        nf.setMaximumFractionDigits(35);
+        byte[] ld = new byte[Type.LONGDOUBLE.size()];
+        Foreign.getInstance().longDoubleFromString(nf.format(value), ld, 0, Type.LONGDOUBLE.size());
+        nf.setParseBigDecimal(true);
+        String strRetValue = Foreign.getInstance().longDoubleToString(ld, 0, Type.LONGDOUBLE.size());
+        BigDecimal retValue;
+        try {
+            retValue = (BigDecimal)nf.parse(strRetValue);
+        } catch (ParseException ex) {
+            Logger.getLogger(ForeignTest.class.getName()).log(Level.SEVERE, null, ex);
+            throw new RuntimeException(ex);
+        }
+        BigDecimal delta = value.subtract(retValue).abs();
+        assertTrue("Not equals, expected: " + value.toEngineeringString() + " but was: " + retValue.toEngineeringString(), delta.compareTo(new BigDecimal("0.0000000000000000001")) < 0);
     }
     static class ClosureProxy {
         void invoke(Closure.Buffer buf) {}
