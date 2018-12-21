@@ -264,7 +264,7 @@ public class NumberTest {
         BigDecimal param = new BigDecimal("1.234567890123456789");
         BigDecimal result = lib.ret_f128(param);
         BigDecimal delta = param.subtract(result).abs();
-        assertTrue("Not equals, expected: " + param.toEngineeringString() + " but was: " + result.toEngineeringString(), delta.compareTo(new BigDecimal("0.0000000000000000001")) < 0);
+        assertTrue("Not equals, max difference 0.0000000000000000001\n\texpected: " + param.toEngineeringString() + "\n\tbut was: " + result.toEngineeringString() +"\n\t delta: " + delta.toEngineeringString(), delta.compareTo(new BigDecimal("0.0000000000000000001")) < 0);
     }
 
 

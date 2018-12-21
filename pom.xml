@@ -78,7 +78,11 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.8.0</version>
         <configuration>
-          <debug>true</debug>
+          <compilerArgs>
+            <arg>-h</arg>
+            <arg>${project.build.directory}/generated-sources/main/native/include/</arg>
+          </compilerArgs>
+          <!--debug>true</debug-->
           <showDeprecation>true</showDeprecation>
         </configuration>
       </plugin>
