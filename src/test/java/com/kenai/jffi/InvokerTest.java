@@ -75,8 +75,14 @@ public class InvokerTest {
         }
     }
 
+    //TODO is this right we mask out the garbage ihn the upper 32 bits if wordsize is 32 ???
+    //This happens on arm???
     static long unsigned(long n) {
-        return n < 0 ? ((n & 0x7FFFFFFFL) + 0x80000000L) : n;
+          if (Platform.getPlatform().longSize() == 32) {
+	   	  return n & 0x00000000FFFFFFFFL;
+	  } else {
+		  return n;
+	  }
     }
 
 
