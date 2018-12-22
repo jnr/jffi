@@ -169,6 +169,11 @@ public class InvokerTest {
         }
     }
 
+    
+    private static void assertLongHex(String msg, long expected, long actual) {
+        assertEquals(msg, String.format("0x%016x", expected), String.format("0x%016x", actual));
+    }
+    
     public static void invokeO(Invoker invoker) {
         Function function = getFunction("invokeO", Type.SLONG, Type.POINTER);
         CallContext ctx = getContext(Type.SLONG, Type.POINTER);
@@ -178,8 +183,8 @@ public class InvokerTest {
                 NATIVE_LONG, ObjectParameterInfo.IN | ObjectParameterInfo.OUT);
 
         long ret = invoker.invokeN1(ctx, function.getFunctionAddress(), 0, 1, arr, strategy, info);
-        assertEquals("incorrect return value", N1, unsigned(ret));
-        assertEquals("incorrect array value", 0xdeadbeefL, getNativeUnsignedLong(arr));
+        assertLongHex("incorrect return value", N1, unsigned(ret));
+        assertLongHex("incorrect array value", 0xdeadbeefL, getNativeUnsignedLong(arr));
     }
 
     public static void invokeNO(Invoker invoker) {
@@ -190,8 +195,8 @@ public class InvokerTest {
         ObjectParameterInfo info = ObjectParameterInfo.create(1, ObjectParameterInfo.ARRAY,
                 NATIVE_LONG, ObjectParameterInfo.IN | ObjectParameterInfo.OUT);
         long ret = invoker.invokeN2(ctx, function.getFunctionAddress(), N2, 0L, 1, arr, strategy, info);
-        assertEquals("incorrect return value", N1, unsigned(ret));
-        assertEquals("incorrect array value", N2, getNativeUnsignedLong(arr));
+        assertLongHex("incorrect return value", N1, unsigned(ret));
+        assertLongHex("incorrect array value", N2, getNativeUnsignedLong(arr));
     }
 
     public static void invokeON(Invoker invoker) {
@@ -202,8 +207,8 @@ public class InvokerTest {
         ObjectParameterInfo info = ObjectParameterInfo.create(0, ObjectParameterInfo.ARRAY,
                 NATIVE_LONG, ObjectParameterInfo.IN | ObjectParameterInfo.OUT);
         long ret = invoker.invokeN2(ctx, function.getFunctionAddress(), 0L, N2, 1, arr, strategy, info);
-        assertEquals("incorrect return value", N1, unsigned(ret));
-        assertEquals("incorrect array value", N2, getNativeUnsignedLong(arr));
+        assertLongHex("incorrect return value", N1, unsigned(ret));
+        assertLongHex("incorrect array value", N2, getNativeUnsignedLong(arr));
     }
 
     public static void invokeOO(Invoker invoker) {
@@ -217,9 +222,9 @@ public class InvokerTest {
         ObjectParameterInfo o2info = ObjectParameterInfo.create(1, ObjectParameterInfo.ARRAY,
                 NATIVE_LONG, ObjectParameterInfo.IN | ObjectParameterInfo.OUT);
         long ret = invoker.invokeN2(ctx, function.getFunctionAddress(), 0L, 0L, 2, arr1, strategy, o1info, arr2, strategy, o2info);
-        assertEquals("incorrect array value", N2, getNativeUnsignedLong(arr1));
-        assertEquals("incorrect array value", N1, getNativeUnsignedLong(arr2));
-        assertEquals("incorrect return value", unsigned(N1 + N2), unsigned(ret));
+        assertLongHex("incorrect array value", N2, getNativeUnsignedLong(arr1));
+        assertLongHex("incorrect array value", N1, getNativeUnsignedLong(arr2));
+        assertLongHex("incorrect return value", unsigned(N1 + N2), unsigned(ret));
     }
 
     public static void invokeDO(Invoker invoker) {
@@ -236,9 +241,9 @@ public class InvokerTest {
                 NATIVE_LONG, ObjectParameterInfo.IN | ObjectParameterInfo.OUT);
 
         long ret = invoker.invokeN2(ctx, function.getFunctionAddress(), o1.address, 0L, 1, o1, s1, o1info, o2, s2, o2info);
-        assertEquals("incorrect ptr value", N2, getNativeUnsignedLong(o1));
-        assertEquals("incorrect array value", N1, getNativeUnsignedLong(o2));
-        assertEquals("incorrect return value", N1 + N2, unsigned(ret));
+        assertLongHex("incorrect ptr value", N2, getNativeUnsignedLong(o1));
+        assertLongHex("incorrect array value", N1, getNativeUnsignedLong(o2));
+        assertLongHex("incorrect return value", N1 + N2, unsigned(ret));
     }
 
     public static void invokeOD(Invoker invoker) {
@@ -255,9 +260,9 @@ public class InvokerTest {
                 NATIVE_LONG, ObjectParameterInfo.IN | ObjectParameterInfo.OUT);
 
         long ret = invoker.invokeN2(ctx, function.getFunctionAddress(), 0L, ptr.address, 1, array, arrayStrategy, o1info, ptr, ptrStrategy, o2info);
-        assertEquals("incorrect ptr value", N1, getNativeUnsignedLong(ptr));
-        assertEquals("incorrect array value", N2, getNativeUnsignedLong(array));
-        assertEquals("incorrect return value", N1 + N2, unsigned(ret));
+        assertLongHex("incorrect ptr value", N1, getNativeUnsignedLong(ptr));
+        assertLongHex("incorrect array value", N2, getNativeUnsignedLong(array));
+        assertLongHex("incorrect return value", N1 + N2, unsigned(ret));
     }
 
 
