@@ -113,7 +113,7 @@ JNIEXPORT jstring JNICALL
 Java_com_kenai_jffi_Foreign_longDoubleToEngineeringString(JNIEnv *env, jobject self, 
     jbyteArray array, jint arrayOffset, jint arrayLength)
 {
-    return jffi_longDoubleToString(env, array, arrayOffset, arrayLength, "%.35Le");
+    return jffi_longDoubleToString(env, array, arrayOffset, arrayLength, "%.60Le");
 }
 
 /*
@@ -125,7 +125,7 @@ JNIEXPORT jstring JNICALL
 Java_com_kenai_jffi_Foreign_longDoubleToPlainString(JNIEnv *env, jobject self, 
     jbyteArray array, jint arrayOffset, jint arrayLength)
 {
-    return jffi_longDoubleToString(env, array, arrayOffset, arrayLength, "%.35Lf");
+    return jffi_longDoubleToString(env, array, arrayOffset, arrayLength, "%.60Le");
 }
 
 /*
@@ -137,7 +137,7 @@ JNIEXPORT jstring JNICALL
 Java_com_kenai_jffi_Foreign_longDoubleToString(JNIEnv *env, jobject self, 
     jbyteArray array, jint arrayOffset, jint arrayLength)
 {
-    return jffi_longDoubleToString(env, array, arrayOffset, arrayLength, "%.35Lg");
+    return jffi_longDoubleToString(env, array, arrayOffset, arrayLength, "%.60Lg");
 }
 
 /*

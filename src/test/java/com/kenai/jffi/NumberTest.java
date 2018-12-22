@@ -31,6 +31,36 @@ public class NumberTest {
         float powf(float x, float y);
         float cosf(float x);
     }
+    
+    public static final String FLT64_MAX =  "1.79769313486231570814527423731704357e+308";
+    public static final String DBL_MAX =    "1.79769313486231570814527423731704357e+308";
+    public static final String FLT128_MAX = "1.18973149535723176508575932662800702e+4932";
+    public static final String LDBL_MAX =   "1.18973149535723176502126385303097021e+4932";
+
+    public static final String FLT64_MIN =  "2.22507385850720138309023271733240406e-308";
+    public static final String DBL_MIN =    "2.22507385850720138309023271733240406e-308";
+    public static final String FLT128_MIN = "3.36210314311209350626267781732175260e-4932";
+    public static final String LDBL_MIN =   "3.36210314311209350626267781732175260e-4932";
+
+    public static final String FLT64_EPSILON =  "2.22044604925031308084726333618164062e-16";
+    public static final String DBL_EPSILON =    "2.22044604925031308084726333618164062e-16";
+    public static final String FLT128_EPSILON = "1.92592994438723585305597794258492732e-34";
+    public static final String LDBL_EPSILON =   "1.08420217248550443400745280086994171e-19";
+
+    public static final String FLT64_DENORM_MIN =  "4.94065645841246544176568792868221372e-324";
+    public static final String DBL_DENORM_MIN =    "4.94065645841246544176568792868221372e-324";
+    public static final String FLT128_DENORM_MIN = "6.47517511943802511092443895822764655e-4966";
+    public static final String LDBL_DENORM_MIN =   "3.64519953188247460252840593361941982e-4951";
+
+    public static final String FLT64_ONE_PLUS_EPSILON =  "1.000000000000000222044604925031308084726333618164062";
+    public static final String DBL_ONE_PLUS_EPSILON =    "1.000000000000000222044604925031308084726333618164062";
+    public static final String FLT128_ONE_PLUS_EPSILON = "1.000000000000000000000000000000000192592994438723585305597794258492732";
+    public static final String LDBL_ONE_PLUS_EPSILON =   "1.000000000000000000108420217248550443400745280086994171";
+
+    public static final String FLT64_ONE_MINUS_EPSILON =  "0.999999999999999777955395074968691915273666381835938";
+    public static final String DBL_ONE_MINUS_EPSILON =    "0.999999999999999777955395074968691915273666381835938";
+    public static final String FLT128_ONE_MINUS_EPSILON = "0.999999999999999999999999999999999807407005561276414694402205741507268";
+    public static final String LDBL_ONE_MINUS_EPSILON =   "0.999999999999999999891579782751449556599254719913005829";
 
     public NumberTest() {
     }
@@ -254,17 +284,54 @@ public class NumberTest {
     @Test public void returnDefaultF128() {
         returnF128(InvokerType.Default);
     }
+private static double calculateMachineEpsilonDouble() {
+        double machEps = 1.0f;
 
-    @Test public void returnDefaultF128HighPrecision() {
-        returnF128HighPrecision(InvokerType.Default);
+        do
+           machEps /= 2.0f;
+        while ((double) (1.0 + (machEps / 2.0)) != 1.0);
+
+        return machEps;
     }
 
-    private void returnF128HighPrecision(InvokerType type) {
-        LibNumberTest lib = UnitHelper.loadTestLibrary(LibNumberTest.class, type);
-        BigDecimal param = new BigDecimal("1.234567890123456789");
-        BigDecimal result = lib.ret_f128(param);
-        BigDecimal delta = param.subtract(result).abs();
-        assertTrue("Not equals, max difference 0.0000000000000000001\n\texpected: " + param.toEngineeringString() + "\n\tbut was: " + result.toEngineeringString() +"\n\t delta: " + delta.toEngineeringString(), delta.compareTo(new BigDecimal("0.0000000000000000001")) < 0);
+    @Test public void returnDefaultF128HighPrecision() {
+        assertEquals(1.0, 1.0 + new Double(FLT64_EPSILON), new Double(FLT64_EPSILON));
+        
+        LibNumberTest lib = UnitHelper.loadTestLibrary(LibNumberTest.class, InvokerType.Default);
+        BigDecimal delta;
+        switch (Type.LONGDOUBLE.size()) {
+            case 8:
+                delta = new BigDecimal(DBL_EPSILON);
+
+                returnF128HighPrecision(lib, DBL_MAX, delta.multiply(new BigDecimal(DBL_MAX)));
+                returnF128HighPrecision(lib, DBL_MIN, delta);
+                returnF128HighPrecision(lib, DBL_EPSILON, delta);
+                returnF128HighPrecision(lib, DBL_DENORM_MIN, delta);
+                returnF128HighPrecision(lib, DBL_ONE_PLUS_EPSILON, delta);
+                returnF128HighPrecision(lib, DBL_ONE_MINUS_EPSILON, delta);
+            break;
+            case 16:
+                delta = new BigDecimal(LDBL_EPSILON);
+                
+                returnF128HighPrecision(lib, LDBL_MAX, delta.multiply(new BigDecimal(LDBL_MAX)));
+                returnF128HighPrecision(lib, LDBL_MIN, delta);
+                returnF128HighPrecision(lib, LDBL_EPSILON, delta);
+                returnF128HighPrecision(lib, LDBL_DENORM_MIN, delta);
+                returnF128HighPrecision(lib, LDBL_ONE_PLUS_EPSILON, delta);
+                returnF128HighPrecision(lib, LDBL_ONE_MINUS_EPSILON, delta);
+                break;
+            default : throw new RuntimeException("Unknown  size of long double: " + Type.LONGDOUBLE.size());
+        }
+    }
+//        BigDecimal param = new BigDecimal("1.234567890123456789");
+
+    private void returnF128HighPrecision(LibNumberTest lib, String valueStr, BigDecimal maxDelta) {
+        BigDecimal value = new BigDecimal(valueStr);
+        BigDecimal result = lib.ret_f128(value);
+        BigDecimal delta = value.subtract(result).abs();
+
+        int comp = maxDelta.compareTo(delta);
+        assertEquals("Not equals, \n\texpected: " + value.toString() + "\n\tbut was: " + result.toString() +"\n\t delta: " + delta.toEngineeringString(), 1, comp);
     }
 
 

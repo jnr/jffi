@@ -92,19 +92,62 @@ public class ForeignTest {
     @Test(expected = RuntimeException.class)
     public void longDoubleFromStringWrongArraySize() {
          byte[] expectedLd = new byte[] {(byte)0x8d,(byte)0xdb,(byte)0xcf,(byte)0x62,(byte)0x14,(byte)0x52,(byte)0x06,(byte)0x9e,(byte)0xff,(byte)0x3f,(byte)0x00,(byte)0x10,(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x00};
-        String strRetValue = Foreign.getInstance().longDoubleToString(expectedLd, 0, 2);
+         Foreign.getInstance().longDoubleToString(expectedLd, 0, 2);
     }
-    
-    @Test public void longDoubleFromString() {
-        String strValue = "1.234567890123456789";
-        BigDecimal value = new BigDecimal(strValue);
+  
+    private void longDoubleToString0(String value, BigDecimal maxDelta) {
         byte[] ld = new byte[Type.LONGDOUBLE.size()];
-        Foreign.getInstance().longDoubleFromString(value.toEngineeringString(), ld, 0, Type.LONGDOUBLE.size());
-        String strRetValue = Foreign.getInstance().longDoubleToString(ld, 0, Type.LONGDOUBLE.size());
-        BigDecimal retValue;
-        retValue = new BigDecimal(strRetValue);
-        BigDecimal delta = value.subtract(retValue).abs();
-        assertTrue("Not equals, expected: " + value.toEngineeringString() + " but was: " + retValue.toEngineeringString(), delta.compareTo(new BigDecimal("0.0000000000000000001")) < 0);
+        Foreign.getInstance().longDoubleFromString(value, ld, 0, Type.LONGDOUBLE.size());
+        String strRetValue = Foreign.getInstance().longDoubleToPlainString(ld, 0, Type.LONGDOUBLE.size());
+        
+        BigDecimal expectedBD = new BigDecimal(value);
+        BigDecimal actualBD = new BigDecimal(strRetValue);
+        BigDecimal delta = expectedBD.subtract(actualBD).abs();
+        int comp = maxDelta.compareTo(delta);
+        assertEquals("delta is " + delta, 1, comp);
+    }
+
+    @Test
+    public void longDoubleFromString() {
+        String ONE_PLUS_EPSILON;
+        String ONE_MINUS_EPSILON;
+        String EPSILON;
+        String MAX;
+        String MIN;
+        String DENORM_MIN;
+        BigDecimal delta;
+        switch (Type.LONGDOUBLE.size()) {
+            case 8:
+                ONE_PLUS_EPSILON = NumberTest.DBL_ONE_PLUS_EPSILON;
+                ONE_MINUS_EPSILON = NumberTest.DBL_ONE_MINUS_EPSILON;
+                EPSILON = NumberTest.DBL_EPSILON;
+                MAX = NumberTest.DBL_MAX;
+                MIN = NumberTest.DBL_MIN;
+                DENORM_MIN = NumberTest.DBL_DENORM_MIN;
+                delta = new BigDecimal(NumberTest.DBL_EPSILON);
+                break;
+            case 16:
+                ONE_PLUS_EPSILON = NumberTest.LDBL_ONE_PLUS_EPSILON;
+                ONE_MINUS_EPSILON = NumberTest.LDBL_ONE_MINUS_EPSILON;
+                EPSILON = NumberTest.LDBL_EPSILON;
+                MAX = NumberTest.LDBL_MAX;
+                MIN = NumberTest.LDBL_MIN;
+                DENORM_MIN = NumberTest.LDBL_DENORM_MIN;
+                delta = new BigDecimal(NumberTest.LDBL_EPSILON);
+                break;
+            default:
+                throw new RuntimeException("Unknown sizeof long double: " + Type.LONGDOUBLE.size());
+        }
+        
+        longDoubleToString0(ONE_PLUS_EPSILON, delta);
+        longDoubleToString0(ONE_MINUS_EPSILON, delta);
+        longDoubleToString0(EPSILON, delta);
+        longDoubleToString0("0.0", delta);
+        longDoubleToString0("-1.0", delta);
+        longDoubleToString0("1.0", delta);
+        longDoubleToString0(MIN, delta);
+        longDoubleToString0(MAX, delta.multiply(new BigDecimal(MAX)));
+        longDoubleToString0(DENORM_MIN, delta);
     }
     static class ClosureProxy {
         void invoke(Closure.Buffer buf) {}

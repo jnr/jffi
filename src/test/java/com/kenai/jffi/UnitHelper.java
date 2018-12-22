@@ -122,7 +122,7 @@ public class UnitHelper {
         }
 
         public Object invoke(Object self, Method method, Object[] argArray) throws Throwable {
-            return getMethodInvoker(method).invoke(argArray);
+            return getMethodInvoker(method).invoke(argArray == null ? new Object[0]: argArray);
         }
         /**
          * Gets the {@link Invoker} for a method.
