@@ -310,7 +310,9 @@ private static double calculateMachineEpsilonDouble() {
                 returnF128HighPrecision(lib, DBL_ONE_PLUS_EPSILON, delta);
                 returnF128HighPrecision(lib, DBL_ONE_MINUS_EPSILON, delta);
             break;
+            case 12:
             case 16:
+                //gcc uses 80bits
                 delta = new BigDecimal(LDBL_EPSILON);
                 
                 returnF128HighPrecision(lib, LDBL_MAX, delta.multiply(new BigDecimal(LDBL_MAX)));

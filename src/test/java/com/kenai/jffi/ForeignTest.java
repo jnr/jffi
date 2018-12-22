@@ -126,7 +126,9 @@ public class ForeignTest {
                 DENORM_MIN = NumberTest.DBL_DENORM_MIN;
                 delta = new BigDecimal(NumberTest.DBL_EPSILON);
                 break;
+            case 12:
             case 16:
+                //gcc uses 80bits
                 ONE_PLUS_EPSILON = NumberTest.LDBL_ONE_PLUS_EPSILON;
                 ONE_MINUS_EPSILON = NumberTest.LDBL_ONE_MINUS_EPSILON;
                 EPSILON = NumberTest.LDBL_EPSILON;
