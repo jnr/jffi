@@ -229,6 +229,10 @@ ifeq ($(OS), aix)
   STRIP = strip
 endif
 
+ifneq ($(OS), dragonflybsd)
+  SOFLAGS = -shared
+endif
+
 ifneq ($(findstring bsd, $(OS)),)
   SOFLAGS = -shared -static-libgcc
   CFLAGS += -pthread
