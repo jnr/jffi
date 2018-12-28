@@ -225,7 +225,7 @@ public abstract class Platform {
             } else if (Util.equalsIgnoreCase("s390", archString, LOCALE) || Util.equalsIgnoreCase("s390x", archString, LOCALE)) {
                 return CPU.S390X;
                 
-            } else if (Util.equalsIgnoreCase("arm", archString, LOCALE)) {
+            } else if (Util.equalsIgnoreCase("arm", archString, LOCALE) || Util.equalsIgnoreCase("armv7l", archString, LOCALE)) {
                 return CPU.ARM;
                 
             } else if (Util.equalsIgnoreCase("aarch64", archString, LOCALE)) {
