@@ -120,7 +120,8 @@ public class StubLoader {
         ARM,
         /** AArch64 */
         AARCH64,
-        MIPS;
+        MIPS,
+        MIPSEL;
 
         @Override
         public String toString() { return name().toLowerCase(LOCALE); }
@@ -176,6 +177,8 @@ public class StubLoader {
             return CPU.X86_64;
         } else if (Util.equalsIgnoreCase("mips", archString, LOCALE)) {
             return CPU.MIPS;
+        } else if (Util.equalsIgnoreCase("mipsel", archString, LOCALE)) {
+            return CPU.MIPSEL;
         } else if (Util.equalsIgnoreCase("ppc", archString, LOCALE) || Util.equalsIgnoreCase("powerpc", archString, LOCALE)) {
             return CPU.PPC;
         } else if (Util.equalsIgnoreCase("ppc64", archString, LOCALE) || Util.equalsIgnoreCase("powerpc64", archString, LOCALE)) {

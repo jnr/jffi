@@ -45,6 +45,7 @@
         <os arch="sparc"/>
         <os arch="arm"/>
         <os arch="mips"/>
+        <os arch="mipsel"/>
       </or>
     </condition>
     <condition property="run.jvm.model" value="">

@@ -102,7 +102,12 @@ public abstract class Platform {
         /**
          * MIPS 32bit big endian
          */
-        MIPS(32);
+        MIPS(32),
+        /**
+         * MIPSEL 32bit little endian
+         */
+        MIPSEL(32);
+
 
         CPU(int dataModel) {
             this.dataModel = dataModel;
@@ -216,6 +221,9 @@ public abstract class Platform {
 
             } else if (Util.equalsIgnoreCase("mips", archString, LOCALE)) {
                 return CPU.MIPS;
+
+            } else if (Util.equalsIgnoreCase("mipsel", archString, LOCALE)) {
+                return CPU.MIPSEL;
 
             } else if (Util.equalsIgnoreCase("ppc", archString, LOCALE) || Util.equalsIgnoreCase("powerpc", archString, LOCALE)) {
                 return CPU.PPC;
