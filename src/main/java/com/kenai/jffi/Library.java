@@ -183,6 +183,23 @@ public final class Library {
     }
     
     /**
+     * Gets the address of a symbol within the <tt>Library</tt>.
+     * 
+     * @param name The name of the symbol to locate.
+     * @param version The version of the symbol to locate.
+     * @return The address of the symbol within the current address space.
+     */
+    public final long getSymbolAddressWithVersion(String name, String version) {
+        try {
+            return foreign.dlvsym(handle, name, version);
+
+        } catch (UnsatisfiedLinkError ex) {
+            lastError.set(foreign.dlerror());
+            return 0;
+        }
+    }
+    
+    /**
      * Gets the current error string from dlopen/LoadLibrary.
      *
      * @return A <tt>String</tt> describing the last error.

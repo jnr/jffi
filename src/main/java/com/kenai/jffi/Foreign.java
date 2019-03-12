@@ -291,6 +291,16 @@ final class Foreign {
     static native long dlsym(long handle, String name);
 
     /**
+     * Locates the memory address of the specified version of a dynamic library symbol.
+     *
+     * @param handle A dynamic library handle obtained from {@link #dlopen}
+     * @param name The name of the symbol.
+     * @param version The version of the symbol.
+     * @return The address where the symbol in loaded in memory.
+     */
+    static native long dlvsym(long handle, String name, String version);
+
+    /**
      * Gets the last error raised by {@link #dlopen} or {@link #dlsym}
      *
      * @return The error string.
