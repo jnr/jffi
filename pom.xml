@@ -69,6 +69,15 @@
               <make.exe>gmake</make.exe>
           </properties>
       </profile>
+      <profile>
+        <id>dragonfly-profile</id>
+        <activation>
+          <os><name>dragonflybsd</name></os>
+        </activation>
+        <properties>
+          <make.exe>gmake</make.exe>
+        </properties>
+      </profile>
   </profiles>
 
   <build>

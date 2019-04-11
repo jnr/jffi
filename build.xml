@@ -127,6 +127,7 @@
       <or>
         <os name="FreeBSD"/>
         <os name="OpenBSD"/>
+        <os name="DragonFlyBSD"/>
         <os name="AIX"/>
         <os name="HP-UX"/>
       </or>

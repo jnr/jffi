@@ -77,6 +77,8 @@ public class StubLoader {
         NETBSD,
         /** OpenBSD */
         OPENBSD,
+	/** DragonFly */
+	DRAGONFLY,
         /** Linux */
         LINUX,
         /** Solaris (and OpenSolaris) */
@@ -148,6 +150,8 @@ public class StubLoader {
             return OS.OPENBSD;
         } else if (Util.startsWithIgnoreCase(osName, "freebsd", LOCALE)) {
             return OS.FREEBSD;
+	} else if (Util.startsWithIgnoreCase(osName, "dragonfly", LOCALE)) {
+            return OS.DRAGONFLY;
         } else if (Util.startsWithIgnoreCase(osName, "windows", LOCALE)) {
             return OS.WINDOWS;
         } else {
