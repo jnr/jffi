@@ -61,6 +61,8 @@ public class UnitHelper {
                 return "libc.so.6";
             case DARWIN:
                 return "libc.dylib";
+            case FREEBSD:
+                return "libc.so.7";
             case WINDOWS:
                 return "msvcrt.dll";
             case AIX:
