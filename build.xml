@@ -174,7 +174,7 @@
 
   <target name="test" depends="compile,-compile-test">
     <mkdir dir="${build.test.dir}/results"/>
-    <junit fork="${test.fork}" forkMode="${test.fork.mode}" printsummary="withOutAndErr" haltonfailure="false">
+    <junit fork="${test.fork}" forkMode="${test.fork.mode}" printsummary="withOutAndErr" haltonfailure="true">
       <jvmarg value="${run.jvm.model}"/>
       <classpath>
         <pathelement location="${build.classes.dir}"/>
