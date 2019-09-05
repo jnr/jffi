@@ -1,8 +1,11 @@
 language: java
 addons:
-  packages:
-    - ant
-    - ant-optional
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - ant
+      - ant-optional
 script: ant test
 notifications:
   irc:
