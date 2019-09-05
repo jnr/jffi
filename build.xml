@@ -175,8 +175,9 @@
 
   <target name="test" depends="compile,-compile-test">
     <mkdir dir="${build.test.dir}/results"/>
-    <junit fork="${test.fork}" forkMode="${test.fork.mode}" printsummary="withOutAndErr" haltonfailure="false">
+    <junit fork="${test.fork}" forkMode="${test.fork.mode}" printsummary="withOutAndErr" haltonfailure="true">
       <jvmarg value="${run.jvm.model}"/>
+      <env key="LC_ALL" value="C"/>
       <classpath>
         <pathelement location="${build.classes.dir}"/>
         <pathelement location="${build.test.dir}/classes"/>
