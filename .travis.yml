@@ -1,4 +1,8 @@
 language: java
+addons:
+  packages:
+    - ant
+    - ant-optional
 script: ant test
 notifications:
   irc:
