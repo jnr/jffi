@@ -259,10 +259,14 @@ public class StubLoader {
         }
 
         try {
-            loadFromJar();
+            loadFromJar(null);
             return;
         } catch (Throwable t) {
-            errors.add(t);
+            try{
+                loadFromJar(new File(System.getProperty("user.dir")));
+            }catch (Throwable t1){
+                errors.add(t1);
+            }
         }
         if (!errors.isEmpty()) {
             Collections.reverse(errors);
@@ -355,13 +359,14 @@ public class StubLoader {
         }
     } 
 
-    private static void loadFromJar() throws IOException, UnsatisfiedLinkError {
+    private static void loadFromJar(File tmpDirFile) throws IOException, UnsatisfiedLinkError {
         InputStream is = getStubLibraryStream();
         FileOutputStream os = null;
 
         File dstFile;
         try {
-            dstFile = File.createTempFile("jffi", "." + dlExtension());
+            dstFile = null == tmpDirFile ? File.createTempFile("jffi", "." + dlExtension()):
+                    File.createTempFile("jffi", "." + dlExtension(), tmpDirFile);
         } catch (IOException ex) {
             throw new IOException("Failed to create temporary file: jffiXXX." + dlExtension());
         }
