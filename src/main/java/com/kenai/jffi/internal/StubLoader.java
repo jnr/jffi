@@ -17,6 +17,7 @@
  */
 package com.kenai.jffi.internal;
 
+import com.kenai.jffi.Platform;
 import com.kenai.jffi.Util;
 
 import java.io.CharArrayWriter;
@@ -50,6 +51,15 @@ public class StubLoader {
     private static final String bootLibraryPropertyName = "jffi.boot.library.path";
     private static final String stubLibraryName
             = String.format("jffi-%d.%d", VERSION_MAJOR, VERSION_MINOR);
+
+    private static final String TMPDIR_ENV =
+            Platform.getPlatform().getOS() == Platform.OS.WINDOWS ?
+                    "TEMP" : "TMPDIR";
+    private static final String TMPDIR = System.getProperty("java.io.tmpdir");
+    private static final String TMPDIR_RECOMMENDATION =
+            "Set `" + TMPDIR_ENV + "` or Java property `java.io.tmpdir` to a read/write path that is not mounted \"noexec\".";
+    public static final String TMPDIR_WRITE_ERROR = "Unable to write jffi binary stub to `" + TMPDIR + "`.";
+    public static final String TMPDIR_EXEC_ERROR = "Unable to execute or load jffi binary stub from `" + TMPDIR + "`.";
 
     private static volatile OS os = null;
     private static volatile CPU cpu = null;
@@ -359,40 +369,57 @@ public class StubLoader {
         }
     } 
 
-    private static void loadFromJar(File tmpDirFile) throws IOException, UnsatisfiedLinkError {
+    private static void loadFromJar(File tmpDirFile) throws IOException, LinkageError {
         InputStream is = getStubLibraryStream();
-        FileOutputStream os = null;
-
         File dstFile;
+
+        // Install the stub library to a temporary location
         try {
+
+            // Create tempfile.
             dstFile = null == tmpDirFile ? File.createTempFile("jffi", "." + dlExtension()):
                     File.createTempFile("jffi", "." + dlExtension(), tmpDirFile);
-        } catch (IOException ex) {
-            throw new IOException("Failed to create temporary file: jffiXXX." + dlExtension());
-        }
-        try {
             dstFile.deleteOnExit();
-            os = new FileOutputStream(dstFile);
-            ReadableByteChannel srcChannel = Channels.newChannel(is);
 
-            for (long pos = 0; is.available() > 0; ) {
-                pos += os.getChannel().transferFrom(srcChannel, pos, Math.max(4096, is.available()));
-            }
+            // Write the library to the tempfile
+            FileOutputStream os = new FileOutputStream(dstFile);
+            try {
+                ReadableByteChannel srcChannel = Channels.newChannel(is);
 
-            os.close();
-            os = null;
-
-            System.load(dstFile.getAbsolutePath());
-            dstFile.delete();
-        } catch (IOException ex) {
-            throw new UnsatisfiedLinkError(ex.getMessage());
-
-        } finally {
-            if (os != null) {
+                for (long pos = 0; is.available() > 0; ) {
+                    pos += os.getChannel().transferFrom(srcChannel, pos, Math.max(4096, is.available()));
+                }
+            } finally {
                 os.close();
             }
+        } catch (IOException ioe) {
+            // If we get here it means we are unable to write the stub library to the system default temp location.
+            throw tempReadonlyError(ioe);
+        } finally {
             is.close();
         }
+
+        try {
+            System.load(dstFile.getAbsolutePath());
+            dstFile.delete();
+        } catch (UnsatisfiedLinkError ule) {
+            // If we get here it means the file wrote to temp ok but can't be loaded from there.
+            throw tempLoadError(ule);
+        }
+    }
+
+    private static IOException tempReadonlyError(IOException ioe) {
+        return new IOException(
+                TMPDIR_WRITE_ERROR + " " +
+                    TMPDIR_RECOMMENDATION,
+                ioe);
+    }
+
+    private static UnsatisfiedLinkError tempLoadError(UnsatisfiedLinkError ule) {
+        return new UnsatisfiedLinkError(
+                TMPDIR_EXEC_ERROR + " " +
+                        TMPDIR_RECOMMENDATION + "\n" +
+                        ule.getLocalizedMessage());
     }
     
     /**
