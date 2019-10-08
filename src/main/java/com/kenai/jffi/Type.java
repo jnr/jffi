@@ -248,9 +248,9 @@ public abstract class Type {
                 return typeInfo = new TypeInfo(handle, foreign.getTypeType(handle), foreign.getTypeSize(handle), foreign.getTypeAlign(handle));
 
             } catch (Throwable error) {
-                UnsatisfiedLinkError ule = new UnsatisfiedLinkError("could not get native definition for type: " + nativeType);
-                ule.initCause(error);
-                throw ule;
+                throw new UnsatisfiedLinkError(
+                        "could not get native definition for type `" + nativeType
+                        + "`, original error message follows: " + error.getLocalizedMessage());
             }
         }
 
