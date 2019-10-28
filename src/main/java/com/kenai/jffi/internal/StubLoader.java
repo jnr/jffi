@@ -134,6 +134,8 @@ public class StubLoader {
         ARM,
         /** AArch64 */
         AARCH64,
+        /** MIPS 64-bit little endian */
+        MIPS64EL,
         /** Unknown CPU */
         UNKNOWN;
 
