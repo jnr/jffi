@@ -165,32 +165,13 @@ endif
 ifeq ($(OS), darwin)
   PLATFORM = darwin
   ARCHES =
-  ifneq ($(findstring $(CPU), ppc powerpc),)
-    ARCHES += ppc
-  endif
   ifneq ($(findstring $(CPU), i386 x86_64),)
     ARCHES += i386 x86_64
   endif
 
-  ifneq ($(realpath $(wildcard /Xcode3/usr/bin/gcc)),)
-    XCODE=/Xcode3
-  else
-    XCODE=$(shell xcode-select -print-path)
-  endif
-  ifneq ($(realpath $(wildcard $(XCODE)/usr/bin/gcc-4.0)),)
-    CC = $(XCODE)/usr/bin/gcc-4.0
-  else
-    CC = $(XCODE)/usr/bin/gcc
-  endif
-  UNIVERSAL_SDK = $(firstword $(strip $(realpath $(XCODE)/SDKs/MacOSX10.4u.sdk) $(realpath $(XCODE)/SDKs/MacOSX10.5.sdk)))
-  ifneq ($(UNIVERSAL_SDK),)
-    MACSDK = $(UNIVERSAL_SDK)
-    ifeq ($(findstring ppc, $(ARCHES)),)
-      ARCHES += ppc
-    endif
-  else
-    MACSDK = $(firstword $(strip $(wildcard $(XCODE)/SDKs/MacOSX10.*.sdk)) $(strip $(wildcard $(XCODE)/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.*.sdk)))
-  endif
+  XCODE=$(shell xcode-select -print-path)
+  CC = $(XCODE)/usr/bin/gcc
+  MACSDK = $(firstword $(strip $(wildcard $(XCODE)/SDKs/MacOSX10.*.sdk)) $(strip $(wildcard $(XCODE)/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.*.sdk)))
 
   CFLAGS += -isysroot $(MACSDK) -DTARGET_RT_MAC_CFM=0
   CFLAGS += -I$(MACSDK)/System/Library/Frameworks/JavaVM.framework/Headers
@@ -313,7 +294,7 @@ build_ffi = \
 $(LIBFFI):
 	@mkdir -p $(@D)
 	@for arch in $(ARCHES); do $(call build_ffi,$$arch);done
-	# Assemble into a FAT (i386, x86_64, ppc) library
+	# Assemble into a FAT (i386, x86_64) library
 	@mkdir -p $(BUILD_DIR)/libffi/.libs
 	@env MACOSX_DEPLOYMENT_TARGET=10.4 /usr/bin/libtool -static -o $@ \
 	    $(foreach arch, $(ARCHES),$(BUILD_DIR)/libffi-darwin-$(arch)/.libs/libffi_convenience.a)
@@ -324,8 +305,6 @@ $(LIBFFI):
 		printf "#include \"libffi-darwin-i386/include/ffi.h\"\n"; \
 		printf "#elif defined(__x86_64__)\n"; \
 		printf "#include \"libffi-darwin-x86_64/include/ffi.h\"\n";\
-		printf "#elif defined(__ppc__)\n"; \
-		printf "#include \"libffi-darwin-ppc/include/ffi.h\"\n";\
 		printf "#endif\n";\
 	) > $(LIBFFI_BUILD_DIR)/include/ffi.h
 	@( \
@@ -333,8 +312,6 @@ $(LIBFFI):
 		printf "#include \"libffi-darwin-i386/include/ffitarget.h\"\n"; \
 		printf "#elif defined(__x86_64__)\n"; \
 		printf "#include \"libffi-darwin-x86_64/include/ffitarget.h\"\n";\
-		printf "#elif defined(__ppc__)\n"; \
-		printf "#include \"libffi-darwin-ppc/include/ffitarget.h\"\n";\
 		printf "#endif\n";\
 	) > $(LIBFFI_BUILD_DIR)/include/ffitarget.h
 else
