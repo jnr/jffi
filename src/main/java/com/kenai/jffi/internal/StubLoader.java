@@ -66,9 +66,17 @@ public class StubLoader {
 
     private static volatile Throwable failureCause = null;
     private static volatile boolean loaded = false;
+    private static final File jffiExtractDir;
 
-    
-    
+    static {
+        String extractDir = System.getProperty("jffi.extract.dir");
+        if (extractDir != null) {
+            jffiExtractDir = new File(extractDir);
+        } else {
+            jffiExtractDir = null;
+        }
+    }
+
     public static final boolean isLoaded() {
         return loaded;
     }
@@ -270,6 +278,17 @@ public class StubLoader {
             return;
         }
 
+        // try user-specified location only if present
+        if (jffiExtractDir != null) {
+            try {
+                loadFromJar(jffiExtractDir);
+                return;
+            } catch (Throwable t1) {
+                throw new UnsatisfiedLinkError("could not load jffi library from " + jffiExtractDir);
+            }
+        }
+
+        // try default tmp location with failover to current directory
         try {
             loadFromJar(null);
             return;
@@ -280,6 +299,8 @@ public class StubLoader {
                 errors.add(t1);
             }
         }
+
+        // aggregate error output and rethrow
         if (!errors.isEmpty()) {
             Collections.reverse(errors);
             CharArrayWriter caw = new CharArrayWriter();
