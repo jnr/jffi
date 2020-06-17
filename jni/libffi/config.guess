@@ -991,8 +991,13 @@ EOF
     m68*:Linux:*:*)
 	echo "$UNAME_MACHINE"-unknown-linux-"$LIBC"
 	exit ;;
-    mips:Linux:*:* | mips64:Linux:*:*)
+    mips:Linux:*:* | mips64:Linux:*:* | mips64*:Linux:*:*)
 	set_cc_for_build
+# If it's on loongnix, arch outputs "mips64", but on Kirin, arch outputs "mips64el"
+       if [[ ${UNAME_MACHINE} =~ "64el" ]]; then
+            UNAME_MACHINE=mips64
+       fi
+
 	IS_GLIBC=0
 	test x"${LIBC}" = xgnu && IS_GLIBC=1
 	sed 's/^	//' << EOF > "$dummy.c"
@@ -1025,7 +1030,7 @@ EOF
 	#endif
 	#endif
 
-	#if defined(__MIPSEL__) || defined(__MIPSEL) || defined(_MIPSEL) || defined(MIPSEL)
+	#if defined(__MIPSEL__) || defined(__MIPSEL) || defined(_MIPSEL) || defined(MIPSEL) || defined(__MIPS64)
 	MIPS_ENDIAN=el
 	#else
 	#if defined(__MIPSEB__) || defined(__MIPSEB) || defined(_MIPSEB) || defined(MIPSEB)
