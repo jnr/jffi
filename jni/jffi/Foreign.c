@@ -274,8 +274,12 @@ Java_com_kenai_jffi_Foreign_unregisterNatives(JNIEnv *env, jobject self, jclass 
 #elif defined(__ia64__) || defined(__ia64)
 # define CPU "ia64"
 
-#elif defined(__mips__) || defined(__mips)
-# define CPU "mips"
+#elif defined(__mips__) || defined(__mips) || defined(__mips64)
+# if defined (__mips64)
+#  define CPU "mips64el"
+# else
+#  define CPU "mips"
+# endif
 
 #elif defined(__s390__)
 # define CPU "s390"

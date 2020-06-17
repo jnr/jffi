@@ -200,6 +200,9 @@ public class StubLoader {
             return CPU.ARM;
         } else if (Util.equalsIgnoreCase("aarch64", archString, LOCALE)) {
             return CPU.AARCH64;
+        } else if (Util.equalsIgnoreCase("mips64", archString, LOCALE) || Util.equalsIgnoreCase("mips64el", archString, LOCALE)) {
+            return CPU.MIPS64EL;
+
         }
 
         // Try to find by lookup up in the CPU list
