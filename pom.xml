@@ -48,8 +48,8 @@
     <maven.test.skip>true</maven.test.skip>
     <maven.test.failure.ignore>true</maven.test.failure.ignore>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.source>1.6</maven.compiler.source>
-    <maven.compiler.target>1.6</maven.compiler.target>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
     <make.exe>make</make.exe>
   </properties>
 
@@ -89,7 +89,6 @@
         <configuration>
           <debug>true</debug>
           <showDeprecation>true</showDeprecation>
-          <target>1.6</target>
         </configuration>
       </plugin>
       <plugin>

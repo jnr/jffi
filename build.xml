@@ -297,11 +297,13 @@
   <target name="-generate-native-headers" depends="-init-vars,-generate-version,-compile-java">
     <mkdir dir="${build.native.dir}"/>
     <mkdir dir="${build.classes.dir}"/>
-    <javah classpath="${build.classes.dir}" destdir="${build.native.dir}" force="yes">
-      <class name="com.kenai.jffi.Foreign"/>
-      <class name="com.kenai.jffi.ObjectBuffer"/>
-      <class name="com.kenai.jffi.Version"/>
-    </javah>
+    <javac destdir="${build.native.dir}" nativeheaderdir="${build.native.dir}">
+      <src path="${src.dir}"/>
+      <src path="${build.dir}/java"/>
+      <include name="com/kenai/jffi/Foreign.java"/>
+      <include name="com/kenai/jffi/ObjectBuffer.java"/>
+      <include name="com/kenai/jffi/Version.java"/>
+    </javac>
     <!--
     <exec executable="javah" failonerror="true">
       <arg line="-d ${build.native.dir}"/>
