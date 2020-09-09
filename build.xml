@@ -35,6 +35,8 @@
         <os arch="s390x"/>
         <os arch="ppc64le"/>
         <os arch="aarch64"/>
+	<os arch="mips64"/>
+	<os arch="mips64el"/>
       </or>
     </condition>
     <condition property="run.jvm.model" value="-d32">
@@ -103,6 +105,18 @@
         <os arch="aarch64"/>
       </or>
     </condition>
+
+    <condition property="platform.cpu" value="mips64">
+      <or>
+        <os arch="mips64"/>
+      </or>
+    </condition>
+    <condition property="platform.cpu" value="mips64el">
+      <or>
+        <os arch="mips64el"/>
+      </or>
+    </condition>
+
     <condition property="platform.os" value="Windows">
       <os family="Windows"/>
     </condition>
