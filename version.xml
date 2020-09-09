@@ -8,10 +8,14 @@
         <mkdir dir="${build.dir}/java/com/kenai/jffi"/>
         <echo file="${build.dir}/java/com/kenai/jffi/Version.java" append="false">
             package com.kenai.jffi;
+            import java.lang.annotation.Native;
             public final class Version {
                 private Version() {}
+                @Native
                 public static final int MAJOR = ${jffi.version.major};
+                @Native
                 public static final int MINOR = ${jffi.version.minor};
+                @Native
                 public static final int MICRO = ${jffi.version.micro};
             }
         </echo>

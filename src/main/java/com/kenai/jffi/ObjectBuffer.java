@@ -31,55 +31,87 @@
  */
 
 package com.kenai.jffi;
+import java.lang.annotation.Native;
 
 /**
  * Holds objects the native code must handle - such as primitive arrays
  */
 final class ObjectBuffer {
     /** Copy the array contents to native memory before calling the function */
+    @Native
     public static final int IN = 0x1;
 
     /** After calling the function, reload the array contents from native memory */
+    @Native
     public static final int OUT = 0x2;
 
     /** Append a NUL byte to the array contents after copying to native memory */
+    @Native
     public static final int ZERO_TERMINATE = 0x4;
 
-    /** Pin the array memory and pass the JVM memory pointer directly to the function */
+    /**
+     * Pin the array memory and pass the JVM memory pointer directly to the function
+     */
+    @Native
     public static final int PINNED = 0x8;
 
     /** For OUT arrays, clear the temporary native memory area */
+    @Native
     public static final int CLEAR = 0x10;
 
     /*
-     * WARNING: The following flags cannot be altered without recompiling the native code 
+     * WARNING: The following flags cannot be altered without recompiling the native
+     * code
      */
+    @Native
     static final int INDEX_SHIFT = 16;
+    @Native
     static final int INDEX_MASK = 0x00ff0000;
+    @Native
     static final int TYPE_SHIFT = 24;
+    @Native
     static final int TYPE_MASK = 0xff << TYPE_SHIFT;
+    @Native
     static final int PRIM_MASK = 0x0f << TYPE_SHIFT;
+    @Native
     static final int FLAGS_SHIFT = 0;
+    @Native
     static final int FLAGS_MASK = 0xff;
 
+    @Native
     static final int ARRAY = 0x10 << TYPE_SHIFT;
+    @Native
     static final int BUFFER = 0x20 << TYPE_SHIFT;
+    @Native
     static final int JNI = 0x40 << TYPE_SHIFT;
-    
+
+    @Native
     static final int BYTE = 0x1 << TYPE_SHIFT;
+    @Native
     static final int SHORT = 0x2 << TYPE_SHIFT;
+    @Native
     static final int INT = 0x3 << TYPE_SHIFT;
+    @Native
     static final int LONG = 0x4 << TYPE_SHIFT;
+    @Native
     static final int FLOAT = 0x5 << TYPE_SHIFT;
+    @Native
     static final int DOUBLE = 0x6 << TYPE_SHIFT;
+    @Native
     static final int BOOLEAN = 0x7 << TYPE_SHIFT;
+    @Native
     static final int CHAR = 0x8 << TYPE_SHIFT;
 
-    /* NOTE: The JNI types can overlap the primitive type, since they are mutually exclusive */
+    /*
+     * NOTE: The JNI types can overlap the primitive type, since they are mutually
+     * exclusive
+     */
     /** The JNIEnv address */
+    @Native
     public static final int JNIENV = 0x1 << TYPE_SHIFT;
 
     /** The jobject handle */
+    @Native
     public static final int JNIOBJECT = 0x2 << TYPE_SHIFT;
 
     /** The objects stored in this buffer */
