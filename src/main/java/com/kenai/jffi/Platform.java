@@ -262,16 +262,23 @@ public abstract class Platform {
     private Platform(OS os) {
         this.os = os;
 
-        int version = 5;
+        int version = 8;
         try {
             String versionString = System.getProperty("java.version");
             if (versionString != null) {
-                String[] v = versionString.split("\\.");
-                version = Integer.valueOf(v[1]);
+                // stop at first non-decimal character
+                String v = versionString.split("[^0-9.]")[0];
+
+                // if x.y assume 1.version and take decimal part
+                int dot = v.indexOf('.');
+                if (dot != -1) {
+                    v = v.substring(dot + 1);
+                }
+                version = Integer.valueOf(v);
             }
         } catch (Exception ex) {
             // Assume version 5 or above.
-            version = 5;
+            version = 8;
         }
 
         javaVersionMajor = version;
