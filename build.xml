@@ -23,35 +23,7 @@
   <target name="build-native" depends="-init, -build-platform-jar, -assemble-final-jar"/>
 
   <target name="-pre-init">
-    <!-- d32/d64 options are not supported on Windows -->
-    <condition property="run.jvm.model" value="">
-      <os family="Windows"/>
-    </condition>
-    <condition property="run.jvm.model" value="-d64">
-      <or>
-        <os arch="amd64"/>
-        <os arch="x86_64"/>
-        <os arch="sparcv9"/>
-        <os arch="s390x"/>
-        <os arch="ppc64le"/>
-        <os arch="aarch64"/>
-	<os arch="mips64"/>
-	<os arch="mips64el"/>
-      </or>
-    </condition>
-    <condition property="run.jvm.model" value="-d32">
-      <or>
-        <os arch="i386"/>
-        <os arch="x86"/>
-        <os arch="powerpc"/>
-        <os arch="sparc"/>
-        <os arch="arm"/>
-      </or>
-    </condition>
-    <condition property="run.jvm.model" value="">
-      <not><isset property="run.jvm.model"/></not>
-    </condition>
-    <property name="run.jvmargs" value="${run.jvm.model} -Djffi.library.path=build/jni -Djffi.boot.library.path=build/jni"/>
+    <property name="run.jvmargs" value="-Djffi.library.path=build/jni -Djffi.boot.library.path=build/jni"/>
   </target>
 
   <target name="-init-vars">
@@ -190,7 +162,6 @@
   <target name="test" depends="compile,-compile-test">
     <mkdir dir="${build.test.dir}/results"/>
     <junit fork="${test.fork}" forkMode="${test.fork.mode}" printsummary="withOutAndErr" haltonfailure="true">
-      <jvmarg value="${run.jvm.model}"/>
       <env key="LC_ALL" value="C"/>
       <classpath>
         <pathelement location="${build.classes.dir}"/>
@@ -217,7 +188,6 @@
   <target name="runtest" description="Runs the test you specify on the command
     line with -Dtest=" depends="compile, -compile-test, ensure-test-name">
     <junit printsummary="withOutAndErr" fork="${test.fork}" forkMode="${test.fork.mode}">
-      <jvmarg value="${run.jvm.model}"/>
       <classpath>
         <pathelement location="${build.classes.dir}"/>
         <pathelement location="${build.test.dir}/classes"/>
