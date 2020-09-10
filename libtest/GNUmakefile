@@ -83,8 +83,14 @@ ifeq ($(OS), darwin)
   ifneq ($(findstring $(CPU), ppc powerpc),)
     ARCHES += ppc
   endif
-  ifneq ($(findstring $(CPU), i386 x86_64),)
-    ARCHES += i386 x86_64
+  ifneq ($(findstring $(CPU), i386),)
+    ARCHES += i386
+  endif
+  ifneq ($(findstring $(CPU), x86_64),)
+    ARCHES += x86_64
+  endif
+  ifneq ($(findstring $(CPU), arm64),)
+    ARCHES += arm64
   endif
 
   ifneq ($(realpath $(wildcard /Xcode3/usr/bin/gcc)),)
