@@ -48,36 +48,79 @@
     <maven.test.skip>true</maven.test.skip>
     <maven.test.failure.ignore>true</maven.test.failure.ignore>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.source>1.8</maven.compiler.source>
-    <maven.compiler.target>1.8</maven.compiler.target>
+    <maven.compiler.source>8</maven.compiler.source>
+    <maven.compiler.target>8</maven.compiler.target>
     <make.exe>make</make.exe>
   </properties>
 
   <profiles>
-      <profile>
-          <id>linux-profile</id>
-          <activation>
-              <os><name>linux</name></os>
-          </activation>
-      </profile>
-      <profile>
-          <id>freebsd-profile</id>
-          <activation>
-              <os><name>freebsd</name></os>
-          </activation>
-          <properties>
-              <make.exe>gmake</make.exe>
-          </properties>
-      </profile>
-      <profile>
-        <id>dragonfly-profile</id>
-        <activation>
-          <os><name>dragonflybsd</name></os>
-        </activation>
-        <properties>
-          <make.exe>gmake</make.exe>
-        </properties>
-      </profile>
+    <profile>
+      <id>linux-profile</id>
+      <activation>
+        <os><name>linux</name></os>
+      </activation>
+    </profile>
+    <profile>
+      <id>freebsd-profile</id>
+      <activation>
+        <os><name>freebsd</name></os>
+      </activation>
+      <properties>
+        <make.exe>gmake</make.exe>
+      </properties>
+    </profile>
+    <profile>
+      <id>dragonfly-profile</id>
+      <activation>
+        <os><name>dragonflybsd</name></os>
+      </activation>
+      <properties>
+        <make.exe>gmake</make.exe>
+      </properties>
+    </profile>
+    <profile>
+      <id>java9</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <executions>
+              <execution>
+                <!-- Compile UnsafeMemoryIO without release flag, so it can access Unsafe -->
+                <id>default-compile</id>
+                <phase>compile</phase>
+                <configuration>
+                  <includes>
+                    <include>com/kenai/jffi/UnsafeMemoryIO.java</include>
+                  </includes>
+                </configuration>
+              </execution>
+              <execution>
+                <id>java9-compile</id>
+                <phase>compile</phase>
+                <goals><goal>compile</goal></goals>
+                <configuration>
+                  <!-- Compile the rest with release flag to ensure compatibility with 8 -->
+                  <!-- Use -release compiler option rather than source/target if 9+ -->
+                  <release>${maven.compiler.target}</release>
+                  <!-- Exclude unsafe-using class when compiling with release flag -->
+                  <includes>
+                    <include>**/*.java</include>
+                  </includes>
+                  <excludes>
+                    <exclude>com/kenai/jffi/UnsafeMemoryIO.java</exclude>
+                  </excludes>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+      <activation>
+        <jdk>[9,)</jdk>
+      </activation>
+    </profile>
   </profiles>
 
   <build>
@@ -85,7 +128,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.1</version>
+        <version>3.8.1</version>
         <configuration>
           <debug>true</debug>
           <showDeprecation>true</showDeprecation>
