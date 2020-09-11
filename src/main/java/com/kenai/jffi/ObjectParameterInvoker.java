@@ -24,7 +24,7 @@ abstract public class ObjectParameterInvoker {
     /**
      * Invokes a function with one numeric argument (which may be a pointer), and returns a numeric value.
      *
-     * @param function The <tt>Function</tt> to invoke.
+     * @param function The <code>Function</code> to invoke.
      * @param n1 numeric argument.
      * @param o1 array or buffer, to be passed as a pointer for the first numeric parameter.
      * @param o1off offset from the start of the array or buffer.
@@ -38,7 +38,7 @@ abstract public class ObjectParameterInvoker {
     /**
      * Invokes a function with two numeric arguments, and returns a numeric value.
      *
-     * @param function The <tt>Function</tt> to invoke.
+     * @param function The <code>Function</code> to invoke.
      * @param n1 first numeric argument.
      * @param n2 The second numeric argument.
      * @param o1 An Object (array or buffer), to be passed as a pointer.
@@ -53,7 +53,7 @@ abstract public class ObjectParameterInvoker {
     /**
      * Invokes a function with two numeric arguments, and returns a numeric value.
      *
-     * @param function The <tt>Function</tt> to invoke.
+     * @param function The <code>Function</code> to invoke.
      * @param n1 first numeric argument.
      * @param n2 The second numeric argument.
      * @param o1 An Object (array or buffer), to be passed as a pointer.
@@ -73,7 +73,7 @@ abstract public class ObjectParameterInvoker {
     /**
      * Invokes a function with two numeric arguments, and returns a numeric value.
      *
-     * @param function The <tt>Function</tt> to invoke.
+     * @param function The <code>Function</code> to invoke.
      * @param n1 first numeric argument.
      * @param n2 The second numeric argument.
      * @param n3 The second numeric argument.

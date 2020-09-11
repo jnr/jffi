@@ -48,9 +48,9 @@ public class CallContextCache {
     }
 
     /**
-     * Gets the global instance of the <tt>CallContextCache</tt>
+     * Gets the global instance of the <code>CallContextCache</code>
      *
-     * @return An instance of a <tt>CallContextCache</tt>
+     * @return An instance of a <code>CallContextCache</code>
      */
     public static CallContextCache getInstance() {
         return SingletonHolder.INSTANCE;

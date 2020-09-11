@@ -44,13 +44,13 @@ public final class LastError {
         static final LastError INSTANCE = new LastError();
     }
 
-    /** Creates a new <tt>LastError</tt> instance */
+    /** Creates a new <code>LastError</code> instance */
     private LastError() {}
 
     /**
-     * Gets the singleton instance of the <tt>LastError</tt> object.
+     * Gets the singleton instance of the <code>LastError</code> object.
      *
-     * @return An instance of <tt>LastError</tt>
+     * @return An instance of <code>LastError</code>
      */
     public static final LastError getInstance() {
         return SingletonHolder.INSTANCE;

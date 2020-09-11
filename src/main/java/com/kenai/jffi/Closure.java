@@ -189,7 +189,7 @@ public interface Closure {
         long getAddress();
 
         /**
-         * Sets whether the closure memory should be released when the <tt>Handle</tt> is
+         * Sets whether the closure memory should be released when the <code>Handle</code> is
          * garbage collected or not.
          *
          * @param autorelease If true, the closure memory is automatically managed,
@@ -201,7 +201,7 @@ public interface Closure {
          * Releases the closure memory back to the operating system.
          *
          * Although the closure trampoline memory will normally be released when
-         * the <tt>Handle</tt> is garbage collected, this may not happen for some
+         * the <code>Handle</code> is garbage collected, this may not happen for some
          * time, and is non-deterministic.  This allows explicit control over
          * memory reclamation.
          */

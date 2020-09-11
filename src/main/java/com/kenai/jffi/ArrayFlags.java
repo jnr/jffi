@@ -59,7 +59,7 @@ public final class ArrayFlags {
      * Tests if the flags indicate data should be copied from native memory.
      *
      * @param flags The array flags.  Any combination of IN | OUT | PINNED | NULTERMINATE.
-     * @return <tt>true</tt> If array data should be copied from native memory.
+     * @return <code>true</code> If array data should be copied from native memory.
      */
     public static final boolean isOut(int flags) {
         return (flags & (OUT | IN)) != IN;
@@ -69,7 +69,7 @@ public final class ArrayFlags {
      * Tests if the flags indicate data should be copied to native memory.
      *
      * @param flags The array flags.  Any combination of IN | OUT | PINNED | NULTERMINATE.
-     * @return <tt>true</tt> If array data should be copied to native memory.
+     * @return <code>true</code> If array data should be copied to native memory.
      */
     public static final boolean isIn(int flags) {
         return (flags & (OUT | IN)) != OUT;

@@ -3,7 +3,7 @@ package com.kenai.jffi;
 import java.lang.reflect.Field;
 
 /**
- * An implementation of <tt>MemoryIO</tt> using sun.misc.Unsafe
+ * An implementation of <code>MemoryIO</code> using sun.misc.Unsafe
  */
 public abstract class UnsafeMemoryIO extends MemoryIO {
     protected static sun.misc.Unsafe unsafe = sun.misc.Unsafe.class.cast(getUnsafe());
@@ -125,7 +125,7 @@ public abstract class UnsafeMemoryIO extends MemoryIO {
     }
 
     /**
-     * A 32 bit optimized implementation of <tt>MemoryIO</tt> using sun.misc.Unsafe
+     * A 32 bit optimized implementation of <code>MemoryIO</code> using sun.misc.Unsafe
      */
     static class UnsafeMemoryIO32 extends UnsafeMemoryIO {
         public final long getAddress(long address) {
@@ -137,7 +137,7 @@ public abstract class UnsafeMemoryIO extends MemoryIO {
     }
 
     /**
-     * A 64 bit optimized implementation of <tt>MemoryIO</tt> using sun.misc.Unsafe
+     * A 64 bit optimized implementation of <code>MemoryIO</code> using sun.misc.Unsafe
      */
     static class UnsafeMemoryIO64 extends UnsafeMemoryIO {
         public final long getAddress(long address) {

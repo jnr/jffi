@@ -154,7 +154,7 @@ public class StubLoader {
     /**
      * Determines the operating system jffi is running on
      *
-     * @return An member of the <tt>OS</tt> enum.
+     * @return An member of the <code>OS</code> enum.
      */
     private static OS determineOS() {
         String osName = System.getProperty("os.name").split(" ")[0];
@@ -185,7 +185,7 @@ public class StubLoader {
      * This normalizes all the variations that are equivalent (e.g. i386, x86, i86pc)
      * into a common cpu type.
      *
-     * @return A member of the <tt>CPU</tt> enum.
+     * @return A member of the <code>CPU</code> enum.
      */
     private static CPU determineCPU() {
         String archString = System.getProperty("os.arch", "unknown");
@@ -234,14 +234,14 @@ public class StubLoader {
     /**
      * Gets the name of the stub library.
      *
-     * @return The name of the stub library as a <tt>String</tt>
+     * @return The name of the stub library as a <code>String</code>
      */
     private static String getStubLibraryName() {
         return stubLibraryName;
     }
 
     /**
-     * Gets the name of this <tt>Platform</tt>.
+     * Gets the name of this <code>Platform</code>.
      *
      * @return The name of this platform.
      */
@@ -449,10 +449,10 @@ public class StubLoader {
     }
     
     /**
-     * Gets an <tt>InputStream</tt> representing the stub library image stored in
+     * Gets an <code>InputStream</code> representing the stub library image stored in
      * the jar file.
      *
-     * @return A new <tt>InputStream</tt>
+     * @return A new <code>InputStream</code>
      */
     private static InputStream getStubLibraryStream() {
         String stubPath = getStubLibraryPath();

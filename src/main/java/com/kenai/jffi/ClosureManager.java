@@ -58,9 +58,9 @@ public final class ClosureManager {
     }
 
     /**
-     * Gets the global instance of the <tt>ClosureManager</tt>
+     * Gets the global instance of the <code>ClosureManager</code>
      *
-     * @return An instance of a <tt>ClosureManager</tt>
+     * @return An instance of a <code>ClosureManager</code>
      */
     public static ClosureManager getInstance() {
         return SingletonHolder.INSTANCE;

@@ -45,7 +45,7 @@ public abstract class MemoryIO {
     /** The address mask used to truncate 32bit addresses contained in long values */
     static final long ADDRESS_MASK = Platform.getPlatform().addressMask();
 
-    /** Holds a single instance of <tt>MemoryIO</tt> */
+    /** Holds a single instance of <code>MemoryIO</code> */
     private static final class SingletonHolder {
         private static final MemoryIO INSTANCE = newMemoryIO();
     }
@@ -55,9 +55,9 @@ public abstract class MemoryIO {
     }
 
     /**
-     * Gets an instance of <tt>MemoryIO</tt> that can be used to access native memory.
+     * Gets an instance of <code>MemoryIO</code> that can be used to access native memory.
      *
-     * @return A <tt>MemoryIO</tt> instance.
+     * @return A <code>MemoryIO</code> instance.
      */
     public static MemoryIO getInstance() {
         return SingletonHolder.INSTANCE;
@@ -71,9 +71,9 @@ public abstract class MemoryIO {
     MemoryIO() {}
 
     /**
-     * Creates a new instance of <tt>MemoryIO</tt> optimized for the current platform.
+     * Creates a new instance of <code>MemoryIO</code> optimized for the current platform.
      *
-     * @return An instance of <tt>MemoryIO</tt>
+     * @return An instance of <code>MemoryIO</code>
      */
     private static MemoryIO newMemoryIO() {
         try {
@@ -105,23 +105,23 @@ public abstract class MemoryIO {
     }
 
     /**
-     * Creates a new JNI implementation of <tt>MemoryIO</tt> optimized for 32 bit platforms
+     * Creates a new JNI implementation of <code>MemoryIO</code> optimized for 32 bit platforms
      *
-     * @return An instance of <tt>MemoryIO</tt>
+     * @return An instance of <code>MemoryIO</code>
      */
     private static MemoryIO newNativeImpl32() { return new NativeImpl32();}
 
     /**
-     * Creates a new JNI implementation of <tt>MemoryIO</tt> optimized for 64 bit platforms
+     * Creates a new JNI implementation of <code>MemoryIO</code> optimized for 64 bit platforms
      *
-     * @return An instance of <tt>MemoryIO</tt>
+     * @return An instance of <code>MemoryIO</code>
      */
     private static MemoryIO newNativeImpl64() { return new NativeImpl64();}
 
     /**
-     * Creates a new sun.misc.Unsafe implementation of <tt>MemoryIO</tt>
+     * Creates a new sun.misc.Unsafe implementation of <code>MemoryIO</code>
      *
-     * @return An instance of <tt>MemoryIO</tt>
+     * @return An instance of <code>MemoryIO</code>
      */
     private static MemoryIO newUnsafeImpl() {
         return Platform.getPlatform().addressSize() == 32
@@ -129,16 +129,16 @@ public abstract class MemoryIO {
     }
 
     /**
-     * Creates a new sun.misc.Unsafe implementation of <tt>MemoryIO</tt> optimized for 32 bit platforms
+     * Creates a new sun.misc.Unsafe implementation of <code>MemoryIO</code> optimized for 32 bit platforms
      *
-     * @return An instance of <tt>MemoryIO</tt>
+     * @return An instance of <code>MemoryIO</code>
      */
     private static MemoryIO newUnsafeImpl32() { return new UnsafeMemoryIO.UnsafeMemoryIO32(); }
 
     /**
-     * Creates a new sun.misc.Unsafe implementation of <tt>MemoryIO</tt> optimized for 64 bit platforms
+     * Creates a new sun.misc.Unsafe implementation of <code>MemoryIO</code> optimized for 64 bit platforms
      *
-     * @return An instance of <tt>MemoryIO</tt>
+     * @return An instance of <code>MemoryIO</code>
      */
     private static MemoryIO newUnsafeImpl64() { return new UnsafeMemoryIO.UnsafeMemoryIO64(); }
 
@@ -700,7 +700,7 @@ public abstract class MemoryIO {
     }
 
     /**
-     * A 32 bit optimized implementation of <tt>MemoryIO</tt> using JNI.
+     * A 32 bit optimized implementation of <code>MemoryIO</code> using JNI.
      */
     private static final class NativeImpl32 extends NativeImpl {
         public final long getAddress(long address) {
@@ -828,7 +828,7 @@ public abstract class MemoryIO {
     }
 
     /**
-     * A 64 bit optimized implementation of <tt>MemoryIO</tt> using JNI.
+     * A 64 bit optimized implementation of <code>MemoryIO</code> using JNI.
      */
     private static final class NativeImpl64 extends NativeImpl {
         public final long getAddress(long address) {

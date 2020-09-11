@@ -476,7 +476,7 @@ final class Foreign {
      * Gets the address of the ffi_type structure for the builtin type
      *
      * @param type The FFI type enum value
-     * @return The address of the ffi_type struct for this type, or <tt>null</tt>
+     * @return The address of the ffi_type struct for this type, or <code>null</code>
      */
     final native long lookupBuiltinType(int type);
 
@@ -1403,7 +1403,7 @@ final class Foreign {
     /**
      * Copies a zero (nul) terminated by array from native memory.
      *
-     * This method will search for a zero byte, starting from <tt>address</tt>
+     * This method will search for a zero byte, starting from <code>address</code>
      * and stop once a zero byte is encountered.  The returned byte array does not
      * contain the terminating zero byte.
      *
@@ -1415,7 +1415,7 @@ final class Foreign {
     /**
      * Copies a zero (nul) terminated by array from native memory.
      *
-     * This method will search for a zero byte, starting from <tt>address</tt>
+     * This method will search for a zero byte, starting from <code>address</code>
      * and stop once a zero byte is encountered.  The returned byte array does not
      * contain the terminating zero byte.
      *
@@ -1747,7 +1747,7 @@ final class Foreign {
     /**
      * Copies a zero Checked(nul) terminated by array from native memory.
      *
-     * This method will search for a zero byte, starting from <tt>address</tt>
+     * This method will search for a zero byte, starting from <code>address</code>
      * and stop once a zero byte is encountered.  The returned byte array does not
      * contain the terminating zero byte.
      *
@@ -1759,7 +1759,7 @@ final class Foreign {
     /**
      * Copies a zero Checked(nul) terminated by array from native memory.
      *
-     * This method will search for a zero byte, starting from <tt>address</tt>
+     * This method will search for a zero byte, starting from <code>address</code>
      * and stop once a zero byte is encountered.  The returned byte array does not
      * contain the terminating zero byte.
      *

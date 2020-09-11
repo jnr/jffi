@@ -48,7 +48,7 @@ public final class HeapInvocationBuffer extends InvocationBuffer {
     private int paramIndex = 0;
 
     /**
-     * Creates a new instance of <tt>HeapInvocationBuffer</tt>.
+     * Creates a new instance of <code>HeapInvocationBuffer</code>.
      *
      * @param function The function that this buffer is going to be used with.
      */
@@ -58,7 +58,7 @@ public final class HeapInvocationBuffer extends InvocationBuffer {
     }
 
     /**
-     * Creates a new instance of <tt>HeapInvocationBuffer</tt>.
+     * Creates a new instance of <code>HeapInvocationBuffer</code>.
      *
      * @param callContext The {@link CallContext} describing how the function should be invoked
      */
@@ -68,7 +68,7 @@ public final class HeapInvocationBuffer extends InvocationBuffer {
     }
 
     /**
-     * Creates a new instance of <tt>HeapInvocationBuffer</tt>.
+     * Creates a new instance of <code>HeapInvocationBuffer</code>.
      *
      * @param context The {@link CallContext} describing how the function should be invoked
      */
@@ -80,7 +80,7 @@ public final class HeapInvocationBuffer extends InvocationBuffer {
 
 
     /**
-     * Gets the backing array of this <tt>InvocationBuffer</tt>
+     * Gets the backing array of this <code>InvocationBuffer</code>
      *
      * @return The backing array for this buffer.
      */
@@ -91,7 +91,7 @@ public final class HeapInvocationBuffer extends InvocationBuffer {
     /**
      * Gets the object buffer used to store java heap array parameters
      *
-     * @return An <tt>ObjectBuffer</tt>
+     * @return An <code>ObjectBuffer</code>
      */
     ObjectBuffer objectBuffer() {
         return objectBuffer;
@@ -459,7 +459,7 @@ public final class HeapInvocationBuffer extends InvocationBuffer {
     }
 
     /**
-     * Little endian, 32 bit implementation of <tt>ArrayIO</tt>
+     * Little endian, 32 bit implementation of <code>ArrayIO</code>
      */
     private static final class LE32ArrayIO extends LittleEndianArrayIO {
         static final ArrayIO INSTANCE = new LE32ArrayIO();
@@ -472,7 +472,7 @@ public final class HeapInvocationBuffer extends InvocationBuffer {
     }
 
     /**
-     * Little endian, 64 bit implementation of <tt>ArrayIO</tt>
+     * Little endian, 64 bit implementation of <code>ArrayIO</code>
      */
     private static final class LE64ArrayIO extends LittleEndianArrayIO {
         static final ArrayIO INSTANCE = new LE64ArrayIO();

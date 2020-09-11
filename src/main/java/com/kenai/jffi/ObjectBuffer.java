@@ -147,7 +147,7 @@ final class ObjectBuffer {
 
 
     /**
-     * Gets the number of objects stored in this <tt>ObjectBuffer</tt>.
+     * Gets the number of objects stored in this <code>ObjectBuffer</code>.
      *
      * @return the number of objects already stored.
      */

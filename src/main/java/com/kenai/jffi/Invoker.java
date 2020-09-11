@@ -48,15 +48,15 @@ public abstract class Invoker {
     }
 
     /**
-     * Gets the <tt>Invoker</tt> singleton.
+     * Gets the <code>Invoker</code> singleton.
      *
-     * @return An instance of <tt>Invoker</tt>.
+     * @return An instance of <code>Invoker</code>.
      */
     public static Invoker getInstance() {
         return SingletonHolder.INSTANCE;
     }
 
-    /** Creates a new <tt>Invoker</tt> */
+    /** Creates a new <code>Invoker</code> */
     private Invoker() {
         this(Foreign.getInstance(), ObjectParameterInvoker.getInstance());
     }
@@ -204,7 +204,7 @@ public abstract class Invoker {
     /**
      * Invokes a function with no arguments, and returns a 32 bit integer.
      *
-     * @param function The <tt>Function</tt> to invoke.
+     * @param function The <code>Function</code> to invoke.
      * @return A 32 bit integer value.
      */
     @Deprecated
@@ -217,7 +217,7 @@ public abstract class Invoker {
      *
      * This method does not save the errno value.
      *
-     * @param function The <tt>Function</tt> to invoke.
+     * @param function The <code>Function</code> to invoke.
      * @return A 32 bit integer value.
      */
     @Deprecated
@@ -228,7 +228,7 @@ public abstract class Invoker {
     /**
      * Invokes a function with one integer argument, and returns a 32 bit integer.
      *
-     * @param function The <tt>Function</tt> to invoke.
+     * @param function The <code>Function</code> to invoke.
      * @param arg1 A 32 bit integer argument.
      * @return A 32 bit integer value.
      */
@@ -242,7 +242,7 @@ public abstract class Invoker {
      *
      * This method does not save the errno value.
      *
-     * @param function The <tt>Function</tt> to invoke.
+     * @param function The <code>Function</code> to invoke.
      * @param arg1 A 32 bit integer argument.
      * @return A 32 bit integer value.
      */
@@ -254,7 +254,7 @@ public abstract class Invoker {
     /**
      * Invokes a function with two integer arguments, and returns a 32 bit integer.
      *
-     * @param function The <tt>Function</tt> to invoke.
+     * @param function The <code>Function</code> to invoke.
      * @param arg1 The first 32 bit integer argument.
      * @param arg2 The second 32 bit integer argument.
      * @return A 32 bit integer value.
@@ -269,7 +269,7 @@ public abstract class Invoker {
      *
      * This method does not save the errno value.
      *
-     * @param function The <tt>Function</tt> to invoke.
+     * @param function The <code>Function</code> to invoke.
      * @param arg1 The first 32 bit integer argument.
      * @param arg2 The second 32 bit integer argument.
      * @return A 32 bit integer value.
@@ -282,7 +282,7 @@ public abstract class Invoker {
     /**
      * Invokes a function with three integer arguments, and returns a 32 bit integer.
      *
-     * @param function The <tt>Function</tt> to invoke.
+     * @param function The <code>Function</code> to invoke.
      * @param arg1 The first 32 bit integer argument.
      * @param arg2 The second 32 bit integer argument.
      * @param arg3 The third 32 bit integer argument.
@@ -298,7 +298,7 @@ public abstract class Invoker {
      *
      * This method does not save the errno value.
      * 
-     * @param function The <tt>Function</tt> to invoke.
+     * @param function The <code>Function</code> to invoke.
      * @param arg1 The first 32 bit integer argument.
      * @param arg2 The second 32 bit integer argument.
      * @param arg3 The third 32 bit integer argument.
@@ -312,7 +312,7 @@ public abstract class Invoker {
     /**
      * Invokes a function with four integer arguments, and returns a 32 bit integer.
      *
-     * @param function The <tt>Function</tt> to invoke.
+     * @param function The <code>Function</code> to invoke.
      * @param arg1 The first 32 bit integer argument.
      * @param arg2 The second 32 bit integer argument.
      * @param arg3 The third 32 bit integer argument.
@@ -327,7 +327,7 @@ public abstract class Invoker {
     /**
      * Invokes a function with five integer arguments, and returns a 32 bit integer.
      *
-     * @param function The <tt>Function</tt> to invoke.
+     * @param function The <code>Function</code> to invoke.
      * @param arg1 The first 32 bit integer argument.
      * @param arg2 The second 32 bit integer argument.
      * @param arg3 The third 32 bit integer argument.
@@ -343,7 +343,7 @@ public abstract class Invoker {
     /**
      * Invokes a function with six integer arguments, and returns a 32 bit integer.
      *
-     * @param function The <tt>Function</tt> to invoke.
+     * @param function The <code>Function</code> to invoke.
      * @param arg1 The first 32 bit integer argument.
      * @param arg2 The second 32 bit integer argument.
      * @param arg3 The third 32 bit integer argument.
@@ -487,7 +487,7 @@ public abstract class Invoker {
     /**
      * Invokes a function with no arguments, and returns a 64 bit integer.
      *
-     * @param function The <tt>Function</tt> to invoke.
+     * @param function The <code>Function</code> to invoke.
      * @return A 64 bit integer value.
      */
     public final long invokeVrL(Function function) {
@@ -497,7 +497,7 @@ public abstract class Invoker {
     /**
      * Invokes a function with one 64 bit integer argument, and returns a 64 bit integer.
      *
-     * @param function The <tt>Function</tt> to invoke.
+     * @param function The <code>Function</code> to invoke.
      * @param arg1 The 64 bit integer argument.
      * @return A 64 bit integer value.
      */
@@ -508,7 +508,7 @@ public abstract class Invoker {
     /**
      * Invokes a function with two 64 bit integer arguments, and returns a 64 bit integer.
      *
-     * @param function The <tt>Function</tt> to invoke.
+     * @param function The <code>Function</code> to invoke.
      * @param arg1 The first 64 bit integer argument.
      * @param arg2 The second 64 bit integer argument.
      * @return A 64 bit integer value.
@@ -520,7 +520,7 @@ public abstract class Invoker {
     /**
      * Invokes a function with three 64 bit integer arguments, and returns a 64 bit integer.
      *
-     * @param function The <tt>Function</tt> to invoke.
+     * @param function The <code>Function</code> to invoke.
      * @param arg1 The first 64 bit integer argument.
      * @param arg2 The second 64 bit integer argument.
      * @param arg3 The third 64 bit integer argument.
@@ -533,7 +533,7 @@ public abstract class Invoker {
     /**
      * Invokes a function with four 64 bit integer arguments, and returns a 64 bit integer.
      *
-     * @param function The <tt>Function</tt> to invoke.
+     * @param function The <code>Function</code> to invoke.
      * @param arg1 The first 64 bit integer argument.
      * @param arg2 The second 64 bit integer argument.
      * @param arg3 The third 64 bit integer argument.
@@ -547,7 +547,7 @@ public abstract class Invoker {
     /**
      * Invokes a function with five 64 bit integer arguments, and returns a 64 bit integer.
      *
-     * @param function The <tt>Function</tt> to invoke.
+     * @param function The <code>Function</code> to invoke.
      * @param arg1 The first 64 bit integer argument.
      * @param arg2 The second 64 bit integer argument.
      * @param arg3 The third 64 bit integer argument.
@@ -562,7 +562,7 @@ public abstract class Invoker {
     /**
      * Invokes a function with six 64 bit integer arguments, and returns a 64 bit integer.
      *
-     * @param function The <tt>Function</tt> to invoke.
+     * @param function The <code>Function</code> to invoke.
      * @param arg1 The first 64 bit integer argument.
      * @param arg2 The second 64 bit integer argument.
      * @param arg3 The third 64 bit integer argument.
@@ -676,7 +676,7 @@ public abstract class Invoker {
     /**
      * Invokes a function with no arguments, and returns a numeric value.
      *
-     * @param function The <tt>Function</tt> to invoke.
+     * @param function The <code>Function</code> to invoke.
      * @return A numeric value.
      */
     public final long invokeVrN(Function function) {
@@ -686,7 +686,7 @@ public abstract class Invoker {
     /**
      * Invokes a function with one numeric argument, and returns a numeric value.
      *
-     * @param function The <tt>Function</tt> to invoke.
+     * @param function The <code>Function</code> to invoke.
      * @param arg1 The numeric argument.
      * @return A numeric value.
      */
@@ -697,7 +697,7 @@ public abstract class Invoker {
     /**
      * Invokes a function with two numeric arguments, and returns a numeric value.
      *
-     * @param function The <tt>Function</tt> to invoke.
+     * @param function The <code>Function</code> to invoke.
      * @param arg1 The first numeric argument.
      * @param arg2 The second numeric argument.
      * @return A numeric value.
@@ -709,7 +709,7 @@ public abstract class Invoker {
     /**
      * Invokes a function with three numeric arguments, and returns a numeric value.
      *
-     * @param function The <tt>Function</tt> to invoke.
+     * @param function The <code>Function</code> to invoke.
      * @param arg1 The first numeric argument.
      * @param arg2 The second numeric argument.
      * @param arg3 The third numeric argument.
@@ -722,7 +722,7 @@ public abstract class Invoker {
     /**
      * Invokes a function with four numeric arguments, and returns a numeric value.
      *
-     * @param function The <tt>Function</tt> to invoke.
+     * @param function The <code>Function</code> to invoke.
      * @param arg1 The first numeric argument.
      * @param arg2 The second numeric argument.
      * @param arg3 The third numeric argument.
@@ -736,7 +736,7 @@ public abstract class Invoker {
     /**
      * Invokes a function with five numeric arguments, and returns a numeric value.
      *
-     * @param function The <tt>Function</tt> to invoke.
+     * @param function The <code>Function</code> to invoke.
      * @param arg1 The first numeric argument.
      * @param arg2 The second numeric argument.
      * @param arg3 The third numeric argument.
@@ -751,7 +751,7 @@ public abstract class Invoker {
     /**
      * Invokes a function with six numeric arguments, and returns a numeric value.
      *
-     * @param function The <tt>Function</tt> to invoke.
+     * @param function The <code>Function</code> to invoke.
      * @param arg1 The first numeric argument.
      * @param arg2 The second numeric argument.
      * @param arg3 The third numeric argument.
@@ -767,7 +767,7 @@ public abstract class Invoker {
     /**
      * Invokes a function with two numeric arguments, and returns a numeric value.
      *
-     * @param function The <tt>Function</tt> to invoke.
+     * @param function The <code>Function</code> to invoke.
      * @param n1 first numeric argument.
      * @param n2 second numeric argument.
      * @param o1 array or buffer, to be passed as a pointer for the first numeric parameter.
@@ -788,7 +788,7 @@ public abstract class Invoker {
     /**
      * Invokes a function with two numeric arguments, and returns a numeric value.
      *
-     * @param function The <tt>Function</tt> to invoke.
+     * @param function The <code>Function</code> to invoke.
      * @param n1 first numeric argument.
      * @param n2 second numeric argument.
      * @param o1 array or buffer, to be passed as a pointer for the first numeric parameter.
@@ -811,7 +811,7 @@ public abstract class Invoker {
     /**
      * Invokes a function with two numeric arguments, and returns a numeric value.
      *
-     * @param function The <tt>Function</tt> to invoke.
+     * @param function The <code>Function</code> to invoke.
      */
     @Deprecated
     public final long invokeNNNO1rN(Function function, 
@@ -826,7 +826,7 @@ public abstract class Invoker {
     /**
      * Invokes a function with two numeric arguments, and returns a numeric value.
      *
-     * @param function The <tt>Function</tt> to invoke.
+     * @param function The <code>Function</code> to invoke.
      */
     @Deprecated
     public final long invokeNNNO2rN(Function function, 
@@ -1900,7 +1900,7 @@ public abstract class Invoker {
     /**
      * Invokes a function and returns a native memory address.
      *
-     * @param function The <tt>Function</tt> to invoke.
+     * @param function The <code>Function</code> to invoke.
      * @param buffer A buffer containing the arguments to the function.
      * @return A native memory address.
      */
@@ -1921,7 +1921,7 @@ public abstract class Invoker {
     /**
      * Invokes a function and returns a 32 bit integer value.
      *
-     * @param function The <tt>Function</tt> to invoke.
+     * @param function The <code>Function</code> to invoke.
      * @param buffer A buffer containing the arguments to the function.
      * @return A native memory address.
      */
@@ -1947,7 +1947,7 @@ public abstract class Invoker {
     /**
      * Invokes a function and returns a 64 bit integer value.
      *
-     * @param function The <tt>Function</tt> to invoke.
+     * @param function The <code>Function</code> to invoke.
      * @param buffer A buffer containing the arguments to the function.
      * @return A native memory address.
      */
@@ -1973,7 +1973,7 @@ public abstract class Invoker {
     /**
      * Invokes a function and returns a 32 bit floating point value.
      *
-     * @param function The <tt>Function</tt> to invoke.
+     * @param function The <code>Function</code> to invoke.
      * @param buffer A buffer containing the arguments to the function.
      * @return A native memory address.
      */
@@ -2000,7 +2000,7 @@ public abstract class Invoker {
     /**
      * Invokes a function and returns a 64 bit floating point value.
      *
-     * @param function The <tt>Function</tt> to invoke.
+     * @param function The <code>Function</code> to invoke.
      * @param buffer A buffer containing the arguments to the function.
      * @return A native memory address.
      */
@@ -2026,7 +2026,7 @@ public abstract class Invoker {
     /**
      * Invokes a function and returns a 64 bit floating point value.
      *
-     * @param function The <tt>Function</tt> to invoke.
+     * @param function The <code>Function</code> to invoke.
      * @param buffer A buffer containing the arguments to the function.
      * @return A native memory address.
      */
@@ -2037,7 +2037,7 @@ public abstract class Invoker {
     /**
      * Invokes a function and returns a 64 bit floating point value.
      *
-     * @param function The <tt>Function</tt> to invoke.
+     * @param function The <code>Function</code> to invoke.
      * @param buffer A buffer containing the arguments to the function.
      * @return A native memory address.
      */
@@ -2049,7 +2049,7 @@ public abstract class Invoker {
     /**
      * Invokes a function that returns a C struct by value.
      *
-     * @param function The <tt>Function</tt> to invoke.
+     * @param function The <code>Function</code> to invoke.
      * @param buffer The parameter buffer.
      * @return A byte array with the return value encoded in native byte order.
      */
@@ -2075,7 +2075,7 @@ public abstract class Invoker {
     /**
      * Invokes a function that returns a C struct by value.
      *
-     * @param function The <tt>Function</tt> to invoke.
+     * @param function The <code>Function</code> to invoke.
      * @param buffer The parameter buffer.
      * @param returnBuffer The output buffer to place the return value in.
      * @param offset The offset within returnBuffer to place the return value.
@@ -2114,7 +2114,7 @@ public abstract class Invoker {
      * Invokes a function, with the parameters loaded into native memory buffers,
      * and the function result is stored in a native memory buffer.
      *
-     * @param function The <tt>Function</tt> to invoke.
+     * @param function The <code>Function</code> to invoke.
      * @param returnBuffer The address of the native buffer to place the result
      * of the function call in.
      * @param parameters An array of addresses of the function parameters.

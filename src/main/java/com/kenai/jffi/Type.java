@@ -112,7 +112,7 @@ public abstract class Type {
     private volatile long handle = 0;
 
     /**
-     * Gets the FFI type enum value for this <tt>Type</tt>
+     * Gets the FFI type enum value for this <code>Type</code>
      *
      * @return An integer representing the FFI type.
      */
@@ -121,7 +121,7 @@ public abstract class Type {
     }
 
     /**
-     * Gets the native address of the ffi_type struct for this <tt>Type</tt>
+     * Gets the native address of the ffi_type struct for this <code>Type</code>
      *
      * @return  The address of the ffi_type structure
      */
@@ -178,10 +178,10 @@ public abstract class Type {
     }
 
     /** 
-     * Converts an array of <tt>Type</tt> objects into an array of pointers to
+     * Converts an array of <code>Type</code> objects into an array of pointers to
      * ffi_type structures.
      * 
-     * @param types An array of <tt>Type</tt>  objects
+     * @param types An array of <code>Type</code>  objects
      * @return An array of native ffi_type handles.
      */
     static long[] nativeHandles(Type[] types) {
@@ -195,10 +195,10 @@ public abstract class Type {
     }
 
     /**
-     * Converts a list of <tt>Type</tt> objects into an array of pointers to
+     * Converts a list of <code>Type</code> objects into an array of pointers to
      * ffi_type structures.
      *
-     * @param types A list of <tt>Type</tt> objects
+     * @param types A list of <code>Type</code> objects
      * @return An array of native ffi_type handles.
      */
     static long[] nativeHandles(List<Type> types) {
@@ -213,10 +213,10 @@ public abstract class Type {
 
 
     /**
-     * Creates a <tt>Type</tt> instance for builtin types.
+     * Creates a <code>Type</code> instance for builtin types.
      *
      * @param nativeType The builtin type enum.
-     * @return A <tt>Type</tt> instance.
+     * @return A <code>Type</code> instance.
      */
     private static Type builtin(NativeType nativeType) {
         return new Builtin(nativeType);

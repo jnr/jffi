@@ -47,7 +47,7 @@ public final class Function {
     final long contextAddress;
 
     /**
-     * Creates a new instance of <tt>Function</tt> with default calling convention.
+     * Creates a new instance of <code>Function</code> with default calling convention.
      *
      * @param address The native address of the function to invoke.
      * @param returnType The return type of the native function.
@@ -58,7 +58,7 @@ public final class Function {
     }
 
     /**
-     * Creates a new instance of <tt>Function</tt> with default calling convention.
+     * Creates a new instance of <code>Function</code> with default calling convention.
      *
      * @param address The native address of the function to invoke.
      */
@@ -69,9 +69,9 @@ public final class Function {
     }
 
     /**
-     * Creates a new instance of <tt>Function</tt>.
+     * Creates a new instance of <code>Function</code>.
      *
-     * <tt>Function</tt> instances created with this constructor will save the
+     * <code>Function</code> instances created with this constructor will save the
      * C errno contents after each call.
      *
      * @param address The native address of the function to invoke.
@@ -84,7 +84,7 @@ public final class Function {
     }
 
     /**
-     * Creates a new instance of <tt>Function</tt>.
+     * Creates a new instance of <code>Function</code>.
      *
      * @param address The native address of the function to invoke.
      * @param returnType The return type of the native function.
@@ -152,7 +152,7 @@ public final class Function {
      * Gets the type of a parameter.
      * 
      * @param index The index of the parameter in the function signature
-     * @return The <tt>Type</tt> of the parameter.
+     * @return The <code>Type</code> of the parameter.
      */
     public final Type getParameterType(int index) {
         return callContext.getParameterType(index);

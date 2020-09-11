@@ -59,7 +59,7 @@ abstract public class PageManager {
     /**
      * Gets the page manager for the current platform.
      *
-     * @return An instance of <tt>PageManager</tt>
+     * @return An instance of <code>PageManager</code>
      */
     public static PageManager getInstance() {
         return SingletonHolder.INSTANCE;
@@ -83,7 +83,7 @@ abstract public class PageManager {
      * Allocates native memory pages.
      *
      * The memory allocated is aligned on a page boundary, and the size of the
-     * allocated memory is <tt>npages</tt> * {@link #pageSize}.
+     * allocated memory is <code>npages</code> * {@link #pageSize}.
      *
      * @param npages The number of pages to allocate.
      * @param protection The initial protection for the page.  This must be a

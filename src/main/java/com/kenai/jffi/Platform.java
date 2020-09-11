@@ -119,7 +119,7 @@ public abstract class Platform {
     }
 
     /**
-     * Holds a single, lazily loaded instance of <tt>Platform</tt>
+     * Holds a single, lazily loaded instance of <code>Platform</code>
      */
     private static final class SingletonHolder {
         static final Platform PLATFORM = determinePlatform(determineOS());
@@ -128,7 +128,7 @@ public abstract class Platform {
     /**
      * Determines the operating system jffi is running on
      *
-     * @return An member of the <tt>OS</tt> enum.
+     * @return An member of the <code>OS</code> enum.
      */
     private static final OS determineOS() {
         String osName = System.getProperty("os.name").split(" ")[0];
@@ -162,10 +162,10 @@ public abstract class Platform {
     }
 
     /**
-     * Determines the <tt>Platform</tt> that best describes the <tt>OS</tt>
+     * Determines the <code>Platform</code> that best describes the <code>OS</code>
      *
      * @param os The operating system.
-     * @return An instance of <tt>Platform</tt>
+     * @return An instance of <code>Platform</code>
      */
     private static final Platform determinePlatform(OS os) {
         switch (os) {
@@ -202,7 +202,7 @@ public abstract class Platform {
          * This normalizes all the variations that are equivalent (e.g. i386, x86, i86pc)
          * into a common cpu type.
          *
-         * @return A member of the <tt>CPU</tt> enum.
+         * @return A member of the <code>CPU</code> enum.
          */
         private static CPU determineCPU() {
             String archString = null;
@@ -255,7 +255,7 @@ public abstract class Platform {
     }
 
     /**
-     * Constructs a new <tt>Platform</tt> instance.
+     * Constructs a new <code>Platform</code> instance.
      *
      * @param os The current operating system.
      */
@@ -285,7 +285,7 @@ public abstract class Platform {
     }
     
     /**
-     * Gets the current <tt>Platform</tt>
+     * Gets the current <code>Platform</code>
      *
      * @return The current platform.
      */
@@ -296,7 +296,7 @@ public abstract class Platform {
     /**
      * Gets the current Operating System.
      *
-     * @return A <tt>OS</tt> value representing the current Operating System.
+     * @return A <code>OS</code> value representing the current Operating System.
      */
     public final OS getOS() {
         return os;
@@ -305,7 +305,7 @@ public abstract class Platform {
     /**
      * Gets the current processor architecture the JVM is running on.
      *
-     * @return A <tt>CPU</tt> value representing the current processor architecture.
+     * @return A <code>CPU</code> value representing the current processor architecture.
      */
     public final CPU getCPU() {
         return ArchHolder.cpu;
@@ -346,7 +346,7 @@ public abstract class Platform {
     }
 
     /**
-     * Gets the name of this <tt>Platform</tt>.
+     * Gets the name of this <code>Platform</code>.
      *
      * @return The name of this platform.
      */
@@ -382,7 +382,7 @@ public abstract class Platform {
     /**
      * Checks if the current platform is supported by JFFI.
      *
-     * @return <tt>true</tt> if the platform is supported, else false.
+     * @return <code>true</code> if the platform is supported, else false.
      */
     public boolean isSupported() {
         //

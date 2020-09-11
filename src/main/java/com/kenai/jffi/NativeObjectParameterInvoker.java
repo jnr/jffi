@@ -36,7 +36,7 @@ final class NativeObjectParameterInvoker extends ObjectParameterInvoker {
     /**
      * Invokes a function with two numeric arguments, and returns a numeric value.
      *
-     * @param function The <tt>Function</tt> to invoke.
+     * @param function The <code>Function</code> to invoke.
      * @param n1 first numeric argument.
      * @param n2 The second numeric argument.
      * @param o1 array or buffer, to be passed as a pointer for the first numeric parameter.
@@ -56,7 +56,7 @@ final class NativeObjectParameterInvoker extends ObjectParameterInvoker {
     /**
      * Invokes a function with two numeric arguments, and returns a numeric value.
      *
-     * @param function The <tt>Function</tt> to invoke.
+     * @param function The <code>Function</code> to invoke.
      * @param n1 first numeric argument.
      * @param n2 The second numeric argument.
      * @param o1 array or buffer, to be passed as a pointer for the first numeric parameter.
@@ -76,7 +76,7 @@ final class NativeObjectParameterInvoker extends ObjectParameterInvoker {
     /**
      * Invokes a function with two numeric arguments, and returns a numeric value.
      *
-     * @param function The <tt>Function</tt> to invoke.
+     * @param function The <code>Function</code> to invoke.
      * @param n1 The first numeric argument.
      * @param n2 The second numeric argument.
      * @param o1 An Object (array or buffer), to be passed as a pointer.
@@ -103,7 +103,7 @@ final class NativeObjectParameterInvoker extends ObjectParameterInvoker {
     /**
      * Invokes a function with two numeric arguments, and returns a numeric value.
      *
-     * @param function The <tt>Function</tt> to invoke.
+     * @param function The <code>Function</code> to invoke.
      * @param n1 The first numeric argument.
      * @param n2 The second numeric argument.
      * @param n3 The third numeric argument.
@@ -124,7 +124,7 @@ final class NativeObjectParameterInvoker extends ObjectParameterInvoker {
     /**
      * Invokes a function with two numeric arguments, and returns a numeric value.
      *
-     * @param function The <tt>Function</tt> to invoke.
+     * @param function The <code>Function</code> to invoke.
      * @param n1 The first numeric argument.
      * @param n2 The second numeric argument.
      * @param n3 The third numeric argument.

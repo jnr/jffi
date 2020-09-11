@@ -70,7 +70,7 @@ public final class Library {
     /** The native dl/LoadLibrary handle */
     private final long handle;
 
-    /** The name of this <tt>Library</tt> */
+    /** The name of this <code>Library</code> */
     private final String name;
 
     /** A handle to the foreign interface to keep it alive as long as this object is alive */
@@ -104,7 +104,7 @@ public final class Library {
     /**
      * Gets a handle to the default library.
      *
-     * @return A <tt>Library</tt> instance representing the default library.
+     * @return A <code>Library</code> instance representing the default library.
      */
     public static final Library getDefault() {
         return DefaultLibrary.INSTANCE;
@@ -114,9 +114,9 @@ public final class Library {
      * Gets a handle for the named library.
      *
      * @param name The name or path of the library to open.
-     * @param flags The library flags (e.g. <tt>LAZY, NOW, LOCAL, GLOBAL</tt>)
-     * @return A <tt>Library</tt> instance representing the named library, or
-     * <tt>null</tt> if the library could not be opened.
+     * @param flags The library flags (e.g. <code>LAZY, NOW, LOCAL, GLOBAL</code>)
+     * @return A <code>Library</code> instance representing the named library, or
+     * <code>null</code> if the library could not be opened.
      */
     public static final Library getCachedInstance(String name, int flags) {
         if (name == null) {
@@ -144,8 +144,8 @@ public final class Library {
      * instance.  Only use when you really need a new handle for the library.
      *
      * @param name The name or path of the library to open.
-     * @param flags The library flags (e.g. <tt>LAZY, NOW, LOCAL, GLOBAL</tt>)
-     * @return A <tt>Library</tt> instance representing the named library, or
+     * @param flags The library flags (e.g. <code>LAZY, NOW, LOCAL, GLOBAL</code>)
+     * @return A <code>Library</code> instance representing the named library, or
      * null if the library cannot be opened.
      */
     public static final Library openLibrary(String name, int flags) {
@@ -167,7 +167,7 @@ public final class Library {
     }
 
     /**
-     * Gets the address of a symbol within the <tt>Library</tt>.
+     * Gets the address of a symbol within the <code>Library</code>.
      * 
      * @param name The name of the symbol to locate.
      * @return The address of the symbol within the current address space.
@@ -185,7 +185,7 @@ public final class Library {
     /**
      * Gets the current error string from dlopen/LoadLibrary.
      *
-     * @return A <tt>String</tt> describing the last error.
+     * @return A <code>String</code> describing the last error.
      */
     public static final String getLastError() {
         String error = lastError.get();

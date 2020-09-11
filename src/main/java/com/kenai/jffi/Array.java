@@ -66,7 +66,7 @@ public final class Array extends Aggregate {
     /**
      * Returns the type of elements in the array
      *
-     * @return The <tt>Type</tt> of the elements in the array
+     * @return The <code>Type</code> of the elements in the array
      */
     public final Type getElementType() {
         return elementType;

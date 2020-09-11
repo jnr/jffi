@@ -85,12 +85,12 @@ public class UnitHelper {
     }
 
     /**
-     * Creates a new InvocationHandler mapping methods in the <tt>interfaceClass</tt>
+     * Creates a new InvocationHandler mapping methods in the <code>interfaceClass</code>
      * to functions in the native library.
-     * @param <T> the type of <tt>interfaceClass</tt>
+     * @param <T> the type of <code>interfaceClass</code>
      * @param libraryName the native library to load
      * @param interfaceClass the interface that contains the native method description
-     * @return a new instance of <tt>interfaceClass</tt> that can be used to call
+     * @return a new instance of <code>interfaceClass</code> that can be used to call
      * functions in the native library.
      */
     public static <T> T loadLibrary(String name, Class<T> interfaceClass, InvokerType invokerType) {
@@ -131,7 +131,7 @@ public class UnitHelper {
          * Gets the {@link Invoker} for a method.
          *
          * @param method the method defined in the interface class
-         * @return the <tt>Invoker</tt> to use to invoke the native function
+         * @return the <code>Invoker</code> to use to invoke the native function
          */
         private final MethodInvoker getMethodInvoker(Method method) {
             MethodInvoker invoker = invokers.get(method);
