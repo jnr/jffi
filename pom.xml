@@ -175,7 +175,7 @@
                 <Bundle-Description>Java Foreign Function Interface - Native Libraries</Bundle-Description>
                 <Bundle-SymbolicName>com.github.jnr.jffi.native</Bundle-SymbolicName>
                 <Require-Bundle>com.github.jnr.jffi</Require-Bundle>
-                <Automatic-Module-Name>org.jnrproject.jffi.syslibs</Automatic-Module-Name>
+                <Automatic-Module-Name>org.jnrproject.jffi.nativelibs</Automatic-Module-Name>
 
               </instructions>
             </configuration>
