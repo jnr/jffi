@@ -135,17 +135,6 @@
         </configuration>
       </plugin>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <configuration>
-          <archive>
-            <manifestEntries>
-              <Automatic-Module-Name>org.jnrproject.jffi</Automatic-Module-Name>
-            </manifestEntries>
-          </archive>
-        </configuration>
-      </plugin>
-      <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
         <version>2.4.0</version>
@@ -164,6 +153,7 @@
                 <Import-Package />
                 <Bundle-SymbolicName>com.github.jnr.jffi</Bundle-SymbolicName>
                 <Main-Class>com.kenai.jffi.Main</Main-Class>
+                <Automatic-Module-Name>org.jnrproject.jffi</Automatic-Module-Name>
               </instructions>
             </configuration>
           </execution>
@@ -185,6 +175,8 @@
                 <Bundle-Description>Java Foreign Function Interface - Native Libraries</Bundle-Description>
                 <Bundle-SymbolicName>com.github.jnr.jffi.native</Bundle-SymbolicName>
                 <Require-Bundle>com.github.jnr.jffi</Require-Bundle>
+                <Automatic-Module-Name>org.jnrproject.jffi.nativelibs</Automatic-Module-Name>
+
               </instructions>
             </configuration>
           </execution>
