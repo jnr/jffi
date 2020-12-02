@@ -176,7 +176,6 @@
                 <Bundle-SymbolicName>com.github.jnr.jffi.native</Bundle-SymbolicName>
                 <Require-Bundle>com.github.jnr.jffi</Require-Bundle>
                 <Automatic-Module-Name>org.jnrproject.jffi.nativelibs</Automatic-Module-Name>
-
               </instructions>
             </configuration>
           </execution>
