@@ -1,0 +1,40 @@
+# This workflow will build the native component for different platforms using
+# qemu-user & docker
+
+name: Build Native
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  arm64:
+
+    # Switch back to ubuntu-latest after that maps to 20.04
+    runs-on: ubuntu-20.04
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install qemu
+        run: sudo apt-get install -y --no-install-recommends qemu-user-static
+      - name: Experimental Docker
+        run: sudo cp .github/experimental-docker.json /etc/docker/daemon.json
+      - name: Restart Docker
+        run: sudo systemctl restart docker.service
+      - name: Clean old docker image
+        run: docker rmi debian:9 || true
+      - name: Build inside Docker
+        run: docker run --rm --platform arm64 -v $GITHUB_WORKSPACE:/work debian:9 /work/.github/build-native-debian.sh
+      - name: Archive built library
+        uses: actions/upload-artifact@v2
+        with:
+          name: shared-object
+          path: build/jni/*.so
+      - name: Archive built jar
+        uses: actions/upload-artifact@v2
+        with:
+          name: jar
+          path: archive/*.jar
+
