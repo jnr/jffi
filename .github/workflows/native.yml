@@ -17,6 +17,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+      - name: Update System
+        run: sudo apt-get update -y
       - name: Install qemu
         run: sudo apt-get install -y --no-install-recommends qemu-user-static
       - name: Experimental Docker
