@@ -271,6 +271,14 @@ public class StubLoader {
     static void load() {
         final String libName = getStubLibraryName();
         List<Throwable> errors = new ArrayList<Throwable>();
+
+        try {
+            System.loadLibrary(libName);
+            return;
+        } catch (Throwable t1) {
+            errors.add(t1);
+        }
+
         String bootPath = getBootPath();
         if (bootPath != null && loadFromBootPath(libName, bootPath, errors)) {
             return;
