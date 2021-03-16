@@ -67,13 +67,24 @@ public class StubLoader {
     private static volatile Throwable failureCause = null;
     private static volatile boolean loaded = false;
     private static final File jffiExtractDir;
+    private static final String jffiExtractName;
+
+    private static final String JFFI_EXTRACT_DIR = "jffi.extract.dir";
+    private static final String JFFI_EXTRACT_NAME = "jffi.extract.name";
 
     static {
-        String extractDir = System.getProperty("jffi.extract.dir");
+        String extractDir = System.getProperty(JFFI_EXTRACT_DIR);
         if (extractDir != null) {
             jffiExtractDir = new File(extractDir);
         } else {
             jffiExtractDir = null;
+        }
+
+        String extractName = System.getProperty(JFFI_EXTRACT_NAME);
+        if (extractName != null) {
+            jffiExtractName = extractName;
+        } else {
+            jffiExtractName = null;
         }
     }
 
@@ -400,23 +411,25 @@ public class StubLoader {
         File dstFile;
 
         // Install the stub library to a temporary location
+        String jffiExtractName = StubLoader.jffiExtractName;
         try {
+            dstFile = calculateExtractPath(tmpDirFile, jffiExtractName);
 
-            // Create tempfile.
-            dstFile = null == tmpDirFile ? File.createTempFile("jffi", "." + dlExtension()):
-                    File.createTempFile("jffi", "." + dlExtension(), tmpDirFile);
-            dstFile.deleteOnExit();
+            if (dstFile.exists()) {
+                // attempt to load existing file
+                // TODO: verify file matches bundled library
+            } else {
+                // Write the library to the tempfile
+                FileOutputStream os = new FileOutputStream(dstFile);
+                try {
+                    ReadableByteChannel srcChannel = Channels.newChannel(is);
 
-            // Write the library to the tempfile
-            FileOutputStream os = new FileOutputStream(dstFile);
-            try {
-                ReadableByteChannel srcChannel = Channels.newChannel(is);
-
-                for (long pos = 0; is.available() > 0; ) {
-                    pos += os.getChannel().transferFrom(srcChannel, pos, Math.max(4096, is.available()));
+                    for (long pos = 0; is.available() > 0; ) {
+                        pos += os.getChannel().transferFrom(srcChannel, pos, Math.max(4096, is.available()));
+                    }
+                } finally {
+                    os.close();
                 }
-            } finally {
-                os.close();
             }
         } catch (IOException ioe) {
             // If we get here it means we are unable to write the stub library to the system default temp location.
@@ -427,11 +440,33 @@ public class StubLoader {
 
         try {
             System.load(dstFile.getAbsolutePath());
-            dstFile.delete();
+            if (null == jffiExtractName) dstFile.delete();
         } catch (UnsatisfiedLinkError ule) {
             // If we get here it means the file wrote to temp ok but can't be loaded from there.
             throw tempLoadError(ule);
         }
+    }
+
+    static File calculateExtractPath(File tmpDirFile, String jffiExtractName) throws IOException {
+        File dstFile;
+        if (null == tmpDirFile) {
+            if (null == jffiExtractName) {
+                // Create tempfile.
+                dstFile = File.createTempFile("jffi", "." + dlExtension());
+                dstFile.deleteOnExit();
+            } else {
+                dstFile = new File(System.getProperty("java.io.tmpdir"), jffiExtractName);
+            }
+        } else {
+            if (null == jffiExtractName) {
+                // Create tempfile.
+                dstFile = File.createTempFile("jffi", "." + dlExtension(), tmpDirFile);
+                dstFile.deleteOnExit();
+            } else {
+                dstFile = new File(tmpDirFile, jffiExtractName);
+            }
+        }
+        return dstFile;
     }
 
     private static IOException tempReadonlyError(IOException ioe) {
