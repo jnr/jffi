@@ -22,12 +22,16 @@ import com.kenai.jffi.Util;
 
 import java.io.CharArrayWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -297,8 +301,12 @@ public class StubLoader {
             try {
                 loadFromJar(jffiExtractDir);
                 return;
+            } catch (SecurityException se) {
+                throw se;
             } catch (Throwable t1) {
-                throw new UnsatisfiedLinkError("could not load jffi library from " + jffiExtractDir);
+                UnsatisfiedLinkError ule = new UnsatisfiedLinkError("could not load jffi library from " + jffiExtractDir);
+                ule.initCause(t1);
+                throw ule;
             }
         }
 
@@ -306,10 +314,14 @@ public class StubLoader {
         try {
             loadFromJar(null);
             return;
+        } catch (SecurityException se) {
+            throw se;
         } catch (Throwable t) {
-            try{
+            try {
                 loadFromJar(new File(System.getProperty("user.dir")));
-            }catch (Throwable t1){
+            } catch (SecurityException se) {
+                throw se;
+            } catch (Throwable t1){
                 errors.add(t1);
             }
         }
@@ -395,7 +407,7 @@ public class StubLoader {
         return false;
     }
     
-    private static String dlExtension() {
+    static String dlExtension() {
         switch (getOS()) {
             case WINDOWS:
                 return "dll";
@@ -407,35 +419,23 @@ public class StubLoader {
     } 
 
     private static void loadFromJar(File tmpDirFile) throws IOException, LinkageError {
-        InputStream is = getStubLibraryStream();
         File dstFile;
 
-        // Install the stub library to a temporary location
+        // Install the stub library
         String jffiExtractName = StubLoader.jffiExtractName;
-        try {
+
+        try (InputStream sourceIS = getStubLibraryStream()) {
             dstFile = calculateExtractPath(tmpDirFile, jffiExtractName);
 
-            if (dstFile.exists()) {
-                // attempt to load existing file
-                // TODO: verify file matches bundled library
+            if (jffiExtractName != null && dstFile.exists()) {
+                // unpacking to a specific name and that file exists, verify it
+                verifyExistingLibrary(dstFile, sourceIS);
             } else {
-                // Write the library to the tempfile
-                FileOutputStream os = new FileOutputStream(dstFile);
-                try {
-                    ReadableByteChannel srcChannel = Channels.newChannel(is);
-
-                    for (long pos = 0; is.available() > 0; ) {
-                        pos += os.getChannel().transferFrom(srcChannel, pos, Math.max(4096, is.available()));
-                    }
-                } finally {
-                    os.close();
-                }
+                unpackLibrary(dstFile, sourceIS);
             }
         } catch (IOException ioe) {
             // If we get here it means we are unable to write the stub library to the system default temp location.
             throw tempReadonlyError(ioe);
-        } finally {
-            is.close();
         }
 
         try {
@@ -447,25 +447,89 @@ public class StubLoader {
         }
     }
 
-    static File calculateExtractPath(File tmpDirFile, String jffiExtractName) throws IOException {
-        File dstFile;
-        if (null == tmpDirFile) {
-            if (null == jffiExtractName) {
-                // Create tempfile.
-                dstFile = File.createTempFile("jffi", "." + dlExtension());
-                dstFile.deleteOnExit();
-            } else {
-                dstFile = new File(System.getProperty("java.io.tmpdir"), jffiExtractName);
-            }
-        } else {
-            if (null == jffiExtractName) {
-                // Create tempfile.
-                dstFile = File.createTempFile("jffi", "." + dlExtension(), tmpDirFile);
-                dstFile.deleteOnExit();
-            } else {
-                dstFile = new File(tmpDirFile, jffiExtractName);
+    private static void unpackLibrary(File dstFile, InputStream sourceIS) throws IOException {
+        // Write the library to the tempfile
+        try (FileOutputStream os = new FileOutputStream(dstFile)) {
+            ReadableByteChannel srcChannel = Channels.newChannel(sourceIS);
+
+            for (long pos = 0; sourceIS.available() > 0; ) {
+                pos += os.getChannel().transferFrom(srcChannel, pos, Math.max(4096, sourceIS.available()));
             }
         }
+    }
+
+    private static void verifyExistingLibrary(File dstFile, InputStream sourceIS) throws IOException {
+        int sourceSize = sourceIS.available();
+
+        try (FileInputStream targetIS = new FileInputStream(dstFile)) {
+            // perform minimal verification of the found file
+            int targetSize = targetIS.available();
+            if (targetSize != sourceSize) throw sizeMismatchError(dstFile, sourceSize, targetSize);
+
+            // compare sha-256 for existing file
+            MessageDigest sourceMD = MessageDigest.getInstance("SHA-256");
+            MessageDigest targetMD = MessageDigest.getInstance("SHA-256");
+            DigestInputStream sourceDIS = new DigestInputStream(sourceIS, sourceMD);
+            DigestInputStream targetDIS = new DigestInputStream(targetIS, targetMD);
+            byte[] buf = new byte[8192];
+            while (sourceIS.available() > 0) {
+                sourceDIS.read(buf);
+                targetDIS.read(buf);
+            }
+            byte[] sourceDigest = sourceMD.digest();
+            byte[] targetDigest = targetMD.digest();
+
+            if (!Arrays.equals(sourceDigest, targetDigest)) throw digestMismatchError(dstFile);
+        } catch (NoSuchAlgorithmException nsae) {
+            throw new IOException(nsae);
+        }
+    }
+
+    private static SecurityException sizeMismatchError(File dstFile, int sourceSize, int targetSize) {
+        return new SecurityException("file size mismatch: " + dstFile + " (" + targetSize + ") does not match packaged library (" + sourceSize + ")");
+    }
+
+    private static SecurityException digestMismatchError(File dstFile) {
+        return new SecurityException("digest mismatch: " + dstFile + " does not match packaged library");
+    }
+
+    static File calculateExtractPath(File tmpDirFile, String jffiExtractName) throws IOException {
+        if (jffiExtractName == null) return calculateExtractPath(tmpDirFile);
+
+        File dstFile;
+
+        // allow empty name to mean "jffi-#.#"
+        if (jffiExtractName.isEmpty()) {
+            jffiExtractName = "jffi-" + VERSION_MAJOR + "." + VERSION_MINOR;
+        }
+
+        // add extension if necessary
+        if (!jffiExtractName.endsWith(dlExtension())) {
+            jffiExtractName = jffiExtractName + "." + dlExtension();
+        }
+
+        // use tmpdir if no dir was specified
+        if (null == tmpDirFile) {
+            dstFile = new File(TMPDIR, jffiExtractName);
+        } else {
+            dstFile = new File(tmpDirFile, jffiExtractName);
+        }
+
+        return dstFile;
+    }
+
+    static File calculateExtractPath(File tmpDirFile) throws IOException {
+        File dstFile;
+
+        // create tempfile
+        if (null == tmpDirFile) {
+            dstFile = File.createTempFile("jffi", "." + dlExtension());
+        } else {
+            dstFile = File.createTempFile("jffi", "." + dlExtension(), tmpDirFile);
+        }
+
+        dstFile.deleteOnExit();
+
         return dstFile;
     }
 
