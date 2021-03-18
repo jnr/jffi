@@ -45,8 +45,6 @@
   </dependencies>
 
   <properties>
-    <maven.test.skip>true</maven.test.skip>
-    <maven.test.failure.ignore>true</maven.test.failure.ignore>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>8</maven.compiler.source>
     <maven.compiler.target>8</maven.compiler.target>
@@ -181,10 +179,9 @@
           </execution>
         </executions>
       </plugin>
-<!--
       <plugin>
         <artifactId>maven-antrun-plugin</artifactId>
-        <version>1.1</version>
+        <version>1.6</version>
         <executions>
           <execution>
             <id>build-native-library</id>
@@ -197,8 +194,8 @@
                 <property name="dist.dir" value="${project.build.directory}" />
                 <property name="build.dir" value="${project.build.directory}" />
                 <property name="build.classes.dir" value="${project.build.outputDirectory}" />
-                <ant antfile="custom-build.xml" dir="." target="-assemble-native-jar" />
-                <unjar src="${project.build.directory}/native.jar" dest="${project.build.outputDirectory}" />
+                <ant antfile="build.xml" dir="." target="-assemble-native-jar" />
+                <unjar src="build/native.jar" dest="${project.build.outputDirectory}" />
               </tasks>
             </configuration>
             <goals>
@@ -207,7 +204,6 @@
           </execution>
         </executions>
       </plugin>
--->
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-antrun-plugin</artifactId>
