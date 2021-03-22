@@ -6,7 +6,7 @@ build
 build.eclipse
 dist
 lib/nblibraries-private.properties
-jni/libffi/doc/libffi.info$
+jni/libffi/doc/libffi.info*
 /.settings/
 target
 .idea
