@@ -27,6 +27,9 @@ jobs:
           restore-keys: ${{ runner.os }}-m2
       - name: Build
         run: "rm archive/* && ant jar && ant archive-platform-jar"
+      - name: Dump config.log
+        if: ${{ always() }}
+        run: "cat /Users/runner/work/jffi/jffi/build/jni/libffi-darwin-x86_64/config.log"
       - name: Archive built library
         uses: actions/upload-artifact@v2
         with:
