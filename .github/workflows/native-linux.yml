@@ -29,6 +29,14 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+      - name: cache dependencies
+        uses: actions/cache@v1
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+      - uses: satackey/action-docker-layer-caching@v0.0.11
+        continue-on-error: true
       - name: Update System
         run: sudo apt-get update -y
       - name: Install qemu
