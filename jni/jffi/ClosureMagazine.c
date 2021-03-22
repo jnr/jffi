@@ -408,7 +408,7 @@ closure_prep(ffi_cif* cif, void* code, Closure* closure, char* errbuf, size_t er
 {
     ffi_status status;
 
-    status = ffi_prep_closure(code, cif, closure_invoke, closure);
+    status = ffi_prep_closure_loc(code, cif, closure_invoke, closure, code);
     switch (status) {
         case FFI_OK:
             return true;
