@@ -26,6 +26,8 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
       - name: Build
+        env:
+          LIBRARY_PATH: /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib:$LIBRARY_PATH
         run: "rm archive/* && ant jar && ant archive-platform-jar"
       - name: Dump config.log
         if: ${{ always() }}
