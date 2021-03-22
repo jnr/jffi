@@ -177,7 +177,7 @@ ifeq ($(OS), darwin)
 
   XCODE=$(shell xcode-select -print-path)
   CC = $(XCODE)/usr/bin/gcc
-  MACSDK = $(firstword $(strip $(wildcard $(XCODE)/SDKs/MacOSX10.*.sdk)) $(strip $(wildcard $(XCODE)/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.*.sdk)))
+  MACSDK = /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk
 
   CFLAGS += -isysroot $(MACSDK) -DTARGET_RT_MAC_CFM=0
   CFLAGS += -I$(MACSDK)/System/Library/Frameworks/JavaVM.framework/Headers
