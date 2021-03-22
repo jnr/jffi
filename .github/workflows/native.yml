@@ -25,6 +25,8 @@ jobs:
           - linux-arm-v5
           - s390x
 
+    name: Linux binary ${{ matrix.arch }}
+
     steps:
       - uses: actions/checkout@v2
       - name: Update System
