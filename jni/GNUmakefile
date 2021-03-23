@@ -182,7 +182,7 @@ ifeq ($(OS), darwin)
   CFLAGS += -isysroot $(MACSDK) -DTARGET_RT_MAC_CFM=0
   CFLAGS += -I$(MACSDK)/System/Library/Frameworks/JavaVM.framework/Headers
   CFLAGS += $(foreach arch, $(ARCHES),-arch $(arch))
-  LDFLAGS = $(foreach arch, $(ARCHES),-arch $(arch)) -dynamiclib -framework JavaVM \
+  LDFLAGS = $(foreach arch, $(ARCHES),-arch $(arch)) -dynamiclib \
 	-Wl,-syslibroot,$(MACSDK) -mmacosx-version-min=10.6
   JNIEXT = jnilib
   #CFLAGS += -I$(MACSDK)/System/Library/Frameworks/Kernel.framework/Versions/A/Headers
