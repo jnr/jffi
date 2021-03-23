@@ -69,7 +69,6 @@
 #  endif
 #endif
 
-#define FFI_MIPS_N32
 #ifdef FFI_MIPS_O32
 /* O32 stack frames have 32bit integer args */
 #  define FFI_SIZEOF_ARG    4
