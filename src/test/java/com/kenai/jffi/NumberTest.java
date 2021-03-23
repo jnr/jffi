@@ -4,6 +4,7 @@ package com.kenai.jffi;
 import com.kenai.jffi.UnitHelper.InvokerType;
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -260,6 +261,9 @@ public class NumberTest {
     }
 
     private void returnF128HighPrecision(InvokerType type) {
+        Assume.assumeFalse("Apple Silicon does not support 80-bit long double",
+                Platform.getPlatform().getOS() == Platform.OS.DARWIN &&
+                Platform.getPlatform().getCPU() == Platform.CPU.AARCH64);
         LibNumberTest lib = UnitHelper.loadTestLibrary(LibNumberTest.class, type);
         BigDecimal param = new BigDecimal("1.234567890123456789");
         BigDecimal result = lib.ret_f128(param);
