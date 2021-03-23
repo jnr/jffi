@@ -1,0 +1,45 @@
+name: Build macOS Binaries
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  native:
+
+    runs-on: macos-latest
+
+    name: macOS binary
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: set up java ${{ matrix.java-version }}
+        uses: actions/setup-java@v1.4.3
+        with:
+          java-version: 8
+      - name: cache dependencies
+        uses: actions/cache@v1
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+      - name: Build
+        env:
+          LIBRARY_PATH: /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib:$LIBRARY_PATH
+        run: "rm archive/* && ant jar && ant archive-platform-jar"
+      - name: Dump config.log
+        if: ${{ always() }}
+        run: "cat /Users/runner/work/jffi/jffi/build/jni/libffi-darwin-x86_64/config.log"
+      - name: Archive built library
+        uses: actions/upload-artifact@v2
+        with:
+          name: shared-object
+          path: build/jni/*.so
+      - name: Archive built jar
+        uses: actions/upload-artifact@v2
+        with:
+          name: jar
+          path: archive/*.jar
+
