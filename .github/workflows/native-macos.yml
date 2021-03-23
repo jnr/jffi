@@ -1,10 +1,15 @@
 name: Build macOS Binaries
 
 on:
+#  push:
+#    branches: [ master ]
+#  pull_request:
+#    branches: [ master ]
+  # GHA does not support building Apple am64 very well, so we disable this workflow for now.
+  # See https://github.com/actions/runner/issues/805
   push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+    branches-ignore:
+      - '**'
 
 jobs:
   native:
