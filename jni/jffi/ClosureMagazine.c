@@ -162,7 +162,8 @@ Java_com_kenai_jffi_Foreign_newClosureMagazine(JNIEnv *env, jobject self, jlong 
     CallContext* ctx = (CallContext *) j2p(ctxAddress);
     Closure* closure = NULL;
     Magazine* magazine = NULL;
-    caddr_t code = NULL;
+    void* code = NULL;
+    caddr_t pcl = NULL;
     char errmsg[256];
 
     magazine = calloc(1, sizeof(*magazine));
@@ -174,16 +175,11 @@ Java_com_kenai_jffi_Foreign_newClosureMagazine(JNIEnv *env, jobject self, jlong 
         goto error;
     }
 
-    closure->magazine = pool;
+    closure->magazine = magazine;
     closure->code = code;
     closure->pcl = pcl;
 
     if (!closure_prep(&ctx->cif, closure->code, closure, errmsg, sizeof(errmsg))) {
-        goto error;
-    }
-
-    if (!jffi_makePagesExecutable(code, 1)) {
-        snprintf(errmsg, sizeof(errmsg), "failed to make page executable. errno=%d (%s)", errno, strerror(errno));
         goto error;
     }
 
