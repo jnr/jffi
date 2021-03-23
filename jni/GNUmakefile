@@ -164,16 +164,7 @@ endif
 
 ifeq ($(OS), darwin)
   PLATFORM = darwin
-  ARCHES =
-  ifneq ($(findstring $(CPU), i386),)
-    ARCHES += i386
-  endif
-  ifneq ($(findstring $(CPU), x86_64),)
-    ARCHES += x86_64
-  endif
-  ifneq ($(findstring $(CPU), aarch64),)
-    ARCHES += arm64
-  endif
+  ARCHES = x86_64 arm64
 
   XCODE=$(shell xcode-select -print-path)
   CC = $(XCODE)/usr/bin/gcc
@@ -300,7 +291,7 @@ build_ffi = \
 $(LIBFFI):
 	@mkdir -p $(@D)
 	@for arch in $(ARCHES); do $(call build_ffi,$$arch);done
-	# Assemble into a FAT (i386, x86_64) library
+	# Assemble into a FAT (x86_64, arm64) library
 	@mkdir -p $(BUILD_DIR)/libffi/.libs
 	@env MACOSX_DEPLOYMENT_TARGET=10.4 /usr/bin/libtool -static -o $@ \
 	    $(foreach arch, $(ARCHES),$(BUILD_DIR)/libffi-darwin-$(arch)/.libs/libffi_convenience.a)
