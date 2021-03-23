@@ -171,7 +171,7 @@ ifeq ($(OS), darwin)
   ifneq ($(findstring $(CPU), x86_64),)
     ARCHES += x86_64
   endif
-  ifneq ($(findstring $(CPU), arm64),)
+  ifneq ($(findstring $(CPU), aarch64),)
     ARCHES += arm64
   endif
 
@@ -311,6 +311,8 @@ $(LIBFFI):
 		printf "#include \"libffi-darwin-i386/include/ffi.h\"\n"; \
 		printf "#elif defined(__x86_64__)\n"; \
 		printf "#include \"libffi-darwin-x86_64/include/ffi.h\"\n";\
+		printf "#elif defined(__arm64__)\n"; \
+		printf "#include \"libffi-darwin-arm64/include/ffi.h\"\n";\
 		printf "#endif\n";\
 	) > $(LIBFFI_BUILD_DIR)/include/ffi.h
 	@( \
@@ -318,6 +320,8 @@ $(LIBFFI):
 		printf "#include \"libffi-darwin-i386/include/ffitarget.h\"\n"; \
 		printf "#elif defined(__x86_64__)\n"; \
 		printf "#include \"libffi-darwin-x86_64/include/ffitarget.h\"\n";\
+		printf "#elif defined(__arm64__)\n"; \
+		printf "#include \"libffi-darwin-arm64/include/ffitarget.h\"\n";\
 		printf "#endif\n";\
 	) > $(LIBFFI_BUILD_DIR)/include/ffitarget.h
 else
