@@ -33,17 +33,6 @@ public class ForeignTest {
     public void tearDown() {
     }
 
-    // TODO add test methods here.
-    // The methods must be annotated with annotation @Test. For example:
-    //
-    // @Test
-    // public void hello() {}
-    @Test public void version() {
-        final int VERSION = Foreign.VERSION_MAJOR << 16 | Foreign.VERSION_MINOR << 8 | Foreign.VERSION_MICRO;
-        int version = Foreign.getInstance().getVersion();
-        assertEquals("Bad version", VERSION, version);
-    }
-
     @Test public void pageSize() {
         long pageSize = Foreign.getInstance().pageSize();
         assertNotSame("Invalid page size", 0, pageSize);
