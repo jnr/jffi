@@ -129,7 +129,7 @@ final class Init {
     }
 
     private static UnsatisfiedLinkError newLoadError(Throwable cause) {
-        UnsatisfiedLinkError error = new UnsatisfiedLinkError();
+        UnsatisfiedLinkError error = new UnsatisfiedLinkError(cause.getLocalizedMessage());
         error.initCause(cause);
 
         return error;
