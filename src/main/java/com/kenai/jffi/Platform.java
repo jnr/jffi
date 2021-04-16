@@ -55,8 +55,8 @@ public abstract class Platform {
         NETBSD,
         /** OpenBSD */
         OPENBSD,
-	/** DragonFly */
-	DRAGONFLY,
+        /** DragonFly */
+        DRAGONFLY,
         /** Linux */
         LINUX,
         /** Solaris (and OpenSolaris) */
@@ -65,6 +65,8 @@ public abstract class Platform {
         WINDOWS,
         /** IBM AIX */
         AIX,
+        /** IBM i */
+        IBMI,
         /** IBM zOS **/
         ZLINUX,
 
@@ -144,6 +146,9 @@ public abstract class Platform {
         } else if (startsWithIgnoreCase(osName, "aix")) {
             return OS.AIX; 
         
+        }else if (startsWithIgnoreCase(osName, "os/400") || startsWithIgnoreCase(osName, "os400")) {
+            return OS.IBMI;
+
         } else if (startsWithIgnoreCase(osName, "openbsd")) {
             return OS.OPENBSD;
         
@@ -367,6 +372,12 @@ public abstract class Platform {
         //
         if (libName.matches(getLibraryNamePattern())) {
             return libName;
+        }
+        //
+        // IBM i can return ".srvpgm" for legacy service programs, not supported by jffi
+        //
+        if (OS.IBMI.equals(getOS())) {
+            return "lib"+libName+".so";
         }
         return System.mapLibraryName(libName);
     }
