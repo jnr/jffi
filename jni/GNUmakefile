@@ -164,16 +164,7 @@ endif
 
 ifeq ($(OS), darwin)
   PLATFORM = darwin
-  ARCHES =
-  ifneq ($(findstring $(CPU), i386),)
-    ARCHES += i386
-  endif
-  ifneq ($(findstring $(CPU), x86_64),)
-    ARCHES += x86_64
-  endif
-  ifneq ($(findstring $(CPU), arm64),)
-    ARCHES += arm64
-  endif
+  ARCHES = x86_64 arm64
 
   XCODE=$(shell xcode-select -print-path)
   CC = $(XCODE)/usr/bin/gcc
@@ -182,7 +173,7 @@ ifeq ($(OS), darwin)
   CFLAGS += -isysroot $(MACSDK) -DTARGET_RT_MAC_CFM=0
   CFLAGS += -I$(MACSDK)/System/Library/Frameworks/JavaVM.framework/Headers
   CFLAGS += $(foreach arch, $(ARCHES),-arch $(arch))
-  LDFLAGS = $(foreach arch, $(ARCHES),-arch $(arch)) -dynamiclib -framework JavaVM \
+  LDFLAGS = $(foreach arch, $(ARCHES),-arch $(arch)) -dynamiclib \
 	-Wl,-syslibroot,$(MACSDK) -mmacosx-version-min=10.6
   JNIEXT = jnilib
   #CFLAGS += -I$(MACSDK)/System/Library/Frameworks/Kernel.framework/Versions/A/Headers
@@ -300,7 +291,7 @@ build_ffi = \
 $(LIBFFI):
 	@mkdir -p $(@D)
 	@for arch in $(ARCHES); do $(call build_ffi,$$arch);done
-	# Assemble into a FAT (i386, x86_64) library
+	# Assemble into a FAT (x86_64, arm64) library
 	@mkdir -p $(BUILD_DIR)/libffi/.libs
 	@env MACOSX_DEPLOYMENT_TARGET=10.4 /usr/bin/libtool -static -o $@ \
 	    $(foreach arch, $(ARCHES),$(BUILD_DIR)/libffi-darwin-$(arch)/.libs/libffi_convenience.a)
@@ -311,6 +302,8 @@ $(LIBFFI):
 		printf "#include \"libffi-darwin-i386/include/ffi.h\"\n"; \
 		printf "#elif defined(__x86_64__)\n"; \
 		printf "#include \"libffi-darwin-x86_64/include/ffi.h\"\n";\
+		printf "#elif defined(__arm64__)\n"; \
+		printf "#include \"libffi-darwin-arm64/include/ffi.h\"\n";\
 		printf "#endif\n";\
 	) > $(LIBFFI_BUILD_DIR)/include/ffi.h
 	@( \
@@ -318,6 +311,8 @@ $(LIBFFI):
 		printf "#include \"libffi-darwin-i386/include/ffitarget.h\"\n"; \
 		printf "#elif defined(__x86_64__)\n"; \
 		printf "#include \"libffi-darwin-x86_64/include/ffitarget.h\"\n";\
+		printf "#elif defined(__arm64__)\n"; \
+		printf "#include \"libffi-darwin-arm64/include/ffitarget.h\"\n";\
 		printf "#endif\n";\
 	) > $(LIBFFI_BUILD_DIR)/include/ffitarget.h
 else

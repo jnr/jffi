@@ -52,6 +52,12 @@
 #include "FaultProtect.h"
 #include "com_kenai_jffi_Foreign.h"
 
+#if (defined(__arm64__) && defined(__APPLE__))
+#define USE_FFI_ALLOC 1
+#else
+#define USE_FFI_ALLOC 0
+#endif
+
 #define THREAD_ATTACH_THRESHOLD (1000)
 
 struct Closure;
@@ -71,9 +77,12 @@ typedef struct Closure {
     void* code; /* the code address must be the first member of this struct; used by java */
     jobject javaObject;
     Magazine* magazine;
+    void* pcl;
 } Closure;
 
 static bool closure_prep(ffi_cif* cif, void* code, Closure* closure, char* errbuf, size_t errbufsize);
+
+#if !USE_FFI_ALLOC
 
 JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_newClosureMagazine(JNIEnv *env, jobject self, jlong ctxAddress, jobject closureMethod,
@@ -105,6 +114,7 @@ Java_com_kenai_jffi_Foreign_newClosureMagazine(JNIEnv *env, jobject self, jlong 
         Closure* closure = &list[i];
         closure->magazine = magazine;
         closure->code = (code + (i * trampolineSize));
+        closure->pcl = closure->code;
 
         if (!closure_prep(&ctx->cif, closure->code, closure, errmsg, sizeof(errmsg))) {
             goto error;
@@ -143,6 +153,63 @@ error:
     return 0L;
 }
 
+#else
+
+JNIEXPORT jlong JNICALL
+Java_com_kenai_jffi_Foreign_newClosureMagazine(JNIEnv *env, jobject self, jlong ctxAddress, jobject closureMethod,
+    jboolean callWithPrimitiveParameters)
+{
+    CallContext* ctx = (CallContext *) j2p(ctxAddress);
+    Closure* closure = NULL;
+    Magazine* magazine = NULL;
+    void* code = NULL;
+    caddr_t pcl = NULL;
+    char errmsg[256];
+
+    magazine = calloc(1, sizeof(*magazine));
+    closure = calloc(1, sizeof(*closure));
+    pcl = ffi_closure_alloc(sizeof(ffi_closure), &code);
+
+    if (magazine == NULL || closure == NULL || pcl == NULL) {
+        snprintf(errmsg, sizeof(errmsg), "failed to allocate a page. errno=%d (%s)", errno, strerror(errno));
+        goto error;
+    }
+
+    closure->magazine = magazine;
+    closure->code = code;
+    closure->pcl = pcl;
+
+    if (!closure_prep(&ctx->cif, closure->code, closure, errmsg, sizeof(errmsg))) {
+        goto error;
+    }
+
+    magazine->methodID = (*env)->FromReflectedMethod(env, closureMethod);
+    if (magazine->methodID == NULL) {
+        throwException(env, IllegalArgument, "could not obtain reference to closure method");
+        goto error;
+    }
+
+    /* Track the allocated page + Closure memory area */
+    magazine->closures = closure;
+    magazine->nextclosure = 0;
+    magazine->nclosures = 1;
+    magazine->code = pcl;
+    magazine->callWithPrimitiveParameters = callWithPrimitiveParameters;
+    (*env)->GetJavaVM(env, &magazine->jvm);
+
+    return p2j(magazine);
+
+error:
+    free(closure);
+    free(magazine);
+    if (pcl != NULL) {
+        ffi_closure_free(pcl);
+    }
+    throwException(env, Runtime, errmsg);
+    return 0L;
+}
+
+#endif //!USE_FFI_ALLOC
 
 /*
  * Class:     com_kenai_jffi_Foreign
@@ -161,10 +228,13 @@ Java_com_kenai_jffi_Foreign_freeClosureMagazine(JNIEnv *env, jobject self, jlong
     }
 
     free(magazine->closures);
+#if !USE_FFI_ALLOC
     jffi_freePages(magazine->code, 1);
+#else
+    ffi_closure_free(magazine->code);
+#endif
     free(magazine);
 }
-
 
 /*
  * Class:     com_kenai_jffi_Foreign
@@ -408,7 +478,7 @@ closure_prep(ffi_cif* cif, void* code, Closure* closure, char* errbuf, size_t er
 {
     ffi_status status;
 
-    status = ffi_prep_closure_loc(code, cif, closure_invoke, closure, code);
+    status = ffi_prep_closure_loc(closure->pcl, cif, closure_invoke, closure, code);
     switch (status) {
         case FFI_OK:
             return true;
