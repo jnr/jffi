@@ -120,6 +120,8 @@ public class StubLoader {
         WINDOWS,
         /** IBM AIX */
         AIX,
+        /** IBM i */
+        IBMI,
         /** IBM zOS **/
         ZLINUX,
 
@@ -181,6 +183,8 @@ public class StubLoader {
             return OS.SOLARIS;
         } else if (Util.startsWithIgnoreCase(osName, "aix", LOCALE)) {
             return OS.AIX; 
+        } else if (Util.startsWithIgnoreCase(osName, "os400", LOCALE) || Util.startsWithIgnoreCase(osName, "os/400", LOCALE)) {
+            return OS.IBMI;
         } else if (Util.startsWithIgnoreCase(osName, "openbsd", LOCALE)) {
             return OS.OPENBSD;
         } else if (Util.startsWithIgnoreCase(osName, "freebsd", LOCALE)) {
@@ -275,7 +279,8 @@ public class StubLoader {
      * @return The path of the jar file.
      */
     private static String getStubLibraryPath() {
-        return "jni/" + getPlatformName() + "/"+ System.mapLibraryName(stubLibraryName);
+        String mappedLibraryName = OS.IBMI.equals(getOS()) ? ("lib" + stubLibraryName + ".so"): System.mapLibraryName(stubLibraryName);
+        return "jni/" + getPlatformName() + "/"+ mappedLibraryName;
     }
     
     public StubLoader() {}
@@ -426,7 +431,6 @@ public class StubLoader {
 
         try (InputStream sourceIS = getStubLibraryStream()) {
             dstFile = calculateExtractPath(tmpDirFile, jffiExtractName);
-
             if (jffiExtractName != null && dstFile.exists()) {
                 // unpacking to a specific name and that file exists, verify it
                 verifyExistingLibrary(dstFile, sourceIS);
@@ -499,7 +503,7 @@ public class StubLoader {
         File dstFile;
 
         // allow empty name to mean "jffi-#.#"
-        if (jffiExtractName.isEmpty()) {
+        if (null == jffiExtractName || jffiExtractName.isEmpty()) {
             jffiExtractName = "jffi-" + VERSION_MAJOR + "." + VERSION_MINOR;
         }
 

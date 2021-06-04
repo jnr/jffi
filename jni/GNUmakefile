@@ -206,6 +206,20 @@ ifeq ($(OS), aix)
   JNIEXT = a
   STRIP = strip
 endif
+ifeq ($(OS), os400)
+  SOFLAGS = -shared -static-libgcc
+  CFLAGS += -pthread -D_CALL_ELF=0
+  LDFLAGS += -pthread
+  JNIEXT = so
+  STRIP = strip
+  LIBFFI = /QOpenSys/pkgs/lib/libffi.so
+  LIBFFI_LIBS ?= $(shell pkg-config --libs libffi)
+  LIBFFI_CFLAGS ?= $(shell pkg-config --cflags libffi)
+  PLATFORM = aix
+  MODEL = 64
+  ARCHES = ppc64
+  WFLAGS += -Werror=undef
+endif
 
 ifneq ($(OS), dragonflybsd)
   SOFLAGS = -shared
@@ -264,7 +278,7 @@ debug:
 	@echo "OBJS=$(OBJS)"
 
 $(LIBJFFI):  $(OBJS) $(LIBFFI_LIBS)
-	$(CC) -o $@ $(LDFLAGS) $(SOFLAGS) $(OBJS) $(LIBFFI_LIBS) $(LIBS)
+	$(CC) -o $@ $(LDFLAGS) $(SOFLAGS) $(OBJS) $(LIBFFI) $(LIBS)
 	$(STRIP) $@
 
 $(BUILD_DIR)/%.o : $(SRC_DIR)/%.c $(wildcard $(JFFI_SRC_DIR)/*.h)
@@ -275,7 +289,7 @@ $(BUILD_DIR)/%.o : $(SRC_DIR)/%.S $(wildcard $(JFFI_SRC_DIR)/*.h)
 	@mkdir -p $(@D)
 	@$(CC) $(CFLAGS) -o $@ -c $<
 
-$(OBJS) : $(LIBFFI_LIBS)
+$(OBJS) : $(LIBFFI)
 
 ifeq ($(OS), darwin)
 build_ffi = \
