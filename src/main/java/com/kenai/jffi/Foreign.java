@@ -1426,6 +1426,20 @@ final class Foreign {
     static native byte[] getZeroTerminatedByteArray(long address, int maxlen);
 
     /**
+     * Copies a zero (nul) terminated by array from native memory.
+     *
+     * This method will search for a varying size null terminator, starting from <code>address</code>
+     * and stop once the terminator is encountered. The returned byte array does not
+     * contain the terminating zero bytes.
+     *
+     * @param address The address to copy the array from
+     * @param maxlen The maximum number of bytes to search for the nul terminator
+     * @param nullTerminatorWidth size of null terminator in bytes
+     * @return A byte array containing the bytes copied from native memory.
+     */
+    static native byte[] getZeroTerminatedByteArray(long address, int maxlen, int nullTerminatorWidth);
+
+    /**
      * Copies a java byte array to native memory and appends a NUL terminating byte.
      *
      * <b>Note</b> A total of length + 1 bytes is written to native memory.
@@ -1436,6 +1450,19 @@ final class Foreign {
      * @param length The number of bytes to copy to native memory
      */
     static native void putZeroTerminatedByteArray(long address, byte[] data, int offset, int length);
+
+    /**
+     * Copies a java byte array to native memory and appends a varying width null terminator.
+     *
+     * <b>Note</b> A total of length + nullTerminatorWidth bytes is written to native memory.
+     *
+     * @param address The address to copy to.
+     * @param data The byte array to copy to native memory
+     * @param offset The offset within the byte array to begin copying from
+     * @param length The number of bytes to copy to native memory
+     * @param nullTerminatorWidth size of null terminator in bytes
+     */
+    static native void putZeroTerminatedByteArray(long address, byte[] data, int offset, int length, int nullTerminatorWidth);
     
     /**
      * Reads an 8 bit integer from a native memory location.
@@ -1757,7 +1784,7 @@ final class Foreign {
     static native byte[] getZeroTerminatedByteArrayChecked(long address);
 
     /**
-     * Copies a zero Checked(nul) terminated by array from native memory.
+     * Copies a zero Checked(nul) terminated byte array from native memory.
      *
      * This method will search for a zero byte, starting from <code>address</code>
      * and stop once a zero byte is encountered.  The returned byte array does not
@@ -1770,6 +1797,20 @@ final class Foreign {
     static native byte[] getZeroTerminatedByteArrayChecked(long address, int maxlen);
 
     /**
+     * Copies a zero Checked(nul) terminated byte array from native memory.
+     *
+     * This method will search for a varying length null terminator, starting from <code>address</code>
+     * and stop once the terminator is encountered. The returned byte array does not
+     * contain the terminating zero bytes.
+     *
+     * @param address The address to copy the array from
+     * @param maxlen The maximum number of bytes to search for the nul terminator
+     * @param nullTerminatorWidth size of null terminator in bytes
+     * @return A byte array containing the bytes copied from native memory.
+     */
+    static native byte[] getZeroTerminatedByteArrayChecked(long address, int maxlen, int nullTerminatorWidth);
+
+    /**
      * Copies a java byte array to native memory and appends a NUL terminating byte.
      *
      * <b>Note</b> A total of length + 1 bytes is written to native memory.
@@ -1780,6 +1821,19 @@ final class Foreign {
      * @param length The number of bytes to copy to native memory
      */
     static native void putZeroTerminatedByteArrayChecked(long address, byte[] data, int offset, int length);
+
+    /**
+     * Copies a java byte array to native memory and appends a varying width null terminator.
+     *
+     * <b>Note</b> A total of length + nullTerminatorWidth bytes is written to native memory.
+     *
+     * @param address The address to copy to.
+     * @param data The byte array to copy to native memory
+     * @param offset The offset within the byte array to begin copying from
+     * @param length The number of bytes to copy to native memory
+     * @param nullTerminatorWidth size of null terminator in bytes
+     */
+    static native void putZeroTerminatedByteArrayChecked(long address, byte[] data, int offset, int length, int nullTerminatorWidth);
 
     /**
      * Creates a new Direct ByteBuffer for a native memory region.
