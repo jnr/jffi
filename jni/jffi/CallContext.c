@@ -63,7 +63,7 @@ static inline int FFI_ALIGN(int v, int a) {
  */
 JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_newCallContext(JNIEnv* env, jobject self,
-        jlong returnType, jlongArray paramArray, jint flags)
+        jlong returnType, jlong fixedParamCount, jlongArray paramArray, jint flags)
 {
     CallContext* ctx = NULL;
     jlong* paramTypes;
@@ -188,8 +188,14 @@ Java_com_kenai_jffi_Foreign_newCallContext(JNIEnv* env, jobject self,
         isFastLong = false;
     }
 
-    ffiStatus = ffi_prep_cif(&ctx->cif, abi, paramCount, (ffi_type *) j2p(returnType),
-            ctx->ffiParamTypes);
+    if (fixedParamCount == paramCount) {
+        ffiStatus = ffi_prep_cif(&ctx->cif, abi, paramCount, (ffi_type *) j2p(returnType),
+                ctx->ffiParamTypes);
+    } else {
+        ffiStatus = ffi_prep_cif_var(&ctx->cif, abi, fixedParamCount, paramCount, (ffi_type *) j2p(returnType),
+                ctx->ffiParamTypes);
+    }
+
     switch (ffiStatus) {
         case FFI_OK:
             break;
