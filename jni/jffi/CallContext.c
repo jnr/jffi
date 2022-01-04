@@ -199,6 +199,9 @@ Java_com_kenai_jffi_Foreign_newCallContext(JNIEnv* env, jobject self,
         case FFI_BAD_ABI:
             throwException(env, Runtime, "Invalid ABI");
             goto cleanup;
+        case FFI_BAD_ARGTYPE:
+            throwException(env, Runtime, "Bad argument type");
+            goto cleanup;
         default:
             throwException(env, Runtime, "Unknown FFI error");
     }
