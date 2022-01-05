@@ -88,7 +88,7 @@ public final class CallContext {
     }
 
     public static CallContext getCallContext(Type returnType, int fixedParamCount, Type[] parameterTypes, CallingConvention convention, boolean saveErrno) {
-        return CallContextCache.getInstance().getCallContext(returnType, parameterTypes, convention, saveErrno);
+        return CallContextCache.getInstance().getCallContext(returnType, fixedParamCount, parameterTypes, convention, saveErrno);
     }
 
     public static CallContext getCallContext(Type returnType, Type[] parameterTypes, CallingConvention convention,
