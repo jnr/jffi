@@ -429,6 +429,11 @@ final class Foreign {
     /**
      * Creates a new native call context.
      *
+     * To allow calling variadic FFI logic, the number of fixed arguments is passed in the high word of the flags
+     * parameter. Older builds that do not use the variadic logic will ignore these bits and continue to use the non-
+     * variadic logic that already worked. This change was primarily made for Apple Silicon, which handles variadic
+     * arguments differently than other platforms.
+     *
      * @param returnType The return type of the function
      * @param paramTypes The types of the parameters
      * @param flags A bitmask of F_DEFAULT, F_STDCALL, F_NOERRNO, F_PROTECT and the fixed param count in the high word.
