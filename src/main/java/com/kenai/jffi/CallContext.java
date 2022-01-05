@@ -141,8 +141,8 @@ public final class CallContext {
 
         final long h = foreign.newCallContext(
                 returnType.handle(),
-                fixedParamCount,
-                Type.nativeHandles(parameterTypes), flags);
+                Type.nativeHandles(parameterTypes),
+                flags | (fixedParamCount << 16));
         if (h == 0) {
             throw new RuntimeException("Failed to create native function");
         }

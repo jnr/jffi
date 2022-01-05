@@ -63,7 +63,7 @@ static inline int FFI_ALIGN(int v, int a) {
  */
 JNIEXPORT jlong JNICALL
 Java_com_kenai_jffi_Foreign_newCallContext(JNIEnv* env, jobject self,
-        jlong returnType, jlong fixedParamCount, jlongArray paramArray, jint flags)
+        jlong returnType, jlongArray paramArray, jint flags)
 {
     CallContext* ctx = NULL;
     jlong* paramTypes;
@@ -72,8 +72,11 @@ Java_com_kenai_jffi_Foreign_newCallContext(JNIEnv* env, jobject self,
     ffi_type* ffiParamTypes;
     int ffiStatus;
     int abi;
+    int fixedParamCount;
 
     paramCount = (*env)->GetArrayLength(env, paramArray);
+    fixedParamCount = (flags >> 16);
+
     ctx = calloc(1, sizeof(*ctx));
     if (ctx == NULL) {
         throwException(env, OutOfMemory, "Failed to allocate CallContext");

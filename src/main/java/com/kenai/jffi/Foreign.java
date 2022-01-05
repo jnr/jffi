@@ -430,13 +430,12 @@ final class Foreign {
      * Creates a new native call context.
      *
      * @param returnType The return type of the function
-     * @param fixedParamCount The number of fixed-length parameters, for varargs calls
      * @param paramTypes The types of the parameters
-     * @param flags A bitmask of F_DEFAULT, F_STDCALL, F_NOERRNO, F_PROTECT
+     * @param flags A bitmask of F_DEFAULT, F_STDCALL, F_NOERRNO, F_PROTECT and the fixed param count in the high word.
      *
      * @return The native address of a new function context
      */
-    final native long newCallContext(long returnType, long fixedParamCount, long[] paramTypes, int flags);
+    final native long newCallContext(long returnType, long[] paramTypes, int flags);
     
     /**
      * Frees a call context created by {@link #newCallContext}
