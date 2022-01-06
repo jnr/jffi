@@ -60,6 +60,8 @@ public final class CallContext {
     final Type[] parameterTypes;
     
     final long[] parameterTypeHandles;
+
+    final int fixedParamCount;
     
     final int flags;
 
@@ -83,6 +85,10 @@ public final class CallContext {
      */
     public static CallContext getCallContext(Type returnType, Type[] parameterTypes, CallingConvention convention, boolean saveErrno) {
         return CallContextCache.getInstance().getCallContext(returnType, parameterTypes, convention, saveErrno);
+    }
+
+    public static CallContext getCallContext(Type returnType, int fixedParamCount, Type[] parameterTypes, CallingConvention convention, boolean saveErrno) {
+        return CallContextCache.getInstance().getCallContext(returnType, fixedParamCount, parameterTypes, convention, saveErrno);
     }
 
     public static CallContext getCallContext(Type returnType, Type[] parameterTypes, CallingConvention convention,
@@ -115,26 +121,28 @@ public final class CallContext {
     }
 
     public CallContext(Type returnType, Type[] parameterTypes, CallingConvention convention, boolean saveErrno) {
-        this(returnType, parameterTypes, convention, saveErrno, false);
+        this(returnType, parameterTypes.length, parameterTypes, convention, saveErrno, false);
     }
 
     /**
      * Creates a new instance of <code>Function</code>.
-     *
      * @param returnType The return type of the native function.
+     * @param fixedParamCount The number of parameters that are fixed, for varargs calls
      * @param parameterTypes The parameter types the function accepts.
      * @param convention The calling convention of the function.
      * @param saveErrno Whether the errno should be saved or not
      */
-    CallContext(Type returnType, Type[] parameterTypes, CallingConvention convention,
-                       boolean saveErrno, boolean faultProtect) {
+    CallContext(Type returnType, int fixedParamCount, Type[] parameterTypes, CallingConvention convention,
+                boolean saveErrno, boolean faultProtect) {
 
         final int flags = (!saveErrno ? Foreign.F_NOERRNO : 0)
                 | (convention == CallingConvention.STDCALL ? Foreign.F_STDCALL : Foreign.F_DEFAULT)
                 | (faultProtect ? Foreign.F_PROTECT : 0);
 
-        final long h = foreign.newCallContext(returnType.handle(),
-                Type.nativeHandles(parameterTypes), flags);
+        final long h = foreign.newCallContext(
+                returnType.handle(),
+                Type.nativeHandles(parameterTypes),
+                flags | (fixedParamCount << 16));
         if (h == 0) {
             throw new RuntimeException("Failed to create native function");
         }
@@ -148,6 +156,7 @@ public final class CallContext {
         this.parameterTypes = parameterTypes.clone();
 
         this.parameterCount = parameterTypes.length;
+        this.fixedParamCount = fixedParamCount;
         this.rawParameterSize = foreign.getCallContextRawParameterSize(h);
         this.parameterTypeHandles = Type.nativeHandles(parameterTypes);
         this.flags = flags;

@@ -68,7 +68,17 @@ public class CallContextCache {
         return getCallContext(returnType, parameterTypes, convention, saveErrno, false);
     }
 
+    public final CallContext getCallContext(Type returnType, int fixedParamCount, Type[] parameterTypes, CallingConvention convention,
+                                            boolean saveErrno) {
+        return getCallContext(returnType, fixedParamCount, parameterTypes, convention, saveErrno, false);
+    }
+
     public final CallContext getCallContext(Type returnType, Type[] parameterTypes, CallingConvention convention,
+                                            boolean saveErrno, boolean faultProtect) {
+        return getCallContext(returnType, parameterTypes.length, parameterTypes, convention, saveErrno, faultProtect);
+    }
+
+    public final CallContext getCallContext(Type returnType, int fixedParamCount, Type[] parameterTypes, CallingConvention convention,
                                             boolean saveErrno, boolean faultProtect) {
         Signature signature = new Signature(returnType, parameterTypes, convention, saveErrno, faultProtect);
         CallContextRef ref = contextCache.get(signature);
@@ -83,7 +93,7 @@ public class CallContextCache {
             contextCache.remove(ref.signature);
         }
 
-        ctx = new CallContext(returnType, parameterTypes.clone(), convention, saveErrno, faultProtect);
+        ctx = new CallContext(returnType, fixedParamCount, parameterTypes.clone(), convention, saveErrno, faultProtect);
         contextCache.put(signature, new CallContextRef(signature, ctx, contextReferenceQueue));
 
         return ctx;

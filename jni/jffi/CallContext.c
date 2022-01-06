@@ -72,8 +72,11 @@ Java_com_kenai_jffi_Foreign_newCallContext(JNIEnv* env, jobject self,
     ffi_type* ffiParamTypes;
     int ffiStatus;
     int abi;
+    int fixedParamCount;
 
     paramCount = (*env)->GetArrayLength(env, paramArray);
+    fixedParamCount = (flags >> 16);
+
     ctx = calloc(1, sizeof(*ctx));
     if (ctx == NULL) {
         throwException(env, OutOfMemory, "Failed to allocate CallContext");
@@ -188,8 +191,14 @@ Java_com_kenai_jffi_Foreign_newCallContext(JNIEnv* env, jobject self,
         isFastLong = false;
     }
 
-    ffiStatus = ffi_prep_cif(&ctx->cif, abi, paramCount, (ffi_type *) j2p(returnType),
-            ctx->ffiParamTypes);
+    if (fixedParamCount == paramCount) {
+        ffiStatus = ffi_prep_cif(&ctx->cif, abi, paramCount, (ffi_type *) j2p(returnType),
+                ctx->ffiParamTypes);
+    } else {
+        ffiStatus = ffi_prep_cif_var(&ctx->cif, abi, fixedParamCount, paramCount, (ffi_type *) j2p(returnType),
+                ctx->ffiParamTypes);
+    }
+
     switch (ffiStatus) {
         case FFI_OK:
             break;
@@ -198,6 +207,9 @@ Java_com_kenai_jffi_Foreign_newCallContext(JNIEnv* env, jobject self,
             goto cleanup;
         case FFI_BAD_ABI:
             throwException(env, Runtime, "Invalid ABI");
+            goto cleanup;
+        case FFI_BAD_ARGTYPE:
+            throwException(env, Runtime, "Bad argument type");
             goto cleanup;
         default:
             throwException(env, Runtime, "Unknown FFI error");
