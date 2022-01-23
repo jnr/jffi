@@ -23,6 +23,8 @@ jobs:
           - arm
           - arm64
           - linux-arm-v5
+          # Commented out until https://github.com/multiarch/qemu-user-static/issues/128 is fixed
+          #- ppc64le
           - s390x
 
     name: Linux binary ${{ matrix.arch }}
