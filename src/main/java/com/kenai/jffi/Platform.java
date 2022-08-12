@@ -104,6 +104,8 @@ public abstract class Platform {
         ARM(32),
         /** AARCH64 */
         AARCH64(64),
+        /** LOONGARCH64 */
+        LOONGARCH64(64),
        /** MIPS64EL */
         MIPS64EL(64),
         /** Unknown CPU */
@@ -242,6 +244,9 @@ public abstract class Platform {
                 
             } else if (Util.equalsIgnoreCase("aarch64", archString, LOCALE)) {
                 return CPU.AARCH64;
+
+            } else if (Util.equalsIgnoreCase("loongarch64", archString, LOCALE)) {
+                return CPU.LOONGARCH64;
 
             } else if (Util.equalsIgnoreCase("mips64", archString, LOCALE) || Util.equalsIgnoreCase("mips64el", archString, LOCALE)) {
                 return CPU.MIPS64EL;

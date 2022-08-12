@@ -241,7 +241,7 @@ ifeq ($(CPU), sparcv9)
   MODEL=64
 endif
 
-ifneq ($(findstring $(CPU), x86_64 amd64 ppc64 ppc64le powerpc64 s390x aarch64 mips64 mips64el),)
+ifneq ($(findstring $(CPU), x86_64 amd64 ppc64 ppc64le powerpc64 s390x aarch64 loongarch64 mips64 mips64el),)
   MODEL = 64
 endif
 
