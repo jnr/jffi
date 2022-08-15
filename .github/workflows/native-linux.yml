@@ -24,6 +24,7 @@ jobs:
           - arm64
           - linux-arm-v5
           - s390x
+          - loongarch64
 
     name: Linux binary ${{ matrix.arch }}
 
