@@ -272,13 +272,6 @@ public class StubLoader {
         final String libName = getStubLibraryName();
         List<Throwable> errors = new ArrayList<Throwable>();
 
-        try {
-            System.loadLibrary(libName);
-            return;
-        } catch (Throwable t1) {
-            errors.add(t1);
-        }
-
         String bootPath = getBootPath();
         if (bootPath != null && loadFromBootPath(libName, bootPath, errors)) {
             return;
@@ -309,6 +302,14 @@ public class StubLoader {
             }catch (Throwable t1){
                 errors.add(t1);
             }
+        }
+
+        // Try to JVM's library path
+        try {
+            System.loadLibrary(libName);
+            return;
+        } catch (Throwable t1) {
+            errors.add(t1);
         }
 
         // aggregate error output and rethrow
