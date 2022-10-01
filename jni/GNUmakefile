@@ -164,25 +164,16 @@ endif
 
 ifeq ($(OS), darwin)
   PLATFORM = darwin
-  ARCHES =
-  ifneq ($(findstring $(CPU), i386),)
-    ARCHES += i386
-  endif
-  ifneq ($(findstring $(CPU), x86_64),)
-    ARCHES += x86_64
-  endif
-  ifneq ($(findstring $(CPU), arm64),)
-    ARCHES += arm64
-  endif
+  ARCHES = x86_64 arm64
 
   XCODE=$(shell xcode-select -print-path)
   CC = $(XCODE)/usr/bin/gcc
-  MACSDK = $(firstword $(strip $(wildcard $(XCODE)/SDKs/MacOSX10.*.sdk)) $(strip $(wildcard $(XCODE)/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.*.sdk)))
+  MACSDK = /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk
 
   CFLAGS += -isysroot $(MACSDK) -DTARGET_RT_MAC_CFM=0
   CFLAGS += -I$(MACSDK)/System/Library/Frameworks/JavaVM.framework/Headers
   CFLAGS += $(foreach arch, $(ARCHES),-arch $(arch))
-  LDFLAGS = $(foreach arch, $(ARCHES),-arch $(arch)) -dynamiclib -framework JavaVM \
+  LDFLAGS = $(foreach arch, $(ARCHES),-arch $(arch)) -dynamiclib \
 	-Wl,-syslibroot,$(MACSDK) -mmacosx-version-min=10.6
   JNIEXT = jnilib
   #CFLAGS += -I$(MACSDK)/System/Library/Frameworks/Kernel.framework/Versions/A/Headers
@@ -215,6 +206,20 @@ ifeq ($(OS), aix)
   JNIEXT = a
   STRIP = strip
 endif
+ifeq ($(OS), os400)
+  SOFLAGS = -shared -static-libgcc
+  CFLAGS += -pthread -D_CALL_ELF=0
+  LDFLAGS += -pthread
+  JNIEXT = so
+  STRIP = strip
+  LIBFFI = /QOpenSys/pkgs/lib/libffi.so
+  LIBFFI_LIBS ?= $(shell pkg-config --libs libffi)
+  LIBFFI_CFLAGS ?= $(shell pkg-config --cflags libffi)
+  PLATFORM = aix
+  MODEL = 64
+  ARCHES = ppc64
+  WFLAGS += -Werror=undef
+endif
 
 ifneq ($(OS), dragonflybsd)
   SOFLAGS = -shared
@@ -236,7 +241,7 @@ ifeq ($(CPU), sparcv9)
   MODEL=64
 endif
 
-ifneq ($(findstring $(CPU), x86_64 amd64 ppc64 ppc64le powerpc64 s390x aarch64 mips64 mips64el),)
+ifneq ($(findstring $(CPU), x86_64 amd64 ppc64 ppc64le powerpc64 s390x aarch64 loongarch64 mips64 mips64el),)
   MODEL = 64
 endif
 
@@ -273,8 +278,11 @@ debug:
 	@echo "OBJS=$(OBJS)"
 
 $(LIBJFFI):  $(OBJS) $(LIBFFI_LIBS)
-	$(CC) -o $@ $(LDFLAGS) $(SOFLAGS) $(OBJS) $(LIBFFI_LIBS) $(LIBS)
+	$(CC) -o $@ $(LDFLAGS) $(SOFLAGS) $(OBJS) $(LIBFFI) $(LIBS)
 	$(STRIP) $@
+ifeq ($(OS), darwin)
+	codesign -s - $@
+endif
 
 $(BUILD_DIR)/%.o : $(SRC_DIR)/%.c $(wildcard $(JFFI_SRC_DIR)/*.h)
 	@mkdir -p $(@D)
@@ -284,7 +292,7 @@ $(BUILD_DIR)/%.o : $(SRC_DIR)/%.S $(wildcard $(JFFI_SRC_DIR)/*.h)
 	@mkdir -p $(@D)
 	@$(CC) $(CFLAGS) -o $@ -c $<
 
-$(OBJS) : $(LIBFFI_LIBS)
+$(OBJS) : $(LIBFFI)
 
 ifeq ($(OS), darwin)
 build_ffi = \
@@ -300,7 +308,7 @@ build_ffi = \
 $(LIBFFI):
 	@mkdir -p $(@D)
 	@for arch in $(ARCHES); do $(call build_ffi,$$arch);done
-	# Assemble into a FAT (i386, x86_64) library
+	# Assemble into a FAT (x86_64, arm64) library
 	@mkdir -p $(BUILD_DIR)/libffi/.libs
 	@env MACOSX_DEPLOYMENT_TARGET=10.4 /usr/bin/libtool -static -o $@ \
 	    $(foreach arch, $(ARCHES),$(BUILD_DIR)/libffi-darwin-$(arch)/.libs/libffi_convenience.a)
@@ -311,6 +319,8 @@ $(LIBFFI):
 		printf "#include \"libffi-darwin-i386/include/ffi.h\"\n"; \
 		printf "#elif defined(__x86_64__)\n"; \
 		printf "#include \"libffi-darwin-x86_64/include/ffi.h\"\n";\
+		printf "#elif defined(__arm64__)\n"; \
+		printf "#include \"libffi-darwin-arm64/include/ffi.h\"\n";\
 		printf "#endif\n";\
 	) > $(LIBFFI_BUILD_DIR)/include/ffi.h
 	@( \
@@ -318,6 +328,8 @@ $(LIBFFI):
 		printf "#include \"libffi-darwin-i386/include/ffitarget.h\"\n"; \
 		printf "#elif defined(__x86_64__)\n"; \
 		printf "#include \"libffi-darwin-x86_64/include/ffitarget.h\"\n";\
+		printf "#elif defined(__arm64__)\n"; \
+		printf "#include \"libffi-darwin-arm64/include/ffitarget.h\"\n";\
 		printf "#endif\n";\
 	) > $(LIBFFI_BUILD_DIR)/include/ffitarget.h
 else

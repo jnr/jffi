@@ -96,7 +96,23 @@ public final class Function {
         this.functionAddress = address;
         this.callContext = CallContext.getCallContext(returnType, paramTypes, convention, saveErrno);
         this.contextAddress = callContext.getAddress();
-    }    
+    }
+
+    /**
+     * Creates a new instance of <code>Function</code>.
+     *
+     * @param address The native address of the function to invoke.
+     * @param returnType The return type of the native function.
+     * @param fixedParamCount The number of fixed params for a variadic call.
+     * @param paramTypes The parameter types the function accepts.
+     * @param convention The calling convention of the function.
+     * @param saveErrno Whether the errno should be saved or not
+     */
+    public Function(long address, Type returnType, int fixedParamCount, Type[] paramTypes, CallingConvention convention, boolean saveErrno) {
+        this.functionAddress = address;
+        this.callContext = CallContext.getCallContext(returnType, fixedParamCount, paramTypes, convention, saveErrno);
+        this.contextAddress = callContext.getAddress();
+    }
 
     /**
      * Gets the number of parameters the native function accepts.

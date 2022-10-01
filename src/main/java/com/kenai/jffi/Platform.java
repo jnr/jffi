@@ -55,8 +55,8 @@ public abstract class Platform {
         NETBSD,
         /** OpenBSD */
         OPENBSD,
-	/** DragonFly */
-	DRAGONFLY,
+        /** DragonFly */
+        DRAGONFLY,
         /** Linux */
         LINUX,
         /** Solaris (and OpenSolaris) */
@@ -65,6 +65,8 @@ public abstract class Platform {
         WINDOWS,
         /** IBM AIX */
         AIX,
+        /** IBM i */
+        IBMI,
         /** IBM zOS **/
         ZLINUX,
 
@@ -102,6 +104,8 @@ public abstract class Platform {
         ARM(32),
         /** AARCH64 */
         AARCH64(64),
+        /** LOONGARCH64 */
+        LOONGARCH64(64),
        /** MIPS64EL */
         MIPS64EL(64),
         /** Unknown CPU */
@@ -144,6 +148,9 @@ public abstract class Platform {
         } else if (startsWithIgnoreCase(osName, "aix")) {
             return OS.AIX; 
         
+        }else if (startsWithIgnoreCase(osName, "os/400") || startsWithIgnoreCase(osName, "os400")) {
+            return OS.IBMI;
+
         } else if (startsWithIgnoreCase(osName, "openbsd")) {
             return OS.OPENBSD;
         
@@ -237,6 +244,9 @@ public abstract class Platform {
                 
             } else if (Util.equalsIgnoreCase("aarch64", archString, LOCALE)) {
                 return CPU.AARCH64;
+
+            } else if (Util.equalsIgnoreCase("loongarch64", archString, LOCALE)) {
+                return CPU.LOONGARCH64;
 
             } else if (Util.equalsIgnoreCase("mips64", archString, LOCALE) || Util.equalsIgnoreCase("mips64el", archString, LOCALE)) {
                 return CPU.MIPS64EL;
@@ -367,6 +377,12 @@ public abstract class Platform {
         //
         if (libName.matches(getLibraryNamePattern())) {
             return libName;
+        }
+        //
+        // IBM i can return ".srvpgm" for legacy service programs, not supported by jffi
+        //
+        if (OS.IBMI.equals(getOS())) {
+            return "lib"+libName+".so";
         }
         return System.mapLibraryName(libName);
     }

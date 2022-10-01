@@ -78,6 +78,11 @@
       </or>
     </condition>
 
+    <condition property="platform.cpu" value="loongarch64">
+      <or>
+        <os arch="loongarch64"/>
+      </or>
+    </condition>
     <condition property="platform.cpu" value="mips64">
       <or>
         <os arch="mips64"/>
@@ -161,6 +166,8 @@
 
   <target name="test" depends="compile,-compile-test">
     <mkdir dir="${build.test.dir}/results"/>
+
+    <echo>test with jni libraries from sources</echo>
     <junit fork="${test.fork}" forkMode="${test.fork.mode}" printsummary="withOutAndErr" haltonfailure="true">
       <env key="LC_ALL" value="C"/>
       <classpath>
@@ -177,7 +184,45 @@
           <include name="**/*Test*.java"/>
         </fileset>
       </batchtest>
+    </junit>
 
+    <echo>test with unpack of jni library</echo>
+    <junit fork="${test.fork}" forkMode="${test.fork.mode}" printsummary="withOutAndErr" haltonfailure="true">
+      <env key="LC_ALL" value="C"/>
+      <classpath>
+        <pathelement location="${build.classes.dir}"/>
+        <pathelement location="${build.test.dir}/classes"/>
+        <fileset dir="archive" includes="*.jar"/>
+        <pathelement location="lib/junit_4/junit-4.11.jar"/>
+        <pathelement location="lib/junit_4/hamcrest-core-1.3.jar"/>
+      </classpath>
+
+      <formatter type="plain" /> <!-- to file -->
+      <batchtest todir="${build.test.dir}/results">
+        <fileset dir="${src.test.dir}">
+          <include name="**/*Test*.java"/>
+        </fileset>
+      </batchtest>
+    </junit>
+
+    <echo>test with unpack of jni library to specific locatiohn</echo>
+    <junit fork="${test.fork}" forkMode="${test.fork.mode}" printsummary="withOutAndErr" haltonfailure="true">
+      <env key="LC_ALL" value="C"/>
+      <classpath>
+        <pathelement location="${build.classes.dir}"/>
+        <pathelement location="${build.test.dir}/classes"/>
+        <fileset dir="archive" includes="*.jar"/>
+        <pathelement location="lib/junit_4/junit-4.11.jar"/>
+        <pathelement location="lib/junit_4/hamcrest-core-1.3.jar"/>
+      </classpath>
+      <sysproperty key="jffi.extract.name" value=""/>
+
+      <formatter type="plain" /> <!-- to file -->
+      <batchtest todir="${build.test.dir}/results">
+        <fileset dir="${src.test.dir}">
+          <include name="**/*Test*.java"/>
+        </fileset>
+      </batchtest>
     </junit>
   </target>
 

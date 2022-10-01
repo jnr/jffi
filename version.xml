@@ -1,7 +1,7 @@
 <project name="version" default="default" basedir=".">
     <property name="jffi.version.major" value="1"/>
-    <property name="jffi.version.minor" value="3"/>
-    <property name="jffi.version.micro" value="2"/>
+    <property name="jffi.version.minor" value="2"/>
+    <property name="jffi.version.micro" value="8"/>
     <target name="-generate-version-source" depends="">
         <echo message="Generating Version.java"/>
         <mkdir dir="${build.classes.dir}"/>

@@ -80,18 +80,7 @@ endif
 
 ifeq ($(OS), darwin)
   ARCHFLAGS = 
-  ifneq ($(findstring $(CPU), ppc powerpc),)
-    ARCHES += ppc
-  endif
-  ifneq ($(findstring $(CPU), i386),)
-    ARCHES += i386
-  endif
-  ifneq ($(findstring $(CPU), x86_64),)
-    ARCHES += x86_64
-  endif
-  ifneq ($(findstring $(CPU), arm64),)
-    ARCHES += arm64
-  endif
+  ARCHES = x86_64 arm64
 
   ifneq ($(realpath $(wildcard /Xcode3/usr/bin/gcc)),)
     XCODE=/Xcode3
@@ -104,14 +93,7 @@ ifeq ($(OS), darwin)
     CC = $(XCODE)/usr/bin/gcc
   endif
 
-  ifneq ($(realpath $(wildcard $(XCODE)/SDKs/MacOSX10.4?.sdk)),)
-    MACSDK = $(XCODE)/SDKs/MacOSX10.4u.sdk
-    ifeq ($(findstring ppc, $(ARCHES)),)
-      ARCHES += ppc
-    endif
-  else
-    MACSDK = $(firstword $(strip $(wildcard $(XCODE)/SDKs/MacOSX10.*.sdk)) $(strip $(wildcard $(XCODE)/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.*.sdk)))
-  endif
+  MACSDK = /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk
   ARCHFLAGS = $(foreach arch, $(ARCHES),-arch $(arch))
   CFLAGS += $(ARCHFLAGS) -isysroot $(MACSDK) -DTARGET_RT_MAC_CFM=0
   CFLAGS += -fno-common

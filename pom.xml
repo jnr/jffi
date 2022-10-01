@@ -8,7 +8,7 @@
   <groupId>com.github.jnr</groupId>
   <artifactId>jffi</artifactId>
   <packaging>jar</packaging>
-  <version>1.3.2-SNAPSHOT</version>
+  <version>1.3.10-SNAPSHOT</version>
   <name>jffi</name>
   <description>Java Foreign Function Interface</description>
   <url>http://github.com/jnr/jffi</url>
@@ -135,6 +135,23 @@
         </configuration>
       </plugin>
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>3.2.0</version>
+        <executions>
+          <execution>
+            <id>default-jar</id>
+            <configuration>
+              <archive>
+                <manifestEntries>
+                  <Automatic-Module-Name>org.jnrproject.jffi</Automatic-Module-Name>
+                </manifestEntries>
+              </archive>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
         <version>2.4.0</version>
@@ -209,15 +226,34 @@
       </plugin>
 -->
         <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>build-helper-maven-plugin</artifactId>
+          <version>3.2.0</version>
+          <executions>
+            <execution>
+              <id>add-source-directory</id>
+              <phase>generate-sources</phase>
+              <configuration>
+              <sources>
+                <source>${project.build.directory}/java</source>
+              </sources>
+              </configuration>
+              <goals>
+                <goal>add-source</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-antrun-plugin</artifactId>
-          <version>1.6</version>
+          <version>3.0.0</version>
           <executions>
             <execution>
             <id>build-native-library</id>
             <phase>generate-sources</phase>
             <configuration>
-              <tasks>
+              <target>
                 <property name="os.name" value="${os.name}" />
                 <property name="os.arch" value="${os.arch}" />
                 <property name="java.home" value="${java.home}" />
@@ -225,11 +261,7 @@
                 <property name="build.dir" value="${project.build.directory}" />
                 <property name="build.classes.dir" value="${project.build.outputDirectory}" />
                 <ant antfile="version.xml" dir="." target="-generate-version-source" />
-              </tasks>
-              <sourceRoot>
-                ${project.build.directory}/java
-              </sourceRoot>
-
+              </target>
             </configuration>
             <goals>
               <goal>run</goal>
@@ -241,7 +273,7 @@
                     <goal>run</goal>
                 </goals>
                 <configuration>
-                    <tasks>
+                    <target>
                       <unzip dest="${project.build.directory}/" overwrite="true">
                           <patternset>
                             <include name="**/*.so" />
@@ -254,7 +286,7 @@
                             <include name="**/*.jar" />
                           </fileset>
                       </unzip>
-                    </tasks>
+                    </target>
                 </configuration>
             </execution>
         </executions>
