@@ -17,16 +17,17 @@ jobs:
 
     strategy:
       matrix:
-        arch:
-          - "386"
-          - amd64
-          - arm
-          - arm64
-          - linux-arm-v5
-          - s390x
-          - loongarch64
+        image: [
+          { base: "debian:10", arch: "386" },
+          { base: "debian:10", arch: amd64 },
+          { base: "debian:10", arch: arm },
+          { base: "debian:10", arch: arm64 },
+          { base: "debian:10", arch: linux-arm-v5 },
+          { base: "debian:10", arch: s390x },
+          { base: "loongsongd/debian:v10.2-la64", arch: "linux/loong64" }
+        ]
 
-    name: Linux binary ${{ matrix.arch }}
+    name: Linux binary ${{ matrix.image.arch }}
 
     steps:
       - uses: actions/checkout@v2
@@ -47,17 +48,17 @@ jobs:
       - name: Restart Docker
         run: sudo systemctl restart docker.service
       - name: Pull docker image
-        run: docker pull --platform $(echo ${{ matrix.arch }} | sed 's|-|/|g') debian:10 || true
+        run: docker pull --platform $(echo ${{ matrix.image.arch }} | sed 's|-|/|g') ${{ matrix.image.base }} || true
       - name: Build inside Docker
-        run: docker run --rm -v $GITHUB_WORKSPACE:/work debian:10 /work/.github/build-native-debian.sh
+        run: docker run --rm -v $GITHUB_WORKSPACE:/work ${{ matrix.image.base }} /work/.github/build-native-debian.sh
       - name: Archive built library
         uses: actions/upload-artifact@v2
         with:
-          name: shared-object-${{ matrix.arch }}
+          name: shared-object-${{ matrix.image.arch }}
           path: build/jni/*.so
       - name: Archive built jar
         uses: actions/upload-artifact@v2
         with:
-          name: jar-${{ matrix.arch }}
+          name: jar-${{ matrix.image.arch }}
           path: archive/*.jar
 
