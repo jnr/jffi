@@ -26,6 +26,7 @@ jobs:
           { base: "debian:10", arch: s390x },
           { base: "loongsongd/debian:v10.2-la64", arch: "linux/loong64" }
         ]
+      fail-fast: false
 
     name: Linux binary ${{ matrix.image.arch }}
 
