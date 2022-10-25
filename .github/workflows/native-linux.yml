@@ -53,7 +53,7 @@ jobs:
       - name: Pull docker image
         run: docker pull --platform $(echo ${{ matrix.image.arch }} | sed 's|-|/|g') ${{ matrix.image.base }} || true
       - name: Build inside Docker
-        run: docker run --rm -v $GITHUB_WORKSPACE:/work ${{ matrix.image.base }} /work/.github/build-native-debian.sh
+        run: docker run --platform $(echo ${{ matrix.image.arch }} --rm -v $GITHUB_WORKSPACE:/work ${{ matrix.image.base }} /work/.github/build-native-debian.sh
       - name: Archive built library
         uses: actions/upload-artifact@v2
         with:
