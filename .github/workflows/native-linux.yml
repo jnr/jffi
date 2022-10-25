@@ -45,7 +45,7 @@ jobs:
       - name: Install Ninja
         run: sudo apt-get install ninja-build
       - name: Install qemu
-        run: "wget -q https://download.qemu.org/qemu-7.1.0.tar.xz && tar xJf qemu-7.1.0.tar.xz && cd qemu-7.1.0 && ./configure --target-list=${{ matrix.image.qemu_arch }} && make -j4 & sudo make install"
+        run: "wget -q https://download.qemu.org/qemu-7.1.0.tar.xz && tar xJf qemu-7.1.0.tar.xz && cd qemu-7.1.0 && ./configure --target-list=${{ matrix.image.qemu_arch }} && make -j4 && sudo make install"
       - name: Experimental Docker
         run: sudo cp .github/experimental-docker.json /etc/docker/daemon.json
       - name: Restart Docker
