@@ -17,15 +17,18 @@ jobs:
 
     strategy:
       matrix:
-        arch:
-          - "386"
-          - amd64
-          - arm
-          - arm64
-          - linux-arm-v5
-          - s390x
+        image: [
+          { base: "debian:10", arch: "386", qemu_arch: "i386-softmmu" },
+          { base: "debian:10", arch: amd64, qemu_arch: "x86_64-softmmu" },
+          { base: "debian:10", arch: arm, qemu_arch: "arm-softmmu" },
+          { base: "debian:10", arch: arm64, qemu_arch: "aarch64-softmmu" },
+          { base: "debian:10", arch: linux-arm-v5, qemu_arch: "arm-softmmu" },
+          { base: "debian:10", arch: s390x, qemu-arch: "s390x-softmmu" },
+          { base: "loongsongd/debian:v10.2-la64", arch: "linux/loong64", qemu_arch: "loongarch64-softmmu" }
+        ]
+      fail-fast: false
 
-    name: Linux binary ${{ matrix.arch }}
+    name: Linux binary ${{ matrix.image.arch }}
 
     steps:
       - uses: actions/checkout@v2
@@ -39,24 +42,26 @@ jobs:
         continue-on-error: true
       - name: Update System
         run: sudo apt-get update -y
+      - name: Install Ninja
+        run: sudo apt-get install ninja-build
       - name: Install qemu
-        run: sudo apt-get install -y --no-install-recommends qemu-user-static
+        run: "wget -q https://download.qemu.org/qemu-7.1.0.tar.xz && tar xJf qemu-7.1.0.tar.xz && cd qemu-7.1.0 && ./configure --target-list=${{ matrix.image.qemu_arch }} && make -j4 && sudo make install"
       - name: Experimental Docker
         run: sudo cp .github/experimental-docker.json /etc/docker/daemon.json
       - name: Restart Docker
         run: sudo systemctl restart docker.service
       - name: Pull docker image
-        run: docker pull --platform $(echo ${{ matrix.arch }} | sed 's|-|/|g') debian:10 || true
+        run: docker pull --platform $(echo ${{ matrix.image.arch }} | sed 's|-|/|g') ${{ matrix.image.base }} || true
       - name: Build inside Docker
-        run: docker run --rm -v $GITHUB_WORKSPACE:/work debian:10 /work/.github/build-native-debian.sh
+        run: docker run --platform $(echo ${{ matrix.image.arch }} --rm -v $GITHUB_WORKSPACE:/work ${{ matrix.image.base }} /work/.github/build-native-debian.sh
       - name: Archive built library
         uses: actions/upload-artifact@v2
         with:
-          name: shared-object-${{ matrix.arch }}
+          name: shared-object-${{ matrix.image.arch }}
           path: build/jni/*.so
       - name: Archive built jar
         uses: actions/upload-artifact@v2
         with:
-          name: jar-${{ matrix.arch }}
+          name: jar-${{ matrix.image.arch }}
           path: archive/*.jar
 
