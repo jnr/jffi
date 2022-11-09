@@ -16,6 +16,7 @@ jobs:
     runs-on: ubuntu-20.04
 
     strategy:
+      fail-fast: false
       matrix:
         arch:
           - "386"
@@ -24,6 +25,9 @@ jobs:
           - arm64
           - linux-arm-v5
           - s390x
+          - mips64le
+          - ppc64le
+          - riscv64
 
     name: Linux binary ${{ matrix.arch }}
 
@@ -57,6 +61,6 @@ jobs:
       - name: Archive built jar
         uses: actions/upload-artifact@v2
         with:
-          name: jar-${{ matrix.arch }}
+          name: jar-${{ matrix.arch }}-Linux
           path: archive/*.jar
 
