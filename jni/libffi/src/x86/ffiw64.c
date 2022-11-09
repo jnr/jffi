@@ -108,6 +108,13 @@ EFI64(ffi_prep_cif_machdep)(ffi_cif *cif)
   return FFI_OK;
 }
 
+/* We perform some black magic here to use some of the parent's stack frame in
+ * ffi_call_win64() that breaks with the MSVC compiler with the /RTCs or /GZ
+ * flags.  Disable the 'Stack frame run time error checking' for this function
+ * so we don't hit weird exceptions in debug builds. */
+#if defined(_MSC_VER)
+#pragma runtime_checks("s", off)
+#endif
 static void
 ffi_call_int (ffi_cif *cif, void (*fn)(void), void *rvalue,
 	      void **avalue, void *closure)
@@ -116,8 +123,24 @@ ffi_call_int (ffi_cif *cif, void (*fn)(void), void *rvalue,
   UINT64 *stack;
   size_t rsize;
   struct win64_call_frame *frame;
+  ffi_type **arg_types = cif->arg_types;
+  int nargs = cif->nargs;
 
   FFI_ASSERT(cif->abi == FFI_GNUW64 || cif->abi == FFI_WIN64);
+
+  /* If we have any large structure arguments, make a copy so we are passing
+     by value.  */
+  for (i = 0; i < nargs; i++)
+    {
+      ffi_type *at = arg_types[i];
+      int size = at->size;
+      if (at->type == FFI_TYPE_STRUCT && size > 8)
+        {
+          char *argcopy = alloca (size);
+          memcpy (argcopy, avalue[i], size);
+          avalue[i] = argcopy;
+        }
+    }
 
   flags = cif->flags;
   rsize = 0;
@@ -172,6 +195,9 @@ ffi_call_int (ffi_cif *cif, void (*fn)(void), void *rvalue,
 
   ffi_call_win64 (stack, frame, closure);
 }
+#if defined(_MSC_VER)
+#pragma runtime_checks("s", restore)
+#endif
 
 void
 EFI64(ffi_call)(ffi_cif *cif, void (*fn)(void), void *rvalue, void **avalue)
@@ -237,7 +263,9 @@ EFI64(ffi_prep_closure_loc)(ffi_closure* closure,
   memcpy (tramp, trampoline, sizeof(trampoline));
   *(UINT64 *)(tramp + sizeof (trampoline)) = (uintptr_t)ffi_closure_win64;
 
+#if defined(FFI_EXEC_STATIC_TRAMP)
 out:
+#endif
   closure->cif = cif;
   closure->fun = fun;
   closure->user_data = user_data;

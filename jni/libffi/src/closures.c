@@ -1,5 +1,5 @@
 /* -----------------------------------------------------------------------
-   closures.c - Copyright (c) 2019 Anthony Green
+   closures.c - Copyright (c) 2019, 2022 Anthony Green
                 Copyright (c) 2007, 2009, 2010 Red Hat, Inc.
                 Copyright (C) 2007, 2009, 2010 Free Software Foundation, Inc
                 Copyright (c) 2011 Plausible Labs Cooperative, Inc.
@@ -27,7 +27,7 @@
    DEALINGS IN THE SOFTWARE.
    ----------------------------------------------------------------------- */
 
-#if defined __linux__ && !defined _GNU_SOURCE
+#if (defined __linux__ || defined __CYGWIN__) && !defined _GNU_SOURCE
 #define _GNU_SOURCE 1
 #endif
 
@@ -133,22 +133,26 @@ ffi_tramp_is_present (__attribute__((unused)) void *ptr)
 #  define FFI_MMAP_EXEC_WRIT 1
 #  define HAVE_MNTENT 1
 # endif
-# if defined(_WIN32) || defined(__OS2__)
-/* Windows systems may have Data Execution Protection (DEP) enabled, 
+# if defined(__CYGWIN__) || defined(_WIN32) || defined(__OS2__)
+/* Windows systems may have Data Execution Protection (DEP) enabled,
    which requires the use of VirtualMalloc/VirtualFree to alloc/free
    executable memory. */
 #  define FFI_MMAP_EXEC_WRIT 1
 # endif
 #endif
 
-#if FFI_MMAP_EXEC_WRIT && !defined FFI_MMAP_EXEC_SELINUX
-# if defined(__linux__) && !defined(__ANDROID__)
+#if FFI_MMAP_EXEC_WRIT && defined(__linux__) && !defined(__ANDROID__)
+# if !defined FFI_MMAP_EXEC_SELINUX
 /* When defined to 1 check for SELinux and if SELinux is active,
    don't attempt PROT_EXEC|PROT_WRITE mapping at all, as that
    might cause audit messages.  */
 #  define FFI_MMAP_EXEC_SELINUX 1
-# endif
-#endif
+# endif /* !defined FFI_MMAP_EXEC_SELINUX */
+# if !defined FFI_MMAP_PAX
+/* Also check for PaX MPROTECT */
+#  define FFI_MMAP_PAX 1
+# endif /* !defined FFI_MMAP_PAX */
+#endif /* FFI_MMAP_EXEC_WRIT && defined(__linux__) && !defined(__ANDROID__) */
 
 #if FFI_CLOSURES
 
@@ -173,7 +177,6 @@ struct ffi_trampoline_table
 {
   /* contiguous writable and executable pages */
   vm_address_t config_page;
-  vm_address_t trampoline_page;
 
   /* free list tracking */
   uint16_t free_count;
@@ -217,7 +220,13 @@ ffi_trampoline_table_alloc (void)
 
   /* Remap the trampoline table on top of the placeholder page */
   trampoline_page = config_page + PAGE_MAX_SIZE;
+
+#ifdef HAVE_PTRAUTH
+  trampoline_page_template = (vm_address_t)(uintptr_t)ptrauth_auth_data((void *)&ffi_closure_trampoline_table_page, ptrauth_key_function_pointer, 0);
+#else
   trampoline_page_template = (vm_address_t)&ffi_closure_trampoline_table_page;
+#endif
+
 #ifdef __arm__
   /* ffi_closure_trampoline_table_page can be thumb-biased on some ARM archs */
   trampoline_page_template &= ~1UL;
@@ -231,11 +240,22 @@ ffi_trampoline_table_alloc (void)
       return NULL;
     }
 
+  if (!(cur_prot & VM_PROT_EXECUTE))
+    {
+      /* If VM_PROT_EXECUTE isn't set on the remapped trampoline page, set it */
+      kt = vm_protect (mach_task_self (), trampoline_page, PAGE_MAX_SIZE,
+         FALSE, cur_prot | VM_PROT_EXECUTE);
+      if (kt != KERN_SUCCESS)
+        {
+          vm_deallocate (mach_task_self (), config_page, PAGE_MAX_SIZE * 2);
+          return NULL;
+        }
+    }
+
   /* We have valid trampoline and config pages */
   table = calloc (1, sizeof (ffi_trampoline_table));
   table->free_count = FFI_TRAMPOLINE_COUNT;
   table->config_page = config_page;
-  table->trampoline_page = trampoline_page;
 
   /* Create and initialize the free list */
   table->free_list_pool =
@@ -245,7 +265,10 @@ ffi_trampoline_table_alloc (void)
     {
       ffi_trampoline_table_entry *entry = &table->free_list_pool[i];
       entry->trampoline =
-	(void *) (table->trampoline_page + (i * FFI_TRAMPOLINE_SIZE));
+	(void *) (trampoline_page + (i * FFI_TRAMPOLINE_SIZE));
+#ifdef HAVE_PTRAUTH
+      entry->trampoline = ptrauth_sign_unauthenticated(entry->trampoline, ptrauth_key_function_pointer, 0);
+#endif
 
       if (i < table->free_count - 1)
 	entry->next = &table->free_list_pool[i + 1];
@@ -314,9 +337,6 @@ ffi_closure_alloc (size_t size, void **code)
 
   /* Initialize the return values */
   *code = entry->trampoline;
-#ifdef HAVE_PTRAUTH
-  *code = ptrauth_sign_unauthenticated (*code, ptrauth_key_asia, 0);
-#endif
   closure->trampoline_table = table;
   closure->trampoline_table_entry = entry;
 
@@ -463,14 +483,18 @@ selinux_enabled_check (void)
 
 #endif /* !FFI_MMAP_EXEC_SELINUX */
 
-/* On PaX enable kernels that have MPROTECT enable we can't use PROT_EXEC. */
-#ifdef FFI_MMAP_EXEC_EMUTRAMP_PAX
+/* On PaX enable kernels that have MPROTECT enabled we can't use PROT_EXEC. */
+#if defined FFI_MMAP_PAX
 #include <stdlib.h>
 
-static int emutramp_enabled = -1;
+enum {
+  PAX_MPROTECT = (1 << 0),
+  PAX_EMUTRAMP = (1 << 1),
+};
+static int cached_pax_flags = -1;
 
 static int
-emutramp_enabled_check (void)
+pax_flags_check (void)
 {
   char *buf = NULL;
   size_t len = 0;
@@ -484,9 +508,10 @@ emutramp_enabled_check (void)
   while (getline (&buf, &len, f) != -1)
     if (!strncmp (buf, "PaX:", 4))
       {
-        char emutramp;
-        if (sscanf (buf, "%*s %*c%c", &emutramp) == 1)
-          ret = (emutramp == 'E');
+        if (NULL != strchr (buf + 4, 'M'))
+          ret |= PAX_MPROTECT;
+        if (NULL != strchr (buf + 4, 'E'))
+          ret |= PAX_EMUTRAMP;
         break;
       }
   free (buf);
@@ -494,9 +519,13 @@ emutramp_enabled_check (void)
   return ret;
 }
 
-#define is_emutramp_enabled() (emutramp_enabled >= 0 ? emutramp_enabled \
-                               : (emutramp_enabled = emutramp_enabled_check ()))
-#endif /* FFI_MMAP_EXEC_EMUTRAMP_PAX */
+#define get_pax_flags() (cached_pax_flags >= 0 ? cached_pax_flags \
+                               : (cached_pax_flags = pax_flags_check ()))
+#define has_pax_flags(flags) ((flags) == ((flags) & get_pax_flags ()))
+#define is_mprotect_enabled() (has_pax_flags (PAX_MPROTECT))
+#define is_emutramp_enabled() (has_pax_flags (PAX_EMUTRAMP))
+
+#endif /* defined FFI_MMAP_PAX */
 
 #elif defined (__CYGWIN__) || defined(__INTERIX)
 
@@ -507,9 +536,10 @@ emutramp_enabled_check (void)
 
 #endif /* !defined(X86_WIN32) && !defined(X86_WIN64) */
 
-#ifndef FFI_MMAP_EXEC_EMUTRAMP_PAX
-#define is_emutramp_enabled() 0
-#endif /* FFI_MMAP_EXEC_EMUTRAMP_PAX */
+#if !defined FFI_MMAP_PAX
+# define is_mprotect_enabled() 0
+# define is_emutramp_enabled() 0
+#endif /* !defined FFI_MMAP_PAX */
 
 /* Declare all functions defined in dlmalloc.c as static.  */
 static void *dlmalloc(size_t);
@@ -695,6 +725,7 @@ static struct
 #ifdef HAVE_MEMFD_CREATE
   { open_temp_exec_file_memfd, "libffi", 0 },
 #endif
+  { open_temp_exec_file_env, "LIBFFI_TMPDIR", 0 },
   { open_temp_exec_file_env, "TMPDIR", 0 },
   { open_temp_exec_file_dir, "/tmp", 0 },
   { open_temp_exec_file_dir, "/var/tmp", 0 },
@@ -732,7 +763,7 @@ open_temp_exec_file_opts_next (void)
 
 /* Return a file descriptor of a temporary zero-sized file in a
    writable and executable filesystem.  */
-static int
+int
 open_temp_exec_file (void)
 {
   int fd;
@@ -873,13 +904,23 @@ dlmmap (void *start, size_t length, int prot,
       return ptr;
     }
 
-  if (execfd == -1 && is_emutramp_enabled ())
+  /* -1 != execfd hints that we already decided to use dlmmap_locked
+     last time.  */
+  if (execfd == -1 && is_mprotect_enabled ())
     {
-      ptr = mmap (start, length, prot & ~PROT_EXEC, flags, fd, offset);
-      return ptr;
+#ifdef FFI_MMAP_EXEC_EMUTRAMP_PAX
+      if (is_emutramp_enabled ())
+        {
+          /* emutramp requires the kernel recognizing the trampoline pattern
+             generated by ffi_prep_closure_loc; there is no way to test
+             in advance whether this will work, so this is experimental.  */
+          ptr = mmap (start, length, prot & ~PROT_EXEC, flags, fd, offset);
+          return ptr;
+        }
+#endif
+      /* fallback to dlmmap_locked.  */
     }
-
-  if (execfd == -1 && !is_selinux_enabled ())
+  else if (execfd == -1 && !is_selinux_enabled ())
     {
       ptr = mmap (start, length, prot | PROT_EXEC, flags, fd, offset);
 
@@ -892,16 +933,11 @@ dlmmap (void *start, size_t length, int prot,
 	 MREMAP_DUP and prot at this point.  */
     }
 
-  if (execsize == 0 || execfd == -1)
-    {
-      pthread_mutex_lock (&open_temp_exec_file_mutex);
-      ptr = dlmmap_locked (start, length, prot, flags, offset);
-      pthread_mutex_unlock (&open_temp_exec_file_mutex);
+  pthread_mutex_lock (&open_temp_exec_file_mutex);
+  ptr = dlmmap_locked (start, length, prot, flags, offset);
+  pthread_mutex_unlock (&open_temp_exec_file_mutex);
 
-      return ptr;
-    }
-
-  return dlmmap_locked (start, length, prot, flags, offset);
+  return ptr;
 }
 
 /* Release memory at the given address, as well as the corresponding

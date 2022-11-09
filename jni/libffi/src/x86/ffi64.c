@@ -1,5 +1,5 @@
 /* -----------------------------------------------------------------------
-   ffi64.c - Copyright (c) 2011, 2018  Anthony Green
+   ffi64.c - Copyright (c) 2011, 2018, 2022  Anthony Green
              Copyright (c) 2013  The Written Word, Inc.
              Copyright (c) 2008, 2010  Red Hat, Inc.
              Copyright (c) 2002, 2007  Bo Thorsen <bo@suse.de>
@@ -218,7 +218,8 @@ classify_argument (ffi_type *type, enum x86_64_reg_class classes[],
     case FFI_TYPE_STRUCT:
       {
 	const size_t UNITS_PER_WORD = 8;
-	size_t words = (type->size + UNITS_PER_WORD - 1) / UNITS_PER_WORD;
+        size_t words = (type->size + byte_offset + UNITS_PER_WORD - 1)
+                       / UNITS_PER_WORD;
 	ffi_type **ptr;
 	unsigned int i;
 	enum x86_64_reg_class subclasses[MAX_CLASSES];
@@ -242,14 +243,15 @@ classify_argument (ffi_type *type, enum x86_64_reg_class classes[],
 	/* Merge the fields of structure.  */
 	for (ptr = type->elements; *ptr != NULL; ptr++)
 	  {
-	    size_t num;
+	    size_t num, pos;
 
 	    byte_offset = FFI_ALIGN (byte_offset, (*ptr)->alignment);
 
 	    num = classify_argument (*ptr, subclasses, byte_offset % 8);
 	    if (num == 0)
 	      return 0;
-	    for (i = 0; i < num; i++)
+            pos = byte_offset / 8;
+            for (i = 0; i < num && (i + pos) < words; i++)
 	      {
 		size_t pos = byte_offset / 8;
 		classes[i + pos] =
@@ -579,6 +581,9 @@ ffi_call_int (ffi_cif *cif, void (*fn)(void), void *rvalue,
 	flags = UNIX64_RET_VOID;
     }
 
+  arg_types = cif->arg_types;
+  avn = cif->nargs;
+
   /* Allocate the space for the arguments, plus 4 words of temp space.  */
   stack = alloca (sizeof (struct register_args) + cif->bytes + 4*8);
   reg_args = (struct register_args *) stack;
@@ -592,9 +597,6 @@ ffi_call_int (ffi_cif *cif, void (*fn)(void), void *rvalue,
      first integer argument.  */
   if (flags & UNIX64_FLAG_RET_IN_MEM)
     reg_args->gpr[gprcount++] = (unsigned long) rvalue;
-
-  avn = cif->nargs;
-  arg_types = cif->arg_types;
 
   for (i = 0; i < avn; ++i)
     {
@@ -611,11 +613,12 @@ ffi_call_int (ffi_cif *cif, void (*fn)(void), void *rvalue,
 	  if (align < 8)
 	    align = 8;
 
-	  /* Pass this argument in memory.  */
-	  argp = (void *) FFI_ALIGN (argp, align);
-	  memcpy (argp, avalue[i], size);
-	  argp += size;
-	}
+          /* Pass this argument in memory.  */
+          argp = (void *) FFI_ALIGN (argp, align);
+          memcpy (argp, avalue[i], size);
+
+          argp += size;
+        }
       else
 	{
 	  /* The argument is passed entirely in registers.  */
@@ -679,6 +682,24 @@ ffi_call_efi64(ffi_cif *cif, void (*fn)(void), void *rvalue, void **avalue);
 void
 ffi_call (ffi_cif *cif, void (*fn)(void), void *rvalue, void **avalue)
 {
+  ffi_type **arg_types = cif->arg_types;
+  int i, nargs = cif->nargs;
+  const int max_reg_struct_size = cif->abi == FFI_GNUW64 ? 8 : 16;
+
+  /* If we have any large structure arguments, make a copy so we are passing
+     by value.  */
+  for (i = 0; i < nargs; i++)
+    {
+      ffi_type *at = arg_types[i];
+      int size = at->size;
+      if (at->type == FFI_TYPE_STRUCT && size > max_reg_struct_size)
+        {
+          char *argcopy = alloca (size);
+          memcpy (argcopy, avalue[i], size);
+          avalue[i] = argcopy;
+        }
+    }
+
 #ifndef __ILP32__
   if (cif->abi == FFI_EFI64 || cif->abi == FFI_GNUW64)
     {
@@ -778,7 +799,9 @@ ffi_prep_closure_loc (ffi_closure* closure,
   memcpy (tramp, trampoline, sizeof(trampoline));
   *(UINT64 *)(tramp + sizeof (trampoline)) = (uintptr_t)dest;
 
+#if defined(FFI_EXEC_STATIC_TRAMP)
 out:
+#endif
   closure->cif = cif;
   closure->fun = fun;
   closure->user_data = user_data;
