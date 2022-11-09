@@ -23,7 +23,8 @@ jobs:
           - arm
           - arm64
           - linux-arm-v5
-          - s390x
+          # this build does not work and ends up just rebuilding x86_64
+          #- s390x
 
     name: Linux binary ${{ matrix.arch }}
 
