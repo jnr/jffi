@@ -106,7 +106,9 @@ public abstract class Platform {
         AARCH64(64),
         /** LOONGARCH64 */
         LOONGARCH64(64),
-       /** MIPS64EL */
+        /** MIPSEL */
+        MIPSEL(32),
+        /** MIPS64EL */
         MIPS64EL(64),
         /** Unknown CPU */
         UNKNOWN(64);
