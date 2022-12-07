@@ -264,6 +264,8 @@ public class NumberTest {
         Assume.assumeFalse("Apple Silicon does not support 80-bit long double",
                 Platform.getPlatform().getOS() == Platform.OS.DARWIN &&
                 Platform.getPlatform().getCPU() == Platform.CPU.AARCH64);
+        Assume.assumeFalse("32-bit ARM does not support 80-bit long double",
+                Platform.getPlatform().getCPU() == Platform.CPU.ARM);
         LibNumberTest lib = UnitHelper.loadTestLibrary(LibNumberTest.class, type);
         BigDecimal param = new BigDecimal("1.234567890123456789");
         BigDecimal result = lib.ret_f128(param);
