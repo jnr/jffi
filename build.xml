@@ -83,6 +83,11 @@
         <os arch="loongarch64"/>
       </or>
     </condition>
+    <condition property="platform.cpu" value="mipsel">
+      <or>
+        <os arch="mipsel"/>
+      </or>
+    </condition>
     <condition property="platform.cpu" value="mips64">
       <or>
         <os arch="mips64"/>
