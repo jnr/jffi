@@ -278,7 +278,7 @@ debug:
 	@echo "OBJS=$(OBJS)"
 
 $(LIBJFFI):  $(OBJS) $(LIBFFI_LIBS)
-	$(CC) -o $@ $(LDFLAGS) $(SOFLAGS) $(OBJS) $(LIBFFI) $(LIBS)
+	$(CC) -o $@ $(LDFLAGS) $(SOFLAGS) $(OBJS) $(LIBFFI_LIBS) $(LIBS)
 	$(STRIP) $@
 ifeq ($(OS), darwin)
 	codesign -s - $@
@@ -292,7 +292,7 @@ $(BUILD_DIR)/%.o : $(SRC_DIR)/%.S $(wildcard $(JFFI_SRC_DIR)/*.h)
 	@mkdir -p $(@D)
 	@$(CC) $(CFLAGS) -o $@ -c $<
 
-$(OBJS) : $(LIBFFI)
+$(OBJS) : $(LIBFFI_LIBS)
 
 ifeq ($(OS), darwin)
 build_ffi = \
