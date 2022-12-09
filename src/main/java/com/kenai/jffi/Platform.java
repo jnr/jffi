@@ -110,6 +110,8 @@ public abstract class Platform {
         MIPSEL(32),
         /** MIPS64EL */
         MIPS64EL(64),
+        /** RISCV64 */
+        RISCV64(64),
         /** Unknown CPU */
         UNKNOWN(64);
 
@@ -255,6 +257,9 @@ public abstract class Platform {
 
             } else if (Util.equalsIgnoreCase("mips64", archString, LOCALE) || Util.equalsIgnoreCase("mips64el", archString, LOCALE)) {
                 return CPU.MIPS64EL;
+
+            } else if (Util.equalsIgnoreCase("riscv64", archString, LOCALE)) {
+                return CPU.RISCV64;
             }
             
 
