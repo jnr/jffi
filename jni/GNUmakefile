@@ -22,7 +22,6 @@ ifneq ($(findstring cygwin, $(BUILD_OS)),)
 endif
 
 CPU ?= $(shell uname -m | sed -e 's/i[345678]86/i386/')
-MODEL = 32 # Default to 32bit compiles
 PLATFORM = $(CPU)-$(OS)
 
 JDK_HOME=$(shell if [ -d "$(JAVA_HOME)"/include ];then echo "$(JAVA_HOME)"; else echo "$(JAVA_HOME)"/..; fi)
@@ -216,7 +215,6 @@ ifeq ($(OS), os400)
   LIBFFI_LIBS ?= $(shell pkg-config --libs libffi)
   LIBFFI_CFLAGS ?= $(shell pkg-config --cflags libffi)
   PLATFORM = aix
-  MODEL = 64
   ARCHES = ppc64
   WFLAGS += -Werror=undef
 endif
@@ -235,22 +233,6 @@ ifeq ($(CPU), i386)
   ifneq ($(findstring $(OS), linux),)
     CFLAGS += -march=i586 -mtune=generic
   endif
-endif
-
-ifeq ($(CPU), sparcv9)
-  MODEL=64
-endif
-
-ifneq ($(findstring $(CPU), x86_64 amd64 ppc64 ppc64le powerpc64 s390x aarch64 loongarch64 mips64 mips64el),)
-  MODEL = 64
-endif
-
-# On platforms (linux, solaris) that support both 32bit and 64bit, force building for one or the other
-ifneq ($(strip $(findstring $(OS), solaris)),)
-  # Change the CC/LD instead of CFLAGS/LDFLAGS, incase other things in the flags
-  # makes the libffi build choke
-  CC += -m$(MODEL)
-  LD += -m$(MODEL)
 endif
 
 LIBJFFI = $(BUILD_DIR)/$(PREFIX)$(LIBNAME)-$(VERSION).$(JNIEXT)
