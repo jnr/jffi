@@ -250,6 +250,9 @@ public abstract class Platform {
             } else if (Util.equalsIgnoreCase("loongarch64", archString, LOCALE)) {
                 return CPU.LOONGARCH64;
 
+            } else if (Util.equalsIgnoreCase("mipsel", archString, LOCALE)) {
+                return CPU.MIPSEL;
+
             } else if (Util.equalsIgnoreCase("mips64", archString, LOCALE) || Util.equalsIgnoreCase("mips64el", archString, LOCALE)) {
                 return CPU.MIPS64EL;
             }
