@@ -165,6 +165,8 @@ public class StubLoader {
         MIPSEL,
         /** MIPS 64-bit little endian */
         MIPS64EL,
+        /** RISC-V 64-bit little endian */
+        RISCV64,
         /** Unknown CPU */
         UNKNOWN;
 
@@ -237,6 +239,8 @@ public class StubLoader {
             return CPU.MIPSEL;
         } else if (Util.equalsIgnoreCase("mips64", archString, LOCALE) || Util.equalsIgnoreCase("mips64el", archString, LOCALE)) {
             return CPU.MIPS64EL;
+        } else if (Util.equalsIgnoreCase("riscv64", archString, LOCALE)) {
+            return CPU.RISCV64;
 
         }
 
