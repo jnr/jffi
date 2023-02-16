@@ -47,7 +47,7 @@ jobs:
       - name: Restart Docker
         run: sudo systemctl restart docker.service
       - name: Pull docker image
-        run: docker pull --platform $(echo ${{ matrix.arch }} | sed 's|-|/|g') debian:10 || true
+        run: docker pull --platform $(echo ${{ matrix.arch }} | sed 's|-|/|g') debian:8 || true
       - name: Build inside Docker
         run: docker run --rm -v $GITHUB_WORKSPACE:/work debian:10 /work/.github/build-native-debian.sh
       - name: Archive built library
