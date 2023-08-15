@@ -120,6 +120,8 @@ public class StubLoader {
         S390X,
         /** ARM */
         ARM,
+	/** LOONGARCH 64 bit */
+        LOONGARCH64,
         /** Unknown CPU */
         UNKNOWN;
 
@@ -180,8 +182,9 @@ public class StubLoader {
             return CPU.S390X;
         } else if (Util.equalsIgnoreCase("arm", archString, LOCALE)) {
             return CPU.ARM;
+        } else if (Util.equalsIgnoreCase("loongarch64", archString, LOCALE)) {
+            return CPU.LOONGARCH64;
         }
-
         // Try to find by lookup up in the CPU list
         for (CPU cpu : CPU.values()) {
             if (Util.equalsIgnoreCase(cpu.name(), archString, LOCALE)) {

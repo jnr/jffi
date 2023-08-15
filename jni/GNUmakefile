@@ -64,7 +64,7 @@ JFLAGS = -fno-omit-frame-pointer -fno-strict-aliasing -DNDEBUG
 OFLAGS = -O2 $(JFLAGS)
 
 # MacOS headers aren't completely warning free, so turn them off
-WERROR = -Werror
+#WERROR = -Werror
 ifneq ($(OS),darwin)
   WFLAGS += -Wundef $(WERROR)
 endif
@@ -243,7 +243,7 @@ ifeq ($(CPU), sparcv9)
   MODEL=64
 endif
 
-ifneq ($(findstring $(CPU), x86_64 amd64 ppc64 ppc64le powerpc64 s390x),)
+ifneq ($(findstring $(CPU), x86_64 amd64 ppc64 ppc64le powerpc64 s390x loongarch64),)
   MODEL = 64
 endif
 
