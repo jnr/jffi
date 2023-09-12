@@ -25,6 +25,7 @@ jobs:
           - linux-arm-v5
           # this build does not work and ends up just rebuilding x86_64
           #- s390x
+      fail-fast: false
 
     name: Linux binary ${{ matrix.arch }}
 
