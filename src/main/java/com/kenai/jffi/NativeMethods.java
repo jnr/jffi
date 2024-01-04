@@ -32,7 +32,8 @@
 
 package com.kenai.jffi;
 
-import java.util.ArrayList;
+import com.kenai.jffi.internal.Cleaner;
+
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -144,18 +145,19 @@ public final class NativeMethods {
         public ResourceHolder(MemoryIO mm, long memory) {
             this.mm = mm;
             this.memory = memory;
-        }
-        
-        @Override
-        protected void finalize() throws Throwable {
-            try {
-                mm.freeMemory(memory);
-            } catch (Throwable t) {
-                Logger.getLogger(getClass().getName()).log(Level.WARNING, 
-                    "Exception when freeing native method struct array: %s", t.getLocalizedMessage());
-            } finally {
-                super.finalize();
-            }
+
+            Cleaner.register(this, new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        mm.freeMemory(memory);
+                    } catch (Throwable t) {
+                        Logger.getLogger(getClass().getName()).log(Level.WARNING,
+                                "Exception when freeing native method struct array: %s", t.getLocalizedMessage());
+                    }
+                }
+            });
         }
     }
+
 }

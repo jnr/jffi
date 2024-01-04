@@ -32,6 +32,8 @@
 
 package com.kenai.jffi;
 
+import com.kenai.jffi.internal.Cleaner;
+
 import java.lang.ref.WeakReference;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -164,6 +166,15 @@ public final class Library {
         this.foreign = foreign;
         this.name = name;
         this.handle = address;
+        Cleaner.register(this, new Runnable() {
+            @Override
+            public void run() {
+                int disposed = UPDATER.getAndSet(Library.this, 1);
+                if (disposed == 0 && handle != 0L) {
+                    foreign.dlclose(handle);
+                }
+            }
+        });
     }
 
     /**
@@ -191,16 +202,5 @@ public final class Library {
         String error = lastError.get();
         return error != null ? error : "unknown";
     }
-    
-    @Override
-    protected void finalize() throws Throwable {
-        try {
-            int disposed = UPDATER.getAndSet(this, 1);
-            if (disposed == 0 && handle != 0L) {
-                foreign.dlclose(handle);
-            }
-        } finally {
-            super.finalize();
-        }
-    }
+
 }

@@ -32,6 +32,8 @@
 
 package com.kenai.jffi;
 
+import com.kenai.jffi.internal.Cleaner;
+
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.logging.Level;
@@ -44,6 +46,7 @@ import java.util.logging.Logger;
  * native function, or to implement a callback from native code to java.
  */
 public final class CallContext {
+
     /** The native address of the context */
     final long contextAddress;
 
@@ -160,6 +163,21 @@ public final class CallContext {
         this.rawParameterSize = foreign.getCallContextRawParameterSize(h);
         this.parameterTypeHandles = Type.nativeHandles(parameterTypes);
         this.flags = flags;
+
+        Cleaner.register(this, new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    int disposed = UPDATER.getAndSet(CallContext.this, 1);
+                    if (disposed == 0 && contextAddress != 0) {
+                        foreign.freeCallContext(contextAddress);
+                    }
+                } catch (Throwable t) {
+                    Logger.getLogger(getClass().getName()).log(Level.WARNING,
+                            "exception when freeing " + getClass() + ": %s", t.getLocalizedMessage());
+                }
+            }
+        });
     }
 
     /**
@@ -237,18 +255,4 @@ public final class CallContext {
     @Deprecated
     public final void dispose() {}
 
-    @Override
-    protected void finalize() throws Throwable {
-        try {
-            int disposed = UPDATER.getAndSet(this, 1);
-            if (disposed == 0 && contextAddress != 0) {
-                foreign.freeCallContext(contextAddress);
-            }
-        } catch (Throwable t) {
-            Logger.getLogger(getClass().getName()).log(Level.WARNING, 
-                    "exception when freeing " + getClass() + ": %s", t.getLocalizedMessage());
-        } finally {
-            super.finalize();
-        }
-    }
 }
