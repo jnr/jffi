@@ -1,6 +1,7 @@
 package com.kenai.jffi;
 
-import java.util.concurrent.atomic.AtomicBoolean;
+import com.kenai.jffi.internal.Cleaner;
+
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -9,6 +10,7 @@ import java.util.logging.Logger;
  *
  */
 public final class ClosureMagazine {
+
     /** A handle to the foreign interface to keep it alive as long as this object is alive */
     @SuppressWarnings({"FieldCanBeLocal", "UnusedDeclaration"})
     private final Foreign foreign;
@@ -23,6 +25,21 @@ public final class ClosureMagazine {
         this.foreign = foreign;
         this.callContext = callContext;
         this.magazineAddress = magazineAddress;
+
+        Cleaner.register(this, new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    int disposed = UPDATER.getAndSet(ClosureMagazine.this, 1);
+                    if (magazineAddress != 0L && disposed == 0) {
+                        foreign.freeClosureMagazine(magazineAddress);
+                    }
+                } catch (Throwable t) {
+                    Logger.getLogger(getClass().getName()).log(Level.WARNING,
+                            "exception when freeing " + getClass() + ": %s", t.getLocalizedMessage());
+                }
+            }
+        });
     }
 
     public Closure.Handle allocate(Object proxy) {
@@ -58,21 +75,6 @@ public final class ClosureMagazine {
         public void dispose() { }
 
         public void free() {}
-    }
-
-    @Override
-    protected void finalize() throws Throwable {
-        try {
-            int disposed = UPDATER.getAndSet(this, 1);
-            if (magazineAddress != 0L && disposed == 0) {
-                foreign.freeClosureMagazine(magazineAddress);
-            }
-        } catch (Throwable t) {
-            Logger.getLogger(getClass().getName()).log(Level.WARNING,
-                    "exception when freeing " + getClass() + ": %s", t.getLocalizedMessage());
-        } finally {
-            super.finalize();
-        }
     }
 
 }

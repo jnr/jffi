@@ -32,11 +32,14 @@
 
 package com.kenai.jffi;
 
+import com.kenai.jffi.internal.Cleaner;
+
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public abstract class Aggregate extends Type {
+
     private final TypeInfo typeInfo;
     private final long handle;
     private volatile int disposed;
@@ -54,26 +57,28 @@ public abstract class Aggregate extends Type {
         this.foreign = foreign;
         this.handle = handle;
         this.typeInfo = new TypeInfo(handle, foreign.getTypeType(handle), foreign.getTypeSize(handle), foreign.getTypeAlign(handle));
+
+        Cleaner.register(this, new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    int disposed = UPDATER.getAndSet(Aggregate.this, 1);
+                    if (disposed == 0) {
+                        foreign.freeAggregate(typeInfo.handle);
+                    }
+                } catch (Throwable t) {
+                    Logger.getLogger(getClass().getName()).log(Level.WARNING,
+                            "Exception when freeing FFI aggregate: %s", t.getLocalizedMessage());
+                }
+            }
+        });
     }
 
     final TypeInfo getTypeInfo() {
         return typeInfo;
     }
 
+    @Deprecated
     public synchronized final void dispose() {}
 
-    @Override
-    protected void finalize() throws Throwable {
-        try {
-            int disposed = UPDATER.getAndSet(this, 1);
-            if (disposed == 0) {
-                foreign.freeAggregate(typeInfo.handle);
-            }
-        } catch (Throwable t) {
-            Logger.getLogger(getClass().getName()).log(Level.WARNING, 
-                    "Exception when freeing FFI aggregate: %s", t.getLocalizedMessage());
-        } finally {
-            super.finalize();
-        }
-    }
 }

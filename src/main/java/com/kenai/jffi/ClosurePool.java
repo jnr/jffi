@@ -32,6 +32,8 @@
 
 package com.kenai.jffi;
 
+import com.kenai.jffi.internal.Cleaner;
+
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -193,6 +195,27 @@ public final class ClosurePool {
             slots.toArray(this.slots);
             next = 0;
             freeCount = this.slots.length;
+
+            Cleaner.register(this, new Runnable() {
+                @Override
+                public void run() {
+                    boolean release = true;
+                    //
+                    // If any of the closures allocated from this magazine set autorelease=false
+                    // then this magazine cannot be freed, so just let it leak
+                    //
+                    for (int i = 0; i < Magazine.this.slots.length; i++) {
+                        if (!Magazine.this.slots[i].autorelease) {
+                            release = false;
+                            break;
+                        }
+                    }
+
+                    if (magazine != 0 && release) {
+                        foreign.freeClosureMagazine(magazine);
+                    }
+                }
+            });
         }
 
         Slot get() {
@@ -225,29 +248,6 @@ public final class ClosurePool {
             next = 0;
         }
 
-        @Override
-        protected void finalize() throws Throwable {
-            try {
-                boolean release = true;
-                //
-                // If any of the closures allocated from this magazine set autorelease=false
-                // then this magazine cannot be freed, so just let it leak
-                //
-                for (int i = 0; i < slots.length; i++) {
-                    if (!slots[i].autorelease) {
-                        release = false;
-                        break;
-                    }
-                }
-
-                if (magazine != 0 && release) {
-                    foreign.freeClosureMagazine(magazine);
-                }
-            } finally {
-                super.finalize();
-            }
-        }
-
         static final class Slot {
             /**
              * The address of the native closure structure.
@@ -273,22 +273,22 @@ public final class ClosurePool {
     }
 
     private static final class MagazineHolder {
+
         final ClosurePool pool;
         final Magazine magazine;
 
         public MagazineHolder(ClosurePool pool, Magazine magazine) {
             this.pool = pool;
             this.magazine = magazine;
+
+            Cleaner.register(this, new Runnable() {
+                @Override
+                public void run() {
+                    pool.recycle(magazine);
+                }
+            });
         }
 
-        @Override
-        protected void finalize() throws Throwable {
-            try {
-                pool.recycle(magazine);
-            } finally {
-                super.finalize();
-            }
-        }
     }
 
     /**
@@ -339,4 +339,5 @@ public final class ClosurePool {
         public void invoke(Buffer buffer) {
         }
     };
+
 }
