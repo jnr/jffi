@@ -5,13 +5,21 @@ set -ex
 cd "$(dirname "$(dirname "$0")")"
 
 # Add stretch for Java 8
-cat <<END > /etc/apt/sources.list.d/stretch.list
-deb http://deb.debian.org/debian stretch main
-deb http://security.debian.org/debian-security stretch/updates main
-END
+#cat <<END > /etc/apt/sources.list.d/stretch.list
+#deb http://deb.debian.org/debian stretch main
+#deb http://security.debian.org/debian-security stretch/updates main
+#END
 
 apt-get update -y
-apt-get install -y --no-install-recommends openjdk-8-jdk-headless make gcc libc6-dev texinfo
+
+apt-get install -y wget apt-transport-https gpg
+wget -qO - https://packages.adoptium.net/artifactory/api/gpg/key/public | gpg --dearmor | tee /etc/apt/trusted.gpg.d/adoptium.gpg > /dev/null
+echo "deb https://packages.adoptium.net/artifactory/deb $(awk -F= '/^VERSION_CODENAME/{print$2}' /etc/os-release) main" | tee /etc/apt/sources.list.d/adoptium.list
+
+apt-get update -y
+
+apt-get install -y temurin-8-jdk
+apt-get install -y --no-install-recommends make gcc libc6-dev texinfo
 # Needs to be split, otherwise a newer version of OpenJDK is pulled
 apt-get install -y --no-install-recommends ant
 rm archive/*
