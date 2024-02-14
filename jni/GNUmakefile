@@ -247,6 +247,9 @@ ifdef CONFIGURE_BUILD
 	LIBFFI_CONFIGURE += --build=$(CONFIGURE_BUILD)
 endif
 
+# Disable memfd_create which binds us to newer glibc (jnr/jffi#138)
+LIBFFI_CONFIGURE += 'ac_cv_func_memfd_create=no'
+
 all:	$(LIBJFFI)
 
 debug:
