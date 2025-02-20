@@ -48,25 +48,37 @@ public final class Cleaner {
         }
     }
 
-    private static final Object cleanerLock = new Object();
+    private static final Object cleanerLock = registerMethod == null ? null : new Object();
     private static volatile Object cleaner;
 
-    private static Object getCleaner(Object object, Runnable cleanProc) {
-        if (cleaner == null) synchronized (cleanerLock) {
-            if (cleaner == null) {
-                try {
-                    if (registerMethod == null) cleaner = createMethod.invoke(null, object, cleanProc);
-                    else cleaner = registerMethod.invoke(createMethod.invoke(null), object, cleanProc);
-                } catch (InvocationTargetException | IllegalAccessException e) {
-                    throw new IllegalStateException(e);
-                }
+    private static Object getCleaner(Object object, Runnable cleanup) {
+        if (registerMethod == null) { // JDK 1.8
+            try {
+                return createMethod.invoke(null, object, cleanup);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw new IllegalStateException(e);
             }
         }
-        return cleaner;
+        else { // JDK 9
+            if (cleaner == null) synchronized (cleanerLock) {
+                if (cleaner == null) {
+                    try {
+                        cleaner = createMethod.invoke(null);
+                    } catch (InvocationTargetException | IllegalAccessException e) {
+                        throw new IllegalStateException(e);
+                    }
+                }
+            }
+            try {
+                return registerMethod.invoke(cleaner, object, cleanup);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw new IllegalStateException(e);
+            }
+        }
     }
 
-    public static Runnable register(Object object, Runnable cleanProc) {
-        Object cleaner = getCleaner(object, cleanProc);
+    public static Runnable register(Object object, Runnable cleanup) {
+        Object cleaner = getCleaner(object, cleanup);
         return new Runnable() {
             @Override
             public void run() {
