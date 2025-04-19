@@ -17,7 +17,7 @@ wget -qO - https://packages.adoptium.net/artifactory/api/gpg/key/public | gpg --
 echo "deb https://packages.adoptium.net/artifactory/deb $(awk -F= '/^VERSION_CODENAME/{print$2}' /etc/os-release) main" | tee /etc/apt/sources.list.d/adoptium.list
 
 apt-get update -y
-if [[ "$CROSS_ARCH" == "riscv64" ]]; then
+if [[ "$(uname -m)" == "riscv64" ]]; then
     # JDK 8 is not available on RISC-V 64
     apt-get install -y temurin-17-jdk
 else

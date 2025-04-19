@@ -47,7 +47,6 @@ jobs:
         run: sudo apt-get install -y --no-install-recommends qemu-user-static
       - name: Initialize environment variables
         run: |
-          echo "CROSS_ARCH=${{ matrix.arch }}" >> $GITHUB_ENV
           if [[ "${{ matrix.arch }}" == "riscv64" ]]; then 
               echo "DOCKER_IMAGE_NAME=debian:trixie" >> $GITHUB_ENV
           else
