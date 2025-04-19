@@ -13,16 +13,18 @@ jobs:
   native:
 
     # Switch back to ubuntu-latest after that maps to 20.04
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
 
     strategy:
       matrix:
         arch:
-          - "386"
+          # https://github.com/adoptium/temurin-build/issues/986
+          # - "386"
           - amd64
           - arm
           - arm64
           - linux-arm-v5
+          - riscv64
           # this build does not work and ends up just rebuilding x86_64
           #- s390x
       fail-fast: false
@@ -30,9 +32,9 @@ jobs:
     name: Linux binary ${{ matrix.arch }}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: cache dependencies
-        uses: actions/cache@v1
+        uses: actions/cache@v4
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
@@ -43,21 +45,25 @@ jobs:
         run: sudo apt-get update -y
       - name: Install qemu
         run: sudo apt-get install -y --no-install-recommends qemu-user-static
-      - name: Experimental Docker
-        run: sudo cp .github/experimental-docker.json /etc/docker/daemon.json
-      - name: Restart Docker
-        run: sudo systemctl restart docker.service
+      - name: Initialize environment variables
+        run: |
+          echo "CROSS_ARCH=${{ matrix.arch }}" >> $GITHUB_ENV
+          if [[ "${{ matrix.arch }}" == "riscv64" ]]; then 
+              echo "DOCKER_IMAGE_NAME=debian:trixie" >> $GITHUB_ENV
+          else
+              echo "DOCKER_IMAGE_NAME=debian:10" >> $GITHUB_ENV
+          fi
       - name: Pull docker image
-        run: docker pull --platform $(echo ${{ matrix.arch }} | sed 's|-|/|g') debian:10 || true
+        run: docker pull --platform $(echo ${{ matrix.arch }} | sed 's|-|/|g') "$DOCKER_IMAGE_NAME" || true
       - name: Build inside Docker
-        run: docker run --rm -v $GITHUB_WORKSPACE:/work debian:10 /work/.github/build-native-debian.sh
+        run: docker run --rm -v $GITHUB_WORKSPACE:/work "$DOCKER_IMAGE_NAME" /work/.github/build-native-debian.sh
       - name: Archive built library
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: shared-object-${{ matrix.arch }}
           path: build/jni/*.so
       - name: Archive built jar
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: jar-${{ matrix.arch }}
           path: archive/*.jar
