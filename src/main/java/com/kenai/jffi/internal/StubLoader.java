@@ -53,8 +53,7 @@ public class StubLoader {
     
     private static final String bootPropertyFilename = "boot.properties";
     private static final String bootLibraryPropertyName = "jffi.boot.library.path";
-    private static final String stubLibraryName
-            = String.format("jffi-%d.%d", VERSION_MAJOR, VERSION_MINOR);
+    private static final String stubLibraryName = "jffi-" + VERSION_MAJOR + '.' + VERSION_MINOR;
 
     private static final String TMPDIR_ENV =
             Platform.getPlatform().getOS() == Platform.OS.WINDOWS ?
