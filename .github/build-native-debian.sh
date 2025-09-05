@@ -4,6 +4,13 @@ set -ex
 
 cd "$(dirname "$(dirname "$0")")"
 
+DEBIAN_VERSION=$(grep '^VERSION_ID=' /etc/os-release | cut -d'"' -f2)
+if [[ "$DEBIAN_VERSION" == "10" ]]; then
+  echo "deb http://archive.debian.org/debian buster main" > /etc/apt/sources.list
+  echo "deb http://archive.debian.org/debian-security buster/updates main" >> /etc/apt/sources.list
+  echo "deb http://archive.debian.org/debian buster-updates main" >> /etc/apt/sources.list
+fi
+
 # Add stretch for Java 8
 #cat <<END > /etc/apt/sources.list.d/stretch.list
 #deb http://deb.debian.org/debian stretch main
