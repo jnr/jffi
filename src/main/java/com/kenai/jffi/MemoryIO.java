@@ -869,6 +869,9 @@ public abstract class MemoryIO {
      */
     @SuppressWarnings("unchecked")
     static boolean isUnsafeAvailable() {
+        // JDK 23 and later warn when using memory-access methods
+        if (Platform.getPlatform().getJavaMajorVersion() >= 23) return false;
+
         try {
             Class sunClass = Class.forName("sun.misc.Unsafe");
 
