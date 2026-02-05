@@ -32,6 +32,9 @@
 
 package com.kenai.jffi;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * Convenience class to interrogate the system about various platform-specific details.
  */
@@ -286,19 +289,23 @@ public abstract class Platform {
         try {
             String versionString = System.getProperty("java.version");
             if (versionString != null) {
-                // stop at first non-decimal character
-                String v = versionString.split("[^0-9.]")[0];
+                // Extract the major version number from both the
+                // old style numbering (1.major.minor) and the
+                // new style (major.minor)
+                Pattern pattern = Pattern.compile("1\\.([0-9]+).*|([0-9]+).*");
+                Matcher matcher = pattern.matcher(versionString);
+                boolean matches = matcher.matches();
+                if (matches) {
+                    String v = matcher.group(1);
+                    if (v == null) {
+                        v = matcher.group(2);
+                    }
 
-                // if x.y assume 1.version and take decimal part
-                int dot = v.indexOf('.');
-                if (dot != -1) {
-                    v = v.substring(dot + 1);
+                    version = Integer.parseInt(v);
                 }
-                version = Integer.valueOf(v);
             }
         } catch (Exception ex) {
-            // Assume version 5 or above.
-            version = 8;
+            // Use default value assigned earlier.
         }
 
         javaVersionMajor = version;
