@@ -287,6 +287,9 @@ Java_com_kenai_jffi_Foreign_unregisterNatives(JNIEnv *env, jobject self, jclass 
 #elif defined(__s390__)
 # define CPU "s390"
 
+#elif defined(__riscv) && (__riscv_xlen == 64)
+# define CPU "riscv64"
+
 #else
 # define CPU "unknown"
 #endif
