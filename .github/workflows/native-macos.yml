@@ -1,15 +1,10 @@
 name: Build macOS Binaries
 
 on:
-#  push:
-#    branches: [ master ]
-#  pull_request:
-#    branches: [ master ]
-  # GHA does not support building Apple am64 very well, so we disable this workflow for now.
-  # See https://github.com/actions/runner/issues/805
   push:
-    branches-ignore:
-      - '**'
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
 
 jobs:
   native:
@@ -19,13 +14,14 @@ jobs:
     name: macOS binary
 
     steps:
-      - uses: actions/checkout@v2
-      - name: set up java ${{ matrix.java-version }}
-        uses: actions/setup-java@v1.4.3
+      - uses: actions/checkout@v4
+      - name: set up java
+        uses: actions/setup-java@v4
         with:
-          java-version: 8
+          distribution: 'zulu'
+          java-version: '8'
       - name: cache dependencies
-        uses: actions/cache@v1
+        uses: actions/cache@v4
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
@@ -36,15 +32,14 @@ jobs:
         run: "rm archive/* && ant jar && ant archive-platform-jar"
       - name: Dump config.log
         if: ${{ always() }}
-        run: "cat /Users/runner/work/jffi/jffi/build/jni/libffi-darwin-x86_64/config.log"
+        run: "cat /Users/runner/work/jffi/jffi/build/jni/libffi-darwin-*/config.log || true"
       - name: Archive built library
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: shared-object
           path: build/jni/*.so
       - name: Archive built jar
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: jar
           path: archive/*.jar
-
