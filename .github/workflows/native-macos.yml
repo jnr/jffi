@@ -26,6 +26,8 @@ jobs:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
+      - name: Install dependencies
+        run: brew install texinfo automake autoconf
       - name: Build
         env:
           LIBRARY_PATH: /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib:$LIBRARY_PATH
