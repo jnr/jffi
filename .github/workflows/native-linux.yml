@@ -23,9 +23,9 @@ jobs:
           - amd64
           - arm
           - arm64
-          - linux-arm-v5
           - riscv64
-          # this build does not work and ends up just rebuilding x86_64
+          # these builds do not work and end up just rebuilding x86_64
+          #- linux-arm-v5
           #- s390x
       fail-fast: false
 
