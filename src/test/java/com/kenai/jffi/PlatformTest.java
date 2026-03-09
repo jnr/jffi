@@ -6,6 +6,10 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import static org.junit.Assert.*;
 
 /**
@@ -40,5 +44,23 @@ public class PlatformTest {
     @Test public void isSupported() {
         // This should never fail
         assertTrue("isSupported failed", Platform.getPlatform().isSupported());
+    }
+
+    @Test public void getMajorVersion() {
+        // This should never fail
+        String version = System.getProperty("java.version");
+        Pattern pattern = Pattern.compile("1\\.([0-9]+).*|([0-9]+).*");
+        Matcher matcher = pattern.matcher(version);
+        boolean matches = matcher.matches();
+        assertTrue("Unexpected java version string: " + version, matches);
+
+        String major = matcher.group(1);
+        if (major == null) {
+            major = matcher.group(2);
+        }
+        assertEquals(
+                Integer.parseInt(major),
+                Platform.getPlatform().getJavaMajorVersion()
+        );
     }
 }
