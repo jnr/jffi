@@ -152,7 +152,7 @@
           </plugin>
           <plugin>
             <artifactId>maven-gpg-plugin</artifactId>
-            <version>1.6</version>
+            <version>3.2.4</version>
             <executions>
               <execution>
                 <id>sign-artifacts</id>
@@ -171,9 +171,6 @@
           </plugin>
         </plugins>
       </build>
-      <modules>
-        <module>maven</module>
-      </modules>
       <properties>
         <invoker.skip>true</invoker.skip>
       </properties>
