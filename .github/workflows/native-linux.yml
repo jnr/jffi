@@ -24,6 +24,7 @@ jobs:
           - arm
           - arm64
           - riscv64
+          - loong64
           # these builds do not work and end up just rebuilding x86_64
           #- linux-arm-v5
           #- s390x
@@ -49,6 +50,8 @@ jobs:
         run: |
           if [[ "${{ matrix.arch }}" == "riscv64" ]]; then 
               echo "DOCKER_IMAGE_NAME=debian:trixie" >> $GITHUB_ENV
+          elif [[ "${{ matrix.arch }}" == "loong64" ]]; then 
+              echo "DOCKER_IMAGE_NAME=debian:sid" >> $GITHUB_ENV
           else
               echo "DOCKER_IMAGE_NAME=debian:10" >> $GITHUB_ENV
           fi
