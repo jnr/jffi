@@ -56,6 +56,14 @@ jobs:
         run: docker pull --platform $(echo ${{ matrix.arch }} | sed 's|-|/|g') "$DOCKER_IMAGE_NAME" || true
       - name: Build inside Docker
         run: docker run --rm -v $GITHUB_WORKSPACE:/work "$DOCKER_IMAGE_NAME" /work/.github/build-native-debian.sh
+      - name: Check GLIBC dependencies
+        run: |
+          docker run --rm -v $GITHUB_WORKSPACE:/work "$DOCKER_IMAGE_NAME" bash -c "objdump -p /work/build/jni/*.so | grep GLIBC || true" > glibc_versions.txt
+          echo "### GLIBC Dependencies for ${{ matrix.arch }}" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          cat glibc_versions.txt >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          cat glibc_versions.txt
       - name: Archive built library
         uses: actions/upload-artifact@v4
         with:
