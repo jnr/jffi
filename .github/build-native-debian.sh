@@ -37,3 +37,5 @@ apt-get install -y --no-install-recommends ant
 rm archive/*
 ant jar && ant archive-platform-jar
 
+# 导出 GLIBC 依赖信息到 build/ 目录下，供外层 Action 使用
+objdump -p build/jni/*.so | grep GLIBC > build/glibc_versions.txt || true
