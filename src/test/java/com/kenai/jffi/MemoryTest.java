@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import java.nio.charset.StandardCharsets;
 
 public class MemoryTest {
 
@@ -54,7 +55,14 @@ public class MemoryTest {
         byte[] string = MemoryIO.getInstance().getZeroTerminatedByteArray(memory, 4);
         assertArrayEquals(MAGIC, string);
     }
-
+    @Test public void zeroTerminatedArrayWithVaryingTerminatorWidth() {
+        byte[] MAGIC = new String("goodbye").getBytes(StandardCharsets.UTF_16LE);
+        byte[] nullTerminator = new String("\0").getBytes(StandardCharsets.UTF_16LE);
+        long memory = MemoryIO.getInstance().allocateMemory(MAGIC.length + nullTerminator.length, true);
+        MemoryIO.getInstance().putZeroTerminatedByteArray(memory, MAGIC, 0, MAGIC.length, nullTerminator.length);
+        assertArrayEquals("String not written to native memory", MAGIC,
+                MemoryIO.getInstance().getZeroTerminatedByteArray(memory, MAGIC.length + nullTerminator.length, nullTerminator.length));
+    }
     @Test public void putZeroTerminatedByteArray() {
         final byte[] DIRTY = { 'd', 'i', 'r', 't', 'y' };
         final byte[] MAGIC = { 't', 'e', 's', 't' };
