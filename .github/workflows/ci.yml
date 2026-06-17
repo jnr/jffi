@@ -17,11 +17,15 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Set up JDK ${{ matrix.java-version }}
+    - name: Set up JDK 17 for build
+      uses: actions/setup-java@v1.4.3
+      with:
+        java-version: 17
+    - name: Build
+      run: mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+    - name: Set up JDK ${{ matrix.java-version }} for test
       uses: actions/setup-java@v1.4.3
       with:
         java-version: ${{ matrix.java-version }}
-    - name: Build
-      run: mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
     - name: Test
       run: ant test
