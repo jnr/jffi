@@ -67,7 +67,6 @@
   <properties>
     <maven.test.skip>true</maven.test.skip>
     <maven.test.failure.ignore>true</maven.test.failure.ignore>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <make.exe>make</make.exe>
   </properties>
 
@@ -96,88 +95,41 @@
         <make.exe>gmake</make.exe>
       </properties>
     </profile>
-    <profile>
-      <id>java9</id>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-compiler-plugin</artifactId>
-            <executions>
-              <execution>
-                <!-- Compile UnsafeMemoryIO without release flag, so it can access Unsafe -->
-                <id>default-compile</id>
-                <phase>compile</phase>
-                <configuration>
-                  <includes>
-                    <include>com/kenai/jffi/UnsafeMemoryIO.java</include>
-                  </includes>
-                </configuration>
-              </execution>
-              <execution>
-                <id>java9-compile</id>
-                <phase>compile</phase>
-                <goals><goal>compile</goal></goals>
-                <configuration>
-                  <!-- Compile the rest with release flag to ensure compatibility with 8 -->
-                  <!-- Use -release compiler option rather than source/target if 9+ -->
-                  <release>8</release>
-                  <!-- Exclude unsafe-using class when compiling with release flag -->
-                  <includes>
-                    <include>**/*.java</include>
-                  </includes>
-                  <excludes>
-                    <exclude>com/kenai/jffi/UnsafeMemoryIO.java</exclude>
-                  </excludes>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-      <activation>
-        <jdk>[9,)</jdk>
-      </activation>
-      <properties>
-        <maven.compiler.release>${java.specification.version}</maven.compiler.release>
-      </properties>
-    </profile>
-    <profile>
-      <id>release</id>
-      <build>
-        <plugins>
-          <plugin>
-            <artifactId>maven-gpg-plugin</artifactId>
-          </plugin>
-        </plugins>
-      </build>
-      <properties>
-        <invoker.skip>true</invoker.skip>
-      </properties>
-    </profile>
   </profiles>
 
   <build>
     <plugins>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
+        <!-- This is a bit gross; we can't access sun.misc without jdk.supported, but we can't add jdk.unsupported
+             while also setting release 8. For now we require a JDK 8 toolchain to compile this one class. -->
+        <executions>
+          <execution>
+            <id>default-compile</id>
+            <configuration>
+              <jdkToolchain>
+                <version>8</version>
+              </jdkToolchain>
+              <includes>
+                <include>com/kenai/jffi/UnsafeMemoryIO.java</include>
+              </includes>
+            </configuration>
+          </execution>
+          <execution>
+            <id>java9-compile</id>
+            <phase>compile</phase>
+            <goals><goal>compile</goal></goals>
+            <configuration>
+              <excludes>
+                <exclude>com/kenai/jffi/UnsafeMemoryIO.java</exclude>
+              </excludes>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
-      <plugin>
-        <artifactId>maven-source-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <artifactId>maven-javadoc-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.sonatype.central</groupId>
-        <artifactId>central-publishing-maven-plugin</artifactId>
-      </plugin>
-
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>3.2.0</version>
         <executions>
           <execution>
             <id>default-jar</id>
@@ -237,33 +189,6 @@
           </execution>
         </executions>
       </plugin>
-<!--
-      <plugin>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <version>1.1</version>
-        <executions>
-          <execution>
-            <id>build-native-library</id>
-            <phase>process-classes</phase>
-            <configuration>
-              <tasks>
-                <property name="os.name" value="${os.name}" />
-                <property name="os.arch" value="${os.arch}" />
-                <property name="java.home" value="${java.home}" />
-                <property name="dist.dir" value="${project.build.directory}" />
-                <property name="build.dir" value="${project.build.directory}" />
-                <property name="build.classes.dir" value="${project.build.outputDirectory}" />
-                <ant antfile="custom-build.xml" dir="." target="-assemble-native-jar" />
-                <unjar src="${project.build.directory}/native.jar" dest="${project.build.outputDirectory}" />
-              </tasks>
-            </configuration>
-            <goals>
-              <goal>run</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
--->
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>build-helper-maven-plugin</artifactId>
