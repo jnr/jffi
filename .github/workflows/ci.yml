@@ -34,5 +34,8 @@ jobs:
       with:
         distribution: 'zulu'
         java-version: ${{ matrix.java-test-version }}
+    - name: Install dependencies on macOS
+      if: matrix.os == 'macos-latest'
+      run: brew install texinfo automake autoconf
     - name: Test
       run: ant test
