@@ -4,7 +4,7 @@
 
   <groupId>com.github.jnr</groupId>
   <artifactId>release</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.0</version>
   <packaging>pom</packaging>
 
   <name>release</name>

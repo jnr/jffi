@@ -23,5 +23,16 @@ Releasing
 Releases of the JNR stack follow this rough process:
 
 * Ensure that all PRs are merged, issues closed, etc.
-* Update all submodules using `git submodule update --remote`
-* Use `mvn release:update-versions` to set release versions for all projects
+* Update all submodules (unsure of correct command)
+* Use `git submodule foreach mvn versions:set -DremoveSnapshot` to remove snapshots from all versions.
+  * Alternatively, only run this against the modules to be released (untested)
+* Install all artifacts now with release versions using `mvn install`
+* Update all artifacts to latest release versions of dependencies using `git submodule foreach mvn versions:use-release-versions`
+* Commit and tag the pom changes
+  * `git submodule foreach mvn versions:commit` which clears the backup version file
+  * `git submodule foreach git add pom.xml` to add the pom changes
+  * `git submodule foreach git commit -m 'Update version for release'` to commit the pom changes
+  * `git submodule foreach mvn scm:tag -Dtag='${project.version}' -DpushChanges=false` to create tags for the release
+* Bump version of the `release` project using the same process as above and add latest commits for all submodules.
+  * 
+* Release artifacts to Maven Central using `mvn deploy -Prelease`
