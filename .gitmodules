@@ -1,0 +1,18 @@
+[submodule "jffi"]
+	path = jffi
+	url = git@github.com:jnr/jffi.git
+[submodule "jnr-ffi"]
+	path = jnr-ffi
+	url = git@github.com:jnr/jnr-ffi.git
+[submodule "jnr-posix"]
+	path = jnr-posix
+	url = git@github.com:jnr/jnr-posix.git
+[submodule "jnr-enxio"]
+	path = jnr-enxio
+	url = git@github.com:jnr/jnr-enxio.git
+[submodule "jnr-unixsocket"]
+	path = jnr-unixsocket
+	url = git@github.com:jnr/jnr-unixsocket.git
+[submodule "jnr-constants"]
+	path = jnr-constants
+	url = git@github.com:jnr/jnr-constants.git
