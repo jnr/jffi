@@ -10,7 +10,7 @@
 
   <artifactId>jffi</artifactId>
   <packaging>jar</packaging>
-  <version>1.3.16</version>
+  <version>1.4.0</version>
   <name>jffi</name>
   <description>Java Foreign Function Interface</description>
   <url>http://github.com/jnr/jffi</url>
