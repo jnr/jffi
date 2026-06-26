@@ -33,6 +33,8 @@ Releases of the JNR stack follow this rough process:
   * `git submodule foreach git add pom.xml` to add the pom changes
   * `git submodule foreach git commit -m 'Update version for release'` to commit the pom changes
   * `git submodule foreach mvn scm:tag -Dtag='${project.version}' -DpushChanges=false` to create tags for the release
-* Bump version of the `release` project using the same process as above (sans `git submodule foreach` and add latest commits for all submodules.
-  * 
+* Bump version of the `release` project using the same process as above (sans `git submodule foreach`) and add latest commits for all submodules.
 * Release artifacts to Maven Central using `mvn deploy -Prelease`
+* Bump the main release project and subprojects using `mvn versions:set -DnextSnapshot` (with `git submodules foreach` for the children)
+* Commit all snapshot bumps in submodules and push
+* Commit submodule latest versions to release project and push
