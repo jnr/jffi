@@ -36,5 +36,6 @@ Releases of the JNR stack follow this rough process:
 * Bump version of the `release` project using the same process as above (sans `git submodule foreach`) and add latest commits for all submodules.
 * Release artifacts to Maven Central using `mvn deploy -Prelease`
 * Bump the main release project and subprojects using `mvn versions:set -DnextSnapshot` (with `git submodules foreach` for the children)
+  * Double-check that it does not use snapshot versions in dependencies
 * Commit all snapshot bumps in submodules and push
 * Commit submodule latest versions to release project and push
