@@ -27,7 +27,7 @@ Releases of the JNR stack follow this rough process:
 * Use `git submodule foreach mvn versions:set -DremoveSnapshot` to remove snapshots from all versions.
   * Alternatively, only run this against the modules to be released (untested)
 * Install all artifacts now with release versions using `mvn install`
-* Update all artifacts to latest release versions of dependencies using `git submodule foreach mvn versions:use-release-versions`
+* Update all artifacts to latest release versions of dependencies using `git submodule foreach mvn versions:use-latest-releases`
 * Commit and tag the pom changes
   * `git submodule foreach mvn versions:commit` which clears the backup version file
   * `git submodule foreach git add pom.xml` to add the pom changes
@@ -39,3 +39,24 @@ Releases of the JNR stack follow this rough process:
   * Double-check that it does not use snapshot versions in dependencies
 * Commit all snapshot bumps in submodules and push
 * Commit submodule latest versions to release project and push
+
+Releasing a single project and dependent subprojects
+----------------------------------------------------
+
+If a single project above jffi needs to be modified and released, the process changes to only handle that project and dependent projects.
+
+* Handle github merges, etc for the project and ensure the submodule repo is at the desired pre-release commit.
+* From the submodule directory, `mvn versions:set -DremoveSnapshot -DgenerateBackupPoms=false` to bump to the release version.
+* Install the release build locally with `mvn install`.
+* From the release directory, `git submodule foreach mvn versions:use-latest-releases` to use the new release version of the module.
+* For each dependent repository, also run `mvn versions:set -DremoveSnapshot -DgenerateBackupPoms=false` to prepare it for release.
+* For each modified repository,
+  * `git add pom.xml` and `git commit -m 'Update version for release'` to commit the pom changes.
+  * `mvn scm:tag -Dtag='${project.version}' -DpushChanges=false` to tag those versions.
+* Prepare to release from the parent dir
+  * `mvn versions:set -DremoveSnapshot -DgenerateBackupPoms=false`
+  * `git add pom.xml`
+  * `git ci -m 'Update version for release'`
+  * `mvn scm:tag -Dtag='${project.version}' -DpushChanges=false`
+* Build and push the release bundle with `mvn deploy -Prelease`
+* Push all tags in all directories
