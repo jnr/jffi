@@ -120,8 +120,14 @@ public abstract class UnsafeMemoryIO extends MemoryIO {
     public final byte[] getZeroTerminatedByteArray(long address, int maxlen) {
         return Foreign.getZeroTerminatedByteArray(address, maxlen);
     }
+    public final byte[] getZeroTerminatedByteArray(long address, int maxlen, int nullTerminatorWidth) {
+        return Foreign.getZeroTerminatedByteArray(address, maxlen, nullTerminatorWidth);
+    }
     public final void putZeroTerminatedByteArray(long address, byte[] data, int offset, int length) {
         Foreign.putZeroTerminatedByteArray(address, data, offset, length);
+    }
+    public final void putZeroTerminatedByteArray(long address, byte[] data, int offset, int length, int nullTerminatorWidth) {
+        Foreign.putZeroTerminatedByteArray(address, data, offset, length, nullTerminatorWidth);
     }
 
     /**
