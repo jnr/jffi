@@ -46,7 +46,7 @@ JFLAGS = -fno-omit-frame-pointer -fno-strict-aliasing
 OFLAGS = -O2 $(JFLAGS)
 WFLAGS = -W -Werror -Wall -Wno-unused -Wno-unused-parameter -Wno-parentheses
 PICFLAGS = -fPIC
-SOFLAGS = -shared -Wl,-O1
+SOFLAGS = -shared -Wl,-O1 -Wl,--version-script,$(SRC_DIR)/libtest.map
 LDFLAGS += $(SOFLAGS)
 
 IFLAGS = -I"$(BUILD_DIR)"
@@ -114,17 +114,17 @@ ifeq ($(OS), solaris)
   CC = gcc
   CFLAGS += -std=c99
   LD = /usr/ccs/bin/ld
-  SOFLAGS = -shared -static-libgcc 
+  SOFLAGS = -shared -static-libgcc -Wl,--version-script,$(SRC_DIR)/libtest.map
 endif
 
 ifeq ($(OS), aix)
   LIBEXT = a
-  SOFLAGS = -shared -static-libgcc
+  SOFLAGS = -shared -static-libgcc -Wl,--version-script,$(SRC_DIR)/libtest.map
   PICFLAGS += -pthread
 endif
 
 ifneq ($(findstring bsd, $(OS)),)
-  SOFLAGS = -shared -static-libgcc
+  SOFLAGS = -shared -static-libgcc -Wl,--version-script,$(SRC_DIR)/libtest.map
   CFLAGS += -pthread
   LDFLAGS += -pthread
 endif
