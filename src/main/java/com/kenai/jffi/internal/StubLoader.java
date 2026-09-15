@@ -394,32 +394,35 @@ public class StubLoader {
             
             // First try to load <dir>/${cpu}-${os}/libjffi-x.y.so, then fallback to <dir>/libjffi-x.y.so 
             File stub = new File(new File(dirs[i], getPlatformName()), soname);
+
+            // try alternate name on Darwin
+            if (!stub.isFile() && getOS() == OS.DARWIN) {
+                stub = new File(getAlternateLibraryPath(stub.getAbsolutePath()));
+            }
+
+            // try without platform
             if (!stub.isFile()) {
                 stub = new File(new File(dirs[i]), soname);
             }
 
-            String path = stub.getAbsolutePath();
+            // try alternate name on Darwin
+            if (!stub.isFile() && getOS() == OS.DARWIN) {
+                stub = new File(getAlternateLibraryPath(stub.getAbsolutePath()));
+            }
+
             if (stub.isFile()) {
                 try {
-                    System.load(path);
+                    System.load(stub.getAbsolutePath());
                     return true;
                 } catch (UnsatisfiedLinkError ex) {
                     errors.add(ex);
                 }
             }
 
-            if (getOS() == OS.DARWIN) {
-                path = getAlternateLibraryPath(path);
-                if (new File(path).isFile()) {
-                    try {
-                        System.load(path);
-                        return true;
-                    } catch (UnsatisfiedLinkError ex) {
-                        errors.add(ex);
-                    }
-                }
-            }
+            // no file found at this path, proceed to next
         }
+
+        // no file could be loaded at these paths
         return false;
     }
     
