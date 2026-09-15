@@ -38,12 +38,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static com.kenai.jffi.Util.equalsIgnoreCase;
 import static java.lang.String.format;
-import static java.util.logging.Level.FINEST;
 
 /**
  * Loads the native stub library.  This is intended to only ever be called
@@ -79,7 +77,7 @@ public class StubLoader {
     private static final String JFFI_EXTRACT_DIR = "jffi.extract.dir";
     private static final String JFFI_EXTRACT_NAME = "jffi.extract.name";
 
-    private static final Logger LOGGER =  Logger.getLogger(StubLoader.class.getName());
+    static final Logger LOGGER =  Logger.getLogger(StubLoader.class.getName());
 
     static {
         String extractDir = System.getProperty(JFFI_EXTRACT_DIR);
@@ -393,8 +391,8 @@ public class StubLoader {
         }
     }
 
-    private static boolean loadFromBootPath(String libName, String bootPath, Collection<Throwable> errors) {
-        LOGGER.log(FINEST, () -> format("Attempting to load library \"{0}}\" from boot path \"{0}\"", libName, bootPath));
+    static boolean loadFromBootPath(String libName, String bootPath, Collection<Throwable> errors) {
+        LOGGER.finest(() -> format("Attempting to load library \"%s\" from boot path \"%s\"", libName, bootPath));
         String[] dirs = bootPath.split(File.pathSeparator);
         for (int i = 0; i < dirs.length; ++i) {
             String soname = System.mapLibraryName(libName);
@@ -404,33 +402,33 @@ public class StubLoader {
 
             // try alternate name on Darwin
             if (!stub.isFile() && getOS() == OS.DARWIN) {
-                LOGGER.log(FINEST, "{0} not found", stub);
+                LOGGER.finest(String.format("%s not found", stub));
                 stub = new File(getAlternateLibraryPath(stub.getAbsolutePath()));
             }
 
             // try without platform
             if (!stub.isFile()) {
-                LOGGER.log(FINEST, "{0} not found", stub);
+                LOGGER.finest(String.format("%s not found", stub));
                 stub = new File(new File(dirs[i]), soname);
             }
 
             // try alternate name on Darwin
             if (!stub.isFile() && getOS() == OS.DARWIN) {
-                LOGGER.log(FINEST, "{0} not found", stub);
+                LOGGER.finest(String.format("%s not found", stub));
                 stub = new File(getAlternateLibraryPath(stub.getAbsolutePath()));
             }
 
             if (!stub.isFile()) {
-                LOGGER.log(FINEST, "{0} not found", stub);
+                LOGGER.finest(String.format("%s not found", stub));
                 continue;
             }
             try {
-                LOGGER.log(FINEST, "{0} found, loading", stub);
+                LOGGER.finest(String.format("%s found, loading", stub));
                 System.load(stub.getAbsolutePath());
                 return true;
             } catch (UnsatisfiedLinkError ex) {
                 File finalStub = stub;
-                LOGGER.log(FINEST, () -> format("%s failed to load: %s", finalStub, ex));
+                LOGGER.finest(() -> format("%s failed to load: %s", finalStub, ex));
                 errors.add(ex);
             }
 
@@ -438,7 +436,7 @@ public class StubLoader {
         }
 
         // no file could be loaded at these paths
-        LOGGER.log(FINEST, "no loadable files found");
+        LOGGER.finest("no loadable files found");
         return false;
     }
     
