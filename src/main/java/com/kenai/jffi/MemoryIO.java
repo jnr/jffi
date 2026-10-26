@@ -522,6 +522,20 @@ public abstract class MemoryIO {
      */
     public abstract byte[] getZeroTerminatedByteArray(long address, int maxlen);
 
+    /**
+     * Reads a byte array from native memory, stopping when a null terminator is found,
+     * or the maximum length is reached.
+     *
+     * This can be used to read non single byte terminator strings from native memory.
+     *
+     * @param address The address to read the data from.
+     * @param maxlen The limit of the memory area to scan for null terminator.
+     * @param nullTerminatorWidth size of null terminator in bytes
+     * @return The byte array containing a copy of the native data.  Any zero
+     * byte is stripped from the end.
+     */
+    public abstract byte[] getZeroTerminatedByteArray(long address, int maxlen, int nullTerminatorWidth);
+
     @Deprecated
     public final byte[] getZeroTerminatedByteArray(long address, long maxlen) {
         return getZeroTerminatedByteArray(address, (int) maxlen);
@@ -538,6 +552,19 @@ public abstract class MemoryIO {
      * @param length The number of bytes to copy to native memory
      */
     public abstract void putZeroTerminatedByteArray(long address, byte[] data, int offset, int length);
+
+    /**
+     * Copies a java byte array to native memory and appends a varying width NUL terminator.
+     *
+     * <b>Note</b> A total of length + 1 bytes is written to native memory.
+     *
+     * @param address The address to copy to.
+     * @param data The byte array to copy to native memory
+     * @param offset The offset within the byte array to begin copying from
+     * @param length The number of bytes to copy to native memory
+     * @param nullTerminatorWidth size of null terminator in bytes
+     */
+    public abstract void putZeroTerminatedByteArray(long address, byte[] data, int offset, int length, int nullTerminatorWidth);
 
     /**
      * Finds the location of a byte value in a native memory region.
@@ -693,8 +720,14 @@ public abstract class MemoryIO {
         public final byte[] getZeroTerminatedByteArray(long address, int maxlen) {
             return Foreign.getZeroTerminatedByteArray(address, maxlen);
         }
+        public final byte[] getZeroTerminatedByteArray(long address, int maxlen, int nullTerminatorWidth) {
+            return Foreign.getZeroTerminatedByteArray(address, maxlen, nullTerminatorWidth);
+        }
         public final void putZeroTerminatedByteArray(long address, byte[] data, int offset, int length) {
             Foreign.putZeroTerminatedByteArray(address, data, offset, length);
+        }
+        public final void putZeroTerminatedByteArray(long address, byte[] data, int offset, int length, int nullTerminatorWidth) {
+            Foreign.putZeroTerminatedByteArray(address, data, offset, length, nullTerminatorWidth);
         }
 
     }
@@ -822,8 +855,14 @@ public abstract class MemoryIO {
         public final byte[] getZeroTerminatedByteArray(long address, int maxlen) {
             return Foreign.getZeroTerminatedByteArrayChecked(address, maxlen);
         }
+        public final byte[] getZeroTerminatedByteArray(long address, int maxlen, int nullTerminatorWidth) {
+            return Foreign.getZeroTerminatedByteArrayChecked(address, maxlen, nullTerminatorWidth);
+        }
         public final void putZeroTerminatedByteArray(long address, byte[] data, int offset, int length) {
             Foreign.putZeroTerminatedByteArrayChecked(address, data, offset, length);
+        }
+        public final void putZeroTerminatedByteArray(long address, byte[] data, int offset, int length, int nullTerminatorWidth) {
+            Foreign.putZeroTerminatedByteArrayChecked(address, data, offset, length, nullTerminatorWidth);
         }
     }
 

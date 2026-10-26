@@ -144,6 +144,29 @@ getArrayChecked(JNIEnv* env, jlong address, jobject obj, jint offset, jint lengt
     },);
 }
 
+static jsize
+UTFStrLen(const char* str, jsize maxlen, jint nullTerminatorWidth)
+{
+    jsize matchingBytesCount = 0;
+    const char* char_ptr = str;
+    const char* end_char_ptr = str + maxlen;
+    while (char_ptr < end_char_ptr) {
+        if (*char_ptr == '\0') {
+            matchingBytesCount++;
+            char_ptr++;
+        } else {
+            char_ptr += nullTerminatorWidth - matchingBytesCount;//jump to start of next character
+            matchingBytesCount = 0;
+            continue;
+        }
+        if (matchingBytesCount == nullTerminatorWidth) {
+            char_ptr -= nullTerminatorWidth;//trim to the last byte just before null terminator
+            return char_ptr - str;
+        }
+    }
+    return maxlen;
+}
+
 #define UNSAFE(J, N) GET(J, N) PUT(J, N) COPY(J, N)
 
 UNSAFE(Byte, jbyte);
@@ -347,6 +370,23 @@ Java_com_kenai_jffi_Foreign_getZeroTerminatedByteArray__JI(JNIEnv* env, jobject 
     return bytes;
 }
 
+/*
+ * Class:     com_kenai_jffi_Foreign
+ * Method:    getZeroTerminatedByteArray
+ * Signature: (JII)[B
+ */
+JNIEXPORT jbyteArray JNICALL
+Java_com_kenai_jffi_Foreign_getZeroTerminatedByteArray__JII(JNIEnv* env, jobject self, jlong address, jint maxlen, jint nullTerminatorWidth)
+{
+    const char *str = (const char*) j2p(address);
+    jsize len = UTFStrLen(str, maxlen, nullTerminatorWidth);
+    jbyteArray bytes = (*env)->NewByteArray(env, len);
+    (*env)->SetByteArrayRegion(env, bytes, 0, len, (jbyte *) str);
+
+    return bytes;
+}
+
+
 JNIEXPORT jbyteArray JNICALL
 Java_com_kenai_jffi_Foreign_getZeroTerminatedByteArrayChecked__JI(JNIEnv* env, jobject self, jlong address, jint maxlen)
 {
@@ -363,6 +403,24 @@ Java_com_kenai_jffi_Foreign_getZeroTerminatedByteArrayChecked__JI(JNIEnv* env, j
 
 /*
  * Class:     com_kenai_jffi_Foreign
+ * Method:    getZeroTerminatedByteArrayChecked
+ * Signature: (JII)[B
+ */
+JNIEXPORT jbyteArray JNICALL
+Java_com_kenai_jffi_Foreign_getZeroTerminatedByteArrayChecked__JII(JNIEnv* env, jobject self, jlong address, jint maxlen, jint nullTerminatorWidth)
+{
+    const char *str = (const char*) j2p(address);
+    jsize len;
+
+    PROT(len = UTFStrLen(str, maxlen, nullTerminatorWidth), NULL);
+    jbyteArray bytes = (*env)->NewByteArray(env, len);
+    (*env)->SetByteArrayRegion(env, bytes, 0, len, (jbyte *) str);
+
+    return bytes;   
+}
+
+/*
+ * Class:     com_kenai_jffi_Foreign
  * Method:    putZeroTerminatedByteArray
  * Signature: (J[BII)V
  */
@@ -374,6 +432,24 @@ Java_com_kenai_jffi_Foreign_putZeroTerminatedByteArray(JNIEnv *env, jobject self
     *((char *) (uintptr_t) address + length) = '\0';
 }
 
+/*
+ * Class:     com_kenai_jffi_Foreign
+ * Method:    putZeroTerminatedByteArray
+ * Signature: (J[BIII)V
+ */
+JNIEXPORT void JNICALL
+Java_com_kenai_jffi_Foreign_putZeroTerminatedByteArray__J_3BIII(JNIEnv *env, jobject self,
+   jlong address, jbyteArray data, jint offset, jint length, jint nullTerminatorWidth)
+{
+    (*env)->GetByteArrayRegion(env, data, offset, length, (jbyte *)j2p(address));
+    char *str = (char*) j2p(address);
+    jint i;
+    for(i = 0; i < nullTerminatorWidth; i++){
+        str[address + length + i] = '\0';
+    }
+}
+
+
 JNIEXPORT void JNICALL
 Java_com_kenai_jffi_Foreign_putZeroTerminatedByteArrayChecked(JNIEnv *env, jobject self,
    jlong address, jbyteArray data, jint offset, jint length)
@@ -382,6 +458,22 @@ Java_com_kenai_jffi_Foreign_putZeroTerminatedByteArrayChecked(JNIEnv *env, jobje
     PROT({ *cp = 0; *(cp + length) ='\0';},);
     (*env)->GetByteArrayRegion(env, data, offset, length, (jbyte *)j2p(address));
 }
+
+/*
+ * Class:     com_kenai_jffi_Foreign
+ * Method:    putZeroTerminatedByteArrayChecked
+ * Signature: (J[BIII)V
+ */
+JNIEXPORT void JNICALL
+Java_com_kenai_jffi_Foreign_putZeroTerminatedByteArrayChecked__J_3BIII(JNIEnv *env, jobject self,
+   jlong address, jbyteArray data, jint offset, jint length, jint nullTerminatorWidth)
+{
+    char* cp = (char *) (uintptr_t) address;
+    jint i;
+    PROT({ *cp = 0; for(i = 0; i < nullTerminatorWidth; i++) cp[address + length + i] = '\0';},);
+    (*env)->GetByteArrayRegion(env, data, offset, length, (jbyte *)j2p(address));
+}
+
 
 /*
  * Class:     com_kenai_jffi_Foreign
