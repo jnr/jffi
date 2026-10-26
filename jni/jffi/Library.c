@@ -64,6 +64,7 @@ enum { RTLD_LAZY=1, RTLD_NOW, RTLD_GLOBAL, RTLD_LOCAL };
     const char *e = dlerror(); snprintf(buf, size, "%s", e ? e : "unknown"); \
 } while(0)
 # define dl_sym(handle, name) dlsym(handle, name)
+# define dl_vsym(handle, name, version) dlvsym(handle, name, version)
 # define dl_close(handle) dlclose(handle)
 #ifndef RTLD_LOCAL
 # define RTLD_LOCAL 8
@@ -145,6 +146,28 @@ Java_com_kenai_jffi_Foreign_dlsym(JNIEnv* env, jclass cls, jlong handle, jstring
     dlerror(); // clear any errors
 #endif
     addr = dl_sym(j2p(handle), sym);
+    if (addr == NULL) {
+        char errbuf[1024] = { 0 };
+        dl_error(errbuf, sizeof(errbuf) - 1);
+        throwException(env, UnsatisfiedLink, "%s", errbuf);
+    }
+
+    return p2j(addr);
+}
+
+JNIEXPORT jlong JNICALL
+Java_com_kenai_jffi_Foreign_dlvsym(JNIEnv* env, jclass cls, jlong handle, jstring jsymbol, jstring jversion)
+{
+    char sym[1024];
+    char version[1024];
+    void* addr;
+
+    getMultibyteString(env, sym, jsymbol, sizeof(sym));
+    getMultibyteString(env, version, jversion, sizeof(version));
+#ifndef _WIN32
+    dlerror(); // clear any errors
+#endif
+    addr = dl_vsym(j2p(handle), sym, version);
     if (addr == NULL) {
         char errbuf[1024] = { 0 };
         dl_error(errbuf, sizeof(errbuf) - 1);
