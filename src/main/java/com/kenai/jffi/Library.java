@@ -37,7 +37,6 @@ import com.kenai.jffi.internal.Cleaner;
 import java.lang.ref.WeakReference;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 
 /**
  * Represents a native library
@@ -78,10 +77,6 @@ public final class Library {
     /** A handle to the foreign interface to keep it alive as long as this object is alive */
     private final Foreign foreign;
 
-    /** Indicates whether this library has been disposed of. */
-    private volatile int disposed;
-
-    private static final AtomicIntegerFieldUpdater<Library> UPDATER = AtomicIntegerFieldUpdater.newUpdater(Library.class, "disposed");
 
     /**
      * Internal wrapper around dlopen.
@@ -166,15 +161,28 @@ public final class Library {
         this.foreign = foreign;
         this.name = name;
         this.handle = address;
-        Cleaner.register(this, new Runnable() {
-            @Override
-            public void run() {
-                int disposed = UPDATER.getAndSet(Library.this, 1);
-                if (disposed == 0 && handle != 0L) {
-                    foreign.dlclose(handle);
-                }
+        Cleaner.register(this, new Disposer(foreign, address));
+    }
+
+    /**
+     * Closes the native library. It must not reference the {@link Library}, or the library would stay reachable
+     * from its own cleanup action and never be closed.
+     */
+    private static final class Disposer implements Runnable {
+        private final Foreign foreign;
+        private final long handle;
+
+        Disposer(Foreign foreign, long handle) {
+            this.foreign = foreign;
+            this.handle = handle;
+        }
+
+        @Override
+        public void run() {
+            if (handle != 0L) {
+                foreign.dlclose(handle);
             }
-        });
+        }
     }
 
     /**

@@ -196,26 +196,42 @@ public final class ClosurePool {
             next = 0;
             freeCount = this.slots.length;
 
-            Cleaner.register(this, new Runnable() {
-                @Override
-                public void run() {
-                    boolean release = true;
-                    //
-                    // If any of the closures allocated from this magazine set autorelease=false
-                    // then this magazine cannot be freed, so just let it leak
-                    //
-                    for (int i = 0; i < Magazine.this.slots.length; i++) {
-                        if (!Magazine.this.slots[i].autorelease) {
-                            release = false;
-                            break;
-                        }
-                    }
+            Cleaner.register(this, new Disposer(foreign, magazine, this.slots));
+        }
 
-                    if (magazine != 0 && release) {
-                        foreign.freeClosureMagazine(magazine);
+        /**
+         * Frees the native magazine. It must not reference the {@link Magazine}, or the magazine would stay
+         * reachable from its own cleanup action and never be freed.
+         */
+        private static final class Disposer implements Runnable {
+            private final Foreign foreign;
+            private final long magazine;
+            private final Slot[] slots;
+
+            Disposer(Foreign foreign, long magazine, Slot[] slots) {
+                this.foreign = foreign;
+                this.magazine = magazine;
+                this.slots = slots;
+            }
+
+            @Override
+            public void run() {
+                boolean release = true;
+                //
+                // If any of the closures allocated from this magazine set autorelease=false
+                // then this magazine cannot be freed, so just let it leak
+                //
+                for (int i = 0; i < slots.length; i++) {
+                    if (!slots[i].autorelease) {
+                        release = false;
+                        break;
                     }
                 }
-            });
+
+                if (magazine != 0 && release) {
+                    foreign.freeClosureMagazine(magazine);
+                }
+            }
         }
 
         Slot get() {
@@ -281,14 +297,28 @@ public final class ClosurePool {
             this.pool = pool;
             this.magazine = magazine;
 
-            Cleaner.register(this, new Runnable() {
-                @Override
-                public void run() {
-                    pool.recycle(magazine);
-                }
-            });
+            Cleaner.register(this, new Recycler(pool, magazine));
         }
 
+    }
+
+    /**
+     * Returns a magazine to its pool. It must not reference the {@link MagazineHolder}, or the holder would stay
+     * reachable from its own cleanup action and the magazine would never be recycled.
+     */
+    private static final class Recycler implements Runnable {
+        private final ClosurePool pool;
+        private final Magazine magazine;
+
+        Recycler(ClosurePool pool, Magazine magazine) {
+            this.pool = pool;
+            this.magazine = magazine;
+        }
+
+        @Override
+        public void run() {
+            pool.recycle(magazine);
+        }
     }
 
     /**

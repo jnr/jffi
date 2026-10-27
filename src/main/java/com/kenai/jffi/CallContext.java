@@ -35,7 +35,6 @@ package com.kenai.jffi;
 import com.kenai.jffi.internal.Cleaner;
 
 import java.util.Arrays;
-import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -67,10 +66,6 @@ public final class CallContext {
     final int fixedParamCount;
     
     final int flags;
-
-    volatile int disposed;
-
-    final AtomicIntegerFieldUpdater<CallContext> UPDATER = AtomicIntegerFieldUpdater.newUpdater(CallContext.class, "disposed");
 
     /** A handle to the foreign interface to keep it alive as long as this object is alive */
     @SuppressWarnings({"FieldCanBeLocal", "UnusedDeclaration"})
@@ -164,20 +159,33 @@ public final class CallContext {
         this.parameterTypeHandles = Type.nativeHandles(parameterTypes);
         this.flags = flags;
 
-        Cleaner.register(this, new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    int disposed = UPDATER.getAndSet(CallContext.this, 1);
-                    if (disposed == 0 && contextAddress != 0) {
-                        foreign.freeCallContext(contextAddress);
-                    }
-                } catch (Throwable t) {
-                    Logger.getLogger(getClass().getName()).log(Level.WARNING,
-                            "exception when freeing " + getClass() + ": %s", t.getLocalizedMessage());
+        Cleaner.register(this, new Disposer(foreign, contextAddress));
+    }
+
+    /**
+     * Frees the native call context. It must not reference the {@link CallContext}, or the context would stay
+     * reachable from its own cleanup action and never be freed.
+     */
+    private static final class Disposer implements Runnable {
+        private final Foreign foreign;
+        private final long contextAddress;
+
+        Disposer(Foreign foreign, long contextAddress) {
+            this.foreign = foreign;
+            this.contextAddress = contextAddress;
+        }
+
+        @Override
+        public void run() {
+            try {
+                if (contextAddress != 0) {
+                    foreign.freeCallContext(contextAddress);
                 }
+            } catch (Throwable t) {
+                Logger.getLogger(CallContext.class.getName()).log(Level.WARNING,
+                        "exception when freeing " + CallContext.class + ": %s", t.getLocalizedMessage());
             }
-        });
+        }
     }
 
     /**

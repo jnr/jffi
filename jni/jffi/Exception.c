@@ -41,14 +41,11 @@ jffi_throwExceptionByName(JNIEnv* env, const char* exceptionName, const char* fm
     va_list ap;
     char buf[1024] = { 0 };
     va_start(ap, fmt);
-    vsnprintf(buf, sizeof(buf) - 1, fmt, ap);
-    
-    (*env)->PushLocalFrame(env, 10);
+    vsnprintf(buf, sizeof(buf) - 1, fmt, ap);    
     jclass exceptionClass = (*env)->FindClass(env, exceptionName);
     if (exceptionClass != NULL) {
         (*env)->ThrowNew(env, exceptionClass, buf);
     }
-    (*env)->PopLocalFrame(env, NULL);
     va_end(ap);
 }
 

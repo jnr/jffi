@@ -146,17 +146,31 @@ public final class NativeMethods {
             this.mm = mm;
             this.memory = memory;
 
-            Cleaner.register(this, new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        mm.freeMemory(memory);
-                    } catch (Throwable t) {
-                        Logger.getLogger(getClass().getName()).log(Level.WARNING,
-                                "Exception when freeing native method struct array: %s", t.getLocalizedMessage());
-                    }
-                }
-            });
+            Cleaner.register(this, new Disposer(mm, memory));
+        }
+    }
+
+    /**
+     * Frees the native method structs. It must not reference the {@link ResourceHolder}, or the holder would stay
+     * reachable from its own cleanup action and never be freed.
+     */
+    private static final class Disposer implements Runnable {
+        private final MemoryIO mm;
+        private final long memory;
+
+        Disposer(MemoryIO mm, long memory) {
+            this.mm = mm;
+            this.memory = memory;
+        }
+
+        @Override
+        public void run() {
+            try {
+                mm.freeMemory(memory);
+            } catch (Throwable t) {
+                Logger.getLogger(NativeMethods.class.getName()).log(Level.WARNING,
+                        "Exception when freeing native method struct array: %s", t.getLocalizedMessage());
+            }
         }
     }
 
