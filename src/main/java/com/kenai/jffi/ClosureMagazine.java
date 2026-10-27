@@ -2,7 +2,7 @@ package com.kenai.jffi;
 
 import com.kenai.jffi.internal.Cleaner;
 
-import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -18,28 +18,16 @@ public final class ClosureMagazine {
     @SuppressWarnings({"FieldCanBeLocal", "UnusedDeclaration"})
     private final CallContext callContext;
     private final long magazineAddress;
-    private volatile int disposed;
-    private static final AtomicIntegerFieldUpdater<ClosureMagazine> UPDATER = AtomicIntegerFieldUpdater.newUpdater(ClosureMagazine.class, "disposed");
+    private final Disposer disposer;
 
     ClosureMagazine(Foreign foreign, CallContext callContext, long magazineAddress) {
         this.foreign = foreign;
         this.callContext = callContext;
         this.magazineAddress = magazineAddress;
 
-        Cleaner.register(this, new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    int disposed = UPDATER.getAndSet(ClosureMagazine.this, 1);
-                    if (magazineAddress != 0L && disposed == 0) {
-                        foreign.freeClosureMagazine(magazineAddress);
-                    }
-                } catch (Throwable t) {
-                    Logger.getLogger(getClass().getName()).log(Level.WARNING,
-                            "exception when freeing " + getClass() + ": %s", t.getLocalizedMessage());
-                }
-            }
-        });
+        this.disposer = new Disposer(foreign, magazineAddress);
+
+        Cleaner.register(this, disposer);
     }
 
     public Closure.Handle allocate(Object proxy) {
@@ -50,9 +38,33 @@ public final class ClosureMagazine {
     }
 
     public void dispose() {
-        int disposed = UPDATER.getAndSet(this, 1);
-        if (magazineAddress != 0L && disposed == 0) {
-            foreign.freeClosureMagazine(magazineAddress);
+        disposer.run();
+    }
+
+    /**
+     * Frees the native magazine, at most once. It must not reference the {@link ClosureMagazine}, or the magazine
+     * would stay reachable from its own cleanup action and never be freed.
+     */
+    private static final class Disposer implements Runnable {
+        private final Foreign foreign;
+        private final long magazineAddress;
+        private final AtomicBoolean disposed = new AtomicBoolean();
+
+        Disposer(Foreign foreign, long magazineAddress) {
+            this.foreign = foreign;
+            this.magazineAddress = magazineAddress;
+        }
+
+        @Override
+        public void run() {
+            try {
+                if (magazineAddress != 0L && disposed.compareAndSet(false, true)) {
+                    foreign.freeClosureMagazine(magazineAddress);
+                }
+            } catch (Throwable t) {
+                Logger.getLogger(ClosureMagazine.class.getName()).log(Level.WARNING,
+                        "exception when freeing " + ClosureMagazine.class + ": %s", t.getLocalizedMessage());
+            }
         }
     }
 
