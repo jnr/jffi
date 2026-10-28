@@ -27,6 +27,9 @@ apt-get update -y
 if [[ "$(uname -m)" == "riscv64" ]]; then
     # JDK 8 is not available on RISC-V 64
     apt-get install -y temurin-17-jdk
+elif [[ "$(uname -m)" == "loongarch64" ]]; then
+    # JDK 8 is not available on RISC-V 64
+    apt-get install -y default-jdk
 else
     apt-get install -y temurin-8-jdk
 fi
