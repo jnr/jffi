@@ -24,8 +24,8 @@ jobs:
           - arm
           - arm64
           - riscv64
+          - linux-arm-v5
           # these builds do not work and end up just rebuilding x86_64
-          #- linux-arm-v5
           #- s390x
       fail-fast: false
 
@@ -47,7 +47,7 @@ jobs:
         run: sudo apt-get install -y --no-install-recommends qemu-user-static
       - name: Initialize environment variables
         run: |
-          if [[ "${{ matrix.arch }}" == "riscv64" ]]; then 
+          if [[ "${{ matrix.arch }}" == "riscv64" || "${{ matrix.arch }}" == "linux-arm-v5" ]]; then
               echo "DOCKER_IMAGE_NAME=debian:trixie" >> $GITHUB_ENV
           else
               echo "DOCKER_IMAGE_NAME=debian:10" >> $GITHUB_ENV
