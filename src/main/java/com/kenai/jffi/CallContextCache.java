@@ -80,7 +80,7 @@ public class CallContextCache {
 
     public final CallContext getCallContext(Type returnType, int fixedParamCount, Type[] parameterTypes, CallingConvention convention,
                                             boolean saveErrno, boolean faultProtect) {
-        Signature signature = new Signature(returnType, parameterTypes, convention, saveErrno, faultProtect);
+        Signature signature = new Signature(returnType, fixedParamCount, parameterTypes, convention, saveErrno, faultProtect);
         CallContextRef ref = contextCache.get(signature);
         CallContext ctx;
 
@@ -116,18 +116,21 @@ public class CallContextCache {
          * garbage collected until the closure does.
          */
         private final Type returnType;
+        // The fixed/variadic boundary changes native argument placement on some ABIs.
+        private final int fixedParamCount;
         private final Type[] parameterTypes;
         private final CallingConvention convention;
         private final boolean saveErrno;
         private final boolean faultProtect;
         private int hashCode = 0;
 
-        public Signature(Type returnType, Type[] parameterTypes, CallingConvention convention, boolean saveErrno,
+        public Signature(Type returnType, int fixedParamCount, Type[] parameterTypes, CallingConvention convention, boolean saveErrno,
                          boolean faultProtect) {
             if (returnType == null || parameterTypes == null) {
                 throw new NullPointerException("null return type or parameter types array");
             }
             this.returnType = returnType;
+            this.fixedParamCount = fixedParamCount;
             this.parameterTypes = parameterTypes;
             this.convention = convention;
             this.saveErrno = saveErrno;
@@ -142,7 +145,7 @@ public class CallContextCache {
 
             final Signature other = (Signature) obj;
 
-            if (convention != other.convention || saveErrno != other.saveErrno || faultProtect != other.faultProtect) {
+            if (fixedParamCount != other.fixedParamCount || convention != other.convention || saveErrno != other.saveErrno || faultProtect != other.faultProtect) {
                 return false;
             }
 
@@ -165,6 +168,7 @@ public class CallContextCache {
 
         private final int calculateHashCode() {
             int hash = 7;
+            hash = 53 * hash + fixedParamCount;
             hash = 53 * hash + (this.returnType != null ? this.returnType.hashCode() : 0);
             int paramHash = 1;
             for (int i = 0; i < parameterTypes.length; ++i) {
