@@ -167,7 +167,8 @@ ifeq ($(OS), darwin)
 
   XCODE=$(shell xcode-select -print-path)
   CC = $(XCODE)/usr/bin/gcc
-  MACSDK = /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk
+  # Use the SDK belonging to the selected Xcode toolchain.
+  MACSDK ?= $(shell xcrun --sdk macosx --show-sdk-path)
 
   CFLAGS += -isysroot $(MACSDK) -DTARGET_RT_MAC_CFM=0
   CFLAGS += -I$(MACSDK)/System/Library/Frameworks/JavaVM.framework/Headers

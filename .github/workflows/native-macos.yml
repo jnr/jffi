@@ -29,8 +29,6 @@ jobs:
       - name: Install dependencies
         run: brew install texinfo automake autoconf
       - name: Build
-        env:
-          LIBRARY_PATH: /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib:$LIBRARY_PATH
         run: "rm archive/* && ant jar && ant archive-platform-jar"
       - name: Dump config.log
         if: ${{ always() }}
