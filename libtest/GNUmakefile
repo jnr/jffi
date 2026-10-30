@@ -92,7 +92,8 @@ ifeq ($(OS), darwin)
     CC = $(XCODE)/usr/bin/gcc
   endif
 
-  MACSDK = /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk
+  # Use the SDK belonging to the selected Xcode toolchain.
+  MACSDK ?= $(shell xcrun --sdk macosx --show-sdk-path)
   ARCHFLAGS = $(foreach arch, $(ARCHES),-arch $(arch))
   CFLAGS += $(ARCHFLAGS) -isysroot $(MACSDK) -DTARGET_RT_MAC_CFM=0
   CFLAGS += -fno-common
