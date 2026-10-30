@@ -55,3 +55,28 @@ void pack_varargs(s64* buf, const char* fmt, ...)
     va_end(ap);
 }
 
+int sum_three_fixed(int a, int b, int c)
+{
+    return a + b + c;
+}
+
+int sum_three_one_fixed(int a, ...)
+{
+    va_list ap;
+    int b, c;
+    va_start(ap, a);
+    b = va_arg(ap, int);
+    c = va_arg(ap, int);
+    va_end(ap);
+    return a + b + c;
+}
+
+int sum_three_two_fixed(int a, int b, ...)
+{
+    va_list ap;
+    int c;
+    va_start(ap, b);
+    c = va_arg(ap, int);
+    va_end(ap);
+    return a + b + c;
+}
