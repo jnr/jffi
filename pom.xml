@@ -4,7 +4,7 @@
   <parent>
     <groupId>com.github.jnr</groupId>
     <artifactId>jnr-parent</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.3</version>
     <relativePath />
   </parent>
 
@@ -88,6 +88,15 @@
   <build>
     <plugins>
       <plugin>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <configuration>
+          <!-- UnsafeMemoryIO references sun.misc.Unsafe, which Java 8 API targeting excludes on newer JDKs. -->
+          <jdkToolchain>
+            <version>8</version>
+          </jdkToolchain>
+        </configuration>
+      </plugin>
+      <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
         <!-- This is a bit gross; we can't access sun.misc without jdk.supported, but we can't add jdk.unsupported
              while also setting release 8. For now we require a JDK 8 toolchain to compile this one class. -->
@@ -111,22 +120,6 @@
               <excludes>
                 <exclude>com/kenai/jffi/UnsafeMemoryIO.java</exclude>
               </excludes>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>default-jar</id>
-            <configuration>
-              <archive>
-                <manifestEntries>
-                  <Automatic-Module-Name>org.jnrproject.jffi</Automatic-Module-Name>
-                </manifestEntries>
-              </archive>
             </configuration>
           </execution>
         </executions>
