@@ -114,6 +114,13 @@ public class UnitHelper {
         }
         return new Address(address);
     }
+    public static Address findSymbolWithVersion(String name, String version) {
+        final long address = LibraryHolder.libtest.getSymbolAddressWithVersion(name, version);
+        if (address == 0L) {
+            throw new UnsatisfiedLinkError("Could not locate symbol '" + name + "' at version '" + version + "'");
+        }
+        return new Address(address);
+    }
     private static final class NativeInvocationHandler implements InvocationHandler {
         private final ConcurrentMap<Method, MethodInvoker> invokers
             = new ConcurrentHashMap<Method, MethodInvoker>();
